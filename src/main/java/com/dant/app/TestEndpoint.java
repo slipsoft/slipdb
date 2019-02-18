@@ -41,5 +41,12 @@ public class TestEndpoint {
 	public Response exception() {
 		throw new RuntimeException("Mon erreur");
 	}
+	
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/json")
+	public Account salut() {
+		return new Account("n.peugnet@free.fr");
+	}
 
 }
