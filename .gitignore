@@ -124,3 +124,4 @@ _testmain.go
 
 *.test
 *.prof
+/target/
