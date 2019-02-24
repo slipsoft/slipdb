@@ -1,6 +1,7 @@
 package sj.simpleDB.arrayList;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.text.NumberFormat;
@@ -77,7 +78,7 @@ public class AL_GlobalTest {
 		
 	}
 	
-	public void globalTestWithCSV() {
+	public void globalTestWithCSV(String pathToCSV) {
 		long startUS = System.nanoTime() / 1000;
 		//AL_Table table = new AL_Table();
 		initCSVTable();
@@ -87,9 +88,8 @@ public class AL_GlobalTest {
 		// Chargement via le CSV
 		int maxLineCount = 1000;
 		int currentLineCount = 0;
-		String filePath = "D:\\L3 DANT disque D\\yellow_tripdata_2015-04.csv";
 		try {
-			FileReader fRead = new FileReader(filePath);
+			FileReader fRead = new FileReader(pathToCSV);
 			BufferedReader bRead = new BufferedReader(fRead);
 			
 
@@ -110,9 +110,12 @@ public class AL_GlobalTest {
 			}
 			bRead.close();
 			//writer.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("File not found");
 		} catch (Exception e) {
-			
+			System.out.println(e);
 		}
+
 
 		printMemUsage();
 		long stopUS = System.nanoTime() / 1000;

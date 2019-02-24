@@ -11,7 +11,7 @@ public class AL_Main {
 		
 		AL_GlobalTest globalTest = new AL_GlobalTest();
 		//globalTest.globalTestOffline();
-		globalTest.globalTestWithCSV();
+		globalTest.globalTestWithCSV("/home/etienne/Code/laTarentule.csv");
 		
 		
 		
