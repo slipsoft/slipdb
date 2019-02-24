@@ -2,6 +2,7 @@ package sj.simpleDB.arrayList;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 
@@ -84,16 +85,20 @@ public class AL_GlobalTest {
 		printMemUsage();
 		
 		// Chargement via le CSV
-		int maxLineCount = 1000000;
+		int maxLineCount = 1000;
 		int currentLineCount = 0;
 		String filePath = "D:\\L3 DANT disque D\\yellow_tripdata_2015-04.csv";
 		try {
 			FileReader fRead = new FileReader(filePath);
 			BufferedReader bRead = new BufferedReader(fRead);
 			
+
+			//PrintWriter writer = new PrintWriter("D:\\\\L3 DANT disque D\\\\SMALL_1_000_000_yellow_tripdata_2015-04.csv", "UTF-8");
+			
 			while (true) { // ce FAMEUX while(true) de la mort qui pue...
 				String line = bRead.readLine();
 				if (line == null) break;
+				//writer.println(line);
 				//System.out.println(line);
 				if (currentLineCount != 0) {
 					processCSVLine(line);
@@ -104,6 +109,7 @@ public class AL_GlobalTest {
 				if (currentLineCount >= maxLineCount) break;
 			}
 			bRead.close();
+			//writer.close();
 		} catch (Exception e) {
 			
 		}
