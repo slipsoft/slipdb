@@ -7,6 +7,8 @@ import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 
+import com.dant.utils.Timer;
+
 public class AL_GlobalTest {
 	
 	/** Test de la base de données
@@ -79,14 +81,14 @@ public class AL_GlobalTest {
 	}
 	
 	public void globalTestWithCSV(String pathToCSV) {
-		long startUS = System.nanoTime() / 1000;
+		Timer timer = new Timer("load time");
 		//AL_Table table = new AL_Table();
 		initCSVTable();
 		printMemUsage();
 		printMemUsage();
 		
 		// Chargement via le CSV
-		int maxLineCount = 1000;
+		int maxLineCount = 100000;
 		int currentLineCount = 0;
 		try {
 			FileReader fRead = new FileReader(pathToCSV);
@@ -118,7 +120,7 @@ public class AL_GlobalTest {
 
 
 		printMemUsage();
-		long stopUS = System.nanoTime() / 1000;
+		timer.printms();
 		
 		AL_Finder finder = new AL_Finder();
 		finder.addFilter("trip_distance", AL_FinderArgumentOperation.equals, new Integer(2));
@@ -133,10 +135,6 @@ public class AL_GlobalTest {
 			int rowIndex = indexList.get(resultIndex);
 			//System.out.println(testTable.rowAsReadableString(rowIndex));
 		}
-		
-		long enlapsedTimeUS = (stopUS - startUS) / 1000;
-		System.out.println("AL_GlobalTest.globalTest : found in " + enlapsedTimeUS + "ms");
-
 		printMemUsage();
 		
 	}

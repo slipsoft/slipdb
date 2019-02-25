@@ -43,7 +43,6 @@ public class TestEndpoint {
 	}
 	
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/json")
 	public Account salut() {
 		return new Account("n.peugnet@free.fr");
