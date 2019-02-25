@@ -127,7 +127,7 @@ public class AL_GlobalTest {
 	public void globalTestWithCSV(String pathToCSV) {
 		
 		//Chargement à partir du fichier CSV
-		loadFromCSV(pathToCSV, 10_000);
+		loadFromCSV(pathToCSV, 100_000);
 		
 		// Recherche d'une distance et d'un nombre de passagers
 		AL_Finder finder = new AL_Finder();
