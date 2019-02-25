@@ -5,23 +5,18 @@ import java.util.Map;
 
 public class Index {
 	protected List<String> columns;
-	protected Map<Object[], Integer> values;
+	protected Map<Key, Integer> values;
 	
 	public Index(List<String> columns) {
-		setColumns(columns);
+		this.columns = columns;
 	}
 	
 	public List<String> getColumns() {
 		return columns;
 	}
-	public void setColumns(List<String> columns) {
-		this.columns = columns;
-	}
-	public Map<Object[], Integer> getValues() {
+	
+	public Map<Key, Integer> getValues() {
 		return values;
-	}
-	public void setValues(Map<Object[], Integer> values) {
-		this.values = values;
 	}
 	
 	
