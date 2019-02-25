@@ -80,16 +80,17 @@ public class AL_GlobalTest {
 		
 	}
 	
-	public void globalTestWithCSV(String pathToCSV) {
+	public void loadFromCSV(String pathToCSV, int maxLineCount) {
 		Timer timer = new Timer("load time");
 		//AL_Table table = new AL_Table();
 		initCSVTable();
 		printMemUsage();
-		printMemUsage();
+		//printMemUsage();
 		
 		// Chargement via le CSV
-		int maxLineCount = 100000;
+		//int maxLineCount = 100000;
 		int currentLineCount = 0;
+		
 		try {
 			FileReader fRead = new FileReader(pathToCSV);
 			BufferedReader bRead = new BufferedReader(fRead);
@@ -121,19 +122,26 @@ public class AL_GlobalTest {
 
 		printMemUsage();
 		timer.printms();
+	}
+	
+	public void globalTestWithCSV(String pathToCSV) {
 		
+		//Chargement à partir du fichier CSV
+		loadFromCSV(pathToCSV, 10_000);
+		
+		// Recherche d'une distance et d'un nombre de passagers
 		AL_Finder finder = new AL_Finder();
-		finder.addFilter("trip_distance", AL_FinderArgumentOperation.equals, new Integer(2));
+		finder.addFilter("trip_distance", AL_FinderArgumentOperation.equals, new Integer(12));
+		finder.addFilter("passenger_count", AL_FinderArgumentOperation.equals, new Integer(1));
 		ArrayList<Integer> indexList = finder.findMatchingIndexList(testTable, 1000);
-
 		
 		
-		
+		// Affichage des résultats
 		System.out.println("AL_GlobalTest.globalTest : indexList.size() = " + indexList.size());
 		for (int resultIndex = 0; resultIndex < indexList.size(); resultIndex++) {
-			//System.out.println("RESULTAT n°" + resultIndex + " :");
+			System.out.println("RESULTAT n°" + resultIndex + " :");
 			int rowIndex = indexList.get(resultIndex);
-			//System.out.println(testTable.rowAsReadableString(rowIndex));
+			System.out.println(testTable.rowAsReadableString(rowIndex));
 		}
 		printMemUsage();
 		
