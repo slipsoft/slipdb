@@ -5,8 +5,10 @@ public class Column {
 	protected String type;
 	protected int size;
 	
-	public Column(String name) {
-		setName(name);
+	public Column(String name, String type, int size) {
+		this.name = name;
+		this.type = type;
+		this.size = size;
 	}
 	
 	public String getName() {

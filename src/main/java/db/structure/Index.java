@@ -1,17 +1,16 @@
 package db.structure;
 
-import java.util.List;
 import java.util.Map;
 
 public class Index {
-	protected List<String> columns;
+	protected Column[] columns;
 	protected Map<Key, Integer> values;
 	
-	public Index(List<String> columns) {
+	public Index(Column[] columns) {
 		this.columns = columns;
 	}
 	
-	public List<String> getColumns() {
+	public Column[] getColumns() {
 		return columns;
 	}
 	

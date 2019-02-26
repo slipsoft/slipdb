@@ -1,5 +1,6 @@
 package db.structure;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Table {
@@ -10,6 +11,7 @@ public class Table {
 	public Table(String name, List<Column> columns) {
 		this.name = name;
 		this.columns = columns;
+		this.indexes = new ArrayList<>();
 	}
 	
 	public String getName() {
@@ -26,5 +28,12 @@ public class Table {
 	
 	public void addIndex(Index index) {
 		this.indexes.add(index);
+	}
+	
+	public int getLineSize() {
+		return columns
+		    .stream()
+		    .mapToInt(Column::getSize)
+		    .sum();
 	}
 }
