@@ -9,7 +9,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class TestTable {
+class TableTest {
 	protected Table table;
 	protected List<Column> columns = new ArrayList<>();
 	protected List<Index> indexes = new ArrayList<>();
