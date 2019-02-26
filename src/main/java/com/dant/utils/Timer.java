@@ -1,5 +1,11 @@
 package com.dant.utils;
 
+
+/**
+ * 
+ * @author Nicolas
+ *
+ */
 public class Timer {
 	protected long start;
 	protected String label;
