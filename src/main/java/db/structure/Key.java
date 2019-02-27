@@ -16,6 +16,8 @@ public class Key {
 	
 	@Override
 	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (obj instanceof Key == false) return false;
 		Key k = (Key) obj;
 		return ArrayUtils.isEquals(k.values, this.values);
 	}

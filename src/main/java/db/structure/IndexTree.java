@@ -17,5 +17,7 @@ public class IndexTree extends Index {
 		super(columns);
 		this.values = new TreeMap<Key, Integer>();
 	}
-
+	
+	
+	
 }
