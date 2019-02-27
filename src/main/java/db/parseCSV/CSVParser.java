@@ -73,8 +73,8 @@ public class CSVParser {
 		
 		// Calcul de la taille d'un trajet
 		totalTripSize = 0;
-		for (int columnIndex = 0; columnIndex < testTable.columnList.size(); columnIndex++) {
-			Column currentColumn = testTable.columnList.get(columnIndex);
+		for (int columnIndex = 0; columnIndex < testTable.getColumns().size(); columnIndex++) {
+			Column currentColumn = testTable.getColumns().get(columnIndex);
 			totalTripSize += currentColumn.dataType.dataSize;
 		}
 		
@@ -101,8 +101,8 @@ public class CSVParser {
 	
 	public byte[] processCSVLine(String csvLine) {
 		String[] valueList = csvLine.split(",");
-		if (valueList.length != testTable.columnList.size()) {
-			System.err.println("ERREUR AL_GlobalTest.processCSVLine : valueList.length("+valueList.length+") != testTable.columnList.size()("+testTable.columnList.size()+")");
+		if (valueList.length != testTable.getColumns().size()) {
+			System.err.println("ERREUR AL_GlobalTest.processCSVLine : valueList.length("+valueList.length+") != testTable.columnList.size()("+testTable.getColumns().size()+")");
 			return new byte[0];
 		}
 		
@@ -111,9 +111,9 @@ public class CSVParser {
 		//System.out.println("CSVParser.processCSVLine llocate = " + totalTripSize);
 		
 		//AL_LineMaker lineMaker = new AL_LineMaker();
-		for (int columnIndex = 0; columnIndex < testTable.columnList.size(); columnIndex++) {
+		for (int columnIndex = 0; columnIndex < testTable.getColumns().size(); columnIndex++) {
 			String strValue = valueList[columnIndex];
-			Column currentColumn = testTable.columnList.get(columnIndex);
+			Column currentColumn = testTable.getColumns().get(columnIndex);
 			
 			
 			float floatValue;
