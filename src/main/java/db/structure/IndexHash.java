@@ -5,6 +5,8 @@ import java.util.HashMap;
 import db.data.Operator;
 
 public class IndexHash extends Index {
+	
+	// Liste des opérateurs compatibles :
 	protected final static Operator[] operators = {
 		Operator.equals
 	};

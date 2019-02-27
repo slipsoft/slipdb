@@ -5,6 +5,9 @@ import java.util.TreeMap;
 import db.data.Operator;
 
 public class IndexTree extends Index {
+	// -> IndexTree devrait
+	
+	// Liste des opérateurs compatibles :
 	protected final static Operator[] operators = {
 		Operator.equals,
 		Operator.greater,
