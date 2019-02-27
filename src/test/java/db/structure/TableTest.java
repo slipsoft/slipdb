@@ -19,7 +19,7 @@ class TableTest {
 		columns.add(new Column("col1", "string", 10));
 		columns.add(new Column("col2", "int", 2));
 		Column[] cols = {columns.get(0)};
-		Index index = new Index(cols);
+		Index index = new IndexHash(cols);
 		indexes.add(index);
 		table = new Table("test", columns);
 		table.addIndex(index);
@@ -47,7 +47,7 @@ class TableTest {
 	@Test
 	final void testAddIndex() {
 		Column[] cols = {columns.get(1)};
-		Index index = new Index(cols);
+		Index index = new IndexHash(cols);
 		table.addIndex(index);
 		assertEquals(index, table.getIndexes().get(1));
 	}

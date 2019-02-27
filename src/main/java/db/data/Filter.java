@@ -1,9 +1,9 @@
 package db.data;
 
-import db.structure.Column;
+import db.structure.Index;
 
 public class Filter {
-	protected Column field;
+	protected Index field;
 	protected Operator operator;
 	protected Object value;
 }

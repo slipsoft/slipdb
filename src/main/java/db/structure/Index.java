@@ -2,7 +2,10 @@ package db.structure;
 
 import java.util.Map;
 
-public class Index {
+import db.data.Operator;
+
+public abstract class Index {
+	protected static Operator[] operators;
 	protected Column[] columns;
 	protected Map<Key, Integer> values;
 	
