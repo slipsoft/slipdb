@@ -8,17 +8,17 @@ public class IndexTree extends Index {
 	// -> IndexTree devrait
 	
 	// Liste des opérateurs compatibles :
-	protected final static Operator[] operators = {
+	protected final static Operator[] compatibleOperatorsList = {
 		Operator.equals,
 		Operator.greater,
 		Operator.less,
 		Operator.greaterOrEquals,
 		Operator.lessOrEquals,
 	};
-
+	
 	public IndexTree(Column[] columns) {
 		super(columns);
-		this.values = new TreeMap<Key, Integer>();
+		this.indexedValuesMap = new TreeMap<Key, Integer>();
 	}
 	
 	

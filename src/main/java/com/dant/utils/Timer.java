@@ -22,9 +22,13 @@ public class Timer {
 	public void printns() {
 		System.out.println(label + ": " + diff() + " ns");
 	}
-	
+
 	public void printµs() {
 		System.out.println(label + ": " + diff() / 1000 + " µs");
+	}
+
+	public void printus() { // identique à printµs, mais moins compliqué à écrire !
+		printµs();
 	}
 	
 	public void printms() {

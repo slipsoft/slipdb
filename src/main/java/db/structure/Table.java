@@ -8,13 +8,13 @@ import db.parseCSV.OptimDataFromCSV;
 
 public class Table {
 
-	protected String name;
-	protected List<Column> columns = new ArrayList<>();
-	protected List<Index> indexes = new ArrayList<>();
+	protected String name; // nom de la table
+	protected List<Column> columnsList = new ArrayList<Column>(); // liste des colonnes de la table
+	protected List<Index> indexesList = new ArrayList<Index>();   // liste des index générés pour cette table
 	
 	public Table(String name, List<Column> columns) {
 		this.name = name;
-		this.columns.addAll(columns);
+		this.columnsList.addAll(columns);
 	}
 	
 	public String getName() {
@@ -22,26 +22,26 @@ public class Table {
 	}
 	
 	public List<Column> getColumns() {
-		return columns;
+		return columnsList;
 	}
 
 	public List<Index> getIndexes() {
-		return indexes;
+		return indexesList;
 	}
 	
 	public void addIndex(Index index) {
-		this.indexes.add(index);
+		this.indexesList.add(index);
 	}
 	
 	public int getLineSize() {
-		return columns
+		return columnsList
 		    .stream()
 		    .mapToInt(Column::getSize)
 		    .sum();
 	}
 	
 	public boolean columnExist(String name) {
-		return this.columns.stream().anyMatch(col -> col.getName() == name);
+		return this.columnsList.stream().anyMatch(col -> col.getName() == name);
 	}
 	
 	/** Ajout d'une colonne
@@ -66,17 +66,17 @@ public class Table {
 		if (columnExist(colName)) return -1;
 		// Ajout de la colonne
 		Column newColumn = new Column(colName, optimDataType);
-		columns.add(newColumn);
-		return columns.size() - 1;
+		columnsList.add(newColumn);
+		return columnsList.size() - 1;
 	}
 	
 	/** Trouver l'index d'une colonne à partir de son nom, dans la liste columns
 	 *  @param colName  nom de la colonne à rechercher
 	 *  @return -1 si introuvable, un entier >= 0 si existe
 	 */
-	public int findColumnNumber(String colName) {
-		for (int colIndex = 0; colIndex < columns.size(); colIndex++) {
-			Column columnAtIndex = columns.get(colIndex);
+	public int findColumnIndex(String colName) {
+		for (int colIndex = 0; colIndex < columnsList.size(); colIndex++) {
+			Column columnAtIndex = columnsList.get(colIndex);
 			if (columnAtIndex.name.equals(colName)) {
 				return colIndex;
 			}
