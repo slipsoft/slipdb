@@ -1,5 +1,6 @@
 package db.structure;
 
+import java.util.ArrayList;
 import java.util.Map;
 import db.data.Operator;
 
@@ -14,11 +15,13 @@ public abstract class Index {
 	protected static Operator[] compatibleOperatorsList; // Liste des opérateurs compatibles
 	protected Column[] indexedColumnsList; // Liste des colonnes indexées dans cet Index
 	
-	// Carte des valeurs indexées par cet objet Index - association clef valeur :
-	// Key est l'identifiant (ex : nom - ou - nom + prénom + age),
-	// Integer est l'index dans le fichier binaire issu des .CSV
-	// Il peut y avoir plus d'une correspondance
-	protected Map<Key, Integer> indexedValuesMap;
+	/** Carte des valeurs indexées par cet objet Index - association clef valeur :
+	 *  Key est l'identifiant (ex : nom -ou- nom + prénom + age par exemple),
+	 *  Integer est l'index dans le fichier binaire issu des .CSV
+	 *  Une seule correspondance est possible, pour que ça fonctionne, il faudrait donc remplacer Integer par ArrayList<Integer>
+	 */
+	protected Map<Key, ArrayList<Integer>> indexedValuesMap;
+	
 	
 	/** Constructeur
 	 * @param columnsToIndex la liste des colonnes à indexer
@@ -37,7 +40,7 @@ public abstract class Index {
 	/**
 	 * @return la carte de toutes les valeurs indexées dans cet Index
 	 */
-	public Map<Key, Integer> getIndexedValuesMap() {
+	public Map<Key, ArrayList<Integer>> getIndexedValuesMap() {
 		return indexedValuesMap;
 	}
 	

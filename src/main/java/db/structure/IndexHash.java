@@ -1,5 +1,6 @@
 package db.structure;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import db.data.Operator;
@@ -13,7 +14,7 @@ public class IndexHash extends Index {
 	
 	public IndexHash(Column[] columns) {
 		super(columns);
-		this.indexedValuesMap = new HashMap<Key, Integer>();
+		this.indexedValuesMap = new HashMap<Key, ArrayList<Integer>>();
 	}
 
 }
