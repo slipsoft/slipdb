@@ -2,28 +2,23 @@ package db.structure;
 
 import db.parseCSV.OptimDataFromCSV;
 import db.parseCSV.StorageDataType;
+import db.types.Type;
 
 public class Column {
 	
-	public String name = "Nom inconnu";
+	protected String name = "Nom inconnu";
+	protected Type type;
+
 	// Type de donnée stockée
 	public final StorageDataType dataType;// = StorageDataType.isUnknown;
 	public final OptimDataFromCSV optimDataType; // utile pour le cast d'une date -> int par exemple
 	
-	//public ArrayList<Object> dataList = new ArrayList<Object>();
-	
 	public Column(String argName, OptimDataFromCSV argOptimDataType) { //StorageDataType argDataType, StorageDataType argDataTypeInCSV) {
-		name = argName;
-		dataType = argOptimDataType.realDataType;
-		optimDataType = argOptimDataType;
+		this.name = argName;
+		this.dataType = argOptimDataType.realDataType;
+		this.optimDataType = argOptimDataType;
+		
 	}
-	
-	
-	
-	
-	
-	protected String type;
-	protected int size;
 	
 	/**
 	 * Laissé pour rester compatibles avec les tests unitaires de Nicolas, mais non utilisé par Sylvain
@@ -31,12 +26,11 @@ public class Column {
 	 * @param type
 	 * @param size
 	 */
-	public Column(String name, String type, int size) {
+	public Column(String name, Type type) {
 		optimDataType = null;
 		dataType = null;
 		this.name = name;
 		this.type = type;
-		this.size = size;
 	}
 	public String getName() {
 		return name;
@@ -44,22 +38,13 @@ public class Column {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public String getType() {
+	public Type getType() {
 		return type;
 	}
-	public void setType(String type) {
+	public void setType(Type type) {
 		this.type = type;
 	}
 	public int getSize() {
-		return size;
+		return type.getSize();
 	}
-	
-	public void setSize(int size) {
-		this.size = size;
-	}
-	
-	
-	
-	
-	
 }

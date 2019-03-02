@@ -48,26 +48,14 @@ public class Table {
 	 *  @param colName
 	 *  @param defaultFillValue
 	 *  @return
+	 * @throws Exception 
 	 */
-	public boolean addColumn(String colName, OptimDataFromCSV optimDataType) {
-		int columnIndex = addColumn_base(colName, optimDataType);
-		if (columnIndex == -1) return false;
-		//Column column = columns.get(columnIndex);
-		//column.storageType = AL_StorageType.isString;
-		//column.clearAndFillWith(defaultFillValue, currentRowNumber);
-		return true;
-	}
-	
-	/** Ajouter une colonne, en retourner l'index dans la liste columns
-	 *  @param colName
-	 *  @return
-	 */
-	private int addColumn_base(String colName, OptimDataFromCSV optimDataType) { //StorageDataType dataType, StorageDataType dataTypeInCSV) {
-		if (columnExist(colName)) return -1;
+	public boolean addColumn(String colName, OptimDataFromCSV optimDataType) throws Exception {
+		if (columnExist(colName)) throw new Exception("Column exist");
 		// Ajout de la colonne
 		Column newColumn = new Column(colName, optimDataType);
 		columnsList.add(newColumn);
-		return columnsList.size() - 1;
+		return true;
 	}
 	
 	/** Trouver l'index d'une colonne à partir de son nom, dans la liste columns
