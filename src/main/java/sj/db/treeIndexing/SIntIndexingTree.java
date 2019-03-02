@@ -19,7 +19,7 @@ public class SIntIndexingTree extends SNumericalIndexingTree {
 		if (indexList == null) {
 			indexList = new IntegerArrayList();
 		}
-		indexList.add(arg0)
+		indexList.add(associatedValue);
 	}
 	
 	
