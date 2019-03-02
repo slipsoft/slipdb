@@ -20,62 +20,16 @@ import db.structure.Table;
 public class CSVParser {
 	
 	
-	public Table testTable;
-	public int totalTripSize;
+	public Table table;
+	public int entrySize;
 	
 	public void initCSVTable() {
 		
-		// Tables et type des tables
-		/*
-		testTable.addColumn("VendorID", StorageDataType.isByte);
-		testTable.addColumn("tpep_pickup_datetime", StorageDataType.isInteger, StorageDataType.isStringDate);
-		testTable.addColumn("tpep_dropoff_datetime", StorageDataType.isInteger, StorageDataType.isStringDate);
-		testTable.addColumn("passenger_count", StorageDataType.isByte);
-		testTable.addColumn("trip_distance", StorageDataType.isFloat);
-		testTable.addColumn("pickup_longitude", StorageDataType.isDouble);
-		testTable.addColumn("pickup_latitude", StorageDataType.isDouble);
-		testTable.addColumn("RateCodeID", StorageDataType.isByte);
-		testTable.addColumn("store_and_fwd_flag", StorageDataType.isChar); // 1 caractère
-		testTable.addColumn("dropoff_longitude", StorageDataType.isDouble);
-		testTable.addColumn("dropoff_latitude", StorageDataType.isDouble);
-		testTable.addColumn("payment_type", StorageDataType.isByte);
-		testTable.addColumn("fare_amount", StorageDataType.isFloat);
-		testTable.addColumn("extra", StorageDataType.isFloat);
-		testTable.addColumn("mta_tax", StorageDataType.isFloat);
-		testTable.addColumn("tip_amount", StorageDataType.isFloat);
-		testTable.addColumn("tolls_amount", StorageDataType.isFloat);
-		testTable.addColumn("improvement_surcharge", StorageDataType.isFloat);
-		testTable.addColumn("total_amount", StorageDataType.isFloat);
-		*/
-		
-		// Optimisation spéciale pour ce type de base de donnée (trajets de NY)
-		
-		testTable.addColumn("VendorID", OptimDataFromCSV.toByte);
-		testTable.addColumn("tpep_pickup_datetime", OptimDataFromCSV.dateStringToInteger);
-		testTable.addColumn("tpep_dropoff_datetime", OptimDataFromCSV.dateStringToInteger);
-		testTable.addColumn("passenger_count", OptimDataFromCSV.toByte);
-		testTable.addColumn("trip_distance", OptimDataFromCSV.floatToShort);
-		testTable.addColumn("pickup_longitude", OptimDataFromCSV.toDouble);
-		testTable.addColumn("pickup_latitude", OptimDataFromCSV.toDouble);
-		testTable.addColumn("RateCodeID", OptimDataFromCSV.toByte);
-		testTable.addColumn("store_and_fwd_flag", OptimDataFromCSV.toChar); // 1 caractère
-		testTable.addColumn("dropoff_longitude", OptimDataFromCSV.toDouble);
-		testTable.addColumn("dropoff_latitude", OptimDataFromCSV.toDouble);
-		testTable.addColumn("payment_type", OptimDataFromCSV.toByte);
-		testTable.addColumn("fare_amount", OptimDataFromCSV.floatToShort);
-		testTable.addColumn("extra", OptimDataFromCSV.floatToByte);
-		testTable.addColumn("mta_tax", OptimDataFromCSV.floatToByte);
-		testTable.addColumn("tip_amount", OptimDataFromCSV.floatToShort);
-		testTable.addColumn("tolls_amount", OptimDataFromCSV.floatToShort);
-		testTable.addColumn("improvement_surcharge", OptimDataFromCSV.floatToByte);
-		testTable.addColumn("total_amount", OptimDataFromCSV.floatToShort);
-		
-		
-		// Calcul de la taille d'un trajet
-		totalTripSize = 0;
-		for (int columnIndex = 0; columnIndex < testTable.getColumns().size(); columnIndex++) {
-			Column currentColumn = testTable.getColumns().get(columnIndex);
-			totalTripSize += currentColumn.dataType.dataSize;
+		// Calcul de la taille d'une entrée
+		entrySize = 0;
+		for (int columnIndex = 0; columnIndex < table.getColumns().size(); columnIndex++) {
+			Column currentColumn = table.getColumns().get(columnIndex);
+			entrySize += currentColumn.dataType.dataSize;
 		}
 		
 		/*VendorID,
@@ -101,19 +55,19 @@ public class CSVParser {
 	
 	public byte[] processCSVLine(String csvLine) {
 		String[] valueList = csvLine.split(",");
-		if (valueList.length != testTable.getColumns().size()) {
-			System.err.println("ERREUR AL_GlobalTest.processCSVLine : valueList.length("+valueList.length+") != testTable.columnList.size()("+testTable.getColumns().size()+")");
+		if (valueList.length != table.getColumns().size()) {
+			System.err.println("ERREUR AL_GlobalTest.processCSVLine : valueList.length("+valueList.length+") != testTable.columnList.size()("+table.getColumns().size()+")");
 			return new byte[0];
 		}
 		
 		// Conversion du trajet en tableau d'octets
-		ByteBuffer tripAsByteBuffer = ByteBuffer.allocate(totalTripSize);
+		ByteBuffer tripAsByteBuffer = ByteBuffer.allocate(entrySize);
 		//System.out.println("CSVParser.processCSVLine llocate = " + totalTripSize);
 		
 		//AL_LineMaker lineMaker = new AL_LineMaker();
-		for (int columnIndex = 0; columnIndex < testTable.getColumns().size(); columnIndex++) {
+		for (int columnIndex = 0; columnIndex < table.getColumns().size(); columnIndex++) {
 			String strValue = valueList[columnIndex];
-			Column currentColumn = testTable.getColumns().get(columnIndex);
+			Column currentColumn = table.getColumns().get(columnIndex);
 			
 			
 			float floatValue;
@@ -174,11 +128,10 @@ public class CSVParser {
 	
 	// Charger la donnée depuis le fichier CSV
 	public void loadFromCSV(String pathToCSV, String savePath, int maxLineCount, Table table) {
-		testTable = table;
+		this.table = table;
+		initCSVTable(); // à remplacer par this.entrySize = table.getLineSize();
 		
 		Timer timer = new Timer("load time");
-		//AL_Table table = new AL_Table();
-		initCSVTable();
 		MemUsage.printMemUsage();
 		
 		//printMemUsage();
