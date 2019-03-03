@@ -1,16 +1,15 @@
 package db.types;
 
 /**
- * Sylvain : Sylvain samedi soir qui parle en mode gros blazé de la vie,
- * je suis un peu extrème, mais je suis blazé xD
  * 
  * Sylvain : vous êtes sérieusement en train de remplacer
  * un type de base de Java (java.lang.String)
  * par votre propre classe String ? o-O
- * Nan sérieux -_-"
   --> (ce n'est que mon avis et j'admets que je peux parfaitement me tromper, hein)
+ * 
  * Je fais mes tests dans mon coin, dans mes packages sj.db[...]
- * je fais des trucs simples mais fonctionnels.
+ * j'essaie de faire des trucs simples mais fonctionnels, faites vos interfaces et expériementations,
+ * on fera des benchmarks ;)
  */
 public class String extends Type {
 

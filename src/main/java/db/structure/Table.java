@@ -50,13 +50,18 @@ public class Table {
 	 *  @return
 	 * @throws Exception 
 	 */
-	public boolean addColumn(String colName, OptimDataFromCSV optimDataType) throws Exception {
-		if (columnExist(colName)) throw new Exception("Column exist");
+	public boolean addColumn(String colName, OptimDataFromCSV optimDataType, boolean hasToIndexThisColumn) throws Exception {
+		if (columnExist(colName)) throw new Exception("Column already exists, colName = " + colName);
 		// Ajout de la colonne
-		Column newColumn = new Column(colName, optimDataType);
+		Column newColumn = new Column(colName, optimDataType, hasToIndexThisColumn);
 		columnsList.add(newColumn);
 		return true;
 	}
+
+	public boolean addColumn(String colName, OptimDataFromCSV optimDataType) throws Exception {
+		return addColumn(colName, optimDataType, false);
+	}
+	
 	
 	/** Trouver l'index d'une colonne à partir de son nom, dans la liste columns
 	 *  @param colName  nom de la colonne à rechercher

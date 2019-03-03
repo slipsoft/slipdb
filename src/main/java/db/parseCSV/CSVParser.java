@@ -20,6 +20,10 @@ import db.structure.Table;
 public class CSVParser {
 	
 	
+	/** Pour le test de l'indexation, ici, faire l'indexation
+	 *  des colonnes qui doivent être indexées via SIndexingTree
+	 */
+	
 	public Table table;
 	public int entrySize;
 	
