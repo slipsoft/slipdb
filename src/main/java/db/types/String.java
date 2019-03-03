@@ -1,6 +1,8 @@
 package db.types;
 
 /**
+ * Sylvain : Sylvain samedi soir qui parle en mode gros blazé de la vie,
+ * je suis un peu extrème, mais je suis blazé xD
  * 
  * Sylvain : vous êtes sérieusement en train de remplacer
  * un type de base de Java (java.lang.String)

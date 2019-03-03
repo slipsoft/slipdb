@@ -1,4 +1,4 @@
-package sj.db.customTreeIndexing;
+package sj.simpleDB.customTreeIndexing;
 
 
 /**

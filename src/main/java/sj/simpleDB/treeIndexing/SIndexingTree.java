@@ -1,4 +1,4 @@
-package sj.db.treeIndexing;
+package sj.simpleDB.treeIndexing;
 
 /**
  * Indexation d'une seuse colonne par un arbre.

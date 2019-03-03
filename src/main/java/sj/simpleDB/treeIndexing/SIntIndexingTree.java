@@ -1,4 +1,4 @@
-package sj.db.treeIndexing;
+package sj.simpleDB.treeIndexing;
 
 import java.util.TreeMap;
 

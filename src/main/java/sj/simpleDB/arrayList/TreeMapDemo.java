@@ -12,13 +12,14 @@ import db.structure.Key;
  *
  */
 
+@SuppressWarnings("unused")
 class TreeMapDemo {
 	
 	public static void main(String args[]) {
 		mainTreeMapDemo();
 	}
 	
-	  public static void mainTreeMapDemo() {
+	public static void mainTreeMapDemo() {
 	 
 	    // Create a TreeMap
 	    TreeMap<String, String> treemap = 

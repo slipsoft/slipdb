@@ -3,6 +3,8 @@
  */
 /**
  * @author Sylvain
+ * - Bac à sable de Sylvain -
+ * 
  * Recherches pour le moteur d'index - TreeMap ou arbre personnalisé
  * Stockage des index
  * 
@@ -22,4 +24,4 @@
  * 
  */
 
-package sj.db.customTreeIndexing;
+package sj.simpleDB.customTreeIndexing;

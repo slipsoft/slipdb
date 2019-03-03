@@ -1,7 +1,6 @@
 package sj.simpleDB.arrayList;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * 2019-02-24

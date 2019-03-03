@@ -1,4 +1,4 @@
-package sj.db.treeIndexing;
+package sj.simpleDB.treeIndexing;
 
 /**
  * IndexingTree gérant des types numériques seulement

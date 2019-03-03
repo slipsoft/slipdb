@@ -9,6 +9,10 @@ import java.util.ArrayList;
 
 import com.dant.utils.Timer;
 
+
+
+// C'est du vieux, code, je fais en sorte que le swarnings ne s'affichent plus
+@SuppressWarnings("all") // bourrin, mais comme c'est du vieux code
 public class AL_GlobalTest {
 	
 	/** Test de la base de données

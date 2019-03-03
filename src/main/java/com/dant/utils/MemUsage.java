@@ -9,8 +9,8 @@ public class MemUsage {
 
 		NumberFormat format = NumberFormat.getInstance();
 
-		StringBuilder sb = new StringBuilder();
-		long maxMemory = runtime.maxMemory();
+		//StringBuilder sb = new StringBuilder();
+		//long maxMemory = runtime.maxMemory();
 		long allocatedMemory = runtime.totalMemory();
 		long freeMemory = runtime.freeMemory();
 		

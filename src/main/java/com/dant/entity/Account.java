@@ -5,6 +5,7 @@ import java.io.Serializable;
 /**
  * Created by pitton on 2017-02-21.
  */
+@SuppressWarnings("serial") // non sérialisé, non utilisé => je fais taire les warnings
 public class Account implements Serializable {
 
 	private String email;
