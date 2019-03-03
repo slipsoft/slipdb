@@ -1,8 +1,16 @@
-package db.types;
+package db.data;
 
 import java.nio.ByteBuffer;
 
 public class Decimal extends Type {
+	
+	protected final static Operator[] compatibleOperatorsList = {
+		Operator.equals,
+		Operator.greater,
+		Operator.less,
+		Operator.greaterOrEquals,
+		Operator.lessOrEquals,
+	};
 
 	public Decimal(int size) {
 		this.size = size;

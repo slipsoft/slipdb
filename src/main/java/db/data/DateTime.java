@@ -1,10 +1,18 @@
-package db.types;
+package db.data;
 
 import java.nio.ByteBuffer;
 
 import com.dant.utils.Utils;
 
 public class DateTime extends Type {
+	
+	protected final static Operator[] compatibleOperatorsList = {
+		Operator.equals,
+		Operator.greater,
+		Operator.less,
+		Operator.greaterOrEquals,
+		Operator.lessOrEquals,
+	};
 
 	public DateTime() {
 	}

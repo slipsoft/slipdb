@@ -1,8 +1,12 @@
-package db.types;
+package db.data;
 
 import java.nio.ByteBuffer;
 
 public class Text extends Type {
+
+	protected final static Operator[] compatibleOperatorsList = {
+		Operator.equals
+	};
 
 	public Text(int size) {
 		this.size = size;

@@ -2,9 +2,9 @@ package db.structure;
 
 import java.nio.ByteBuffer;
 
+import db.data.Type;
 import db.parseCSV.OptimDataFromCSV;
 import db.parseCSV.StorageDataType;
-import db.types.Type;
 
 public class Column {
 	
