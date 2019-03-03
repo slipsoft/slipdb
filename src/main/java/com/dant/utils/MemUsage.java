@@ -17,13 +17,13 @@ public class MemUsage {
 		
 		long usedMemory = allocatedMemory - freeMemory;
 		
-		System.out.println("Used Memory = " + format.format(usedMemory / 1024));
+		Log.info("Used Memory = " + format.format(usedMemory / 1024));
 		
 		/*
-		System.out.println("free memory: " + format.format(freeMemory / 1024));
-		System.out.println("allocated memory: " + format.format(allocatedMemory / 1024));
-		System.out.println("max memory: " + format.format(maxMemory / 1024));
-		System.out.println("total free memory: " + format.format((freeMemory + (maxMemory - allocatedMemory)) / 1024));*/
+		Log.info("free memory: " + format.format(freeMemory / 1024));
+		Log.info("allocated memory: " + format.format(allocatedMemory / 1024));
+		Log.info("max memory: " + format.format(maxMemory / 1024));
+		Log.info("total free memory: " + format.format((freeMemory + (maxMemory - allocatedMemory)) / 1024));*/
 		
 		
 		/*

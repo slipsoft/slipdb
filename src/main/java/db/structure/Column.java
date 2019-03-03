@@ -1,5 +1,7 @@
 package db.structure;
 
+import java.nio.ByteBuffer;
+
 import db.parseCSV.OptimDataFromCSV;
 import db.parseCSV.StorageDataType;
 import db.types.Type;
@@ -35,19 +37,28 @@ public class Column {
 		this.type = type;
 		hasToIndexThisColumn = false;
 	}
+
 	public String getName() {
 		return name;
 	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
+
 	public Type getType() {
 		return type;
 	}
+
 	public void setType(Type type) {
 		this.type = type;
 	}
+
 	public int getSize() {
 		return type.getSize();
+	}
+	
+	public void parse(String input, ByteBuffer outputBuffer) {
+		this.getType().parse(input, outputBuffer);
 	}
 }

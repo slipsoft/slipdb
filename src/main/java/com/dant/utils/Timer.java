@@ -20,20 +20,11 @@ public class Timer {
 	}
 	
 	public void printns() {
-		System.out.println(label + ": " + diff() + " ns");
-	}
-
-	public void printµs() {
-		System.out.println(label + ": " + diff() / 1000 + " µs");
-	}
-
-	public void printus() { // identique à printµs, mais moins compliqué à écrire !
-		printµs();
+		Log.info(label + ": " + diff() + " ns");
 	}
 	
 	public void printms() {
-		
-		System.out.println(label + ": " + diff() / 1000000 + " ms");
+		Log.info(label + ": " + diff() / 1000000 + " ms");
 	}
 	
 }
