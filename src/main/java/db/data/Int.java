@@ -22,7 +22,7 @@ public class Int extends Type {
 	}
 	
 	@Override
-	public Int get(Byte[] bytes) {
+	public Integer get(Byte[] bytes) {
 		// TODO Auto-generated method stub
 		return null;
 	}

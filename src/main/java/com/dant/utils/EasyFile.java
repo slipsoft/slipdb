@@ -3,13 +3,13 @@ package com.dant.utils;
 import java.io.IOException;
 
 @SuppressWarnings("serial")
-public class File extends java.io.File {
+public class EasyFile extends java.io.File {
 
-	public File(String pathname) {
+	public EasyFile(String pathname) {
 		super(pathname);
 	}
 
-	protected void createFileIfNotExist() throws IOException {
+	public void createFileIfNotExist() throws IOException {
 		if (!exists()) {
 			java.io.File dirObject = getParentFile();
 			if (!dirObject.exists()) {

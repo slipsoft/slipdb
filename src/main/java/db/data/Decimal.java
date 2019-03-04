@@ -22,7 +22,7 @@ public class Decimal extends Type {
 	}
 	
 	@Override
-	public Decimal get(Byte[] bytes) {
+	public Float get(Byte[] bytes) {
 		// TODO Auto-generated method stub
 		return null;
 	}

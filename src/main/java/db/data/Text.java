@@ -18,7 +18,7 @@ public class Text extends Type {
 	}
 	
 	@Override
-	public Text get(Byte[] bytes) {
+	public String get(Byte[] bytes) {
 		// TODO Auto-generated method stub
 		return null;
 	}

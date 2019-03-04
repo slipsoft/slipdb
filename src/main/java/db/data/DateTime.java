@@ -1,6 +1,7 @@
 package db.data;
 
 import java.nio.ByteBuffer;
+import java.util.Date;
 
 import com.dant.utils.Utils;
 
@@ -24,7 +25,7 @@ public class DateTime extends Type {
 	}
 	
 	@Override
-	public DateTime get(Byte[] bytes) {
+	public Date get(Byte[] bytes) {
 		// TODO Auto-generated method stub
 		return null;
 	}

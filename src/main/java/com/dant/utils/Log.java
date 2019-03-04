@@ -9,7 +9,7 @@ import java.util.Date;
 public class Log {
 	protected static volatile int level = 0;
 	protected static String prefix = "LOG";
-	protected static File file;
+	protected static EasyFile file;
 	
 	public static int getLevel() {
 		return level;
@@ -21,7 +21,7 @@ public class Log {
 
 	public static void start(String file, int level) {
 		Log.level = level;
-		Log.file = new File(file);
+		Log.file = new EasyFile(file);
 	}
 
 	/**
