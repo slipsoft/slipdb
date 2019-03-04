@@ -1,20 +1,31 @@
 package db.structure;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.dant.utils.EasyFile;
+import com.dant.utils.Log;
 
 import db.parseCSV.OptimDataFromCSV;
 
 
 public class Table {
 
+	protected static String basePath = "target/tables/";
 	protected String name; // nom de la table
+	protected EasyFile file;
 	protected List<Column> columnsList = new ArrayList<Column>(); // liste des colonnes de la table
 	protected List<Index> indexesList = new ArrayList<Index>();   // liste des index générés pour cette table
 	
-	public Table(String name, List<Column> columns) {
+	public Table(String name, List<Column> columns) throws IOException {
 		this.name = name;
 		this.columnsList.addAll(columns);
+		this.file = new EasyFile(basePath + name + ".bin");
+		this.file.createFileIfNotExist();
 	}
 	
 	public String getName() {
@@ -75,6 +86,24 @@ public class Table {
 			}
 		}
 		return -1;
+	}
+	
+	public List<Object> get(int id) throws IOException {
+		FileInputStream is = new FileInputStream(file);
+		List<Object> entry = new ArrayList<>();
+		is.skip(id * getLineSize());
+		for (Column column : columnsList) {
+			byte[] b = new byte[column.getSize()];
+			is.read(b);
+			Log.debug(b);
+			entry.add(column.getType().get(b));
+		}
+		is.close();
+		return entry;
+	}
+	
+	public OutputStream write() throws IOException {
+		return new FileOutputStream(file);
 	}
 	
 }

@@ -18,13 +18,13 @@ public class Decimal extends Type {
 	
 	@Override
 	public void parse(String input, ByteBuffer outputBuffer) {
-		outputBuffer.putFloat(Float.parseFloat(input));
+		outputBuffer.putDouble(Double.parseDouble(input));
 	}
 	
 	@Override
-	public Float get(Byte[] bytes) {
-		// TODO Auto-generated method stub
-		return null;
+	public Double get(byte[] bytes) {
+		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
+		return wrapped.getDouble();
 	}
 
 }

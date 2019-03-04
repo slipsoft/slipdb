@@ -6,6 +6,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 public class Log {
 	protected static volatile int level = 0;
 	protected static String prefix = "LOG";
@@ -39,7 +41,11 @@ public class Log {
 	 */
 	public static void debug(Object msg, String prefix) {
 		if (Log.level > 1) {
-			info(msg.toString(), prefix);
+			String str = msg.toString();
+			if (msg.getClass().isArray()) {
+				str = ArrayUtils.toString(msg);
+			}
+			info(str, prefix);
 		}
 	}
 	

@@ -21,6 +21,6 @@ public abstract class Type {
 	}
 	
 	abstract public void parse(String input, ByteBuffer outputBuffer);
-	abstract public Object get(Byte[] bytes);
+	abstract public Object get(byte[] bytes);
 
 }

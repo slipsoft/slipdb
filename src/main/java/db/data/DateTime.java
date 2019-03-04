@@ -16,6 +16,7 @@ public class DateTime extends Type {
 	};
 
 	public DateTime() {
+		this.size = 4;
 	}
 
 	@Override
@@ -25,8 +26,8 @@ public class DateTime extends Type {
 	}
 	
 	@Override
-	public Date get(Byte[] bytes) {
-		// TODO Auto-generated method stub
-		return null;
+	public Date get(byte[] bytes) {
+		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
+		return Utils.dateFromSecInt(wrapped.getInt());
 	}
 }

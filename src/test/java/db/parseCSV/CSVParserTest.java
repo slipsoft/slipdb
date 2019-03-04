@@ -20,7 +20,8 @@ class CSVParserTest {
 	protected CSVParser parser = new CSVParser();
 
 	@BeforeAll
-	static void setUpBeforeClass() throws Exception {		
+	static void setUpBeforeClass() throws Exception {
+		Log.start("target/slipdb.log", 3);	
 	}
 
 	@BeforeEach

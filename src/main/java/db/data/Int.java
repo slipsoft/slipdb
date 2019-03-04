@@ -22,9 +22,9 @@ public class Int extends Type {
 	}
 	
 	@Override
-	public Integer get(Byte[] bytes) {
-		// TODO Auto-generated method stub
-		return null;
+	public Integer get(byte[] bytes) {
+		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
+		return wrapped.getInt();
 	}
 
 }

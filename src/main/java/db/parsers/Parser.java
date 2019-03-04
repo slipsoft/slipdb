@@ -1,7 +1,6 @@
 package db.parsers;
 
 import java.io.InputStream;
-import java.io.OutputStream;
 
 import db.structure.Table;
 
@@ -14,8 +13,8 @@ public abstract class Parser {
 		this.entrySize = schema.getLineSize();
 	}
 
-	public void parse(InputStream input, OutputStream output) {
-		parse(input, output, -1);
+	public void parse(InputStream input) {
+		parse(input, -1);
 	}
 
 	/**
@@ -27,7 +26,7 @@ public abstract class Parser {
 	 * @param schema
 	 * @param limit
 	 */
-	abstract public void parse(InputStream input, OutputStream output, int limit);
+	abstract public void parse(InputStream input, int limit);
 	
 	abstract protected byte[] processLine(String line);
 }

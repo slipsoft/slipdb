@@ -6,7 +6,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 import com.dant.utils.Log;
@@ -22,14 +21,14 @@ public class CsvParser extends Parser {
 	}
 
 	@Override
-	public void parse(InputStream input, OutputStream output, int limit) {
+	public void parse(InputStream input, int limit) {
 		int currentLineCount = 0;
 		
 		Timer timer = new Timer("load time");
 		MemUsage.printMemUsage();
 		try (
 				BufferedReader bRead = new BufferedReader(new InputStreamReader(input));
-				DataOutputStream bWrite = new DataOutputStream(new BufferedOutputStream(output));
+				DataOutputStream bWrite = new DataOutputStream(new BufferedOutputStream(schema.write()));
 		) {
 			while (currentLineCount != limit) {
 				String line = bRead.readLine();
