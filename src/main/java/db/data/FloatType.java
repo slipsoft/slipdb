@@ -1,11 +1,8 @@
 package db.data;
 
 import java.nio.ByteBuffer;
-import java.util.Date;
 
-import com.dant.utils.Utils;
-
-public class DateTime extends Type {
+public class FloatType extends Type {
 	
 	protected final static Operator[] compatibleOperatorsList = {
 		Operator.equals,
@@ -15,19 +12,19 @@ public class DateTime extends Type {
 		Operator.lessOrEquals,
 	};
 
-	public DateTime() {
-		this.size = 4;
-	}
-
-	@Override
-	public void parse(String input, ByteBuffer outputBuffer) {
-		int dateAsInt = Utils.dateToSecInt(Utils.dateFromString(input));
-		outputBuffer.putInt(dateAsInt);
+	public FloatType() {
+		this.size = Float.BYTES;
 	}
 	
 	@Override
-	public Date get(byte[] bytes) {
-		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
-		return Utils.dateFromSecInt(wrapped.getInt());
+	public void parse(String input, ByteBuffer outputBuffer) {
+		outputBuffer.putFloat(Float.parseFloat(input));
 	}
+	
+	@Override
+	public Float get(byte[] bytes) {
+		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
+		return wrapped.getFloat();
+	}
+
 }

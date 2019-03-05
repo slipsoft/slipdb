@@ -9,8 +9,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import db.data.Int;
-import db.data.Text;
+import db.data.IntegerType;
+import db.data.StringType;
 
 class TableTest {
 	protected Table table;
@@ -19,8 +19,8 @@ class TableTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		columns.add(new Column("col1", new Text(10)));
-		columns.add(new Column("col2", new Int(2)));
+		columns.add(new Column("col1", new StringType(10)));
+		columns.add(new Column("col2", new IntegerType()));
 		Column[] cols = {columns.get(0)};
 		Index index = new IndexHash(cols);
 		indexes.add(index);
@@ -57,7 +57,7 @@ class TableTest {
 
 	@Test
 	final void testGetLineSize() {
-		assertEquals(12, table.getLineSize());
+		assertEquals(14, table.getLineSize());
 	}
 
 }

@@ -2,7 +2,7 @@ package db.data;
 
 import java.nio.ByteBuffer;
 
-public class Decimal extends Type {
+public class IntegerType extends Type {
 	
 	protected final static Operator[] compatibleOperatorsList = {
 		Operator.equals,
@@ -12,19 +12,19 @@ public class Decimal extends Type {
 		Operator.lessOrEquals,
 	};
 
-	public Decimal(int size) {
-		this.size = size;
+	public IntegerType() {
+		this.size = Integer.BYTES;
 	}
 	
 	@Override
 	public void parse(String input, ByteBuffer outputBuffer) {
-		outputBuffer.putDouble(Double.parseDouble(input));
+		outputBuffer.putInt(Integer.parseInt(input));
 	}
 	
 	@Override
-	public Double get(byte[] bytes) {
+	public Integer get(byte[] bytes) {
 		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
-		return wrapped.getDouble();
+		return wrapped.getInt();
 	}
 
 }

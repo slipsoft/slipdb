@@ -14,10 +14,11 @@ import org.junit.jupiter.api.function.Executable;
 
 import com.dant.utils.Log;
 
-import db.data.DateTime;
-import db.data.Decimal;
-import db.data.Int;
-import db.data.Text;
+import db.data.ByteType;
+import db.data.DateType;
+import db.data.DoubleType;
+import db.data.FloatType;
+import db.data.StringType;
 import db.structure.Column;
 import db.structure.Table;
 
@@ -34,25 +35,25 @@ class CsvParserTest {
 	void setUp() throws Exception {
 		ArrayList<Column> columns = new ArrayList<Column>();
 		try {
-			columns.add(new Column("VendorID", new Int(4)));
-			columns.add(new Column("tpep_pickup_datetime", new DateTime()));
-			columns.add(new Column("tpep_dropoff_datetime", new DateTime()));
-			columns.add(new Column("passenger_count", new Int(4)));
-			columns.add(new Column("trip_distance", new Decimal(8)));
-			columns.add(new Column("pickup_longitude", new Decimal(8)));
-			columns.add(new Column("pickup_latitude", new Decimal(8)));
-			columns.add(new Column("RateCodeID", new Int(4)));
-			columns.add(new Column("store_and_fwd_flag", new Text(1)));
-			columns.add(new Column("dropoff_longitude", new Decimal(8)));
-			columns.add(new Column("dropoff_latitude", new Decimal(8)));
-			columns.add(new Column("payment_type",  new Int(4)));
-			columns.add(new Column("fare_amount", new Decimal(8)));
-			columns.add(new Column("extra", new Decimal(8)));
-			columns.add(new Column("mta_tax", new Decimal(8)));
-			columns.add(new Column("tip_amount", new Decimal(8)));
-			columns.add(new Column("tolls_amount", new Decimal(8)));
-			columns.add(new Column("improvement_surcharge", new Decimal(8)));
-			columns.add(new Column("total_amount", new Decimal(8)));
+			columns.add(new Column("VendorID", new ByteType()));
+			columns.add(new Column("tpep_pickup_datetime", new DateType()));
+			columns.add(new Column("tpep_dropoff_datetime", new DateType()));
+			columns.add(new Column("passenger_count", new ByteType()));
+			columns.add(new Column("trip_distance", new FloatType()));
+			columns.add(new Column("pickup_longitude", new DoubleType()));
+			columns.add(new Column("pickup_latitude", new DoubleType()));
+			columns.add(new Column("RateCodeID", new ByteType()));
+			columns.add(new Column("store_and_fwd_flag", new StringType(1)));
+			columns.add(new Column("dropoff_longitude", new DoubleType()));
+			columns.add(new Column("dropoff_latitude", new DoubleType()));
+			columns.add(new Column("payment_type",  new ByteType()));
+			columns.add(new Column("fare_amount", new FloatType()));
+			columns.add(new Column("extra", new FloatType()));
+			columns.add(new Column("mta_tax", new FloatType()));
+			columns.add(new Column("tip_amount", new FloatType()));
+			columns.add(new Column("tolls_amount", new FloatType()));
+			columns.add(new Column("improvement_surcharge", new FloatType()));
+			columns.add(new Column("total_amount", new FloatType()));
 		} catch (Exception e) {
 			Log.error(e);
 		}

@@ -2,13 +2,13 @@ package db.data;
 
 import java.nio.ByteBuffer;
 
-public class Text extends Type {
+public class StringType extends Type {
 
 	protected final static Operator[] compatibleOperatorsList = {
 		Operator.equals
 	};
 
-	public Text(int size) {
+	public StringType(int size) {
 		this.size = size;
 	}
 	
