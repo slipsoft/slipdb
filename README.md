@@ -51,4 +51,4 @@ _not deployable yet..._
 -   **Etienne LELOUËt** - [etienne-lelouet](https://github.com/etienne-lelouet)
 -   **Nicolas PEUGNET** - [n-peugnet](https://github.com/n-peugnet)
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/slipsoft/slipdb/contributors) who participated in this project.
