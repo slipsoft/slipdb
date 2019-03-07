@@ -1,6 +1,6 @@
-# slipdb
+# ![SlipDb](docs/slipdb.png)
 
-Distributed index based search engine.
+A distributed, index based, search engine.
 
 
 ## Getting Started
