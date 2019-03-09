@@ -11,7 +11,9 @@ import java.util.TreeMap;
 import com.dant.utils.Log;
 
 import db.data.DataType;
+import db.data.Operator;
 import db.structure.Column;
+import db.structure.Index;
 import db.structure.Table;
 
 /**
@@ -58,7 +60,7 @@ import db.structure.Table;
 	
  * 
  */
-public class SIndexingTree {
+public class SIndexingTree extends Index {
 	protected SIndexingTreeType treeType; // servira pour l'utilisation de méthodes génériques, pour utiliser le bon type d'arbre et faire les bons cast
 
 	// Carte des index sous forme de TreeMap
@@ -70,6 +72,7 @@ public class SIndexingTree {
 	 * @throws FileNotFoundException 
 	 */
 	public void indexColumnFromDisk(Table inTable, int columnIndex) throws IOException {
+		indexedColumnsList = new Column[0];
 		List<Column> columnsList = inTable.getColumns();
 		int columnsNumber = columnsList.size();
 		if (columnsNumber <= columnIndex) { // columnIndex invalide
@@ -88,6 +91,9 @@ public class SIndexingTree {
 		Column indexThisColumn = columnsList.get(columnIndex);
 		DataType columnDataType = indexThisColumn.getDataType();
 		int dataSizeInBytes = columnDataType.getSize();
+		
+		indexedColumnsList = new Column[1]; // Currently, an IndexTree only supports one column
+		indexedColumnsList[0] = indexThisColumn;
 		
 		int skipBeforeData = dataOffsetInLine; // skip the first values
 		int skipAfterData = totalLineSize - skipBeforeData - dataSizeInBytes; // skip the remaining values
@@ -165,5 +171,13 @@ public class SIndexingTree {
 		binIndexList.add(binIndex);
 	}
 	
+	// -> Is it still useful ? (compatibleOperatorsList)
+	protected final static Operator[] compatibleOperatorsList = {
+		Operator.equals,
+		Operator.greater,
+		Operator.less,
+		Operator.greaterOrEquals,
+		Operator.lessOrEquals,
+	};
 	
 }
