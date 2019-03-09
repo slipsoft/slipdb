@@ -15,7 +15,9 @@ import db.structure.Column;
 import db.structure.Table;
 
 public class CsvParser extends Parser {
-
+	
+	protected static String csvSeparator = ","; // the CSV separator used to delimit fields
+	
 	public CsvParser(Table schema) {
 		super(schema);
 	}
@@ -51,13 +53,18 @@ public class CsvParser extends Parser {
 
 	@Override
 	protected byte[] processLine(String line) {
-		String[] valueList = line.split(",");
+		// 1) Split the current line, get an array of String
+		String[] valueList = line.split(csvSeparator); // csvSeparator declared in the unit
+		// Checks if there is a problem in the number of fields
+		// Nicolas will probably make it throw an exception (au error has to be thrown, and handled the right way)
+		// -> On a huge data amount, a few wrong entries won't really matter
 		if (valueList.length != schema.getColumns().size()) {
 			System.err.println("ERREUR AL_GlobalTest.processCSVLine : valueList.length(" + valueList.length
 					+ ") != testTable.columnList.size()(" + schema.getColumns().size() + ")");
+			// will be handled Nicolas' way ?
 			return new byte[0];
 		}
-
+		
 		ByteBuffer entryBuffer = ByteBuffer.allocate(entrySize);
 
 		for (int columnIndex = 0; columnIndex < schema.getColumns().size(); columnIndex++) {

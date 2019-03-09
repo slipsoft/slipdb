@@ -12,20 +12,27 @@ import com.dant.utils.Log;
 
 import zArchive.sj.simpleBD.parseCSV.SOptimDataFromCSV;
 
-
+/**
+ * A simple SQL-like table, consisting of 
+ */
 public class Table {
 
 	protected static String basePath = "target/tables/";
-	protected String name; // nom de la table
-	protected EasyFile file;
+	protected String name; // table name
+	protected EasyFile fileLinesOnDisk;
 	protected List<Column> columnsList = new ArrayList<Column>(); // liste des colonnes de la table
 	protected List<Index> indexesList = new ArrayList<Index>();   // liste des index générés pour cette table
 	
-	public Table(String name, List<Column> columns) throws IOException {
-		this.name = name;
-		this.columnsList.addAll(columns);
-		this.file = new EasyFile(basePath + name + ".bin");
-		this.file.createFileIfNotExist();
+	/** Create a table with a name and a columns list
+	 * @param name name
+	 * @param columns
+	 * @throws IOException
+	 */
+	public Table(String argName, List<Column> argColumnsList) throws IOException {
+		this.name = argName;
+		this.columnsList.addAll(argColumnsList);
+		this.fileLinesOnDisk = new EasyFile(basePath + name + ".bin");
+		this.fileLinesOnDisk.createFileIfNotExist();
 	}
 	
 	public String getName() {
@@ -49,6 +56,17 @@ public class Table {
 		    .stream()
 		    .mapToInt(Column::getSize)
 		    .sum();
+		// -> do a performance benchmark with this function (seems very fast)
+		/*
+		Same as :
+		
+		int lineSize = 0;
+		for (int columnIndex = 0; columnIndex < columnsList.size(); columnIndex++) {
+			lineSize += columnsList.get(columnIndex).getSize();
+		}
+		return lineSize;
+		
+		*/
 	}
 	
 	public boolean columnExist(String name) {
@@ -61,17 +79,18 @@ public class Table {
 	 *  @return
 	 * @throws Exception 
 	 */
-	public boolean addColumn(String colName, SOptimDataFromCSV optimDataType, boolean hasToIndexThisColumn) throws Exception {
+	public boolean addColumn(String colName, SOptimDataFromCSV optimDataType/*, boolean hasToIndexThisColumn*/) throws Exception {
 		if (columnExist(colName)) throw new Exception("Column already exists, colName = " + colName);
 		// Ajout de la colonne
-		Column newColumn = new Column(colName, optimDataType, hasToIndexThisColumn);
+		Column newColumn = new Column(colName, optimDataType);//, hasToIndexThisColumn);
 		columnsList.add(newColumn);
 		return true;
 	}
 
+	/*
 	public boolean addColumn(String colName, SOptimDataFromCSV optimDataType) throws Exception {
 		return addColumn(colName, optimDataType, false);
-	}
+	}*/
 	
 	
 	/** Trouver l'index d'une colonne à partir de son nom, dans la liste columns
@@ -88,22 +107,32 @@ public class Table {
 		return -1;
 	}
 	
-	public List<Object> get(int id) throws IOException {
-		FileInputStream is = new FileInputStream(file);
-		List<Object> entry = new ArrayList<>();
-		is.skip(id * getLineSize());
+	/**
+	 * 
+	 * @param lineId is the position of the line, 0 being the first loaded line from the file (CSV for New York taxis)
+	 * @return a list containing every entry associates with the line at position lineId
+	 * @throws IOException
+	 */
+	public List<Object> getLineById(int lineId) throws IOException { // or getRowById
+		// Get a new disposable FileInputStream with the file where all table rows ars stored
+		FileInputStream fileAsStream = new FileInputStream(fileLinesOnDisk);
+		// List of values stored in the line of id lineId
+		List<Object> lineValues = new ArrayList<>(); // rowValues
+		// Seek to the right position in the stream
+		fileAsStream.skip(lineId * getLineSize());
+		// For each column, reads the associated value
 		for (Column column : columnsList) {
-			byte[] b = new byte[column.getSize()];
-			is.read(b);
-			Log.debug(b);
-			entry.add(column.getType().get(b));
+			byte[] columnValueAsByteArray = new byte[column.getSize()];
+			fileAsStream.read(columnValueAsByteArray); // reads from the stream
+			//Log.debug(b); for debug purposes only
+			lineValues.add(column.getType().get(columnValueAsByteArray));
 		}
-		is.close();
-		return entry;
+		fileAsStream.close();
+		return lineValues;
 	}
 	
 	public OutputStream write() throws IOException {
-		return new FileOutputStream(file);
+		return new FileOutputStream(fileLinesOnDisk);
 	}
 	
 }

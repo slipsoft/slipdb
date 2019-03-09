@@ -6,7 +6,7 @@ import db.structure.Table;
 
 public abstract class Parser {
 	protected Table schema;
-	protected int entrySize;
+	protected int entrySize; // number of bytes used to store information
 	
 	public Parser(Table schema) {
 		this.schema = schema;

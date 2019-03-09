@@ -75,8 +75,8 @@ class CsvParserTest {
 			}
 		};
 		assertDoesNotThrow(exec);
-		Log.debug(table.get(0), "entry/0");
-		Log.debug(table.get(70), "entry/70");
+		Log.debug(table.getLineById(0), "entry/0");
+		Log.debug(table.getLineById(70), "entry/70");
 	}
 
 }

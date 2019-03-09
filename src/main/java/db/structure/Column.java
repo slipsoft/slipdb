@@ -14,13 +14,13 @@ public class Column {
 	// Type de donnée stockée
 	public final SStorageDataType dataType;// = StorageDataType.isUnknown;
 	public final SOptimDataFromCSV optimDataType; // utile pour le cast d'une date -> int par exemple
-	public final boolean hasToIndexThisColumn; // Indexer cette colonne au chargement
+	//public final boolean hasToIndexThisColumn; // Indexer cette colonne au chargement
 	
-	public Column(String argName, SOptimDataFromCSV argOptimDataType, boolean aHasToIndexThisColumn) { //StorageDataType argDataType, StorageDataType argDataTypeInCSV) {
+	public Column(String argName, SOptimDataFromCSV argOptimDataType/*, boolean aHasToIndexThisColumn*/) { //StorageDataType argDataType, StorageDataType argDataTypeInCSV) {
 		this.name = argName;
 		this.dataType = argOptimDataType.realDataType;
 		this.optimDataType = argOptimDataType;
-		hasToIndexThisColumn = aHasToIndexThisColumn;
+		//hasToIndexThisColumn = aHasToIndexThisColumn; not useful anymore
 	}
 	
 	
@@ -35,7 +35,7 @@ public class Column {
 		dataType = null;
 		this.name = name;
 		this.type = type;
-		hasToIndexThisColumn = false;
+		//hasToIndexThisColumn = false;
 	}
 
 	public String getName() {

@@ -34,7 +34,7 @@ class CSVParserTest {
 			table.addColumn("tpep_pickup_datetime", SOptimDataFromCSV.dateStringToInteger);
 			table.addColumn("tpep_dropoff_datetime", SOptimDataFromCSV.dateStringToInteger);
 			table.addColumn("passenger_count", SOptimDataFromCSV.toByte);
-			table.addColumn("trip_distance", SOptimDataFromCSV.floatToShort, true);
+			table.addColumn("trip_distance", SOptimDataFromCSV.floatToShort);
 			table.addColumn("pickup_longitude", SOptimDataFromCSV.toDouble);
 			table.addColumn("pickup_latitude", SOptimDataFromCSV.toDouble);
 			table.addColumn("RateCodeID", SOptimDataFromCSV.toByte);
