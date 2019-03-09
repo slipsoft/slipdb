@@ -4,7 +4,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -22,16 +21,14 @@ import db.data.IntegerArrayList;
 import db.data.StringType;
 import db.parsers.CsvParser;
 import db.structure.Column;
+import db.structure.IndexTree;
 import db.structure.Table;
-import sj.simpleDB.treeIndexing.SIndexingTreeObject;
 
-public class SIndexingTreeTest {
+public class IndexTreeTest {
 
 	protected static CsvParser parser;
 	protected static Table table;
 
-	
-	
 	@BeforeAll
 	static void setUpBeforeAll() throws Exception {
 		Log.info("setUpBeforeAll");
@@ -77,29 +74,38 @@ public class SIndexingTreeTest {
 		/**
 		 * Note : c'est super le bordel ici, je vais ranger ça ^^'
 		 */
-		SIndexingTreeObject indexingObject = new SIndexingTreeObject();
+		IndexTree indexingObject = new IndexTree();
 		//SIndexingTreeFloat indexingFoat = new SIndexingTreeFloat();
 		Log.info("Lancé");
+		
+		// Index the column on index 4
 		int indexingColumnIndex = 4;
+		
+		// Index the column from the disk
+		// -> reading fron the disk is quite slow
+		// --> a very cool optimization will be to index a bunch of columns at the same time
 		Timer loadFromDiskTimer = new Timer("Time took to index this column, from disk");
 		indexingObject.indexColumnFromDisk(table, indexingColumnIndex);
 		loadFromDiskTimer.printms();
-
+		
 		Timer searchQueryTimer = new Timer("Time took to return the matching elements");
 		Timer searchQueryFullTimer = new Timer("Time took to return the matching elements + size evaluation");
-		//indexingFoat.indexColumnFromDisk(table, indexingColumnIndex);
 		Log.info("Fini");
 		Log.info("OBJECT RESULT :");
+		
+		// Get the query result
 		Collection<IntegerArrayList> result;
-		result = indexingObject.findMatchingBinIndexes(new Float((byte) 3), new Float((byte) 100), true); // new Float(20), new Float(21)
+		result = indexingObject.findMatchingBinIndexes(new Float(3), new Float(100), true); // new Float(20), new Float(21)
 		searchQueryTimer.printms();
+		
+		// Iterates over all the results
 		int numberOfResults = 0;
 		for (IntegerArrayList list : result) {
 			//Log.info("list size = " + list.size());
 			numberOfResults += list.size();
 			for (Integer index : list) {
+				// un-comment this line if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
 				/*Log.info("  index = " + index);
-				List<Object> objList = table.getValuesOfLineById(index);
 				Object indexedValue = objList.get(indexingColumnIndex);
 				
 				Log.info("  valeur indexée = " + indexedValue);*/
@@ -108,16 +114,6 @@ public class SIndexingTreeTest {
 		}
 		searchQueryFullTimer.printms();
 		Log.info("Number of results = " + numberOfResults);
-
-		/*Log.info("FLOAT RESULT :");
-		result = indexingFoat.findMatchingBinIndexes(new Float(20), new Float(21), true);
-		for (IntegerArrayList list : result) {
-			Log.info("list size = " + list.size());
-			for (Integer index : list) {
-				Log.info("index = " + index);
-			}
-		}*/
-		
 		
 	}
 	
