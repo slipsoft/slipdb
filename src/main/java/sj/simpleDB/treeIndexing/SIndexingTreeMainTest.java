@@ -8,6 +8,7 @@ public class SIndexingTreeMainTest {
 		//treeInt.addValue(associatedValue, binIndex);
 		
 		
+		
 		System.out.println("test main!");
 
 	}

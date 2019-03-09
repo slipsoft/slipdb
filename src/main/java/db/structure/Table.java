@@ -115,7 +115,7 @@ public class Table {
 	 */
 	public List<Object> getValuesOfLineById(int lineId) throws IOException { // or getRowById
 		
-		// Get a new disposable FileInputStream with the file where all table rows ars stored
+		// Get a new disposable FileInputStream with the file where all table rows are stored
 		FileInputStream fileAsStream = new FileInputStream(fileLinesOnDisk);
 		
 		// List of values stored in the line of id lineId
@@ -137,6 +137,10 @@ public class Table {
 	
 	public OutputStream tableToOutputStream() throws IOException {
 		return new FileOutputStream(fileLinesOnDisk);
+	}
+	
+	public EasyFile getFileLinesOnDisk() {
+		return fileLinesOnDisk;
 	}
 	
 	

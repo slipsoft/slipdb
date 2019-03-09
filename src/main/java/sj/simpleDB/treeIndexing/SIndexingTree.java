@@ -1,7 +1,12 @@
 package sj.simpleDB.treeIndexing;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+
+import com.dant.utils.Log;
 
 import db.data.DataType;
 import db.structure.Column;
@@ -29,10 +34,16 @@ import db.structure.Table;
 	  Fractionner les listes de chaque feuille semble être une mauvaise idée : il faudrait que chaque feuille ait sa liste complète écrite
 	  quelque part sur le disque. Mais utiliser un fichier par feuille serait horrible (beaucoup trop long à charger, trop de place perdue sur le disque...)
 	  
-	  S'il y a suffisament de mémoire pour indexer toute une colonne, j'indexe toute la colonne, puis j'écris les données sur le disque.
+	  S'il y a suffisamment de mémoire pour indexer toute une colonne, j'indexe toute la colonne, puis j'écris les données sur le disque.
 	  Les données seraient de la forme, pour chaque feuille : nombre d'éléments + binIndex pour chaque élément.
 	  Une fois que tout a été écrit sur le disque, je libère la mémoire vive et je ne garde que la position (dans le fichier) de chaque liste (feuille).
 	  Ainsi, en mémoire, il n'y a plus que la position sur le disque de la liste, et non plus la liste de tous les binIndex.
+	  
+	  S'il n'y a pas suffisamment de mémoire, alors, à chaque fois que l'arbre est trop plein, je vais le mettre sur le disque.
+	  L'arbre sera ainsi fractionné, mais ça ne devrait pas trop nuire aux performances, à condition que les fractions (les bouts d'arbre)
+	  soient quand-même suffisament grandes.
+	  -> Au lieu d'avoir en mémoire la (seule) position et taille ou commence le bloc associé à une valeur, il faudra donc avoir une liste.
+	 	
 	  
 	
 	V1 : indexer une colonne à partir du disque
@@ -61,7 +72,7 @@ public abstract class SIndexingTree {
 	 * @param isInclusive
 	 * @return la collection contenant tous les binIndex correspondants
 	 */
-	public abstract Collection<IntegerArrayList> findMatchingBinIndexes(Integer minValue, Integer maxValue, boolean isInclusive);
+	public abstract Collection<IntegerArrayList> findMatchingBinIndexes(Object minValue, Object maxValue, boolean isInclusive);
 	
 	/** Ajouter une valeur et un binIndex associé
 	 *  @param associatedValue valeur indexée, ATTENTION : doit être du type du SIndexingTree utilisé (Integer pour un SIndexingTreeInt par exemple, Float pour un TreeFloat)
@@ -72,16 +83,59 @@ public abstract class SIndexingTree {
 	/** 
 	 *  @param inTable
 	 *  @param columnIndex
+	 * @throws FileNotFoundException 
 	 */
-	public void indexColumnFromDisk(Table inTable, int columnIndex) {
+	public void indexColumnFromDisk(Table inTable, int columnIndex) throws IOException {
 		List<Column> columnsList = inTable.getColumns();
 		int columnsNumber = columnsList.size();
 		if (columnsNumber <= columnIndex) { // columnIndex invalide
 			return;
 		}
-		Column indexThisColumn = columnsList.get(columnIndex);
-		DataType columnType = indexThisColumn.getDataType();
+		// We need to find where the data is, on the disk.
+		// Compute where to read from, on a line, and how many bytes to skip
+		int dataOffsetInLine = 0;
+		for (int tempColIndex = 0; tempColIndex < columnIndex; tempColIndex++) {
+			Column tempColumn = columnsList.get(tempColIndex);
+			dataOffsetInLine += tempColumn.getSize();
+		}
+		int totalLineSize = inTable.getLineSize(); // total size of a line
 		
+		// Information on the current column that we will index
+		Column indexThisColumn = columnsList.get(columnIndex);
+		DataType columnDataType = indexThisColumn.getDataType();
+		int dataSizeInBytes = columnDataType.getSize();
+		
+		int skipBeforeData = dataOffsetInLine; // skip the first values
+		int skipAfterData = totalLineSize - skipBeforeData - dataSizeInBytes; // skip the remaining values
+		
+		// Now, let's read the whole file and index the rows (=lines)...
+		// That pretty non-optimised, but that's only V1
+		Log.info("skipBeforeData = " + skipBeforeData + " dataSizeInBytes = " + dataSizeInBytes + "  skipAfterData = " + skipAfterData, "SIndexingTree.indexColumnFromDisk");
+		
+		// Get a new disposable FileInputStream with the file where all table rows are stored
+		FileInputStream fileAsStream = new FileInputStream(inTable.getFileLinesOnDisk());
+		int lineIndex = 0;
+		
+		while (true) {
+
+			// Seeks to the right position in the stream
+			long checkSkipBytesAmount;
+			checkSkipBytesAmount = fileAsStream.skip(skipBeforeData);
+			byte[] columnValueAsByteArray = new byte[dataSizeInBytes];
+			int bytesRead = fileAsStream.read(columnValueAsByteArray); // reads from the stream
+			if (bytesRead == -1) // end of stream
+				break;
+			Object readValue = columnDataType.getValueFromByteArray(columnValueAsByteArray);
+			this.addValue(readValue, new Integer(lineIndex));
+			checkSkipBytesAmount = fileAsStream.skip(skipAfterData);
+			if (lineIndex % 10000 == 0) Log.info("lineIndex = " + lineIndex + " readValue = " + readValue);
+			
+			
+			lineIndex++;
+		}
+		
+		
+		fileAsStream.close();
 	}
 	
 	
