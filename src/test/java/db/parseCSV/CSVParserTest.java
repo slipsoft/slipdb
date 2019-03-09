@@ -47,11 +47,18 @@ class CSVParserTest {
 			table.addColumn("tolls_amount", OptimDataFromCSV.floatToShort);
 			table.addColumn("improvement_surcharge", OptimDataFromCSV.floatToByte);
 			table.addColumn("total_amount", OptimDataFromCSV.floatToShort);
+			
+			int totalEntrySize = 0;
+			for (Column col : table.getColumns()) {
+				totalEntrySize += col.dataType.getSize();
+			}
+			Log.debug("Sylvain CSVParserTest : totalEntrySize = " + totalEntrySize);
+			
 		} catch (Exception e) {
 			Log.error(e);
 		}
 	}
-
+	
 	@AfterEach
 	void tearDown() throws Exception {
 	}
