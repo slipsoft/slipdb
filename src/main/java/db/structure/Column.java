@@ -3,8 +3,8 @@ package db.structure;
 import java.nio.ByteBuffer;
 
 import db.data.Type;
-import sj.simpleBD.parseCSV.SOptimDataFromCSV;
-import sj.simpleBD.parseCSV.SStorageDataType;
+import zArchive.sj.simpleBD.parseCSV.SOptimDataFromCSV;
+import zArchive.sj.simpleBD.parseCSV.SStorageDataType;
 
 public class Column {
 	

@@ -1,4 +1,4 @@
-package sj.simpleBD.parseCSV;
+package zArchive.sj.simpleBD.parseCSV;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;

@@ -1,4 +1,4 @@
-package sj.simpleDB.arrayList;
+package zArchive.sj.simpleDB.arrayList;
 
 /**
  * Argument du AL_Finder

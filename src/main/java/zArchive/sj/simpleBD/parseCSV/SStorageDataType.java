@@ -1,4 +1,4 @@
-package sj.simpleBD.parseCSV;
+package zArchive.sj.simpleBD.parseCSV;
 
 public enum SStorageDataType {
 	isUnknown(-1),

@@ -1,4 +1,4 @@
-package sj.simpleDB.arrayList;
+package zArchive.sj.simpleDB.arrayList;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;

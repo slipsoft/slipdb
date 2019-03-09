@@ -1,4 +1,4 @@
-package sj.simpleDB.arrayList;
+package zArchive.sj.simpleDB.arrayList;
 
 import java.text.DateFormat;
 import java.text.ParseException;

@@ -14,8 +14,8 @@ import com.dant.utils.Log;
 
 import db.structure.Column;
 import db.structure.Table;
-import sj.simpleBD.parseCSV.SCSVParser;
-import sj.simpleBD.parseCSV.SOptimDataFromCSV;
+import zArchive.sj.simpleBD.parseCSV.SCSVParser;
+import zArchive.sj.simpleBD.parseCSV.SOptimDataFromCSV;
 
 class CSVParserTest {
 	protected Table table;

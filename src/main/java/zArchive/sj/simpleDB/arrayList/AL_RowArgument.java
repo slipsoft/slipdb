@@ -1,4 +1,4 @@
-package sj.simpleDB.arrayList;
+package zArchive.sj.simpleDB.arrayList;
 
 public class AL_RowArgument {
 	

@@ -10,7 +10,7 @@ import java.util.List;
 import com.dant.utils.EasyFile;
 import com.dant.utils.Log;
 
-import sj.simpleBD.parseCSV.SOptimDataFromCSV;
+import zArchive.sj.simpleBD.parseCSV.SOptimDataFromCSV;
 
 
 public class Table {
