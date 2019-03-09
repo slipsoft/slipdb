@@ -33,14 +33,14 @@ public class CsvParser extends Parser {
 				DataOutputStream bWrite = new DataOutputStream(new BufferedOutputStream(schema.tableToOutputStream()));
 		) {
 			while (currentLineCount != limit) {
-				String line = bRead.readLine();
+				String readCSVLine = bRead.readLine();
 	
-				if (line == null) // no more data
+				if (readCSVLine == null) // no more data
 					break;
 				
 				if (currentLineCount != 0) { // we don't want to process the first line (informations on fields and columns)
-					byte[] lineAsByteArray = processLine(line);
-					bWrite.write(lineAsByteArray);
+					byte[] lineAsByteArray = processLine(readCSVLine);
+					bWrite.write(lineAsByteArray); // writes the line in the output stream associated with the current file
 				}
 				currentLineCount++;
 			}
@@ -51,8 +51,11 @@ public class CsvParser extends Parser {
 		MemUsage.printMemUsage();
 		timer.printms();
 	}
-
+	
 	@Override
+	/**
+	 * No indexing is done here
+	 */
 	protected byte[] processLine(String line) {
 		// 1) Split the current line, get an array of String
 		String[] valueList = line.split(csvSeparator); // csvSeparator declared in the unit
@@ -62,19 +65,21 @@ public class CsvParser extends Parser {
 		if (valueList.length != schema.getColumns().size()) {
 			System.err.println("ERREUR AL_GlobalTest.processCSVLine : valueList.length(" + valueList.length
 					+ ") != testTable.columnList.size()(" + schema.getColumns().size() + ")");
-			// will be handled Nicolas' way ?
+			// -> will be handled Nicolas' way ?
 			return new byte[0];
 		}
 		
-		// the buffer 
+		// the buffer used to store the line data as an array of bytes
 		ByteBuffer entryBuffer = ByteBuffer.allocate(lineByteSize);
-
+		
+		// for each column, parse and write data into entryBuffer
 		for (int columnIndex = 0; columnIndex < schema.getColumns().size(); columnIndex++) {
 			String strValue = valueList[columnIndex];
 			Column currentColumn = schema.getColumns().get(columnIndex);
+			// Converts the string value into an array of bytes representing the same data
 			currentColumn.parse(strValue, entryBuffer);
 		}
-
+		// returns the CSV line as an array of rightly typed data, as bytes
 		return entryBuffer.array();
 	}
 

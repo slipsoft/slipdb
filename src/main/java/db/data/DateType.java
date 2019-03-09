@@ -5,7 +5,7 @@ import java.util.Date;
 
 import com.dant.utils.Utils;
 
-public class DateType extends Type {
+public class DateType extends DataType {
 	
 	protected final static Operator[] compatibleOperatorsList = {
 		Operator.equals,
@@ -16,7 +16,7 @@ public class DateType extends Type {
 	};
 
 	public DateType() {
-		this.size = 4;
+		this.sizeInBytes = 4;
 	}
 
 	@Override

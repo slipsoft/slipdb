@@ -2,7 +2,7 @@ package db.data;
 
 import java.nio.ByteBuffer;
 
-public class DoubleType extends Type {
+public class DoubleType extends DataType {
 	
 	protected final static Operator[] compatibleOperatorsList = {
 		Operator.equals,
@@ -13,7 +13,7 @@ public class DoubleType extends Type {
 	};
 
 	public DoubleType() {
-		this.size = Double.BYTES;
+		this.sizeInBytes = Double.BYTES;
 	}
 	
 	@Override

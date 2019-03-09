@@ -4,16 +4,16 @@ import java.nio.ByteBuffer;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-public abstract class Type {
-	protected int size;
+public abstract class DataType {
+	protected int sizeInBytes;
 	protected static Operator[] compatibleOperatorsList;
 	
 	public int getSize() {
-		return size;
+		return sizeInBytes;
 	}
 	
-	public void setSize(int size) {
-		this.size = size;
+	public void setSize(int argSizeInBytes) {
+		this.sizeInBytes = argSizeInBytes;
 	}
 	
 	public boolean isOperatorCompatible(Operator op) {

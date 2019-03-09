@@ -2,7 +2,7 @@ package db.data;
 
 import java.nio.ByteBuffer;
 
-public class FloatType extends Type {
+public class FloatType extends DataType {
 	
 	protected final static Operator[] compatibleOperatorsList = {
 		Operator.equals,
@@ -13,7 +13,7 @@ public class FloatType extends Type {
 	};
 
 	public FloatType() {
-		this.size = Float.BYTES;
+		this.sizeInBytes = Float.BYTES;
 	}
 	
 	@Override

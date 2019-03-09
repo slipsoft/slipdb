@@ -129,7 +129,7 @@ public class Table {
 			byte[] columnValueAsByteArray = new byte[column.getSize()];
 			fileAsStream.read(columnValueAsByteArray); // reads from the stream
 			//Log.debug(b); for debug purposes only
-			lineValues.add(column.getType().getValueFromByteArray(columnValueAsByteArray));
+			lineValues.add(column.getDataType().getValueFromByteArray(columnValueAsByteArray));
 		}
 		fileAsStream.close();
 		return lineValues;
@@ -138,5 +138,7 @@ public class Table {
 	public OutputStream tableToOutputStream() throws IOException {
 		return new FileOutputStream(fileLinesOnDisk);
 	}
+	
+	
 	
 }

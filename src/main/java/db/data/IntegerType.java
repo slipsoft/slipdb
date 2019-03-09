@@ -2,7 +2,7 @@ package db.data;
 
 import java.nio.ByteBuffer;
 
-public class IntegerType extends Type {
+public class IntegerType extends DataType {
 	
 	protected final static Operator[] compatibleOperatorsList = {
 		Operator.equals,
@@ -13,7 +13,7 @@ public class IntegerType extends Type {
 	};
 
 	public IntegerType() {
-		this.size = Integer.BYTES;
+		this.sizeInBytes = Integer.BYTES;
 	}
 	
 	@Override

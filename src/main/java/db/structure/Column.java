@@ -2,14 +2,14 @@ package db.structure;
 
 import java.nio.ByteBuffer;
 
-import db.data.Type;
+import db.data.DataType;
 import zArchive.sj.simpleBD.parseCSV.SOptimDataFromCSV;
 import zArchive.sj.simpleBD.parseCSV.SStorageDataType;
 
 public class Column {
 	
 	protected String name = "Nom inconnu";
-	protected Type type;
+	protected DataType storedDataType;
 
 	// Type de donnée stockée
 	public final SStorageDataType dataType;// = StorageDataType.isUnknown;
@@ -30,11 +30,11 @@ public class Column {
 	 * @param type
 	 * @param size
 	 */
-	public Column(String name, Type type) {
+	public Column(String name, DataType type) {
 		optimDataType = null;
 		dataType = null;
 		this.name = name;
-		this.type = type;
+		this.storedDataType = type;
 		//hasToIndexThisColumn = false;
 	}
 
@@ -46,19 +46,19 @@ public class Column {
 		this.name = name;
 	}
 
-	public Type getType() {
-		return type;
+	public DataType getDataType() {
+		return storedDataType;
 	}
 
-	public void setType(Type type) {
-		this.type = type;
+	public void setDataType(DataType type) {
+		this.storedDataType = type;
 	}
 
 	public int getSize() {
-		return type.getSize();
+		return storedDataType.getSize();
 	}
 	
 	public void parse(String input, ByteBuffer outputBuffer) {
-		this.getType().parse(input, outputBuffer);
+		this.getDataType().parse(input, outputBuffer);
 	}
 }

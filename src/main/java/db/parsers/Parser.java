@@ -16,7 +16,7 @@ public abstract class Parser {
 	public void parse(InputStream input) {
 		parse(input, -1);
 	}
-
+	
 	/**
 	 * Parse an input stream into an output stream according to a schema with a
 	 * limit of lines (-1 : no limit)

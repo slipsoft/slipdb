@@ -22,6 +22,7 @@ import db.data.FloatType;
 import db.data.StringType;
 import db.structure.Column;
 import db.structure.Table;
+import zArchive.sj.simpleBD.parseCSV.SCSVParser;
 
 class CsvParserTest {
 	protected CsvParser parser;

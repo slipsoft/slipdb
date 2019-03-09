@@ -1,6 +1,11 @@
 package sj.simpleDB.treeIndexing;
 
 import java.util.Collection;
+import java.util.List;
+
+import db.data.DataType;
+import db.structure.Column;
+import db.structure.Table;
 
 /**
  * -> Pour l'instant, c'est dans mon package, mais je vais faire moi-même un peu plus tard le refactoring quand tout marchera !
@@ -28,6 +33,16 @@ import java.util.Collection;
 	  Les données seraient de la forme, pour chaque feuille : nombre d'éléments + binIndex pour chaque élément.
 	  Une fois que tout a été écrit sur le disque, je libère la mémoire vive et je ne garde que la position (dans le fichier) de chaque liste (feuille).
 	  Ainsi, en mémoire, il n'y a plus que la position sur le disque de la liste, et non plus la liste de tous les binIndex.
+	  
+	
+	V1 : indexer une colonne à partir du disque
+		Chargement :
+		à partir d'un objet Table, lire du disque tous les champs concernés,
+		les ajouter à l'index.
+		
+		Recherche :
+		via findMatchingBinIndexes
+	
  * 
  */
 public abstract class SIndexingTree {
@@ -38,7 +53,7 @@ public abstract class SIndexingTree {
 	 * @param associatedValue
 	 * @return
 	 */
-	public abstract IntegerArrayList findBinIndexArrayFromValue(Integer associatedValue);
+	public abstract IntegerArrayList findBinIndexArrayFromValue(Object associatedValue);
 	/**
 	 * 
 	 * @param minValue
@@ -49,10 +64,25 @@ public abstract class SIndexingTree {
 	public abstract Collection<IntegerArrayList> findMatchingBinIndexes(Integer minValue, Integer maxValue, boolean isInclusive);
 	
 	/** Ajouter une valeur et un binIndex associé
-	 * @param associatedValue valeur indexée, ATTENTION : doit être du type du SIndexingTree utilisé (Integer pour un SIndexingTreeInt par exemple, Float pour un TreeFloat)
-	 * @param binIndex position (dans le fichier binaire global) de l'objet stocké dans la table
+	 *  @param associatedValue valeur indexée, ATTENTION : doit être du type du SIndexingTree utilisé (Integer pour un SIndexingTreeInt par exemple, Float pour un TreeFloat)
+	 *  @param binIndex position (dans le fichier binaire global) de l'objet stocké dans la table
 	 */
 	public abstract void addValue(Object associatedValue, Integer binIndex);
+	
+	/** 
+	 *  @param inTable
+	 *  @param columnIndex
+	 */
+	public void indexColumnFromDisk(Table inTable, int columnIndex) {
+		List<Column> columnsList = inTable.getColumns();
+		int columnsNumber = columnsList.size();
+		if (columnsNumber <= columnIndex) { // columnIndex invalide
+			return;
+		}
+		Column indexThisColumn = columnsList.get(columnIndex);
+		DataType columnType = indexThisColumn.getDataType();
+		
+	}
 	
 	
 }

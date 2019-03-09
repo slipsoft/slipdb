@@ -2,14 +2,14 @@ package db.data;
 
 import java.nio.ByteBuffer;
 
-public class StringType extends Type {
+public class StringType extends DataType {
 
 	protected final static Operator[] compatibleOperatorsList = {
 		Operator.equals
 	};
 
 	public StringType(int size) {
-		this.size = size;
+		this.sizeInBytes = size;
 	}
 	
 	@Override

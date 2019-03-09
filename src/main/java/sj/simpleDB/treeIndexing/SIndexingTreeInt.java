@@ -20,8 +20,9 @@ public class SIndexingTreeInt extends SIndexingTree {
 	 * @param associatedValue
 	 * @return
 	 */
-	public IntegerArrayList findBinIndexArrayFromValue(Integer associatedValue) {
-		return intTreeMap.get(associatedValue); // fait une comparaison d'objet, et non une comparaison de référence : if (associatedValue.equals(valeurDansArbre)) [...]
+	@Override
+	public IntegerArrayList findBinIndexArrayFromValue(Object associatedValue) {
+		return intTreeMap.get((Integer)associatedValue); // fait une comparaison d'objet, et non une comparaison de référence : if (associatedValue.equals(valeurDansArbre)) [...]
 	}
 	
 	
