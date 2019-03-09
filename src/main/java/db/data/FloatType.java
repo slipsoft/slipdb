@@ -22,7 +22,7 @@ public class FloatType extends Type {
 	}
 	
 	@Override
-	public Float get(byte[] bytes) {
+	public Float getValueFromByteArray(byte[] bytes) {
 		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
 		return wrapped.getFloat();
 	}

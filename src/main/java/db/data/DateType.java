@@ -26,8 +26,9 @@ public class DateType extends Type {
 	}
 	
 	@Override
-	public Date get(byte[] bytes) {
+	public Date getValueFromByteArray(byte[] bytes) {
 		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
-		return Utils.dateFromSecInt(wrapped.getInt());
+		int dateAsInt = wrapped.getInt(); // converts the byte array into an int
+		return Utils.dateFromSecInt(dateAsInt);
 	}
 }

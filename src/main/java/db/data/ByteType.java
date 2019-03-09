@@ -18,8 +18,8 @@ public class ByteType extends Type {
 	}
 	
 	@Override
-	public Byte get(byte[] bytes) {
-		return new Byte(bytes[0]);
+	public Byte getValueFromByteArray(byte[] bytes) {
+		return new Byte(bytes[0]); // get the associates byte
 	}
 
 }

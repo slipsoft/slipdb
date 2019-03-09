@@ -113,25 +113,29 @@ public class Table {
 	 * @return a list containing every entry associates with the line at position lineId
 	 * @throws IOException
 	 */
-	public List<Object> getLineById(int lineId) throws IOException { // or getRowById
+	public List<Object> getValuesOfLineById(int lineId) throws IOException { // or getRowById
+		
 		// Get a new disposable FileInputStream with the file where all table rows ars stored
 		FileInputStream fileAsStream = new FileInputStream(fileLinesOnDisk);
+		
 		// List of values stored in the line of id lineId
 		List<Object> lineValues = new ArrayList<>(); // rowValues
+		
 		// Seek to the right position in the stream
 		fileAsStream.skip(lineId * getLineSize());
+		
 		// For each column, reads the associated value
 		for (Column column : columnsList) {
 			byte[] columnValueAsByteArray = new byte[column.getSize()];
 			fileAsStream.read(columnValueAsByteArray); // reads from the stream
 			//Log.debug(b); for debug purposes only
-			lineValues.add(column.getType().get(columnValueAsByteArray));
+			lineValues.add(column.getType().getValueFromByteArray(columnValueAsByteArray));
 		}
 		fileAsStream.close();
 		return lineValues;
 	}
 	
-	public OutputStream write() throws IOException {
+	public OutputStream tableToOutputStream() throws IOException {
 		return new FileOutputStream(fileLinesOnDisk);
 	}
 	

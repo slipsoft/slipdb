@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
 import com.dant.utils.Log;
+import com.dant.utils.Timer;
 
 import db.data.ByteType;
 import db.data.DateType;
@@ -71,12 +72,14 @@ class CsvParserTest {
 			@Override
 			public void execute() throws Throwable {
 				FileInputStream is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
+				Timer parseTimer = new Timer("Temps pris par le parsing");
 				parser.parse(is);
+				parseTimer.printms();
 			}
 		};
 		assertDoesNotThrow(exec);
-		Log.debug(table.getLineById(0), "entry/0");
-		Log.debug(table.getLineById(70), "entry/70");
+		Log.debug(table.getValuesOfLineById(0), "entry/0");
+		Log.debug(table.getValuesOfLineById(70), "entry/70");
 	}
-
 }
+

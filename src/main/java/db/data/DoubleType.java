@@ -22,7 +22,7 @@ public class DoubleType extends Type {
 	}
 	
 	@Override
-	public Double get(byte[] bytes) {
+	public Double getValueFromByteArray(byte[] bytes) {
 		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
 		return wrapped.getDouble();
 	}

@@ -18,7 +18,7 @@ public class StringType extends Type {
 	}
 	
 	@Override
-	public String get(byte[] bytes) {
+	public String getValueFromByteArray(byte[] bytes) {
 		return new String(bytes);
 	}
 

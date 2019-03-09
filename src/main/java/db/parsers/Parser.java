@@ -6,11 +6,11 @@ import db.structure.Table;
 
 public abstract class Parser {
 	protected Table schema;
-	protected int entrySize; // number of bytes used to store information
+	protected int lineByteSize; // number of bytes used to store information
 	
 	public Parser(Table schema) {
 		this.schema = schema;
-		this.entrySize = schema.getLineSize();
+		this.lineByteSize = schema.getLineSize();
 	}
 
 	public void parse(InputStream input) {
@@ -28,5 +28,10 @@ public abstract class Parser {
 	 */
 	abstract public void parse(InputStream input, int limit);
 	
+	/** Converts a line (such as a CSV line) to a byte array of raw data
+	 *  @param line
+	 *  @return the data stored by the line as byte array
+	 */
 	abstract protected byte[] processLine(String line);
+	
 }

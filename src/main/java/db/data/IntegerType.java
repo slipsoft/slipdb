@@ -22,7 +22,7 @@ public class IntegerType extends Type {
 	}
 	
 	@Override
-	public Integer get(byte[] bytes) {
+	public Integer getValueFromByteArray(byte[] bytes) {
 		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
 		return wrapped.getInt();
 	}

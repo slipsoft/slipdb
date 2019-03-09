@@ -30,14 +30,15 @@ public class CsvParser extends Parser {
 		MemUsage.printMemUsage();
 		try (
 				BufferedReader bRead = new BufferedReader(new InputStreamReader(input));
-				DataOutputStream bWrite = new DataOutputStream(new BufferedOutputStream(schema.write()));
+				DataOutputStream bWrite = new DataOutputStream(new BufferedOutputStream(schema.tableToOutputStream()));
 		) {
 			while (currentLineCount != limit) {
 				String line = bRead.readLine();
 	
-				if (line == null)
+				if (line == null) // no more data
 					break;
-				if (currentLineCount != 0) {
+				
+				if (currentLineCount != 0) { // we don't want to process the first line (informations on fields and columns)
 					byte[] lineAsByteArray = processLine(line);
 					bWrite.write(lineAsByteArray);
 				}
@@ -65,12 +66,12 @@ public class CsvParser extends Parser {
 			return new byte[0];
 		}
 		
-		ByteBuffer entryBuffer = ByteBuffer.allocate(entrySize);
+		// the buffer 
+		ByteBuffer entryBuffer = ByteBuffer.allocate(lineByteSize);
 
 		for (int columnIndex = 0; columnIndex < schema.getColumns().size(); columnIndex++) {
 			String strValue = valueList[columnIndex];
 			Column currentColumn = schema.getColumns().get(columnIndex);
-
 			currentColumn.parse(strValue, entryBuffer);
 		}
 
