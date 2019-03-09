@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 
 import com.dant.utils.Log;
 
@@ -56,29 +58,11 @@ import db.structure.Table;
 	
  * 
  */
-public abstract class SIndexingTree {
+public class SIndexingTree {
 	protected SIndexingTreeType treeType; // servira pour l'utilisation de méthodes génériques, pour utiliser le bon type d'arbre et faire les bons cast
 
-	/**
-	 * 
-	 * @param associatedValue
-	 * @return
-	 */
-	public abstract IntegerArrayList findBinIndexArrayFromValue(Object associatedValue);
-	/**
-	 * 
-	 * @param minValue
-	 * @param maxValue
-	 * @param isInclusive
-	 * @return la collection contenant tous les binIndex correspondants
-	 */
-	public abstract Collection<IntegerArrayList> findMatchingBinIndexes(Object minValue, Object maxValue, boolean isInclusive);
-	
-	/** Ajouter une valeur et un binIndex associé
-	 *  @param associatedValue valeur indexée, ATTENTION : doit être du type du SIndexingTree utilisé (Integer pour un SIndexingTreeInt par exemple, Float pour un TreeFloat)
-	 *  @param binIndex position (dans le fichier binaire global) de l'objet stocké dans la table
-	 */
-	public abstract void addValue(Object associatedValue, Integer binIndex);
+	// Carte des index sous forme de TreeMap
+	protected TreeMap<Object/*clef*/, IntegerArrayList/*valeur*/> floatTreeMap = new TreeMap<Object, IntegerArrayList>();
 	
 	/** 
 	 *  @param inTable
@@ -128,14 +112,57 @@ public abstract class SIndexingTree {
 			Object readValue = columnDataType.getValueFromByteArray(columnValueAsByteArray);
 			this.addValue(readValue, new Integer(lineIndex));
 			checkSkipBytesAmount = fileAsStream.skip(skipAfterData);
-			if (lineIndex % 10000 == 0) Log.info("lineIndex = " + lineIndex + " readValue = " + readValue);
-			
+			// Display some contents, debuging :
+			//if (lineIndex % 10000 == 0) Log.info("lineIndex = " + lineIndex + " readValue = " + readValue);
 			
 			lineIndex++;
 		}
 		
 		
 		fileAsStream.close();
+	}
+	
+	// Plus tard, pour optimiser : protected final int divideAndGroupBy; // Grouper les valeurs en lot
+	
+	
+	// IntegerArrayList correpond à la liste des binIndex ayant la même valeur pour cet IndexingTree (donc pour la colonne indexée)
+	
+	/** Trouver le tableau d'index correspondant à une valeur
+	 * @param associatedValue
+	 * @return
+	 */
+	public IntegerArrayList findBinIndexArrayFromValue(Object associatedValue) {
+		return floatTreeMap.get(associatedValue); // fait une comparaison d'objet, et non une comparaison de référence : if (associatedValue.equals(valeurDansArbre)) [...]
+	}
+	
+	
+	/**
+	 * 
+	 * @param minValue
+	 * @param maxValue
+	 * @param isInclusive
+	 * @return la collection contenant tous les binIndex correspondants
+	 */
+	public Collection<IntegerArrayList> findMatchingBinIndexes(Object minValue, Object maxValue, boolean isInclusive) { // NavigableMap<Integer, IntegerArrayList> findSubTree
+		NavigableMap<Object, IntegerArrayList> subTree = floatTreeMap.subMap(minValue, isInclusive, maxValue, isInclusive);
+		Collection<IntegerArrayList> collectionValues = subTree.values();
+		return collectionValues;
+		///for (IntegerArrayList binIndexArray : collectionValues) {
+		//}
+	}
+	
+	/** Ajouter une valeur et un binIndex associé
+	 *  @param associatedValue valeur indexée, ATTENTION : doit être du type du SIndexingTree utilisé (Integer pour un SIndexingTreeInt par exemple, Float pour un TreeFloat)
+	 *  @param binIndex position (dans le fichier binaire global) de l'objet stocké dans la table
+	 */
+	public void addValue(Object argAssociatedValue, Integer binIndex) {
+		//Integer realAssociatedValue = (Integer)argAssociatedValue; // cast de la valeur : elle DOIT être de type Integer
+		IntegerArrayList binIndexList = findBinIndexArrayFromValue(argAssociatedValue);
+		if (binIndexList == null) {
+			binIndexList = new IntegerArrayList();
+			floatTreeMap.put(argAssociatedValue, binIndexList);
+		}
+		binIndexList.add(binIndex);
 	}
 	
 	

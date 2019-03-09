@@ -23,8 +23,6 @@ import db.parsers.CsvParser;
 import db.structure.Column;
 import db.structure.Table;
 import sj.simpleDB.treeIndexing.IntegerArrayList;
-import sj.simpleDB.treeIndexing.SIndexingTreeFloat;
-import sj.simpleDB.treeIndexing.SIndexingTreeInt;
 import sj.simpleDB.treeIndexing.SIndexingTreeObject;
 
 public class SIndexingTreeTest {
@@ -82,7 +80,7 @@ public class SIndexingTreeTest {
 		SIndexingTreeObject indexingObject = new SIndexingTreeObject();
 		//SIndexingTreeFloat indexingFoat = new SIndexingTreeFloat();
 		Log.info("Lancé");
-		int indexingColumnIndex = 3;
+		int indexingColumnIndex = 4;
 		Timer loadFromDiskTimer = new Timer("Time took to index this column, from disk");
 		indexingObject.indexColumnFromDisk(table, indexingColumnIndex);
 		loadFromDiskTimer.printms();
@@ -93,11 +91,11 @@ public class SIndexingTreeTest {
 		Log.info("Fini");
 		Log.info("OBJECT RESULT :");
 		Collection<IntegerArrayList> result;
-		result = indexingObject.findMatchingBinIndexes(new Byte((byte) 3), new Byte((byte) 100), true); // new Float(20), new Float(21)
+		result = indexingObject.findMatchingBinIndexes(new Float((byte) 3), new Float((byte) 100), true); // new Float(20), new Float(21)
 		searchQueryTimer.printms();
 		int numberOfResults = 0;
 		for (IntegerArrayList list : result) {
-			Log.info("list size = " + list.size());
+			//Log.info("list size = " + list.size());
 			numberOfResults += list.size();
 			for (Integer index : list) {
 				/*Log.info("  index = " + index);
@@ -109,6 +107,7 @@ public class SIndexingTreeTest {
 			}
 		}
 		searchQueryFullTimer.printms();
+		Log.info("Number of results = " + numberOfResults);
 
 		/*Log.info("FLOAT RESULT :");
 		result = indexingFoat.findMatchingBinIndexes(new Float(20), new Float(21), true);
