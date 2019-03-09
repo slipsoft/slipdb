@@ -44,10 +44,15 @@ public abstract class SIndexingTree {
 	 * @param minValue
 	 * @param maxValue
 	 * @param isInclusive
-	 * @return
+	 * @return la collection contenant tous les binIndex correspondants
 	 */
 	public abstract Collection<IntegerArrayList> findMatchingBinIndexes(Integer minValue, Integer maxValue, boolean isInclusive);
 	
+	/** Ajouter une valeur et un binIndex associé
+	 * @param associatedValue valeur indexée, ATTENTION : doit être du type du SIndexingTree utilisé (Integer pour un SIndexingTreeInt par exemple, Float pour un TreeFloat)
+	 * @param binIndex position (dans le fichier binaire global) de l'objet stocké dans la table
+	 */
+	public abstract void addValue(Object associatedValue, Integer binIndex);
 	
 	
 }

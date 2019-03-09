@@ -3,8 +3,8 @@ package db.structure;
 import java.nio.ByteBuffer;
 
 import db.data.Type;
-import db.parseCSV.OptimDataFromCSV;
-import db.parseCSV.StorageDataType;
+import sj.simpleBD.parseCSV.SOptimDataFromCSV;
+import sj.simpleBD.parseCSV.SStorageDataType;
 
 public class Column {
 	
@@ -12,11 +12,11 @@ public class Column {
 	protected Type type;
 
 	// Type de donnée stockée
-	public final StorageDataType dataType;// = StorageDataType.isUnknown;
-	public final OptimDataFromCSV optimDataType; // utile pour le cast d'une date -> int par exemple
+	public final SStorageDataType dataType;// = StorageDataType.isUnknown;
+	public final SOptimDataFromCSV optimDataType; // utile pour le cast d'une date -> int par exemple
 	public final boolean hasToIndexThisColumn; // Indexer cette colonne au chargement
 	
-	public Column(String argName, OptimDataFromCSV argOptimDataType, boolean aHasToIndexThisColumn) { //StorageDataType argDataType, StorageDataType argDataTypeInCSV) {
+	public Column(String argName, SOptimDataFromCSV argOptimDataType, boolean aHasToIndexThisColumn) { //StorageDataType argDataType, StorageDataType argDataTypeInCSV) {
 		this.name = argName;
 		this.dataType = argOptimDataType.realDataType;
 		this.optimDataType = argOptimDataType;

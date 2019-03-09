@@ -10,7 +10,7 @@ import java.util.List;
 import com.dant.utils.EasyFile;
 import com.dant.utils.Log;
 
-import db.parseCSV.OptimDataFromCSV;
+import sj.simpleBD.parseCSV.SOptimDataFromCSV;
 
 
 public class Table {
@@ -61,7 +61,7 @@ public class Table {
 	 *  @return
 	 * @throws Exception 
 	 */
-	public boolean addColumn(String colName, OptimDataFromCSV optimDataType, boolean hasToIndexThisColumn) throws Exception {
+	public boolean addColumn(String colName, SOptimDataFromCSV optimDataType, boolean hasToIndexThisColumn) throws Exception {
 		if (columnExist(colName)) throw new Exception("Column already exists, colName = " + colName);
 		// Ajout de la colonne
 		Column newColumn = new Column(colName, optimDataType, hasToIndexThisColumn);
@@ -69,7 +69,7 @@ public class Table {
 		return true;
 	}
 
-	public boolean addColumn(String colName, OptimDataFromCSV optimDataType) throws Exception {
+	public boolean addColumn(String colName, SOptimDataFromCSV optimDataType) throws Exception {
 		return addColumn(colName, optimDataType, false);
 	}
 	

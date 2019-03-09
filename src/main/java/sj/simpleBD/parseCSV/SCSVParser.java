@@ -1,4 +1,4 @@
-package db.parseCSV;
+package sj.simpleBD.parseCSV;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -17,7 +17,7 @@ import db.structure.Table;
 
 
 
-public class CSVParser {
+public class SCSVParser {
 	
 	
 	/** Pour le test de l'indexation, ici, faire l'indexation
@@ -106,11 +106,11 @@ public class CSVParser {
 				break;
 			case floatToByte :
 				floatValue = Float.parseFloat(strValue);
-				tripAsByteBuffer.put(OptimDataFromCSV.convertFloatToByte(floatValue));
+				tripAsByteBuffer.put(SOptimDataFromCSV.convertFloatToByte(floatValue));
 				break;
 			case floatToShort :
 				floatValue = Float.parseFloat(strValue);
-				tripAsByteBuffer.putShort(OptimDataFromCSV.convertFloatToShort(floatValue));
+				tripAsByteBuffer.putShort(SOptimDataFromCSV.convertFloatToShort(floatValue));
 				break;
 			//case isString : // pas de prise en charge des strings pour le moment
 			//	break;

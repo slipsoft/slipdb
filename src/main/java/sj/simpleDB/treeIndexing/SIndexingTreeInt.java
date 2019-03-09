@@ -21,15 +21,10 @@ public class SIndexingTreeInt extends SIndexingTree {
 	 * @return
 	 */
 	public IntegerArrayList findBinIndexArrayFromValue(Integer associatedValue) {
-		return intTreeMap.get(associatedValue);
+		return intTreeMap.get(associatedValue); // fait une comparaison d'objet, et non une comparaison de référence : if (associatedValue.equals(valeurDansArbre)) [...]
 	}
 	
-	/**
-	 * @param minValue
-	 * @param maxValue
-	 * @param isInclusive
-	 * @return la collection contenant tous les binIndex correspondants
-	 */
+	
 	@Override
 	public Collection<IntegerArrayList> findMatchingBinIndexes(Integer minValue, Integer maxValue, boolean isInclusive) { // NavigableMap<Integer, IntegerArrayList> findSubTree
 		NavigableMap<Integer, IntegerArrayList> subTree = intTreeMap.subMap(minValue, isInclusive, maxValue, isInclusive);
@@ -39,15 +34,13 @@ public class SIndexingTreeInt extends SIndexingTree {
 		//}
 	}
 	
-	/** Ajouter une valeur et un binIndex associé
-	 * @param associatedValue valeur indexée
-	 * @param binIndex position (dans le fichier binaire global) de l'objet stocké dans la table
-	 */
-	public void addValue(Integer associatedValue, Integer binIndex) {
-		IntegerArrayList binIndexList = findBinIndexArrayFromValue(associatedValue);
+	@Override
+	public void addValue(Object argAssociatedValue, Integer binIndex) {
+		Integer realAssociatedValue = (Integer)argAssociatedValue; // cast de la valeur : elle DOIT être de type Integer
+		IntegerArrayList binIndexList = findBinIndexArrayFromValue(realAssociatedValue);
 		if (binIndexList == null) {
 			binIndexList = new IntegerArrayList();
-			intTreeMap.put(associatedValue, binIndexList);
+			intTreeMap.put(realAssociatedValue, binIndexList);
 		}
 		binIndexList.add(binIndex);
 	}

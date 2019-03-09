@@ -1,6 +1,6 @@
-package db.parseCSV;
+package sj.simpleBD.parseCSV;
 
-public enum StorageDataType {
+public enum SStorageDataType {
 	isUnknown(-1),
 	isByte(1),
 	isChar(2),
@@ -16,7 +16,7 @@ public enum StorageDataType {
 	
 	public final byte dataSize;
 	
-	private StorageDataType(int arg_dataSize) {
+	private SStorageDataType(int arg_dataSize) {
 		dataSize = (byte) arg_dataSize;
 		
 	}

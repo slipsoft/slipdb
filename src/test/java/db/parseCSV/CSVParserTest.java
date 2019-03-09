@@ -14,10 +14,12 @@ import com.dant.utils.Log;
 
 import db.structure.Column;
 import db.structure.Table;
+import sj.simpleBD.parseCSV.SCSVParser;
+import sj.simpleBD.parseCSV.SOptimDataFromCSV;
 
 class CSVParserTest {
 	protected Table table;
-	protected CSVParser parser = new CSVParser();
+	protected SCSVParser parser = new SCSVParser();
 
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
@@ -28,25 +30,25 @@ class CSVParserTest {
 	void setUp() throws Exception {
 		table = new Table("test", new ArrayList<Column>());
 		try {
-			table.addColumn("VendorID", OptimDataFromCSV.toByte);
-			table.addColumn("tpep_pickup_datetime", OptimDataFromCSV.dateStringToInteger);
-			table.addColumn("tpep_dropoff_datetime", OptimDataFromCSV.dateStringToInteger);
-			table.addColumn("passenger_count", OptimDataFromCSV.toByte);
-			table.addColumn("trip_distance", OptimDataFromCSV.floatToShort, true);
-			table.addColumn("pickup_longitude", OptimDataFromCSV.toDouble);
-			table.addColumn("pickup_latitude", OptimDataFromCSV.toDouble);
-			table.addColumn("RateCodeID", OptimDataFromCSV.toByte);
-			table.addColumn("store_and_fwd_flag", OptimDataFromCSV.toChar); // 1 caractère
-			table.addColumn("dropoff_longitude", OptimDataFromCSV.toDouble);
-			table.addColumn("dropoff_latitude", OptimDataFromCSV.toDouble);
-			table.addColumn("payment_type", OptimDataFromCSV.toByte);
-			table.addColumn("fare_amount", OptimDataFromCSV.floatToShort);
-			table.addColumn("extra", OptimDataFromCSV.floatToByte);
-			table.addColumn("mta_tax", OptimDataFromCSV.floatToByte);
-			table.addColumn("tip_amount", OptimDataFromCSV.floatToShort);
-			table.addColumn("tolls_amount", OptimDataFromCSV.floatToShort);
-			table.addColumn("improvement_surcharge", OptimDataFromCSV.floatToByte);
-			table.addColumn("total_amount", OptimDataFromCSV.floatToShort);
+			table.addColumn("VendorID", SOptimDataFromCSV.toByte);
+			table.addColumn("tpep_pickup_datetime", SOptimDataFromCSV.dateStringToInteger);
+			table.addColumn("tpep_dropoff_datetime", SOptimDataFromCSV.dateStringToInteger);
+			table.addColumn("passenger_count", SOptimDataFromCSV.toByte);
+			table.addColumn("trip_distance", SOptimDataFromCSV.floatToShort, true);
+			table.addColumn("pickup_longitude", SOptimDataFromCSV.toDouble);
+			table.addColumn("pickup_latitude", SOptimDataFromCSV.toDouble);
+			table.addColumn("RateCodeID", SOptimDataFromCSV.toByte);
+			table.addColumn("store_and_fwd_flag", SOptimDataFromCSV.toChar); // 1 caractère
+			table.addColumn("dropoff_longitude", SOptimDataFromCSV.toDouble);
+			table.addColumn("dropoff_latitude", SOptimDataFromCSV.toDouble);
+			table.addColumn("payment_type", SOptimDataFromCSV.toByte);
+			table.addColumn("fare_amount", SOptimDataFromCSV.floatToShort);
+			table.addColumn("extra", SOptimDataFromCSV.floatToByte);
+			table.addColumn("mta_tax", SOptimDataFromCSV.floatToByte);
+			table.addColumn("tip_amount", SOptimDataFromCSV.floatToShort);
+			table.addColumn("tolls_amount", SOptimDataFromCSV.floatToShort);
+			table.addColumn("improvement_surcharge", SOptimDataFromCSV.floatToByte);
+			table.addColumn("total_amount", SOptimDataFromCSV.floatToShort);
 			
 			int totalEntrySize = 0;
 			for (Column col : table.getColumns()) {
