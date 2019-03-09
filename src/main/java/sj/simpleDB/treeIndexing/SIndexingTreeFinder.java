@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import db.data.IntegerArrayList;
+
 /** Retourner les valeurs correspondant aux filtres passés en argument
  * 
  * Manière pas super optimisée :

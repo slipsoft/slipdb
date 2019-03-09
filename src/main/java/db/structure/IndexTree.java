@@ -1,4 +1,4 @@
-package sj.simpleDB.treeIndexing;
+package db.structure;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -11,10 +11,9 @@ import java.util.TreeMap;
 import com.dant.utils.Log;
 
 import db.data.DataType;
+import db.data.IntegerArrayList;
 import db.data.Operator;
-import db.structure.Column;
-import db.structure.Index;
-import db.structure.Table;
+import sj.simpleDB.treeIndexing.SIndexingTreeType;
 
 /**
  * -> Pour l'instant, c'est dans mon package, mais je vais faire moi-même un peu plus tard le refactoring quand tout marchera !
@@ -60,7 +59,7 @@ import db.structure.Table;
 	
  * 
  */
-public class SIndexingTree extends Index {
+public class IndexTree extends Index {
 	protected SIndexingTreeType treeType; // servira pour l'utilisation de méthodes génériques, pour utiliser le bon type d'arbre et faire les bons cast
 
 	// Carte des index sous forme de TreeMap

@@ -1,4 +1,4 @@
-package sj.simpleDB.treeIndexing;
+package db.data;
 
 import java.util.ArrayList;
 

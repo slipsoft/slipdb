@@ -18,11 +18,11 @@ import db.data.ByteType;
 import db.data.DateType;
 import db.data.DoubleType;
 import db.data.FloatType;
+import db.data.IntegerArrayList;
 import db.data.StringType;
 import db.parsers.CsvParser;
 import db.structure.Column;
 import db.structure.Table;
-import sj.simpleDB.treeIndexing.IntegerArrayList;
 import sj.simpleDB.treeIndexing.SIndexingTreeObject;
 
 public class SIndexingTreeTest {
