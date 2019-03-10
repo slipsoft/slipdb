@@ -16,7 +16,8 @@ public abstract class Index {
 	protected Column[] indexedColumnsList; // Liste des colonnes indexées dans cet Index
 	
 	
-	/** Constructeur
+	/** Constructor, not always used.
+	 * The simple constructor with no arguments is used by the TreeMap indexing class.
 	 * @param columnsToIndex la liste des colonnes à indexer
 	 */
 	public Index(Column[] columnsToIndex) {
