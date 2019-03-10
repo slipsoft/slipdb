@@ -25,8 +25,9 @@ import db.data.IntegerArrayList;
 import db.data.StringType;
 import db.parsers.CsvParser;
 import db.structure.Column;
-import db.structure.IndexTreeV1;
 import db.structure.Table;
+import db.structure.indexTree.IndexTreeV1;
+import db.structure.indexTree.IndexTreeV2;
 
 public class IndexTreeTest {
 
