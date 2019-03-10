@@ -67,7 +67,7 @@ public class IndexTreeTest {
 		table = new Table("test", columns);
 		parser = new CsvParser(table);
 		
-		FileInputStream is = new FileInputStream("../SMALL_100_000_yellow_tripdata_2015-04.csv");
+		FileInputStream is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); // "../SMALL_1_000_000_yellow_tripdata_2015-04.csv"
 		Timer parseTimer = new Timer("Temps pris par le parsing");
 		parser.parse(is);
 		parseTimer.printms();
@@ -133,8 +133,8 @@ public class IndexTreeTest {
 		//result = indexingObject.findMatchingBinIndexes(new Float(0), new Float(10000), true); // new Float(20), new Float(21)
 		//result = indexingObject.findMatchingBinIndexes(new Integer(-1000), new Integer(1000), true);
 
-		Date dateFrom = Utils.dateFromString("2010-04-15 23:59:00");
-		Date dateTo = Utils.dateFromString("2018-04-16 00:06:30");
+		Date dateFrom = Utils.dateFromString("2015-04-15 23:59:00");
+		Date dateTo = Utils.dateFromString("2015-04-16 00:06:30");
 		int intDateFrom = Utils.dateToSecInt(dateFrom);
 		int intDateTo = Utils.dateToSecInt(dateTo);
 		result = indexingObject.findMatchingBinIndexes(intDateFrom, intDateTo, true);

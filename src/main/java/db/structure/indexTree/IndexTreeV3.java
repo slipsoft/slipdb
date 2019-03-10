@@ -1,11 +1,15 @@
 package db.structure.indexTree;
 
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
@@ -79,12 +83,16 @@ public class IndexTreeV3 extends Index {
 	public static double[] arrayMaxDistanceBetweenTwoNumericalElements = {
 		10000,
 		100,
+		/*10, 8, 5, 4, 3, 2, 1,*/
 		0 // arbre terminal contenant la donnée fine
 	};
 	
 	// Seulement alloué si l'arbre est un arbre intermédiaire
 	protected TreeMap<Object/*clef, valeur indexée*/, IndexTreeV3> finerSubTrees = null; //new TreeMap<Object, IndexTreeV3>();
 	protected TreeMap<Object/*clef, valeur indexée*/, IntegerArrayList/*valeur*/> binIndexesFromValue = null;
+	protected EasyFile fileSaveOnDisk = null;
+	protected static String basePath = "target/treeIndexDiskMemory/";
+	protected static int rootIndexTreeCount = 0;
 	
 	
 	protected boolean isTerminalDataTree;
@@ -110,8 +118,22 @@ public class IndexTreeV3 extends Index {
 			binIndexesFromValue = new TreeMap<Object, IntegerArrayList>(); // TreeMap des valeurs fines
 			//IntegerArrayList -> BinIndexArrayList
 		}
+		if (isRootTree()) {
+			fileSaveOnDisk = new EasyFile(basePath + "IndexTreeV3_indexSave_" + rootIndexTreeCount + ".bin_tree");
+			try {
+				fileSaveOnDisk.createFileIfNotExist();
+			} catch (IOException e) {
+				fileSaveOnDisk = null;
+				e.printStackTrace();
+			}
+			rootIndexTreeCount++;
+			
+		}
 	}
 	
+	public boolean isRootTree() {
+		return (heightIndex == 0);
+	}
 	
 	// Work In Proress ...
 	// Max distance between two numerical elements to be in the same block :
@@ -326,6 +348,108 @@ public class IndexTreeV3 extends Index {
 		return indexThisValue;
 		
 	}
+	
+	public boolean wasWrittenOnDisk = false;
+	public long thisTreeBinIndexPos; // index sur le disque
+	public long thisTreeBinIndexPosAssociationTable;
+	public int numberOfBinIndexArrayOnDisk;
+	
+	/**
+	Sauvegarde d'un indexTreeV3 sur le disque (et mise en lecture seule, donc) :
+		-> Il faut avoir une organisation très structurée, savoir très rapidement où retrouver les arbres contenant la donnée fine.
+		1) Ecriture de tous les arbres contenant la donnée fine, sur le disque
+		2) La donnée fine des arbres (terminaux) est remplacée par une position et une taille : position de la donnée dans le fichier binaire,
+		   et nombre d'éléments dans chaque arbre.
+		3) Ensuite, tous les arbres juste au-dessus des arbres terminaux écrivent les valeurs qu'il contiennent : valeur, nombre d'arbres terminaux,
+		   et pour chaque arbre terminal : valeur et position dans le fichier binaire (donnera la taille quand consulté)
+		4) Traîtement des arbres encore au-dessus : identique.
+		...
+		dernier) identique, sauf que je garde en mémoire vive le dernier arbre (appartenant à l'arbre root, donc).
+	 * @throws IOException 
+	*/
+	public void saveOnDisk() throws IOException {
+		if (heightIndex != 0) return; // doit être l'arbre root
+		// if (fileSaveOnDisk == null) return;
+		// 1) Pour tout arbre donnant sur un arbre de donnée fine, j'écris l'arbre de donnée fine et je garde sa binPos et value
+		if (finerSubTrees == null) return;
+		
+		DataOutputStream writeInDataStream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(fileSaveOnDisk)));
+		
+		// 
+		int lastTreeIndex = arrayMaxDistanceBetweenTwoNumericalElements.length - 1;
+		for (int writeTreeIndex = lastTreeIndex; writeTreeIndex >= 0; writeTreeIndex--) {
+			writeAllSubTreesOnDisk(writeTreeIndex, writeInDataStream); // écriture de tous les arbres, du plus fin au plus grossier
+		}
+		
+		
+		
+		
+	}
+	
+	/** Ecrire les sous-arbres sur le disque
+	 * @param neededHeight
+	 * @throws IOException 
+	 */
+	public void writeAllSubTreesOnDisk(int neededHeight, DataOutputStream writeInDataStream) throws IOException {
+		if (this.heightIndex == neededHeight) { // je dois écrire cet arbre sur le disque
+			
+			
+			// Si c'est un arbre terminal, j'écris les valeurs fines
+			// Si c'est un abre intermédiaire : j'écris les valeurs contenues dans l'arbre ???
+			if (isTerminalDataTree) {
+				Collection<IntegerArrayList> collectionOfBinIndexesArrays = binIndexesFromValue.values();
+				ArrayList<IntegerArrayList> allBinIndexArrays = new ArrayList<IntegerArrayList>();
+				ArrayList<Object> allBinIndexAssociatedValues = new ArrayList<Object>();
+				//ArrayList<Long> binPositionOfIntegerArrayList = new ArrayList<Long>();
+				//binPositionOfIntegerArrayList.ensureCapacity(allBinIndexArrays.size());
+				
+				
+				allBinIndexAssociatedValues.addAll(binIndexesFromValue.keySet());
+				allBinIndexArrays.addAll(binIndexesFromValue.values()); // dans le même ordre
+
+				long[] binPositionOfIntegerArrayList = new long[allBinIndexArrays.size()];
+				
+				
+				
+				//for (Entry<Object, IntegerArrayList> ent : binIndexesFromValue.entrySet()) {}
+				
+				thisTreeBinIndexPos = writeInDataStream.size();
+				numberOfBinIndexArrayOnDisk = allBinIndexArrays.size();
+				
+				// 1) Faire la sauvegarde des listes de valeurs fines (IntegerArrayList) en mettant en mémoire la liste des positions d'écriture
+				// 2) Ecrire la liste des correspondances binIndex <-> valeur fine (et se souvenir de là où elle est écrite via thisTreeBinIndexPosAssociationTable)
+				// 3) L'arbre parent qui a appelé subTree.writeAllSubTreesOnDisk (cf plus bas), stocke à peu près de la même manière les sous-arbres qu'il a fait ..
+				//    écrire (valeur arrondie <-> binIndex de l'arbre (arbre terminal ou intermédiaire) 
+				
+				writeInDataStream.writeInt(numberOfBinIndexArrayOnDisk); // nombre de listes contenant des BinIndex
+				int arraySize = allBinIndexArrays.size();
+				
+				for (int index = 0; index < arraySize; index++) {
+					IntegerArrayList binIndexArray = allBinIndexArrays.get(index);
+					binPositionOfIntegerArrayList[index] = writeInDataStream.size();
+					// Ecriture de la liste
+					
+				}
+				
+				
+				wasWrittenOnDisk = true; // vient d'être écrit sur le disque
+			}
+			
+			
+			
+		} else if (heightIndex < neededHeight) { // si je suis trop bas (proche du root), j'avance aux sous-arbres suivants
+			
+			for (IndexTreeV3 subTree : finerSubTrees.values()) { // pour tous les sous-arbres, écrire sur le disque
+				subTree.wasWrittenOnDisk = false;
+				subTree.writeAllSubTreesOnDisk(neededHeight, writeInDataStream);
+				if (subTree.wasWrittenOnDisk) {
+					// je remplace dans ma liste 
+				}
+			}
+			
+		} // si heightIndex > neededHeight, rien à faire, je suis trop proche des données fines, je ne connais pas les arbres plus hauts
+	}
+	
 	
 	
 	
