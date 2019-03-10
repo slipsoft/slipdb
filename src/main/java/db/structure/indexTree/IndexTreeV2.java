@@ -1,5 +1,6 @@
 package db.structure.indexTree;
 
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -39,7 +40,7 @@ public class IndexTreeV2 extends Index {
 	// Work In Proress ...
 	// Max distance between two numerical elements to be in the same block :
 	// If 0 is used, no grouping is done (enhances performance for int variables)
-	protected double maxDistanceBetweenTwoNumericalElements = 23; // compressionFactor
+	protected double maxDistanceBetweenTwoNumericalElements = 0; // compressionFactor
 	// IntegerArrayList : mettre un TreeMap des valeurs fines, plus optimisé qu'un ArrayList, en plus, c'est facile de faire un merge de collections lors d'une recherche
 	
 	/** Returns true if there is more than one value on an IntegerArrayList */

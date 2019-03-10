@@ -28,6 +28,7 @@ import db.structure.Column;
 import db.structure.Table;
 import db.structure.indexTree.IndexTreeV1;
 import db.structure.indexTree.IndexTreeV2;
+import db.structure.indexTree.IndexTreeV3;
 
 public class IndexTreeTest {
 
@@ -102,7 +103,7 @@ public class IndexTreeTest {
 		/**
 		 * Note : c'est super le bordel ici, je vais ranger ça ^^'
 		 */
-		IndexTreeV1 indexingObject = new IndexTreeV1();
+		IndexTreeV3 indexingObject = new IndexTreeV3();
 		//SIndexingTreeFloat indexingFoat = new SIndexingTreeFloat();
 		Log.info("Lancé");
 		
