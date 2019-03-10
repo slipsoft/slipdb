@@ -26,9 +26,11 @@ public class DateType extends DataType {
 	}
 	
 	@Override
-	public Date getValueFromByteArray(byte[] bytes) {
+	// Date -> Integer, for it to be indexed faster, and the same way Integers are (that's really convenient, see IndexTree for more)
+	public Integer getValueFromByteArray(byte[] bytes) {
 		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
-		int dateAsInt = wrapped.getInt(); // converts the byte array into an int
-		return Utils.dateFromSecInt(dateAsInt);
+		return wrapped.getInt();
+		//int dateAsInt = wrapped.getInt(); // converts the byte array into an int
+		//return Utils.dateFromSecInt(dateAsInt);
 	}
 }

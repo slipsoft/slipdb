@@ -108,7 +108,9 @@ public class IndexTreeTest {
 
 		Date dateFrom = Utils.dateFromString("2015-04-15 15:30:00");
 		Date dateTo = Utils.dateFromString("2015-04-25 15:30:00");
-		result = indexingObject.findMatchingBinIndexes(dateFrom, dateTo, true);
+		int intDateFrom = Utils.dateToSecInt(dateFrom);
+		int intDateTo = Utils.dateToSecInt(dateTo);
+		result = indexingObject.findMatchingBinIndexes(intDateFrom, intDateTo, true);
 		MemUsage.printMemUsage();
 		searchQueryTimer.printms();
 		
