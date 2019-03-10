@@ -12,6 +12,7 @@ import java.util.TreeMap;
 import com.dant.utils.EasyFile;
 import com.dant.utils.Log;
 
+import db.data.BinIndexArrayList;
 import db.data.DataType;
 import db.data.IntegerArrayList;
 import db.data.Operator;
@@ -59,25 +60,38 @@ import sj.simpleDB.treeIndexing.SIndexingTreeType;
 		Recherche :
 		via findMatchingBinIndexes
 	
+	ok, V1 fonctionnelle, 
+	
+	V2 : réduire l'espace mémoire pris, n'avoir que très peu de variables en mémoire, charger le moins de données possibles du disque
+		
+	
+	
  * 
  */
-public class IndexTree extends Index {
+public class IndexTreeV1 extends Index {
 	protected SIndexingTreeType treeType; // servira pour l'utilisation de méthodes génériques, pour utiliser le bon type d'arbre et faire les bons cast
 	
 	protected Object storedDataType; // Integer, Float, Double, Byte, String ...
 	
 	// Indexes map, using TreeMap
 	// This Map is in memory, fast to access, but possibly takes a lot of memory (not working for huge files)
-	protected TreeMap<Object/*clef*/, IntegerArrayList/*valeur*/> inMemoryObjectTreeMap = new TreeMap<Object, IntegerArrayList>();
+	protected TreeMap<Object/*clef*/, IntegerArrayList/*valeur*/> inMemoryObjectTreeMap = new TreeMap<Object, IntegerArrayList>(); //IntegerArrayList -> BinIndexArrayList
 	
 	// If a lot of data is (later : removed or) added, the data on disk will be fragmented, causing performances issues.
 	protected TreeMap<Object/*clef, valeur indexée*/, ArrayList<IndexTreeOnDiskBlock>> onDiskDataBlocksTreeMap = new TreeMap<Object, ArrayList<IndexTreeOnDiskBlock>>();
-
+	
 	protected EasyFile fileStoringDataBlocks; // link between the disk and onDiskDataBlocks
 	
+	// Work In Proress ...
 	// Max distance between two numerical elements to be in the same block :
 	// If 0 is used, no grouping is done (enhances performance for int variables)
-	protected double maxDistanceBetweenTwoNumericalElements; // compressionFactor
+	protected double maxDistanceBetweenTwoNumericalElements = 23; // compressionFactor
+	// IntegerArrayList : mettre un TreeMap des valeurs fines, plus optimisé qu'un ArrayList, en plus, c'est facile de faire un merge de collections lors d'une recherche
+	
+	/** Returns true if there is more than one value on an IntegerArrayList */
+	public boolean compressionIsEnabled() {
+		return (maxDistanceBetweenTwoNumericalElements != 0);
+	}
 	
 	/* When a query is made, the IndexTree return what's in it's memory, and checks the disk for all the data.
 	 * Once the inMemoryObjectTreeMap is too big, it's flushed on the disk using onDiskDataBlocks.
@@ -95,6 +109,7 @@ public class IndexTree extends Index {
 		if (columnsNumber <= columnIndex) { // invalid columnIndex
 			return;
 		}
+		System.out.println("maxDistanceBetweenTwoNumericalElements = " + maxDistanceBetweenTwoNumericalElements);
 		// We need to find where the data is, on the disk.
 		// Compute where to read from, on a line, and how many bytes to skip
 		int dataOffsetInLine = 0;
@@ -151,27 +166,56 @@ public class IndexTree extends Index {
 	// IntegerArrayList correpond à la liste des binIndex ayant la même valeur pour cet IndexingTree (donc pour la colonne indexée)
 	
 	/** Trouver le tableau d'index correspondant à une valeur
-	 * @param associatedValue
-	 * @return
+	 *  @param associatedValue
+	 *  @return
 	 */
-	public IntegerArrayList findBinIndexArrayFromValue(Object associatedValue) {
+	public IntegerArrayList findBinIndexArrayInMemoryFromValue(Object associatedValue) {
 		return inMemoryObjectTreeMap.get(associatedValue); // fait une comparaison d'objet, et non une comparaison de référence : if (associatedValue.equals(valeurDansArbre)) [...]
 	}
 	
 	
-	/**
+	/** Only gets the matching binIndexes from memory, not from stored data on disk
 	 * 
 	 * @param minValue
 	 * @param maxValue
 	 * @param isInclusive
 	 * @return la collection contenant tous les binIndex correspondants
 	 */
-	public Collection<IntegerArrayList> findMatchingBinIndexes(Object minValue, Object maxValue, boolean isInclusive) { // NavigableMap<Integer, IntegerArrayList> findSubTree
-		NavigableMap<Object, IntegerArrayList> subTree = inMemoryObjectTreeMap.subMap(minValue, isInclusive, maxValue, isInclusive);
+	public Collection<IntegerArrayList> findMatchingBinIndexesInMemory(Object minValue, Object maxValue, boolean isInclusive) { // NavigableMap<Integer, IntegerArrayList> findSubTree
+		
+		Object searchForMinValue = minValue;
+		Object searchForMaxValue = maxValue;
+		if (maxDistanceBetweenTwoNumericalElements != 0) { // WIP
+			searchForMinValue = getBlockNumericalValue(minValue);
+			searchForMaxValue = getBlockNumericalValue(maxValue);
+		}
+		
+		NavigableMap<Object, IntegerArrayList> subTree = inMemoryObjectTreeMap.subMap(searchForMinValue, isInclusive, searchForMaxValue, isInclusive);
 		Collection<IntegerArrayList> collectionValues = subTree.values();
+		
+		// Now, if the current TreeIndex has it's elements grouped, remove all the non-matching elements
+		// Careful, this is (currently) quite slow
+		if (maxDistanceBetweenTwoNumericalElements != 0) {
+			
+		}
+		
 		return collectionValues;
 		///for (IntegerArrayList binIndexArray : collectionValues) {
 		//}
+	}
+	
+	/** Search for the matching binIndexes (between minValue and maxValue), in memory and on the disk
+	 *  @param minValue 
+	 *  @param maxValue 
+	 *  @param isInclusive 
+	 *  @return 
+	 */
+	public Collection<IntegerArrayList> findMatchingBinIndexes(Object minValue, Object maxValue, boolean isInclusive) {
+		Collection<IntegerArrayList> collectionFromMemory = findMatchingBinIndexesInMemory(minValue, maxValue, isInclusive);
+		// Collection<IntegerArrayList> collectionFromDisk = findMatchingBinIndexesInMemory(minValue, maxValue, isInclusive);
+		Collection<IntegerArrayList> returnCollection = collectionFromMemory;
+		//returnCollection.addAll(collectionFromDisk);
+		return returnCollection;
 	}
 	
 	/** Ajouter une valeur et un binIndex associé
@@ -180,34 +224,35 @@ public class IndexTree extends Index {
 	 */
 	public void addValue(Object argAssociatedValue, Integer binIndex) {
 		
-		Object indexThisValue;
+		Object indexThisValue = argAssociatedValue;
 		// If we have to regroup elements together, finds the right tree value
 		// This isn't really fast (probably) but will work, if the values are not too large or small
-		if (maxDistanceBetweenTwoNumericalElements != 0) {
-			
-			
-			
+		if (maxDistanceBetweenTwoNumericalElements != 0) { // WIP
+			// WIP
+			indexThisValue = getBlockNumericalValue(argAssociatedValue);
+			/*
 			double associatedValueAsDouble = ((Number) argAssociatedValue).doubleValue();
 			double indexThisValueAsDouble = (associatedValueAsDouble / maxDistanceBetweenTwoNumericalElements);
 			long indexThisValueIntegerPart = (long) indexThisValueAsDouble; // ne fonctionne pas si la valeur est supéieure à un int64 signé
 			//float newValueGrouped = (float) ((double)((Float)argAssociatedValue).floatValue() / maxDistanceBetweenTwoNumericalElements);
 			
+			long indexThisValueIntegerPart = getBlockNumericalValue(argAssociatedValue);
 			
 			if (argAssociatedValue.getClass() == Float.class) indexThisValue = new Float(indexThisValueIntegerPart);
 			if (argAssociatedValue.getClass() == Double.class) indexThisValue = new Double(indexThisValueIntegerPart);
 			if (argAssociatedValue.getClass() == Byte.class) indexThisValue = new Byte((byte)indexThisValueIntegerPart);
-			if (argAssociatedValue.getClass() == Integer.class) indexThisValue = new Integer((int)indexThisValueIntegerPart);
+			if (argAssociatedValue.getClass() == Integer.class) indexThisValue = new Integer((int)indexThisValueIntegerPart); // also DateType compatible
 			if (argAssociatedValue.getClass() == Long.class) indexThisValue = new Long(indexThisValueIntegerPart);
-			
-			// Reste à faire : DateType
-			
+			// WIP
+			//System.out.println("IndexTree.addValue : " + argAssociatedValue + " -> " + indexThisValue);
+		*/
 		}
 		
 		//Integer realAssociatedValue = (Integer)argAssociatedValue; // cast de la valeur : elle DOIT être de type Integer
-		IntegerArrayList binIndexList = findBinIndexArrayFromValue(argAssociatedValue);
+		IntegerArrayList binIndexList = findBinIndexArrayInMemoryFromValue(indexThisValue);
 		if (binIndexList == null) {
 			binIndexList = new IntegerArrayList();
-			inMemoryObjectTreeMap.put(argAssociatedValue, binIndexList);
+			inMemoryObjectTreeMap.put(indexThisValue, binIndexList);
 		}
 		binIndexList.add(binIndex);
 	}
@@ -218,6 +263,29 @@ public class IndexTree extends Index {
 	public void flushMemoryOnDisk() {
 		
 	}
+	
+	/** Probably not very fast ><"
+	 *  @param originalAssociatedValue
+	 *  @return
+	 */
+	protected Object getBlockNumericalValue(Object originalAssociatedValue) {
+		double associatedValueAsDouble = ((Number) originalAssociatedValue).doubleValue();
+		double indexThisValueAsDouble = (associatedValueAsDouble / maxDistanceBetweenTwoNumericalElements);
+		long indexThisValueIntegerPart = (long) indexThisValueAsDouble; // ne fonctionne pas si la valeur est supéieure à un int64 signé
+		
+		Object indexThisValue = null; // originalAssociatedValue normally, but I want to have a bug here if needed
+		
+		if (originalAssociatedValue.getClass() == Float.class) indexThisValue = new Float(indexThisValueIntegerPart);
+		if (originalAssociatedValue.getClass() == Double.class) indexThisValue = new Double(indexThisValueIntegerPart);
+		if (originalAssociatedValue.getClass() == Byte.class) indexThisValue = new Byte((byte)indexThisValueIntegerPart);
+		if (originalAssociatedValue.getClass() == Integer.class) indexThisValue = new Integer((int)indexThisValueIntegerPart); // also DateType compatible
+		if (originalAssociatedValue.getClass() == Long.class) indexThisValue = new Long(indexThisValueIntegerPart);
+		
+		return indexThisValue;
+		
+	}
+	
+	
 	
 	
 	// -> Is it still useful ? (compatibleOperatorsList)

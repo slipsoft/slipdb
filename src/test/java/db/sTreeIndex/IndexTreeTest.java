@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -24,7 +25,7 @@ import db.data.IntegerArrayList;
 import db.data.StringType;
 import db.parsers.CsvParser;
 import db.structure.Column;
-import db.structure.IndexTree;
+import db.structure.IndexTreeV1;
 import db.structure.Table;
 
 public class IndexTreeTest {
@@ -36,6 +37,7 @@ public class IndexTreeTest {
 	static void setUpBeforeAll() throws Exception {
 		Log.info("setUpBeforeAll");
 		Log.start("target/slipdb_indexingTreeTest.log", 3);
+		//if (true) return;
 		ArrayList<Column> columns = new ArrayList<Column>();
 		try {
 			columns.add(new Column("VendorID", new ByteType()));
@@ -71,18 +73,41 @@ public class IndexTreeTest {
 		Log.info("setUpBeforeAll OK");
 	}
 	
+	/*
+	@Test
+	void testStorageLimit() {
+		
+		int arraySize = 1_000_000;
+		MemUsage.printMemUsage();
+		/*float[] floatArray = new float[arraySize];
+		for (float i = 0; i < arraySize; i++) {
+			floatArray[(int)i] = i;
+		}* /
+		Timer time = new Timer("Time");
+		Float[] floatArray = new Float[arraySize];
+		float nb = 0;
+		for (float i = 0; i < arraySize; i++) {
+			floatArray[(int)i] = nb;
+			nb++;
+		}
+		time.printms();
+		MemUsage.printMemUsage();
+		
+	}*/
+	
 	@Test
 	void testIndexingTreeInt() throws IOException {
-		
+		//if (true) return;
 		/**
 		 * Note : c'est super le bordel ici, je vais ranger ça ^^'
 		 */
-		IndexTree indexingObject = new IndexTree();
+		IndexTreeV1 indexingObject = new IndexTreeV1();
 		//SIndexingTreeFloat indexingFoat = new SIndexingTreeFloat();
 		Log.info("Lancé");
 		
 		// Index the column on index 4
-		//int indexingColumnIndex = 4; // passanger count
+		//int indexingColumnIndex = 3; // passanger count
+		//int indexingColumnIndex = 4; // trip distance
 		//int indexingColumnIndex = 5; // latitude
 		int indexingColumnIndex = 1; // date pickup
 		
@@ -106,11 +131,13 @@ public class IndexTreeTest {
 		//result = indexingObject.findMatchingBinIndexes(new Float(0), new Float(10000), true); // new Float(20), new Float(21)
 		//result = indexingObject.findMatchingBinIndexes(new Integer(-1000), new Integer(1000), true);
 
-		Date dateFrom = Utils.dateFromString("2015-04-15 15:30:00");
-		Date dateTo = Utils.dateFromString("2015-04-25 15:30:00");
+		Date dateFrom = Utils.dateFromString("2010-04-15 23:59:00");
+		Date dateTo = Utils.dateFromString("2018-04-16 00:06:30");
 		int intDateFrom = Utils.dateToSecInt(dateFrom);
 		int intDateTo = Utils.dateToSecInt(dateTo);
 		result = indexingObject.findMatchingBinIndexes(intDateFrom, intDateTo, true);
+		//result = indexingObject.findMatchingBinIndexes(new Byte((byte)0), new Byte((byte)100), true);
+		
 		MemUsage.printMemUsage();
 		searchQueryTimer.printms();
 		
@@ -121,11 +148,13 @@ public class IndexTreeTest {
 			numberOfResults += list.size();
 			numberOfLines++;
 			for (Integer index : list) {
-				// un-comment this line if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
+				// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
 				/*Log.info("  index = " + index);
+				List<Object> objList = table.getValuesOfLineById(index);
 				Object indexedValue = objList.get(indexingColumnIndex);
 				
-				Log.info("  valeur indexée = " + indexedValue);*/
+				//Log.info("  valeur indexée = " + indexedValue);
+				Log.info("  objList = " + objList);*/
 				
 			}
 		}
