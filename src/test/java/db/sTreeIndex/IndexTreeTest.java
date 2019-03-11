@@ -5,11 +5,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.dant.utils.Log;
@@ -26,8 +24,6 @@ import db.data.StringType;
 import db.parsers.CsvParser;
 import db.structure.Column;
 import db.structure.Table;
-import db.structure.indexTree.IndexTreeV1;
-import db.structure.indexTree.IndexTreeV2;
 import db.structure.indexTree.IndexTreeV3;
 
 public class IndexTreeTest {
