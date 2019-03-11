@@ -350,7 +350,8 @@ public class IndexTreeV3 extends Index {
 	}
 	
 	public boolean wasWrittenOnDisk = false;
-	public long thisTreeBinIndexPos; // index sur le disque
+	public long thisTreeBinIndexPos; // index sur le disque des données de l'arbre (valeurs fines, ou (valeur, binPosition) des sous-arbres)
+	
 	public long thisTreeBinIndexPosAssociationTable;
 	public int numberOfBinIndexArrayOnDisk;
 	
@@ -375,8 +376,10 @@ public class IndexTreeV3 extends Index {
 		
 		DataOutputStream writeInDataStream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(fileSaveOnDisk)));
 		
-		// 
-		int lastTreeIndex = arrayMaxDistanceBetweenTwoNumericalElements.length - 1;
+		// Ecriture de chaque niveau, l'un après l'autre :
+		// Je commence par les arbres de donnée fine, je stocke leur valeurs, 
+		// Puis je remonte jusqu'à l'arbre root (je peux écrire l'arbre root sur le disque, aussi, sous forme de (liste des sous-arbres, nombre de sous arbres), i.e. commencer par la fin)
+		int lastTreeIndex = (arrayMaxDistanceBetweenTwoNumericalElements.length) - 1;
 		for (int writeTreeIndex = lastTreeIndex; writeTreeIndex >= 0; writeTreeIndex--) {
 			writeAllSubTreesOnDisk(writeTreeIndex, writeInDataStream); // écriture de tous les arbres, du plus fin au plus grossier
 		}
@@ -395,7 +398,7 @@ public class IndexTreeV3 extends Index {
 			
 			
 			// Si c'est un arbre terminal, j'écris les valeurs fines
-			// Si c'est un abre intermédiaire : j'écris les valeurs contenues dans l'arbre ???
+			
 			if (isTerminalDataTree) {
 				Collection<IntegerArrayList> collectionOfBinIndexesArrays = binIndexesFromValue.values();
 				ArrayList<IntegerArrayList> allBinIndexArrays = new ArrayList<IntegerArrayList>();
@@ -434,6 +437,8 @@ public class IndexTreeV3 extends Index {
 				
 				wasWrittenOnDisk = true; // vient d'être écrit sur le disque
 			}
+			
+			// Si c'est un abre intermédiaire : j'écris les valeurs contenues dans l'arbre ???
 			
 			
 			
