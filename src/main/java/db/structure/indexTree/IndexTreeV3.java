@@ -89,8 +89,8 @@ public class IndexTreeV3 extends Index {
 	// -> Ce tableau devra être à chaque fois adapté au type de valeur stockée, par exmemple, pour indexer une colonne de double, les longitudes/latitudes,
 	//    il faudrait qu'il y ait les valeurs 0.1, 0.01, 0.001 : multiplier la valeur par 10, 100, 1000 et en prendre la partie entière.
 	public static double[] arrayMaxDistanceBetweenTwoNumericalElements = {
-		10000,
-		100, // marche bien pour des int, mal pour des double où seules les décomales changent (et non la partie entière)
+		10000d,
+		100d, // marche bien pour des int, mal pour des double où seules les décimales changent (et non la partie entière)
 		/*10, 8, 5, 4, 3, 2, 1,*/
 		0 // arbre terminal contenant la donnée fine
 	};
@@ -117,7 +117,8 @@ public class IndexTreeV3 extends Index {
 	 */
 	public IndexTreeV3(int argHeightIndex, Object argAssociatedRoundValue) {
 		// storedValuesClassType défini via argAssociatedRoundValue
-		storedValuesClassType = argAssociatedRoundValue.getClass();
+		if (argAssociatedRoundValue != null)
+			storedValuesClassType = argAssociatedRoundValue.getClass();
 		heightIndex = argHeightIndex;
 		associatedRoundValue = argAssociatedRoundValue;
 		maxDistanceBetweenTwoNumericalElements = arrayMaxDistanceBetweenTwoNumericalElements[heightIndex];
@@ -285,34 +286,6 @@ public class IndexTreeV3 extends Index {
 	}
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	/** Search for the matching binIndexes (between minValue and maxValue), in memory and on the disk
 	 *  @param minValue 
 	 *  @param maxValue 
@@ -373,12 +346,21 @@ public class IndexTreeV3 extends Index {
 	 *  @param originalAssociatedValue
 	 *  @return
 	 */
-	protected Object getBlockNumericalValue(Object originalAssociatedValue) {
+	protected Number getBlockNumericalValue(Object originalAssociatedValue) {
+		return getBlockNumericalValue(originalAssociatedValue, maxDistanceBetweenTwoNumericalElements);	
+	}
+	
+	/** Probably not very fast ><"
+	 *  @param originalAssociatedValue
+	 *  @param divideValueBy
+	 *  @return
+	 */
+	protected Number getBlockNumericalValue(Object originalAssociatedValue, double divideValueBy) {
 		double associatedValueAsDouble = ((Number) originalAssociatedValue).doubleValue();
-		double indexThisValueAsDouble = (associatedValueAsDouble / maxDistanceBetweenTwoNumericalElements);
+		double indexThisValueAsDouble = (associatedValueAsDouble / divideValueBy);
 		long indexThisValueIntegerPart = (long) indexThisValueAsDouble; // ne fonctionne pas si la valeur est supéieure à un int64 signé
 		
-		Object indexThisValue = null; // originalAssociatedValue normally, but I want to have a bug here if needed
+		Number indexThisValue = null; // originalAssociatedValue normally, but I want to have a bug here if needed
 		
 		if (originalAssociatedValue.getClass() == Float.class)   indexThisValue = new Float(indexThisValueIntegerPart);
 		if (originalAssociatedValue.getClass() == Double.class)  indexThisValue = new Double(indexThisValueIntegerPart);
@@ -400,6 +382,7 @@ public class IndexTreeV3 extends Index {
 
 	public static long debugNumberOfTreesWrittenOnDisk = 0;
 	public static long debugNumberOfExactArrayListValuesWrittenOnDisk = 0;
+	public static long debugNumberOfExactValuesWrittenOnDisk = 0;
 	
 	
 	
@@ -437,7 +420,9 @@ public class IndexTreeV3 extends Index {
 		
 		writeInDataStream.close();
 		
-		System.out.println("IndexTreeV3.saveOnDisk : debugNumberOfTreesWrittenOnDisk=" + debugNumberOfTreesWrittenOnDisk + "  debugNumberOfExactArrayListValuesWrittenOnDisk=" + debugNumberOfExactArrayListValuesWrittenOnDisk);
+		System.out.println("IndexTreeV3.saveOnDisk : debugNumberOfTreesWrittenOnDisk=" + debugNumberOfTreesWrittenOnDisk);
+		System.out.println("IndexTreeV3.saveOnDisk : debugNumberOfExactArrayListValuesWrittenOnDisk=" + debugNumberOfExactArrayListValuesWrittenOnDisk);
+		System.out.println("IndexTreeV3.saveOnDisk : debugNumberOfExactValuesWrittenOnDisk=" + debugNumberOfExactValuesWrittenOnDisk);
 		
 		
 	}
@@ -457,6 +442,8 @@ public class IndexTreeV3 extends Index {
 		/**
 			Je vais à la bonne position, puis je lis la table de routage de l'arbre pour trouver tous les arbres qui correspondent
 			jusqu'aux valeurs finales.
+			1) Je lis la table de l'arbre root, je vais aux arbres dont les valeurs sont compatibles
+			2) 
 			
 			
 			
@@ -470,17 +457,14 @@ public class IndexTreeV3 extends Index {
 		
 		long routingTableBinIndex = randFile.readLong();
 		randFile.seek(routingTableBinIndex);
+		
+		
+		ArrayList<IntegerArrayList> listOfMatchingArraysOfBinIndexes = new ArrayList<IntegerArrayList>();
+		
 		// Lecture de la table de routage
-		boolean terminalDataTree = randFile.readBoolean();
-		if (terminalDataTree) { // lecture des valeurs
-			int numberOfIntegerArrayLists = randFile.readInt();
-			Object associatedValue = readObjectValueFromDisk(randFile, storedValuesClassType);
-			
-			int binIndexOfIntegerArrayList = randFile.readInt();
-			
-		} else { // 
-			
-		}
+		int currentHeight = 0;
+		
+		searchInDiskData(randFile, listOfMatchingArraysOfBinIndexes, minValueExact, maxValueExact, isInclusive, currentHeight);
 		
 		randFile.close();
 		
@@ -490,9 +474,6 @@ public class IndexTreeV3 extends Index {
 		long reallySkipped = readFromDataStream.skip(fileSize - 8);
 		
 		readFromDataStream.
-		
-		
-		
 		readFromDataStream.close();*/
 		
 		//System.out.println("IndexTreeV3.findMatchingBinIndexesFromDisk :  reallySkipped = " + Long.toString(reallySkipped) + " fileSize-8 = " + (fileSize - 8));
@@ -500,6 +481,62 @@ public class IndexTreeV3 extends Index {
 		return new ArrayList<IntegerArrayList>();
 		
 		
+	}
+	
+	/**
+	 * 
+	 * @param randFile
+	 * @param listOfMatchingArraysOfBinIndexes
+	 * @param currentHeight
+	 * @throws IOException 
+	 */
+	protected void searchInDiskData(RandomAccessFile randFile, ArrayList<IntegerArrayList> listOfMatchingArraysOfBinIndexes, Object minValueExact, Object maxValueExact, boolean isInclusive, int currentHeight) throws IOException {
+		double divideByFactor = arrayMaxDistanceBetweenTwoNumericalElements[currentHeight];
+		Number roundMinValue = getBlockNumericalValue(minValueExact, divideByFactor);
+		Number roundMaxValue = getBlockNumericalValue(maxValueExact, divideByFactor);
+		
+		boolean isTerminalDataTree = randFile.readBoolean();
+		// arbre terminal, lecture des valeurs
+		if (isTerminalDataTree) {
+			int numberOfIntegerArrayLists = randFile.readInt();
+			ArrayList<Long> seekPositionsArrayList = new ArrayList<Long>();
+			
+			// Pour toutes les listes
+			for (int indexIntergerArrayList = 0; indexIntergerArrayList < numberOfIntegerArrayLists; indexIntergerArrayList++) {
+				
+				Number associatedValue = (Number) readObjectValueFromDisk(randFile, storedValuesClassType);
+				double cVal = associatedValue.doubleValue();
+				// Si la valeur est dans l'intervalle
+				if (roundMinValue.doubleValue() <= cVal && cVal <= roundMaxValue.doubleValue()) {
+					int binIndexOfIntegerArrayList = randFile.readInt();
+					seekPositionsArrayList.add(new Long(binIndexOfIntegerArrayList));
+				} else {
+					randFile.skipBytes(4); // inutile de lire le binIndex
+				}
+			
+			}
+			// Je charge les ArrayList que j'ai à charger, et je les ajoute au résultat
+			int numberOfIntegerArrayListToLoad = seekPositionsArrayList.size();
+			for (int indexIntegerArrayList = 0; indexIntegerArrayList < numberOfIntegerArrayListToLoad; indexIntegerArrayList++) {
+				long seekPos = seekPositionsArrayList.get(indexIntegerArrayList);
+				randFile.seek(seekPos);
+				IntegerArrayList binIndexList = new IntegerArrayList();
+				int numberOfAssociatedBinIndexes = randFile.readInt();
+				// Ajout à la liste de tous les binIndex
+				for (int indexInList = 0; indexInList < numberOfAssociatedBinIndexes; indexInList++) {
+					int binIndex = randFile.readInt();
+					binIndexList.add(binIndex);
+				}
+				// Ajout de la liste de binIndex au résultat
+				listOfMatchingArraysOfBinIndexes.add(binIndexList);
+			}
+			
+		} else { // arbre intermédiaire : 
+			// Je regarde toutes les valeurs de la table de routage, je stocke les arbres auxquels je dois aller, puis je seek là où ils sont, récursivement
+			
+			// searchInDiskData(randFile, listOfMatchingArraysOfBinIndexes, minValueExact, maxValueExact, isInclusive, currentHeight + 1);
+			
+		}
 	}
 	
 	/** Ecrire les sous-arbres sur le disque
@@ -568,6 +605,7 @@ public class IndexTreeV3 extends Index {
 					for (int indexInIntegerArrayList = 0; indexInIntegerArrayList < numberOfAssociatedBinIndexes; indexInIntegerArrayList++) {
 						int binIndex = binIndexesIntegerArrayList.get(indexInIntegerArrayList);
 						writeInDataStream.writeInt(binIndex);
+						debugNumberOfExactValuesWrittenOnDisk++;
 					}
 					
 					// plus tard writeObjectValueOnDisk(exactValue, writeInDataStream);
