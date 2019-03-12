@@ -4,6 +4,7 @@ package db.structure.indexTree;
 	Recherches pour la V3 de IndexTree
  */
 
+// IMPORTANT : les binIndex doivent être des long et non plus des int, comme les fichiers vont être énormes.
 
 // IntegerArrayList : mettre un TreeMap des valeurs fines, plus optimisé qu'un ArrayList, en plus, c'est facile de faire un merge de collections lors d'une recherche
 
