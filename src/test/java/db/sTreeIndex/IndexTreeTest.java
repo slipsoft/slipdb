@@ -138,6 +138,8 @@ public class IndexTreeTest {
 		result = indexingObject.findMatchingBinIndexes(intDateFrom, intDateTo, true);
 		//result = indexingObject.findMatchingBinIndexes(new Byte((byte)0), new Byte((byte)100), true);
 		
+		indexingObject.findMatchingBinIndexesFromDisk(intDateFrom, intDateTo, true);
+		
 		MemUsage.printMemUsage();
 		searchQueryTimer.printms();
 		

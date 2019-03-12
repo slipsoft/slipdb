@@ -12,6 +12,12 @@ public class ByteType extends DataType {
 		this.sizeInBytes = Byte.BYTES;
 	}
 	
+	@SuppressWarnings("rawtypes")
+	@Override
+	public Class getAssociatedClassType() {
+		return Byte.class;
+	}
+	
 	@Override
 	public void parse(String input, ByteBuffer outputBuffer) {
 		outputBuffer.put(Byte.parseByte(input));

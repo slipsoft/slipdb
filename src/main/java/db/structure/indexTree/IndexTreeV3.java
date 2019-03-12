@@ -1,5 +1,6 @@
 package db.structure.indexTree;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -7,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -76,6 +78,9 @@ import sj.simpleDB.treeIndexing.SIndexingTreeType;
 public class IndexTreeV3 extends Index {
 	protected SIndexingTreeType treeType; // servira pour l'utilisation de méthodes génériques, pour utiliser le bon type d'arbre et faire les bons cast
 	
+	@SuppressWarnings("rawtypes")
+	protected Class storedValuesClassType;
+	
 	// First tree has sub-trees storing divided values
 	// Il s'agit de retrouver au plus vite les valeurs fines
 	// Le premier arbre sait où sont rangées les valeurs /1000
@@ -103,6 +108,7 @@ public class IndexTreeV3 extends Index {
 	protected Object associatedRoundValue; // Valeur divisée par arrayMaxDistanceBetweenTwoNumericalElements[heightIndex]
 	
 	public IndexTreeV3() {
+		// storedValuesClassType défini dans indexColumnFromDisk
 		this(0, null);
 	}
 	
@@ -110,6 +116,8 @@ public class IndexTreeV3 extends Index {
 	 *  @param argHeightIndex
 	 */
 	public IndexTreeV3(int argHeightIndex, Object argAssociatedRoundValue) {
+		// storedValuesClassType défini via argAssociatedRoundValue
+		storedValuesClassType = argAssociatedRoundValue.getClass();
 		heightIndex = argHeightIndex;
 		associatedRoundValue = argAssociatedRoundValue;
 		maxDistanceBetweenTwoNumericalElements = arrayMaxDistanceBetweenTwoNumericalElements[heightIndex];
@@ -173,6 +181,7 @@ public class IndexTreeV3 extends Index {
 		// Information on the current column that we will index
 		Column indexThisColumn = columnsList.get(columnIndex);
 		DataType columnDataType = indexThisColumn.getDataType();
+		storedValuesClassType = columnDataType.getAssociatedClassType();
 		int dataSizeInBytes = columnDataType.getSize();
 		
 		indexedColumnsList = new Column[1]; // Currently, an IndexTree only supports one column
@@ -274,6 +283,35 @@ public class IndexTreeV3 extends Index {
 		///for (IntegerArrayList binIndexArray : collectionValues) {
 		//}
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	/** Search for the matching binIndexes (between minValue and maxValue), in memory and on the disk
 	 *  @param minValue 
@@ -394,9 +432,72 @@ public class IndexTreeV3 extends Index {
 			writeAllStoredDataOnDisk(writeTreeIndex, writeInDataStream); // écriture de tous les arbres, du plus fin au plus grossier
 		}
 		
+		// Dernière donnée écrite dans le flux : la position de la table de routage de l'arbre principal (root, le premier)
+		writeInDataStream.writeFloat(routingTableBinIndex);
+		
 		writeInDataStream.close();
 		
 		System.out.println("IndexTreeV3.saveOnDisk : debugNumberOfTreesWrittenOnDisk=" + debugNumberOfTreesWrittenOnDisk + "  debugNumberOfExactArrayListValuesWrittenOnDisk=" + debugNumberOfExactArrayListValuesWrittenOnDisk);
+		
+		
+	}
+	
+	
+	/** Gets the matching results from disk !
+	 *  
+	 *  @param minValue
+	 *  @param maxValue
+	 *  @param isInclusive
+	 *  @return la collection contenant tous les binIndex correspondants
+	 * @throws IOException 
+	 */
+	public Collection<IntegerArrayList> findMatchingBinIndexesFromDisk(Object minValueExact, Object maxValueExact, boolean isInclusive) throws IOException { // NavigableMap<Integer, IntegerArrayList> findSubTree
+		
+		// Lecture du dernier float écrit dans le disque, i.e. de la position de la table de routage de l'arbre principal
+		/**
+			Je vais à la bonne position, puis je lis la table de routage de l'arbre pour trouver tous les arbres qui correspondent
+			jusqu'aux valeurs finales.
+			
+			
+			
+			Optimiser : faire le moins de seek/skip possibles
+		 */
+		
+		// fileSavedOnDisk
+		long fileSize = fileSaveOnDisk.length();
+		RandomAccessFile randFile = new RandomAccessFile(fileSaveOnDisk, "r");
+		randFile.seek(fileSize - 8);
+		
+		long routingTableBinIndex = randFile.readLong();
+		randFile.seek(routingTableBinIndex);
+		// Lecture de la table de routage
+		boolean terminalDataTree = randFile.readBoolean();
+		if (terminalDataTree) { // lecture des valeurs
+			int numberOfIntegerArrayLists = randFile.readInt();
+			Object associatedValue = readObjectValueFromDisk(randFile, storedValuesClassType);
+			
+			int binIndexOfIntegerArrayList = randFile.readInt();
+			
+		} else { // 
+			
+		}
+		
+		randFile.close();
+		
+		/*
+		DataInputStream readFromDataStream = new DataInputStream(new BufferedInputStream(new FileInputStream(fileSaveOnDisk)));
+		long fileSize = fileSaveOnDisk.length();
+		long reallySkipped = readFromDataStream.skip(fileSize - 8);
+		
+		readFromDataStream.
+		
+		
+		
+		readFromDataStream.close();*/
+		
+		//System.out.println("IndexTreeV3.findMatchingBinIndexesFromDisk :  reallySkipped = " + Long.toString(reallySkipped) + " fileSize-8 = " + (fileSize - 8));
+		
+		return new ArrayList<IntegerArrayList>();
 		
 		
 	}
@@ -521,8 +622,6 @@ public class IndexTreeV3 extends Index {
 			}
 			
 			
-			
-			
 		} else if (heightIndex < neededHeight) { // si je suis trop bas (proche du root), j'avance aux sous-arbres suivants
 			
 			for (IndexTreeV3 subTree : finerSubTrees.values()) { // pour tous les sous-arbres, écrire sur le disque
@@ -568,6 +667,26 @@ public class IndexTreeV3 extends Index {
 		if (dataClassType == Byte.class)     result = new Byte(readFromDataStream.readByte());
 		if (dataClassType == Integer.class)  result = new Integer(readFromDataStream.readInt());
 		if (dataClassType == Long.class)     result = new Long(readFromDataStream.readLong());
+		
+		return result;
+	}
+	
+	/** Probably not very fast ><"
+	 *  Même very very lent, indeed :'(
+	 *  @param originalAssociatedValue
+	 *  @return
+	 * @throws IOException 
+	 */
+	@SuppressWarnings("rawtypes") // J'utilise Class pour rendre générique ma fonction
+	protected Object readObjectValueFromDisk(RandomAccessFile randAccessFile, Class dataClassType) throws IOException  {
+		
+		Object result = null;
+		
+		if (dataClassType == Float.class)    result = new Float(randAccessFile.readFloat()); // new Float() : il le fait tout seul et essaie d'optimiser le truc, je pense !
+		if (dataClassType == Double.class)   result = new Double(randAccessFile.readDouble());
+		if (dataClassType == Byte.class)     result = new Byte(randAccessFile.readByte());
+		if (dataClassType == Integer.class)  result = new Integer(randAccessFile.readInt());
+		if (dataClassType == Long.class)     result = new Long(randAccessFile.readLong());
 		
 		return result;
 	}

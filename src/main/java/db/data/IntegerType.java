@@ -15,6 +15,12 @@ public class IntegerType extends DataType {
 	public IntegerType() {
 		this.sizeInBytes = Integer.BYTES;
 	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	public Class getAssociatedClassType() {
+		return Integer.class;
+	}
 	
 	@Override
 	public void parse(String input, ByteBuffer outputBuffer) {

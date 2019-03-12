@@ -16,6 +16,12 @@ public class FloatType extends DataType {
 		this.sizeInBytes = Float.BYTES;
 	}
 	
+	@SuppressWarnings("rawtypes")
+	@Override
+	public Class getAssociatedClassType() {
+		return Float.class;
+	}
+	
 	@Override
 	public void parse(String input, ByteBuffer outputBuffer) {
 		outputBuffer.putFloat(Float.parseFloat(input));

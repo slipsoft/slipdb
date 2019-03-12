@@ -16,6 +16,12 @@ public class DoubleType extends DataType {
 		this.sizeInBytes = Double.BYTES;
 	}
 	
+	@SuppressWarnings("rawtypes")
+	@Override
+	public Class getAssociatedClassType() {
+		return Double.class;
+	}
+	
 	@Override
 	public void parse(String input, ByteBuffer outputBuffer) {
 		outputBuffer.putDouble(Double.parseDouble(input));

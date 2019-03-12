@@ -12,6 +12,9 @@ public abstract class DataType {
 		return sizeInBytes;
 	}
 	
+	@SuppressWarnings("rawtypes")
+	public abstract Class getAssociatedClassType();
+	
 	public void setSize(int argSizeInBytes) {
 		this.sizeInBytes = argSizeInBytes;
 	}

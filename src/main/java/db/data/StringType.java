@@ -17,6 +17,12 @@ public class StringType extends DataType {
 		outputBuffer.put(input.getBytes());
 	}
 	
+	@SuppressWarnings("rawtypes")
+	@Override
+	public Class getAssociatedClassType() {
+		return String.class;
+	}
+	
 	@Override
 	public String getValueFromByteArray(byte[] bytes) {
 		return new String(bytes);

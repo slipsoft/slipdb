@@ -1,7 +1,7 @@
 package db.data;
 
 import java.nio.ByteBuffer;
-import java.util.Date;
+//import java.util.Date;
 
 import com.dant.utils.Utils;
 
@@ -17,6 +17,12 @@ public class DateType extends DataType {
 
 	public DateType() {
 		this.sizeInBytes = 4;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@Override
+	public Class getAssociatedClassType() {
+		return Integer.class;
 	}
 
 	@Override
