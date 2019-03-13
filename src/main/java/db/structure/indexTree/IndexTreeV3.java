@@ -89,8 +89,9 @@ public class IndexTreeV3 extends Index {
 	// -> Ce tableau devra être à chaque fois adapté au type de valeur stockée, par exmemple, pour indexer une colonne de double, les longitudes/latitudes,
 	//    il faudrait qu'il y ait les valeurs 0.1, 0.01, 0.001 : multiplier la valeur par 10, 100, 1000 et en prendre la partie entière.
 	public static double[] arrayMaxDistanceBetweenTwoNumericalElements = {
-		10000d,
-		100d, // marche bien pour des int, mal pour des double où seules les décimales changent (et non la partie entière)
+		1000000,
+		10000,
+		100, // marche bien pour des int, mal pour des double où seules les décimales changent (et non la partie entière)
 		/*10, 8, 5, 4, 3, 2, 1,*/
 		0 // arbre terminal contenant la donnée fine
 	};
@@ -101,6 +102,7 @@ public class IndexTreeV3 extends Index {
 	protected EasyFile fileSaveOnDisk = null;
 	protected static String basePath = "target/treeIndexDiskMemory/";
 	protected static int rootIndexTreeCount = 0;
+	protected String currentSaveFilePath = null;
 	
 	
 	protected boolean isTerminalDataTree;
@@ -131,7 +133,8 @@ public class IndexTreeV3 extends Index {
 			//IntegerArrayList -> BinIndexArrayList
 		}
 		if (isRootTree()) {
-			fileSaveOnDisk = new EasyFile(basePath + "IndexTreeV3_indexSave_" + rootIndexTreeCount + ".bin_tree");
+			currentSaveFilePath = basePath + "IndexTreeV3_indexSave_" + rootIndexTreeCount + ".bin_tree";
+			fileSaveOnDisk = new EasyFile(currentSaveFilePath);
 			try {
 				fileSaveOnDisk.createFileIfNotExist();
 			} catch (IOException e) {
@@ -416,7 +419,7 @@ public class IndexTreeV3 extends Index {
 		}
 		
 		// Dernière donnée écrite dans le flux : la position de la table de routage de l'arbre principal (root, le premier)
-		writeInDataStream.writeFloat(routingTableBinIndex);
+		writeInDataStream.writeLong(routingTableBinIndex);
 		
 		writeInDataStream.close();
 		
@@ -426,7 +429,10 @@ public class IndexTreeV3 extends Index {
 		
 		
 	}
-	
+
+	public static int debugDiskNumberOfTrees = 0;
+	public static int debugDiskNumberOfIntegerArrayList = 0;
+	public static int debugDiskNumberOfExactValues = 0;
 	
 	/** Gets the matching results from disk !
 	 *  
@@ -437,6 +443,9 @@ public class IndexTreeV3 extends Index {
 	 * @throws IOException 
 	 */
 	public Collection<IntegerArrayList> findMatchingBinIndexesFromDisk(Object minValueExact, Object maxValueExact, boolean isInclusive) throws IOException { // NavigableMap<Integer, IntegerArrayList> findSubTree
+		debugDiskNumberOfTrees = 0;
+		debugDiskNumberOfIntegerArrayList = 0;
+		debugDiskNumberOfExactValues = 0;
 		
 		// Lecture du dernier float écrit dans le disque, i.e. de la position de la table de routage de l'arbre principal
 		/**
@@ -451,8 +460,10 @@ public class IndexTreeV3 extends Index {
 		 */
 		
 		// fileSavedOnDisk
-		long fileSize = fileSaveOnDisk.length();
-		RandomAccessFile randFile = new RandomAccessFile(fileSaveOnDisk, "r");
+		//long fileSize = fileSaveOnDisk.length();
+		RandomAccessFile randFile = new RandomAccessFile(currentSaveFilePath, "r");
+		long fileSize = randFile.length();
+		System.out.println("IndexTreeV3.loadFromDisk : fileSize = " + fileSize + "currentSaveFilePath = " + currentSaveFilePath);
 		randFile.seek(fileSize - 8);
 		
 		long routingTableBinIndex = randFile.readLong();
@@ -468,6 +479,10 @@ public class IndexTreeV3 extends Index {
 		
 		randFile.close();
 		
+		System.out.println("IndexTreeV3.loadFromDisk : debugDiskNumberOfTrees=" + debugDiskNumberOfTrees);
+		System.out.println("IndexTreeV3.loadFromDisk : debugDiskNumberOfIntegerArrayList=" + debugDiskNumberOfIntegerArrayList);
+		System.out.println("IndexTreeV3.loadFromDisk : debugDiskNumberOfExactValues=" + debugDiskNumberOfExactValues);
+		
 		/*
 		DataInputStream readFromDataStream = new DataInputStream(new BufferedInputStream(new FileInputStream(fileSaveOnDisk)));
 		long fileSize = fileSaveOnDisk.length();
@@ -478,11 +493,12 @@ public class IndexTreeV3 extends Index {
 		
 		//System.out.println("IndexTreeV3.findMatchingBinIndexesFromDisk :  reallySkipped = " + Long.toString(reallySkipped) + " fileSize-8 = " + (fileSize - 8));
 		
-		return new ArrayList<IntegerArrayList>();
+		return listOfMatchingArraysOfBinIndexes;
 		
 		
 	}
 	
+	public static boolean enabeDebugDiskMessages = false;
 	/**
 	 * 
 	 * @param randFile
@@ -491,41 +507,69 @@ public class IndexTreeV3 extends Index {
 	 * @throws IOException 
 	 */
 	protected void searchInDiskData(RandomAccessFile randFile, ArrayList<IntegerArrayList> listOfMatchingArraysOfBinIndexes, Object minValueExact, Object maxValueExact, boolean isInclusive, int currentHeight) throws IOException {
-		double divideByFactor = arrayMaxDistanceBetweenTwoNumericalElements[currentHeight];
-		Number roundMinValue = getBlockNumericalValue(minValueExact, divideByFactor);
-		Number roundMaxValue = getBlockNumericalValue(maxValueExact, divideByFactor);
 		
-		boolean isTerminalDataTree = randFile.readBoolean();
-		// arbre terminal, lecture des valeurs
+		Number roundMinValue;
+		Number roundMaxValue;
+		
+		// Pas de division si je suis à un arbre terminal
+		if (currentHeight == arrayMaxDistanceBetweenTwoNumericalElements.length - 1) {
+			roundMinValue = (Number) minValueExact;
+			roundMaxValue = (Number) maxValueExact;
+			//System.out.println("searchInDiskData MAXMIMAL HEIGHT divideByFactor = " + divideByFactor);
+		} else {
+			double divideByFactor = arrayMaxDistanceBetweenTwoNumericalElements[currentHeight];
+			roundMinValue = getBlockNumericalValue(minValueExact, divideByFactor);
+			roundMaxValue = getBlockNumericalValue(maxValueExact, divideByFactor);
+		}
+		
+		double roundMinValueAsDouble = roundMinValue.doubleValue();
+		double roundMaxValueAsDouble = roundMaxValue.doubleValue();
+		debugDiskNumberOfTrees++;
+		
+		// Première valeur attendue : un booléen pour indiquer si l'arbre est un arbre terminal ou un arbre intermédiaire
+		boolean isTerminalDataTree = randFile.readBoolean(); // se déduit de currentHeight, mais vérification anti-bug
+
+		if (enabeDebugDiskMessages) System.out.println("searchInDiskData : debugDiskNumberOfTrees = " + debugDiskNumberOfTrees + "  readBool = " + isTerminalDataTree);
+		
+		// Arbre terminal, lecture des valeurs fines : lecture de tous les couples (valeur, binPosition)
 		if (isTerminalDataTree) {
+			// Nombre d'IntegerArrayList
 			int numberOfIntegerArrayLists = randFile.readInt();
+			// Liste des positions où aller pour chercher les binIndex des données associées
 			ArrayList<Long> seekPositionsArrayList = new ArrayList<Long>();
-			
-			// Pour toutes les listes
+			if (enabeDebugDiskMessages) System.out.println("searchInDiskData numberOfIntegerArrayLists = " + numberOfIntegerArrayLists);
+			// Lecture de la table de routage des IntegerArrayList (valeurs fines)
+			// Pour toutes les IntegerArrayList (couple valeur, binPosition)
 			for (int indexIntergerArrayList = 0; indexIntergerArrayList < numberOfIntegerArrayLists; indexIntergerArrayList++) {
 				
+				// Je lis la valeur du disque
 				Number associatedValue = (Number) readObjectValueFromDisk(randFile, storedValuesClassType);
 				double cVal = associatedValue.doubleValue();
-				// Si la valeur est dans l'intervalle
-				if (roundMinValue.doubleValue() <= cVal && cVal <= roundMaxValue.doubleValue()) {
+				// Si la valeur est dans l'intervalle (pas optimisé, je cast juste en double)
+				if (roundMinValueAsDouble <= cVal && cVal <= roundMaxValueAsDouble) {
 					int binIndexOfIntegerArrayList = randFile.readInt();
+					// Si la valeur est dans l'intervalle, je l'ajoute à la liste seekPositionsArrayList des positions où aller pour charger la donnée
 					seekPositionsArrayList.add(new Long(binIndexOfIntegerArrayList));
+					if (enabeDebugDiskMessages) System.out.println("searchInDiskData : IntegerArrayList dans l'intervalle = " + cVal);
 				} else {
 					randFile.skipBytes(4); // inutile de lire le binIndex
+					if (enabeDebugDiskMessages) System.out.println("searchInDiskData : IntegerArrayList PAS dans l'intervalle = " + cVal);
 				}
-			
 			}
-			// Je charge les ArrayList que j'ai à charger, et je les ajoute au résultat
+			
+			// Je charge les IntegerArrayList que j'ai à charger, et je les ajoute au résultat
 			int numberOfIntegerArrayListToLoad = seekPositionsArrayList.size();
 			for (int indexIntegerArrayList = 0; indexIntegerArrayList < numberOfIntegerArrayListToLoad; indexIntegerArrayList++) {
+				debugDiskNumberOfIntegerArrayList++;
 				long seekPos = seekPositionsArrayList.get(indexIntegerArrayList);
-				randFile.seek(seekPos);
+				randFile.seek(seekPos); // seek à la position où est écrite l'IntegerArrayList
 				IntegerArrayList binIndexList = new IntegerArrayList();
-				int numberOfAssociatedBinIndexes = randFile.readInt();
+				int numberOfAssociatedBinIndexes = randFile.readInt(); // nombre de binIndex associés à la valeur
 				// Ajout à la liste de tous les binIndex
 				for (int indexInList = 0; indexInList < numberOfAssociatedBinIndexes; indexInList++) {
-					int binIndex = randFile.readInt();
-					binIndexList.add(binIndex);
+					int binIndex = randFile.readInt(); // position sur le disque de la donnée fine
+					binIndexList.add(binIndex); // ajout à l'IntegerArrayList en cours
+					debugDiskNumberOfExactValues++;
 				}
 				// Ajout de la liste de binIndex au résultat
 				listOfMatchingArraysOfBinIndexes.add(binIndexList);
@@ -533,10 +577,39 @@ public class IndexTreeV3 extends Index {
 			
 		} else { // arbre intermédiaire : 
 			// Je regarde toutes les valeurs de la table de routage, je stocke les arbres auxquels je dois aller, puis je seek là où ils sont, récursivement
+			// Liste des positions où aller pour chercher les binIndex des données associées
+			ArrayList<Long> seekPositionsSubTrees = new ArrayList<Long>();
+			// Lecture de la table de routage de cet arbre intermédiaire
+			int numberOfSubTrees = randFile.readInt();
+			for (int subTreeIndex = 0; subTreeIndex < numberOfSubTrees; subTreeIndex++) {
+				// Je lis la valeur associée du disque
+				Number associatedValue = (Number) readObjectValueFromDisk(randFile, storedValuesClassType);
+				double cVal = associatedValue.doubleValue();
+				// Si la valeur est dans l'intervalle (pas optimisé, je cast juste en double)
+				if (roundMinValueAsDouble <= cVal && cVal <= roundMaxValueAsDouble) {
+					int binIndexOfSubTree = randFile.readInt();
+					if (enabeDebugDiskMessages) System.out.println("searchInDiskData : subTree dans l'intervalle = " + cVal);
+					// Si la valeur est dans l'intervalle, je l'ajoute à la liste seekPositionsArrayList des positions où aller pour charger la donnée
+					seekPositionsSubTrees.add(new Long(binIndexOfSubTree));
+				} else {
+					randFile.skipBytes(4); // inutile de lire le binIndex
+					if (enabeDebugDiskMessages) System.out.println("searchInDiskData : subTree PAS dans l'intervalle = " + cVal);
+				}
+			}
+			
+			// Maintenant, je vais aux arbres qui m'intéressent !
+			int numberOfMatchingSubTrees = seekPositionsSubTrees.size();
+			for (int subTreeIndex = 0; subTreeIndex < numberOfMatchingSubTrees; subTreeIndex++) {
+				long seekPos = seekPositionsSubTrees.get(subTreeIndex);
+				randFile.seek(seekPos);
+				searchInDiskData(randFile, listOfMatchingArraysOfBinIndexes, minValueExact, maxValueExact, isInclusive, currentHeight + 1);
+			}
 			
 			// searchInDiskData(randFile, listOfMatchingArraysOfBinIndexes, minValueExact, maxValueExact, isInclusive, currentHeight + 1);
 			
 		}
+		
+		
 	}
 	
 	/** Ecrire les sous-arbres sur le disque
@@ -652,7 +725,7 @@ public class IndexTreeV3 extends Index {
 					// Pour chaque arbre, j'écris la valeur associée (clef)...
 					writeObjectValueOnDisk(associatedValue, writeInDataStream); // écriture de la valeur
 					// ...et le binIndex où le trouver (table de routage des valaurs fines ou des sous-arbres)
-					writeInDataStream.writeFloat(subTree.routingTableBinIndex);
+					writeInDataStream.writeInt((int)subTree.routingTableBinIndex);
 				}
 				
 				wasWrittenOnDisk = true; // vient d'être écrit sur le disque

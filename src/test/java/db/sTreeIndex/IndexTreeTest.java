@@ -64,7 +64,7 @@ public class IndexTreeTest {
 		parser = new CsvParser(table);
 		
 		FileInputStream is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); // "../SMALL_1_000_000_yellow_tripdata_2015-04.csv"
-		//FileInputStream is = new FileInputStream("../SMALL_1_000_000_yellow_tripdata_2015-04.csv");
+		//FileInputStream is = new FileInputStream("../SMALL_1_000_000_yellow_tripdata_2015-04.csv"); // testdata
 		
 		Timer parseTimer = new Timer("Temps pris par le parsing");
 		parser.parse(is);
@@ -120,8 +120,12 @@ public class IndexTreeTest {
 		MemUsage.printMemUsage();
 		loadFromDiskTimer.printms();
 		
-		Timer searchQueryTimer = new Timer("Time took to return the matching elements");
-		Timer searchQueryFullTimer = new Timer("Time took to return the matching elements + size evaluation");
+		// Ecriture sur le disque
+		Timer writeIndexToDiskTimer = new Timer("Temps pris pour l'écriture sur disque");
+		indexingObject.saveOnDisk();
+		writeIndexToDiskTimer.printms();
+		
+		
 		Log.info("Fini");
 		Log.info("OBJECT RESULT :");
 		
@@ -131,14 +135,16 @@ public class IndexTreeTest {
 		//result = indexingObject.findMatchingBinIndexes(new Float(0), new Float(10000), true); // new Float(20), new Float(21)
 		//result = indexingObject.findMatchingBinIndexes(new Integer(-1000), new Integer(1000), true);
 
-		Date dateFrom = Utils.dateFromString("2015-04-15 23:59:00");
+		Date dateFrom = Utils.dateFromString("2015-04-16 00:05:00");
 		Date dateTo = Utils.dateFromString("2015-04-16 00:06:30");
 		int intDateFrom = Utils.dateToSecInt(dateFrom);
 		int intDateTo = Utils.dateToSecInt(dateTo);
+		
+		Timer searchQueryTimer = new Timer("Time took to return the matching elements");
+		Timer searchQueryFullTimer = new Timer("Time took to return the matching elements + size evaluation");
 		result = indexingObject.findMatchingBinIndexes(intDateFrom, intDateTo, true);
 		//result = indexingObject.findMatchingBinIndexes(new Byte((byte)0), new Byte((byte)100), true);
 		
-		//indexingObject.findMatchingBinIndexesFromDisk(intDateFrom, intDateTo, true);
 		
 		MemUsage.printMemUsage();
 		searchQueryTimer.printms();
@@ -163,10 +169,35 @@ public class IndexTreeTest {
 		searchQueryFullTimer.printms();
 		Log.info("Number of results = " + numberOfResults);
 		Log.info("Number of lines = " + numberOfLines);
+		
+		
+		Log.info("Depuis le disque : ");
+		Timer searchFromDiskTimer = new Timer("Temps pris pour la recherche du disque");
+		result = indexingObject.findMatchingBinIndexesFromDisk(intDateFrom, intDateTo, true);
+		searchFromDiskTimer.printms();
+		
+		// Iterates over all the results
+		numberOfResults = 0;
+		numberOfLines = 0;
+		for (IntegerArrayList list : result) {
+			//Log.info("list size = " + list.size());
+			numberOfResults += list.size();
+			numberOfLines++;
+			for (Integer index : list) {
+				// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
+				/*Log.info("  index = " + index);
+				List<Object> objList = table.getValuesOfLineById(index);
+				Object indexedValue = objList.get(indexingColumnIndex);
+				
+				//Log.info("  valeur indexée = " + indexedValue);
+				Log.info("  objList = " + objList);*/
+				
+			}
+		}
+		Log.info("Number of results = " + numberOfResults);
+		Log.info("Number of lines = " + numberOfLines);
 
-		Timer writeIndexToDiskTimer = new Timer("Temps pris pour l'écriture sur disque");
-		indexingObject.saveOnDisk();
-		writeIndexToDiskTimer.printms();
+		
 		
 		
 	}
