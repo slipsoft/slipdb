@@ -3,6 +3,7 @@ package db.sTreeIndex;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -83,6 +84,7 @@ public class TestIndexTreeMT1 {
 	
 	static int globalTableId = 0;
 	
+	// Copier des fichiers (arborescence de Sylvain)
 	static void createFileCopies(int maxFileCount) throws IOException {
 		File sourceFile = new File("../SMALL_1_000_000_yellow_tripdata_2015-04.csv");
 		
@@ -117,52 +119,51 @@ public class TestIndexTreeMT1 {
 			runnableList.add(runnableLoad);
 		}
 		
+		/**
+		 * Bilan : le parsing demande beaucoup plus de calculs que de disque.
+		 * -> Voir quelles sont les fonctions qui prennent le plus de temps à parser
+		 * -> Possible de parser le même fichier, en partant à des index différents (mais pas une bonne idée, car je ne sais pas d'où partir, de peur de couper une ligne)
+		 */
 		Timer parseTimer = new Timer("Temps pris par le parsing de " + maxRunCount + " fichiers");
+		
+		
+		
 		for (int runCount = 0; runCount < maxRunCount; runCount++) {
-			threadList.get(runCount).start();
-			//runnableList.get(runCount).run();
+			threadList.get(runCount).start();   // 12,3 s
+			//runnableList.get(runCount).run(); // 25,7 s
 		}
 		for (int runCount = 0; runCount < maxRunCount; runCount++) {
 			threadList.get(runCount).join();
 		}
-
-		parseTimer.printms();
-		
 		
 		/*
-		Runnable newRunnableTable = () -> {
-			try {
-				loadNewTableFromDisk("table" + globalTableId, "../SMALL_100_000_yellow_tripdata_2015-04.csv");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-		};
-		Thread t;
-		t = new Thread(newRunnableTable);
-		t.start();
-		// join de tous les threads
-
-		Timer parseTimer = new Timer("Temps pris par le parsing");
-		loadNewTableFromDisk("table1", "../SMALL_100_000_yellow_tripdata_2015-04.csv");
-		loadNewTableFromDisk("table2", "../SMALL_100_000_yellow_tripdata_2015-04.csv");
-		loadNewTableFromDisk("table2", "../SMALL_100_000_yellow_tripdata_2015-04.csv");
-		loadNewTableFromDisk("table3", "../SMALL_100_000_yellow_tripdata_2015-04.csv");
-		loadNewTableFromDisk("table4", "../SMALL_100_000_yellow_tripdata_2015-04.csv");
-		loadNewTableFromDisk("table5", "../SMALL_100_000_yellow_tripdata_2015-04.csv");
-		parseTimer.printms();*/
-		/*
-		ArrayList<Column> columns = initializeColumnsForNYData();
-		table = new Table("test", columns);
-		parser = new CsvParser(table);
-		FileInputStream is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); // "../SMALL_1_000_000_yellow_tripdata_2015-04.csv"
-		//FileInputStream is = new FileInputStream("../SMALL_1_000_000_yellow_tripdata_2015-04.csv"); // testdata
+		ByteType bType = new ByteType(null);
+		DoubleType dType = new DoubleType(null);
+		DateType ddType = new DateType(new Utils());
 		
-		Timer parseTimer = new Timer("Temps pris par le parsing");
-		parser.parse(is);
-		parseTimer.printms();
-		is.close();
+		ByteBuffer bBuff = ByteBuffer.allocate(20);
+		
+		int maxCount = 10_000_000;
+		for (int count = 0; count < maxCount; count++) {
+			bBuff.rewind();
+			//bType.parse("78", bBuff);
+			//dType.parse("4546586.212", bBuff);
+			//ddType.parse("2015-04-27 15:45:38", bBuff);
+		}
+		// Date   : 9 700 ms
+		// Double :   550 ms
+		// Byte   :    35 ms
+		// Boucle :    10 ms
+		
 		*/
+		
+		parseTimer.printms();
+		
+		/**
+		 * En première idée, pour parser :
+		 * 1) Sauvegarder chaque colonne sur disque, parsée ou non : éviter, autant que possible, de parser les dates par exemple
+		 * */
+		
 		Log.info("setUpBeforeAll OK");
 	}
 	
