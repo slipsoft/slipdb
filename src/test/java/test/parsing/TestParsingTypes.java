@@ -47,7 +47,7 @@ public class TestParsingTypes {
 			bBuff.rewind();
 		}
 		localTimer.printms();
-
+		
 		localTimer = new Timer("Parsing de ByteType ");
 		for (int count = 0; count < maxCountOperation; count++) {
 			bBuff.rewind();
@@ -99,8 +99,6 @@ public class TestParsingTypes {
 		// Double : 1 654 ms
 		// Byte   :    35 ms
 		// Boucle :    10 ms
-		
-		
 		
 		
 	}
