@@ -136,27 +136,6 @@ public class TestIndexTreeMT1 {
 			threadList.get(runCount).join();
 		}
 		
-		/*
-		ByteType bType = new ByteType(null);
-		DoubleType dType = new DoubleType(null);
-		DateType ddType = new DateType(new Utils());
-		
-		ByteBuffer bBuff = ByteBuffer.allocate(20);
-		
-		int maxCount = 10_000_000;
-		for (int count = 0; count < maxCount; count++) {
-			bBuff.rewind();
-			//bType.parse("78", bBuff);
-			//dType.parse("4546586.212", bBuff);
-			//ddType.parse("2015-04-27 15:45:38", bBuff);
-		}
-		// Date   : 9 700 ms
-		// Double :   550 ms
-		// Byte   :    35 ms
-		// Boucle :    10 ms
-		
-		*/
-		
 		parseTimer.printms();
 		
 		/**
