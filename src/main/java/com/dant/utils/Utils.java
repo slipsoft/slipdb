@@ -7,9 +7,11 @@ import java.util.Date;
 
 public class Utils {
 	// Opérations sur les dates
-	public static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+	public DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 	
-	public static Date dateFromString(String dateAsString) {
+	// Les fonctions static ne sont pas thread-safe.
+	
+	public /*synchronized static*/ Date dateFromString(String dateAsString) {
 		try {
 			return dateFormat.parse(dateAsString);
 		} catch (ParseException e) {
@@ -17,15 +19,15 @@ public class Utils {
 		}
 	}
 	
-	public static String dateToString(Date date) {
+	public /*static*/ String dateToString(Date date) {
 	    return dateFormat.format(date);
 	}
 
-	public static int dateToSecInt(Date date) {
+	public /*static*/ int dateToSecInt(Date date) {
 		return (int) (date.getTime() / 1_000); // tient sur 4 octets sans problème
 	}
 
-	public static Date dateFromSecInt(int secAsInt) {
+	public /*static*/ Date dateFromSecInt(int secAsInt) {
 		Date date = new Date(((long)secAsInt) * 1_000);
 		return date;
 	}

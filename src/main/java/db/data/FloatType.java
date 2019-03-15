@@ -2,6 +2,8 @@ package db.data;
 
 import java.nio.ByteBuffer;
 
+import com.dant.utils.Utils;
+
 public class FloatType extends DataType {
 	
 	protected final static Operator[] compatibleOperatorsList = {
@@ -11,8 +13,9 @@ public class FloatType extends DataType {
 		Operator.greaterOrEquals,
 		Operator.lessOrEquals,
 	};
-
-	public FloatType() {
+	
+	public FloatType(Utils argCurrentUtilsInstance) {
+		super(argCurrentUtilsInstance);
 		this.sizeInBytes = Float.BYTES;
 	}
 	

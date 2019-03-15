@@ -2,6 +2,8 @@ package db.data;
 
 import java.nio.ByteBuffer;
 
+import com.dant.utils.Utils;
+
 public class IntegerType extends DataType {
 	
 	protected final static Operator[] compatibleOperatorsList = {
@@ -11,10 +13,12 @@ public class IntegerType extends DataType {
 		Operator.greaterOrEquals,
 		Operator.lessOrEquals,
 	};
-
-	public IntegerType() {
+	
+	public IntegerType(Utils argCurrentUtilsInstance) {
+		super(argCurrentUtilsInstance);
 		this.sizeInBytes = Integer.BYTES;
 	}
+	
 
 	@SuppressWarnings("rawtypes")
 	@Override

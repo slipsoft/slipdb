@@ -91,10 +91,10 @@ public class SCSVParser {
 				tripAsByteBuffer.putInt(Integer.parseInt(strValue));
 				break;
 
-			case dateStringToInteger :
+			/*case dateStringToInteger :
 				int dateAsInt = Utils.dateToSecInt(Utils.dateFromString(strValue));
 				tripAsByteBuffer.putInt(dateAsInt);
-				break;
+				break;*/
 			case toLong :
 				tripAsByteBuffer.putLong(Long.parseLong(strValue));
 				break;

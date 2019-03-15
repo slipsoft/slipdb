@@ -1,11 +1,13 @@
 package db.sTreeIndex;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -26,18 +28,21 @@ import db.structure.Column;
 import db.structure.Table;
 import db.structure.indexTree.IndexTreeV3;
 
-public class IndexTreeTest {
+/***
+ * Premier test de multi-thread simple
+ *
+ */
+
+
+public class TestIndexTreeMT1 {
 
 	protected static CsvParser parser;
 	protected static Table table;
-	protected static Utils currentlyUsedUils = new Utils(); // For thread-safety ! (but, here, it's static so thread unsafe... ^^')
-
-	@BeforeAll
-	static void setUpBeforeAll() throws Exception {
-		Log.info("setUpBeforeAll");
-		Log.start("target/slipdb_indexingTreeTest.log", 3);
-		//if (true) return;
+	
+	
+	static ArrayList<Column> initializeColumnsForNYData() {
 		ArrayList<Column> columns = new ArrayList<Column>();
+		Utils currentlyUsedUils = new Utils(); // For thread-safety !
 		try {
 			columns.add(new Column("VendorID", new ByteType(currentlyUsedUils)));
 			columns.add(new Column("tpep_pickup_datetime", new DateType(currentlyUsedUils)));
@@ -61,16 +66,103 @@ public class IndexTreeTest {
 		} catch (Exception e) {
 			Log.error(e);
 		}
+		return columns;
+	}
+	
+	static Table loadNewTableFromDisk(String tableName, String filePathOnDisk) throws IOException {
+		ArrayList<Column> columns = initializeColumnsForNYData();
+		Table newTable = new Table(tableName, columns);
+		CsvParser newParser = new CsvParser(newTable);
+		FileInputStream is = new FileInputStream(filePathOnDisk);
+		//Timer parseTimer = new Timer("Temps pris par le parsing de " + tableName);
+		newParser.parse(is);
+		is.close();
+		//parseTimer.printms();
+		return newTable;
+	}
+	
+	static int globalTableId = 0;
+	
+	static void createFileCopies(int maxFileCount) throws IOException {
+		File sourceFile = new File("../SMALL_1_000_000_yellow_tripdata_2015-04.csv");
+		
+		for (int fileCount = 0; fileCount < 10; fileCount++) {
+			File destFile = new File("../SMALL_1_000_000_yellow_tripdata_2015-04_"+fileCount+".csv");
+			FileUtils.copyFile(sourceFile, destFile);
+		}
+	}
+	
+	@BeforeAll
+	static void setUpBeforeAll() throws Exception {
+		Log.info("setUpBeforeAll");
+		Log.start("target/slipdb_indexingTreeTest.log", 3);
+
+		
+		//createFileCopies(10);
+		
+		// Runnable ArrayList : créer les runnable et les thread
+		// Démarrer tout
+		// Attendre que tout se termine
+		// Comparer chargement linaire et multi-trhead (même fichier vs fichiers différents)
+		
+		ArrayList<TestIndexTreeMT1Runnable> runnableList = new ArrayList<TestIndexTreeMT1Runnable>();
+		ArrayList<Thread> threadList = new ArrayList<Thread>();
+		
+		int maxRunCount = 10;
+		
+		for (int runCount = 0; runCount < maxRunCount; runCount++) {
+			TestIndexTreeMT1Runnable runnableLoad = new TestIndexTreeMT1Runnable();
+			Thread runThread = new Thread(runnableLoad);
+			threadList.add(runThread);
+			runnableList.add(runnableLoad);
+		}
+		
+		Timer parseTimer = new Timer("Temps pris par le parsing de " + maxRunCount + " fichiers");
+		for (int runCount = 0; runCount < maxRunCount; runCount++) {
+			threadList.get(runCount).start();
+			//runnableList.get(runCount).run();
+		}
+		for (int runCount = 0; runCount < maxRunCount; runCount++) {
+			threadList.get(runCount).join();
+		}
+
+		parseTimer.printms();
+		
+		
+		/*
+		Runnable newRunnableTable = () -> {
+			try {
+				loadNewTableFromDisk("table" + globalTableId, "../SMALL_100_000_yellow_tripdata_2015-04.csv");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+		};
+		Thread t;
+		t = new Thread(newRunnableTable);
+		t.start();
+		// join de tous les threads
+
+		Timer parseTimer = new Timer("Temps pris par le parsing");
+		loadNewTableFromDisk("table1", "../SMALL_100_000_yellow_tripdata_2015-04.csv");
+		loadNewTableFromDisk("table2", "../SMALL_100_000_yellow_tripdata_2015-04.csv");
+		loadNewTableFromDisk("table2", "../SMALL_100_000_yellow_tripdata_2015-04.csv");
+		loadNewTableFromDisk("table3", "../SMALL_100_000_yellow_tripdata_2015-04.csv");
+		loadNewTableFromDisk("table4", "../SMALL_100_000_yellow_tripdata_2015-04.csv");
+		loadNewTableFromDisk("table5", "../SMALL_100_000_yellow_tripdata_2015-04.csv");
+		parseTimer.printms();*/
+		/*
+		ArrayList<Column> columns = initializeColumnsForNYData();
 		table = new Table("test", columns);
 		parser = new CsvParser(table);
-		
 		FileInputStream is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); // "../SMALL_1_000_000_yellow_tripdata_2015-04.csv"
 		//FileInputStream is = new FileInputStream("../SMALL_1_000_000_yellow_tripdata_2015-04.csv"); // testdata
 		
 		Timer parseTimer = new Timer("Temps pris par le parsing");
 		parser.parse(is);
 		parseTimer.printms();
-		
+		is.close();
+		*/
 		Log.info("setUpBeforeAll OK");
 	}
 	
@@ -98,7 +190,7 @@ public class IndexTreeTest {
 	
 	@Test
 	void testIndexingTreeInt() throws IOException {
-		//if (true) return;
+		if (true) return;
 		/**
 		 * Note : c'est super le bordel ici, je vais ranger ça ^^'
 		 */
@@ -135,7 +227,9 @@ public class IndexTreeTest {
 		MemUsage.printMemUsage();
 		//result = indexingObject.findMatchingBinIndexes(new Float(0), new Float(10000), true); // new Float(20), new Float(21)
 		//result = indexingObject.findMatchingBinIndexes(new Integer(-1000), new Integer(1000), true);
-
+		
+		Utils currentlyUsedUils = new Utils(); // For thread-safety !
+		
 		Date dateFrom = currentlyUsedUils.dateFromString("2015-04-16 00:05:00");
 		Date dateTo = currentlyUsedUils.dateFromString("2015-04-16 00:06:30");
 		int intDateFrom = currentlyUsedUils.dateToSecInt(dateFrom);

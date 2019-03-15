@@ -14,8 +14,9 @@ public class DateType extends DataType {
 		Operator.greaterOrEquals,
 		Operator.lessOrEquals,
 	};
-
-	public DateType() {
+	
+	public DateType(Utils argCurrentUtilsInstance) {
+		super(argCurrentUtilsInstance);
 		this.sizeInBytes = 4;
 	}
 	
@@ -27,7 +28,7 @@ public class DateType extends DataType {
 
 	@Override
 	public void parse(String input, ByteBuffer outputBuffer) {
-		int dateAsInt = Utils.dateToSecInt(Utils.dateFromString(input));
+		int dateAsInt = currentUtilsInstance.dateToSecInt(currentUtilsInstance.dateFromString(input));
 		outputBuffer.putInt(dateAsInt);
 	}
 	

@@ -2,6 +2,8 @@ package db.data;
 
 import java.nio.ByteBuffer;
 
+import com.dant.utils.Utils;
+
 public class DoubleType extends DataType {
 	
 	protected final static Operator[] compatibleOperatorsList = {
@@ -11,8 +13,9 @@ public class DoubleType extends DataType {
 		Operator.greaterOrEquals,
 		Operator.lessOrEquals,
 	};
-
-	public DoubleType() {
+	
+	public DoubleType(Utils argCurrentUtilsInstance) {
+		super(argCurrentUtilsInstance);
 		this.sizeInBytes = Double.BYTES;
 	}
 	

@@ -21,13 +21,13 @@ public class CsvParser extends Parser {
 	public CsvParser(Table schema) {
 		super(schema);
 	}
-
+	
 	@Override
 	public void parse(InputStream input, int limit) {
 		int currentLineCount = 0;
 		
-		Timer timer = new Timer("load time");
-		MemUsage.printMemUsage();
+		//Timer timer = new Timer("load time");
+		//MemUsage.printMemUsage();
 		try (
 				BufferedReader bRead = new BufferedReader(new InputStreamReader(input));
 				DataOutputStream bWrite = new DataOutputStream(new BufferedOutputStream(schema.tableToOutputStream()));
@@ -48,8 +48,8 @@ public class CsvParser extends Parser {
 			Log.error(e);
 		}
 
-		MemUsage.printMemUsage();
-		timer.printms();
+		//MemUsage.printMemUsage();
+		//timer.printms();
 	}
 	
 	@Override

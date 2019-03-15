@@ -9,6 +9,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.dant.utils.Utils;
+
 import db.data.IntegerType;
 import db.data.StringType;
 
@@ -19,8 +21,10 @@ class TableTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		columns.add(new Column("col1", new StringType(10)));
-		columns.add(new Column("col2", new IntegerType()));
+
+		Utils currentlyUsedUils = new Utils(); // For thread-safety !
+		columns.add(new Column("col1", new StringType(10, currentlyUsedUils)));
+		columns.add(new Column("col2", new IntegerType(currentlyUsedUils)));
 		Column[] cols = {columns.get(0)};
 		Index index = new IndexHash(cols);
 		indexes.add(index);

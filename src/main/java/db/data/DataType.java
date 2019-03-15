@@ -4,12 +4,19 @@ import java.nio.ByteBuffer;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import com.dant.utils.Utils;
+
 public abstract class DataType {
 	protected int sizeInBytes;
 	protected static Operator[] compatibleOperatorsList;
+	protected final Utils currentUtilsInstance; // doit être initialisé
 	
 	public int getSize() {
 		return sizeInBytes;
+	}
+	
+	public DataType(Utils argCurrentUtilsInstance) {
+		currentUtilsInstance = argCurrentUtilsInstance;
 	}
 	
 	@SuppressWarnings("rawtypes")

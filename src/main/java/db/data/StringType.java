@@ -2,13 +2,16 @@ package db.data;
 
 import java.nio.ByteBuffer;
 
+import com.dant.utils.Utils;
+
 public class StringType extends DataType {
 
 	protected final static Operator[] compatibleOperatorsList = {
 		Operator.equals
 	};
-
-	public StringType(int size) {
+	
+	public StringType(int size, Utils argCurrentUtilsInstance) {
+		super(argCurrentUtilsInstance);
 		this.sizeInBytes = size;
 	}
 	

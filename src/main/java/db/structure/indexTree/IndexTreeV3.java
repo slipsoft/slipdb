@@ -167,6 +167,7 @@ public class IndexTreeV3 extends Index {
 	 */
 	public void indexColumnFromDisk(Table inTable, int columnIndex) throws IOException {
 		indexedColumnsList = new Column[0];
+		
 		List<Column> columnsList = inTable.getColumns();
 		int columnsNumber = columnsList.size();
 		if (columnsNumber <= columnIndex) { // invalid columnIndex
