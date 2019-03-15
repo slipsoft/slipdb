@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -23,7 +24,6 @@ import db.data.FloatType;
 import db.data.StringType;
 import db.structure.Column;
 import db.structure.Table;
-import zArchive.sj.simpleBD.parseCSV.SCSVParser;
 
 class CsvParserTest {
 	protected CsvParser parser;
@@ -50,7 +50,7 @@ class CsvParserTest {
 			columns.add(new Column("store_and_fwd_flag", new StringType(3)));
 			columns.add(new Column("dropoff_longitude", new DoubleType()));
 			columns.add(new Column("dropoff_latitude", new DoubleType()));
-			columns.add(new Column("payment_type",  new ByteType()));
+			columns.add(new Column("payment_type", new ByteType()));
 			columns.add(new Column("fare_amount", new FloatType()));
 			columns.add(new Column("extra", new FloatType()));
 			columns.add(new Column("mta_tax", new FloatType()));
@@ -83,6 +83,27 @@ class CsvParserTest {
 		assertDoesNotThrow(exec);
 		Log.debug(table.getValuesOfLineById(0), "entry/0");
 		Log.debug(table.getValuesOfLineById(70), "entry/70");
+		List<Object> expected = new ArrayList<Object>();
+		expected.add((byte) 2);
+		expected.add(Utils.dateFromString("2015-04-09 19:29:33"));
+		expected.add(Utils.dateFromString("2015-04-09 19:37:09"));
+		expected.add((byte) 1);
+		expected.add((float) 0.83);
+		expected.add(-73.98651885986328);
+		expected.add(40.76189422607422);
+		expected.add((byte) 1);
+		expected.add("N");
+		expected.add(-73.97399139404297);
+		expected.add(40.760414123535156);
+		expected.add((byte) 1);
+		expected.add((float) 6.5);
+		expected.add((float) 1.0);
+		expected.add((float) 0.5);
+		expected.add((float) 1.66);
+		expected.add((float) 0.0);
+		expected.add((float) 0.3);
+		expected.add((float) 9.96);
+
+		assertEquals(expected, table.getValuesOfLineById(70));
 	}
 }
-
