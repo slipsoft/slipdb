@@ -15,9 +15,15 @@ public class DateType extends DataType {
 		Operator.lessOrEquals,
 	};
 	
-	public DateType(Utils argCurrentUtilsInstance) {
-		super(argCurrentUtilsInstance);
+	// Nécessaire ppur rendre les opérations trhead-safe, il ne peut pas y avoir de Utils ayant des méthodes statiques utilisant les mêmes objets instanciés.
+	// (sous peine d'exceptions dus à des problèmes de concurrence)
+	// Et nbe pas utiliser de synchronized ou volatile, de préférence, cela réduirait grandement les performances)
+	Utils currentUtilsInstance = new Utils();
+	
+	public DateType() {
+		super();
 		this.sizeInBytes = 4;
+		// peu de dates crées ! :) System.out.println("DateType : nouvelle date !");
 	}
 	
 	@SuppressWarnings("rawtypes")

@@ -14,8 +14,8 @@ public class IntegerType extends DataType {
 		Operator.lessOrEquals,
 	};
 	
-	public IntegerType(Utils argCurrentUtilsInstance) {
-		super(argCurrentUtilsInstance);
+	public IntegerType() {
+		super();
 		this.sizeInBytes = Integer.BYTES;
 	}
 	

@@ -34,11 +34,11 @@ public class TestParsingTypes {
 		Timer localTimer;
 		ByteBuffer bBuff = ByteBuffer.allocate(20);
 		
-		ByteType   byteType = new ByteType(null);
-		DoubleType doubleType = new DoubleType(null);
-		DateType   dateType = new DateType(new Utils());
-		IntegerType integerType = new IntegerType(null);
-		FloatType floatType = new FloatType(null);
+		ByteType   byteType = new ByteType();
+		DoubleType doubleType = new DoubleType();
+		DateType   dateType = new DateType();
+		IntegerType integerType = new IntegerType();
+		FloatType floatType = new FloatType();
 		
 		Log.info("Cout en millisecondes, pour " + maxCountOperationStr + " itérations :");
 		

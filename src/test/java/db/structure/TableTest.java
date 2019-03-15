@@ -23,8 +23,8 @@ class TableTest {
 	void setUp() throws Exception {
 
 		Utils currentlyUsedUils = new Utils(); // For thread-safety !
-		columns.add(new Column("col1", new StringType(10, currentlyUsedUils)));
-		columns.add(new Column("col2", new IntegerType(currentlyUsedUils)));
+		columns.add(new Column("col1", new StringType(10)));
+		columns.add(new Column("col2", new IntegerType()));
 		Column[] cols = {columns.get(0)};
 		Index index = new IndexHash(cols);
 		indexes.add(index);

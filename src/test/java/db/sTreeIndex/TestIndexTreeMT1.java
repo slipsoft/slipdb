@@ -45,25 +45,25 @@ public class TestIndexTreeMT1 {
 		ArrayList<Column> columns = new ArrayList<Column>();
 		Utils currentlyUsedUils = new Utils(); // For thread-safety !
 		try {
-			columns.add(new Column("VendorID", new ByteType(currentlyUsedUils)));
-			columns.add(new Column("tpep_pickup_datetime", new DateType(currentlyUsedUils)));
-			columns.add(new Column("tpep_dropoff_datetime", new DateType(currentlyUsedUils)));
-			columns.add(new Column("passenger_count", new ByteType(currentlyUsedUils)));
-			columns.add(new Column("trip_distance", new FloatType(currentlyUsedUils)));
-			columns.add(new Column("pickup_longitude", new DoubleType(currentlyUsedUils)));
-			columns.add(new Column("pickup_latitude", new DoubleType(currentlyUsedUils)));
-			columns.add(new Column("RateCodeID", new ByteType(currentlyUsedUils)));
-			columns.add(new Column("store_and_fwd_flag", new StringType(1, currentlyUsedUils)));
-			columns.add(new Column("dropoff_longitude", new DoubleType(currentlyUsedUils)));
-			columns.add(new Column("dropoff_latitude", new DoubleType(currentlyUsedUils)));
-			columns.add(new Column("payment_type",  new ByteType(currentlyUsedUils)));
-			columns.add(new Column("fare_amount", new FloatType(currentlyUsedUils)));
-			columns.add(new Column("extra", new FloatType(currentlyUsedUils)));
-			columns.add(new Column("mta_tax", new FloatType(currentlyUsedUils)));
-			columns.add(new Column("tip_amount", new FloatType(currentlyUsedUils)));
-			columns.add(new Column("tolls_amount", new FloatType(currentlyUsedUils)));
-			columns.add(new Column("improvement_surcharge", new FloatType(currentlyUsedUils)));
-			columns.add(new Column("total_amount", new FloatType(currentlyUsedUils)));
+			columns.add(new Column("VendorID", new ByteType()));
+			columns.add(new Column("tpep_pickup_datetime", new DateType()));
+			columns.add(new Column("tpep_dropoff_datetime", new DateType()));
+			columns.add(new Column("passenger_count", new ByteType()));
+			columns.add(new Column("trip_distance", new FloatType()));
+			columns.add(new Column("pickup_longitude", new DoubleType()));
+			columns.add(new Column("pickup_latitude", new DoubleType()));
+			columns.add(new Column("RateCodeID", new ByteType()));
+			columns.add(new Column("store_and_fwd_flag", new StringType(1)));
+			columns.add(new Column("dropoff_longitude", new DoubleType()));
+			columns.add(new Column("dropoff_latitude", new DoubleType()));
+			columns.add(new Column("payment_type",  new ByteType()));
+			columns.add(new Column("fare_amount", new FloatType()));
+			columns.add(new Column("extra", new FloatType()));
+			columns.add(new Column("mta_tax", new FloatType()));
+			columns.add(new Column("tip_amount", new FloatType()));
+			columns.add(new Column("tolls_amount", new FloatType()));
+			columns.add(new Column("improvement_surcharge", new FloatType()));
+			columns.add(new Column("total_amount", new FloatType()));
 		} catch (Exception e) {
 			Log.error(e);
 		}

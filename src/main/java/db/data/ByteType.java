@@ -2,7 +2,6 @@ package db.data;
 
 import java.nio.ByteBuffer;
 
-import com.dant.utils.Utils;
 
 public class ByteType extends DataType {
 
@@ -11,8 +10,8 @@ public class ByteType extends DataType {
 	};
 	
 	
-	public ByteType(Utils argCurrentUtilsInstance) {
-		super(argCurrentUtilsInstance);
+	public ByteType() {
+		super();
 		this.sizeInBytes = Byte.BYTES;
 	}
 	

@@ -14,8 +14,8 @@ public class FloatType extends DataType {
 		Operator.lessOrEquals,
 	};
 	
-	public FloatType(Utils argCurrentUtilsInstance) {
-		super(argCurrentUtilsInstance);
+	public FloatType() {
+		super();
 		this.sizeInBytes = Float.BYTES;
 	}
 	

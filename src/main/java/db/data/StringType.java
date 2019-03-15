@@ -10,8 +10,8 @@ public class StringType extends DataType {
 		Operator.equals
 	};
 	
-	public StringType(int size, Utils argCurrentUtilsInstance) {
-		super(argCurrentUtilsInstance);
+	public StringType(int size) {
+		super();
 		this.sizeInBytes = size;
 	}
 	
