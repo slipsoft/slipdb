@@ -15,6 +15,7 @@ import db.data.DateType;
 import db.data.DoubleType;
 import db.data.FloatType;
 import db.data.IntegerType;
+import db.data.LongType;
 
 
 public class TestParsingTypes {
@@ -39,6 +40,7 @@ public class TestParsingTypes {
 		DateType   dateType = new DateType();
 		IntegerType integerType = new IntegerType();
 		FloatType floatType = new FloatType();
+		LongType longType = new LongType();
 		
 		Log.info("Cout en millisecondes, pour " + maxCountOperationStr + " itérations :");
 		
@@ -54,11 +56,18 @@ public class TestParsingTypes {
 			byteType.parse("78", bBuff);
 		}
 		localTimer.printms();
-		
+
 		localTimer = new Timer("Parsing de IntegerType ");
 		for (int count = 0; count < maxCountOperation; count++) {
 			bBuff.rewind();
 			integerType.parse("454689586", bBuff);
+		}
+		localTimer.printms();
+
+		localTimer = new Timer("Parsing de LongType ");
+		for (int count = 0; count < maxCountOperation; count++) {
+			bBuff.rewind();
+			longType.parse("45468957895686", bBuff);
 		}
 		localTimer.printms();
 		

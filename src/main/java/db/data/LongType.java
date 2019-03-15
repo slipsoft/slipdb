@@ -2,7 +2,7 @@ package db.data;
 
 import java.nio.ByteBuffer;
 
-public class IntegerType extends DataType {
+public class LongType extends DataType {
 	
 	protected final static Operator[] compatibleOperatorsList = {
 		Operator.equals,
@@ -12,27 +12,27 @@ public class IntegerType extends DataType {
 		Operator.lessOrEquals,
 	};
 	
-	public IntegerType() {
+	public LongType() {
 		super();
-		this.sizeInBytes = Integer.BYTES;
+		this.sizeInBytes = Long.BYTES;
 	}
 	
 
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Class getAssociatedClassType() {
-		return Integer.class;
+		return Long.class;
 	}
 	
 	@Override
 	public void parse(String input, ByteBuffer outputBuffer) {
-		outputBuffer.putInt(Integer.parseInt(input));
+		outputBuffer.putLong(Long.parseLong(input));
 	}
 	
 	@Override
-	public Integer getValueFromByteArray(byte[] bytes) {
+	public Long getValueFromByteArray(byte[] bytes) {
 		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
-		return wrapped.getInt();
+		return wrapped.getLong();
 	}
 
 }
