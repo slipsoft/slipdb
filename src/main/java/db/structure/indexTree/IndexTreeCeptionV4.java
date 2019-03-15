@@ -26,6 +26,7 @@ import db.structure.Table;
 import sj.simpleDB.treeIndexing.SIndexingTreeType;
 
 /**
+ * TreeMapCeption : un arbre dans un arbre...
  *  V4 !
  *  Au programme :
  *  - multi-thread du processus d'indexation
@@ -37,7 +38,7 @@ import sj.simpleDB.treeIndexing.SIndexingTreeType;
  */
 
 
-public class IndexTreeV4 {
+public class IndexTreeCeptionV4 {
 	protected SIndexingTreeType treeType; // servira pour l'utilisation de méthodes génériques, pour utiliser le bon type d'arbre et faire les bons cast
 	
 	@SuppressWarnings("rawtypes")
@@ -71,7 +72,7 @@ public class IndexTreeV4 {
 	protected int heightIndex = 0; // par défaut, le permier arbre
 	protected Object associatedRoundValue; // Valeur divisée par arrayMaxDistanceBetweenTwoNumericalElements[heightIndex]
 	
-	public IndexTreeV4() {
+	public IndexTreeCeptionV4() {
 		// storedValuesClassType défini dans indexColumnFromDisk
 		this(0, null);
 	}
@@ -79,7 +80,7 @@ public class IndexTreeV4 {
 	/** Création de l'arbre, à hauteur définie
 	 *  @param argHeightIndex
 	 */
-	public IndexTreeV4(int argHeightIndex, Object argAssociatedRoundValue) {
+	public IndexTreeCeptionV4(int argHeightIndex, Object argAssociatedRoundValue) {
 		// storedValuesClassType défini via argAssociatedRoundValue
 		if (argAssociatedRoundValue != null)
 			storedValuesClassType = argAssociatedRoundValue.getClass();
