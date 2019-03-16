@@ -1,4 +1,4 @@
-package db.parseCSV;
+package zdb.veryOldParseCSV;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,7 +17,7 @@ import db.structure.Table;
 import zArchive.sj.simpleBD.parseCSV.SCSVParser;
 import zArchive.sj.simpleBD.parseCSV.SOptimDataFromCSV;
 
-class CSVParserTest {
+class VeryOldCSVParserTest {
 	protected Table table;
 	protected SCSVParser parser = new SCSVParser();
 
