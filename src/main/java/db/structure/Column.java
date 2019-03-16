@@ -10,6 +10,9 @@ public class Column {
 	
 	protected String name = "Nom inconnu";
 	protected DataType storedDataType;
+	
+	public Object minValue = null;
+	public Object maxValue = null;
 
 	// Type de donnée stockée
 	public final SStorageDataType dataType;// = StorageDataType.isUnknown;
@@ -59,6 +62,49 @@ public class Column {
 	}
 	
 	public void parse(String input, ByteBuffer outputBuffer) {
-		this.getDataType().parse(input, outputBuffer);
+		this.getDataType()/*storedDataType*/.parse(input, outputBuffer);
 	}
+	
+	public Object parseAndReturnValue(String input, ByteBuffer outputBuffer) {
+		return this.getDataType().parseAndReturnValue(input, outputBuffer);
+	}
+	
+	
+	public int compareValues(Object value1, Object value2) {
+		if (value1 == null || value2 == null) return 0;
+		if (value1.getClass() != value2.getClass()) return 0;
+		
+		if (value1 instanceof Number) {
+			double asDouble1 = ((Number) value1).doubleValue(); // lent et pas opti ><"
+			double asDouble2 = ((Number) value2).doubleValue(); // lent et pas opti ><"
+
+			if (asDouble1 == asDouble2) return 0;
+			if (asDouble1 > asDouble2) return 1;
+			return -1;
+		}
+		
+		return 0;
+		
+		/*
+		if (value1.getClass() == Float.class)   {
+			if ((Float) value1 == (Float) value2) return 0;
+			if ((Float) value1 > (Float) value2) return 1;
+			return -1;
+		}
+		
+		if (value1.getClass() == Double.class)   {
+			if (((Double) value1) == (Double) value2) return 0;
+			if ((Double) value1 > (Double) value2) return 1;
+			return -1;
+		}
+		
+		if (value1.getClass() == Double.class)   {
+			if ((Double) value1 == (Double) value2) return 0;
+			if ((Double) value1 > (Double) value2) return 1;
+			return -1;
+		}*/
+		
+	}
+	
+	
 }

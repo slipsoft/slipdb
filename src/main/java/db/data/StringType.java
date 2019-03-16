@@ -3,8 +3,6 @@ package db.data;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import com.dant.utils.Utils;
-
 public class StringType extends DataType {
 
 	protected final static Operator[] compatibleOperatorsList = {
@@ -20,6 +18,13 @@ public class StringType extends DataType {
 	public void parse(String input, ByteBuffer outputBuffer) {
 		byte[] bytes = Arrays.copyOf(input.getBytes(), this.sizeInBytes);
 		outputBuffer.put(bytes);
+	}
+	
+	@Override
+	public Object parseAndReturnValue(String input, ByteBuffer outputBuffer) {
+		byte[] bytes = Arrays.copyOf(input.getBytes(), this.sizeInBytes);
+		outputBuffer.put(bytes);
+		return input;
 	}
 	
 	@SuppressWarnings("rawtypes")

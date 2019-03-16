@@ -30,6 +30,13 @@ public class IntegerType extends DataType {
 	}
 	
 	@Override
+	public Integer parseAndReturnValue(String input, ByteBuffer outputBuffer) {
+		Integer asInteger = Integer.parseInt(input);
+		outputBuffer.putInt(asInteger);
+		return asInteger;
+	}
+	
+	@Override
 	public Integer getValueFromByteArray(byte[] bytes) {
 		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
 		return wrapped.getInt();

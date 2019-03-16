@@ -39,6 +39,13 @@ public class DateType extends DataType {
 	}
 	
 	@Override
+	public Integer parseAndReturnValue(String input, ByteBuffer outputBuffer) {
+		Integer dateAsInt = Utils.dateToSecInt(currentUtilsInstance.dateFromString(input));
+		outputBuffer.putInt(dateAsInt);
+		return dateAsInt;
+	}
+	
+	@Override
 	// Date -> Integer, for it to be indexed faster, and the same way Integers are (that's really convenient, see IndexTree for more)
 	public Integer getValueFromByteArray(byte[] bytes) {
 		ByteBuffer wrapped = ByteBuffer.wrap(bytes);

@@ -30,6 +30,13 @@ public class LongType extends DataType {
 	}
 	
 	@Override
+	public Long parseAndReturnValue(String input, ByteBuffer outputBuffer) {
+		Long asLong = Long.parseLong(input);
+		outputBuffer.putLong(asLong);
+		return asLong;
+	}
+	
+	@Override
 	public Long getValueFromByteArray(byte[] bytes) {
 		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
 		return wrapped.getLong();

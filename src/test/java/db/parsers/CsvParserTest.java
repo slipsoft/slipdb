@@ -14,7 +14,6 @@ import org.junit.jupiter.api.function.Executable;
 
 import com.dant.utils.Log;
 import com.dant.utils.Timer;
-import com.dant.utils.Utils;
 
 import db.data.ByteType;
 import db.data.DateType;
@@ -23,10 +22,9 @@ import db.data.FloatType;
 import db.data.StringType;
 import db.structure.Column;
 import db.structure.Table;
-import zArchive.sj.simpleBD.parseCSV.SCSVParser;
 
 class CsvParserTest {
-	protected CsvParser parser;
+	protected Parser parser;
 	protected Table table;
 
 	@BeforeAll
@@ -37,7 +35,7 @@ class CsvParserTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		ArrayList<Column> columns = new ArrayList<Column>();
-		Utils currentlyUsedUils = new Utils(); // For thread-safety !
+		//Utils currentlyUsedUils = new Utils(); // For thread-safety !
 		try {
 			columns.add(new Column("VendorID", new ByteType()));
 			columns.add(new Column("tpep_pickup_datetime", new DateType()));
@@ -62,7 +60,8 @@ class CsvParserTest {
 			Log.error(e);
 		}
 		table = new Table("test", columns);
-		parser = new CsvParser(table);
+		parser = new CsvParserS2(table); // 790 ms
+		//parser = new CsvParser(table); // 750 ms
 	}
 
 	@AfterEach

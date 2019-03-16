@@ -34,7 +34,7 @@ import sj.simpleDB.treeIndexing.SIndexingTreeType;
  *  - un index sur lequel on peut faire des recherches
  *  - évaluation dynamique de la distance entre valeurs (arrayMaxDistanceBetweenTwoNumericalElements)
  *  
- *
+ *	
  */
 
 

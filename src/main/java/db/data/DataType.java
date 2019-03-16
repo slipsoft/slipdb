@@ -9,6 +9,8 @@ public abstract class DataType {
 	protected static Operator[] compatibleOperatorsList;
 	//c'est en fait inutile (merci Nicolas ;) ) : protected final Utils currentUtilsInstance; // doit être initialisé
 	
+	protected Object currentValue;
+	
 	public int getSize() {
 		return sizeInBytes;
 	}
@@ -28,6 +30,7 @@ public abstract class DataType {
 	}
 	
 	abstract public void parse(String input, ByteBuffer outputBuffer);
+	abstract public Object parseAndReturnValue(String input, ByteBuffer outputBuffer);
 	abstract public Object getValueFromByteArray(byte[] bytes);
 
 }

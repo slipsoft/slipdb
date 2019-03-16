@@ -22,13 +22,15 @@ import db.data.FloatType;
 import db.data.IntegerArrayList;
 import db.data.StringType;
 import db.parsers.CsvParser;
+import db.parsers.CsvParserS2;
+import db.parsers.Parser;
 import db.structure.Column;
 import db.structure.Table;
 import db.structure.indexTree.IndexTreeV3;
 
 public class IndexTreeTest {
 
-	protected static CsvParser parser;
+	protected static Parser parser;
 	protected static Table table;
 	protected static Utils currentlyUsedUils = new Utils(); // For thread-safety ! (but, here, it's static so thread unsafe... ^^')
 
@@ -62,10 +64,10 @@ public class IndexTreeTest {
 			Log.error(e);
 		}
 		table = new Table("test", columns);
-		parser = new CsvParser(table);
+		parser = new CsvParserS2(table);
 		
-		FileInputStream is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); // "../SMALL_1_000_000_yellow_tripdata_2015-04.csv"
-		//FileInputStream is = new FileInputStream("../SMALL_1_000_000_yellow_tripdata_2015-04.csv"); // testdata
+		//FileInputStream is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); // "../SMALL_1_000_000_yellow_tripdata_2015-04.csv"
+		FileInputStream is = new FileInputStream("../SMALL_1_000_000_yellow_tripdata_2015-04.csv"); // testdata
 		
 		Timer parseTimer = new Timer("Temps pris par le parsing");
 		parser.parse(is);
@@ -102,15 +104,22 @@ public class IndexTreeTest {
 		/**
 		 * Note : c'est super le bordel ici, je vais ranger ça ^^'
 		 */
-		IndexTreeV3 indexingObject = new IndexTreeV3();
 		//SIndexingTreeFloat indexingFoat = new SIndexingTreeFloat();
 		Log.info("Lancé");
 		
 		// Index the column on index 4
 		//int indexingColumnIndex = 3; // passanger count
-		//int indexingColumnIndex = 4; // trip distance
+		int indexingColumnIndex = 4; // trip distance
 		//int indexingColumnIndex = 5; // latitude
-		int indexingColumnIndex = 1; // date pickup
+		//int indexingColumnIndex = 1; // date pickup
+		
+		Column indexThisColumn = table.getColumns().get(indexingColumnIndex);
+		
+		System.out.println("OUOUOUOU " + indexThisColumn.minValue + "  " +  indexThisColumn.maxValue);
+
+		IndexTreeV3 indexingObject = new IndexTreeV3(0, null, indexThisColumn.minValue, indexThisColumn.maxValue);
+		
+		//indexingObject.initializeMaxDistanceBetweenElementsArray(indexThisColumn.minValue, indexThisColumn.maxValue);
 		
 		// Index the column from the disk
 		// -> reading fron the disk is quite slow
@@ -133,18 +142,20 @@ public class IndexTreeTest {
 		// Get the query result
 		Collection<IntegerArrayList> result;
 		MemUsage.printMemUsage();
-		//result = indexingObject.findMatchingBinIndexes(new Float(0), new Float(10000), true); // new Float(20), new Float(21)
+		result = indexingObject.findMatchingBinIndexes(new Float(20), new Float(25), true); // new Float(20), new Float(21)
 		//result = indexingObject.findMatchingBinIndexes(new Integer(-1000), new Integer(1000), true);
 
 		Date dateFrom = currentlyUsedUils.dateFromString("2015-04-16 00:05:00");
 		Date dateTo = currentlyUsedUils.dateFromString("2015-04-16 00:06:30");
-		int intDateFrom = currentlyUsedUils.dateToSecInt(dateFrom);
-		int intDateTo = currentlyUsedUils.dateToSecInt(dateTo);
+		int intDateFrom = Utils.dateToSecInt(dateFrom);
+		int intDateTo = Utils.dateToSecInt(dateTo);
 		
 		Timer searchQueryTimer = new Timer("Time took to return the matching elements");
 		Timer searchQueryFullTimer = new Timer("Time took to return the matching elements + size evaluation");
-		result = indexingObject.findMatchingBinIndexes(intDateFrom, intDateTo, true);
+		//result = indexingObject.findMatchingBinIndexes(intDateFrom, intDateTo, true);
+		
 		//result = indexingObject.findMatchingBinIndexes(new Byte((byte)0), new Byte((byte)100), true);
+		//result = indexingObject.findMatchingBinIndexes(new Double(0), new Double(0), true);
 		
 		
 		MemUsage.printMemUsage();
@@ -174,7 +185,9 @@ public class IndexTreeTest {
 		
 		Log.info("Depuis le disque : ");
 		Timer searchFromDiskTimer = new Timer("Temps pris pour la recherche du disque");
-		result = indexingObject.findMatchingBinIndexesFromDisk(intDateFrom, intDateTo, true);
+		result = indexingObject.findMatchingBinIndexesFromDisk(new Float(20), new Float(25), true);
+		//result = indexingObject.findMatchingBinIndexesFromDisk(intDateFrom, intDateTo, true);
+		
 		searchFromDiskTimer.printms();
 		
 		// Iterates over all the results

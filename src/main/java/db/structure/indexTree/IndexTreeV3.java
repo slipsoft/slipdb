@@ -112,14 +112,56 @@ public class IndexTreeV3 extends Index {
 	
 	public IndexTreeV3() {
 		// storedValuesClassType défini dans indexColumnFromDisk
-		this(0, null);
+		this(0, null, null, null);
+	}
+	
+
+	/** Création de l'arbre, à hauteur définie
+	 *  @param argHeightIndex
+	 */
+	public IndexTreeV3(int argHeightIndex, Object argAssociatedRoundValue) {
+		this(argHeightIndex, argAssociatedRoundValue, null, null);
+	}
+	
+	public void initializeMaxDistanceBetweenElementsArray(Object minValue, Object maxValue) {
+		if (true) return;
+		if (minValue == null || maxValue == null) return;
+		if ((minValue instanceof Number) == false) return;
+		if (minValue.getClass() != maxValue.getClass()) return;
+		
+		double doubleMinAbsValue = Math.abs(((Number) minValue).doubleValue());
+		double doubleMaxAbsValue = Math.abs(((Number) maxValue).doubleValue());
+		double maxAbsValue = Math.max(doubleMinAbsValue, doubleMaxAbsValue);
+		
+		//double interval = doubleMaxValue - doubleMinValue;
+		
+		double divideIterationFactor = 8;
+		double divideBy = maxAbsValue / divideIterationFactor;
+		int maxDepth = 10;
+		
+		arrayMaxDistanceBetweenTwoNumericalElements = new double[maxDepth + 1];
+		for (int depthIndex = 0; depthIndex < maxDepth; depthIndex++) {
+			arrayMaxDistanceBetweenTwoNumericalElements[depthIndex] = divideBy;
+			divideBy /= divideIterationFactor;
+			//maxAbsValue / Math.pow(10, depthIndex);
+		}
+		arrayMaxDistanceBetweenTwoNumericalElements[maxDepth] = 0;
+		
+
+		for (int depthIndex = 0; depthIndex < arrayMaxDistanceBetweenTwoNumericalElements.length; depthIndex++) {
+			System.out.println("At index " + depthIndex + " : " + arrayMaxDistanceBetweenTwoNumericalElements[depthIndex]);
+			//maxAbsValue / Math.pow(10, depthIndex);
+		}
+		
+		
 	}
 	
 	/** Création de l'arbre, à hauteur définie
 	 *  @param argHeightIndex
 	 */
-	public IndexTreeV3(int argHeightIndex, Object argAssociatedRoundValue) {
+	public IndexTreeV3(int argHeightIndex, Object argAssociatedRoundValue, Object minValue, Object maxValue) {
 		// storedValuesClassType défini via argAssociatedRoundValue
+		//initializeMaxDistanceBetweenElementsArray(minValue, maxValue);
 		if (argAssociatedRoundValue != null)
 			storedValuesClassType = argAssociatedRoundValue.getClass();
 		heightIndex = argHeightIndex;
