@@ -15,7 +15,7 @@ public class DateType extends DataType {
 		Operator.lessOrEquals,
 	};
 	
-	// Nécessaire ppur rendre les opérations trhead-safe, il ne peut pas y avoir de Utils ayant des méthodes statiques utilisant les mêmes objets instanciés.
+	// Nécessaire pour rendre les opérations trhead-safe, il ne peut pas y avoir de Utils ayant des méthodes statiques utilisant les mêmes objets instanciés.
 	// (sous peine d'exceptions dus à des problèmes de concurrence)
 	// Et nbe pas utiliser de synchronized ou volatile, de préférence, cela réduirait grandement les performances)
 	Utils currentUtilsInstance = new Utils();
@@ -34,7 +34,7 @@ public class DateType extends DataType {
 
 	@Override
 	public void parse(String input, ByteBuffer outputBuffer) {
-		int dateAsInt = currentUtilsInstance.dateToSecInt(currentUtilsInstance.dateFromString(input));
+		int dateAsInt = Utils.dateToSecInt(currentUtilsInstance.dateFromString(input));
 		outputBuffer.putInt(dateAsInt);
 	}
 	
