@@ -5,11 +5,11 @@ import java.util.ArrayList;
 /**
  *  KeyMaker, pour ne pas avoir à créer un tableau lors de la création des clefs, pas super optilisé mais pratique (parfois)
  */
-public class KeyMaker {
+public class KeyHashMaker {
 	
 	protected ArrayList<Object> valuesList = new ArrayList<Object>(); // Liste des valeurs de la clef : Integer, String ...
 	
-	public KeyMaker() {
+	public KeyHashMaker() {
 		
 	}
 	
@@ -19,7 +19,7 @@ public class KeyMaker {
 	
 	public Key makeKey() {
 		Object[] objectArray = valuesList.toArray();
-		return new Key(objectArray);
+		return new KeyHash(objectArray);
 	}
 	
 }
