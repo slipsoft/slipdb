@@ -25,12 +25,18 @@ public class DoubleType extends DataType {
 	}
 	
 	@Override
-	public void parse(String input, ByteBuffer outputBuffer) {
+	public void writeToBuffer(String input, ByteBuffer outputBuffer) {
 		outputBuffer.putDouble(Double.parseDouble(input));
 	}
 	
 	@Override
-	public Double getValueFromByteArray(byte[] bytes) {
+	public Double readTrueValue(byte[] bytes) {
+		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
+		return wrapped.getDouble();
+	}
+	
+	@Override
+	public Double readIndexValue(byte[] bytes) {
 		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
 		return wrapped.getDouble();
 	}
