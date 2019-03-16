@@ -25,12 +25,18 @@ public class IntegerType extends DataType {
 	}
 	
 	@Override
-	public void parse(String input, ByteBuffer outputBuffer) {
+	public void writeToBuffer(String input, ByteBuffer outputBuffer) {
 		outputBuffer.putInt(Integer.parseInt(input));
 	}
 	
 	@Override
-	public Integer getValueFromByteArray(byte[] bytes) {
+	public Integer readTrueValue(byte[] bytes) {
+		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
+		return wrapped.getInt();
+	}
+	
+	@Override
+	public Integer readIndexValue(byte[] bytes) {
 		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
 		return wrapped.getInt();
 	}

@@ -175,7 +175,7 @@ public class IndexTreeCeptionV4 {
 			int bytesRead = fileAsStream.read(columnValueAsByteArray); // reads from the stream
 			if (bytesRead == -1) // end of stream
 				break;
-			Object readValue = columnDataType.getValueFromByteArray(columnValueAsByteArray);
+			Object readValue = columnDataType.readIndexValue(columnValueAsByteArray);
 			this.addValue(readValue, new Integer(lineIndex)); // creating a new Integer is quite slow ><" (but the bottle neck really is I/O on disk)
 			checkSkipBytesAmount = fileAsStream.skip(skipAfterData);
 			// Display some contents, debuging :

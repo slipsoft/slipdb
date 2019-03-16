@@ -59,6 +59,6 @@ public class Column {
 	}
 	
 	public void parse(String input, ByteBuffer outputBuffer) {
-		this.getDataType().parse(input, outputBuffer);
+		this.getDataType().writeToBuffer(input, outputBuffer);
 	}
 }

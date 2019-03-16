@@ -28,6 +28,7 @@ import db.structure.Table;
 class CsvParserTest {
 	protected CsvParser parser;
 	protected Table table;
+	Utils utilsInstance;
 
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
@@ -37,7 +38,7 @@ class CsvParserTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		ArrayList<Column> columns = new ArrayList<Column>();
-		Utils currentlyUsedUils = new Utils(); // For thread-safety !
+		utilsInstance = new Utils(); // For thread-safety !
 		try {
 			columns.add(new Column("VendorID", new ByteType()));
 			columns.add(new Column("tpep_pickup_datetime", new DateType()));
@@ -85,8 +86,8 @@ class CsvParserTest {
 		Log.debug(table.getValuesOfLineById(70), "entry/70");
 		List<Object> expected = new ArrayList<Object>();
 		expected.add((byte) 2);
-		expected.add(Utils.dateFromString("2015-04-09 19:29:33"));
-		expected.add(Utils.dateFromString("2015-04-09 19:37:09"));
+		expected.add(utilsInstance.dateFromString("2015-04-09 19:29:33"));
+		expected.add(utilsInstance.dateFromString("2015-04-09 19:37:09"));
 		expected.add((byte) 1);
 		expected.add((float) 0.83);
 		expected.add(-73.98651885986328);

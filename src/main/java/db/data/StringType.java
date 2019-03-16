@@ -17,7 +17,7 @@ public class StringType extends DataType {
 	}
 	
 	@Override
-	public void parse(String input, ByteBuffer outputBuffer) {
+	public void writeToBuffer(String input, ByteBuffer outputBuffer) {
 		byte[] bytes = Arrays.copyOf(input.getBytes(), this.sizeInBytes);
 		outputBuffer.put(bytes);
 	}
@@ -29,7 +29,12 @@ public class StringType extends DataType {
 	}
 	
 	@Override
-	public String getValueFromByteArray(byte[] bytes) {
+	public String readTrueValue(byte[] bytes) {
+		return new String(bytes).replaceAll("\0", "");
+	}
+	
+	@Override
+	public String readIndexValue(byte[] bytes) {
 		return new String(bytes).replaceAll("\0", "");
 	}
 

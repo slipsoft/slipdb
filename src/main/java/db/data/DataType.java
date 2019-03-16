@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+
 public abstract class DataType {
 	protected int sizeInBytes;
 	protected static Operator[] compatibleOperatorsList;
@@ -27,7 +28,8 @@ public abstract class DataType {
 		return ArrayUtils.contains(compatibleOperatorsList, op);
 	}
 	
-	abstract public void parse(String input, ByteBuffer outputBuffer);
-	abstract public Object getValueFromByteArray(byte[] bytes);
+	abstract public void writeToBuffer(String input, ByteBuffer outputBuffer);
+	abstract public Object readTrueValue(byte[] bytes);
+	abstract public Object readIndexValue(byte[] bytes); // return Key object in the future
 
 }
