@@ -63,8 +63,8 @@ class CsvParserTest {
 			Log.error(e);
 		}
 		table = new Table("test", columns);
-		parser = new CsvParserS2(table); // 790 ms
-		//parser = new CsvParser(table); // 750 ms
+		//parser = new CsvParser2(table); // 790 ms
+		parser = new CsvParser(table); // 750 ms
 	}
 
 	@AfterEach

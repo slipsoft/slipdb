@@ -22,7 +22,6 @@ import db.data.FloatType;
 import db.data.IntegerArrayList;
 import db.data.StringType;
 import db.parsers.CsvParser;
-import db.parsers.CsvParserS2;
 import db.parsers.Parser;
 import db.structure.Column;
 import db.structure.Table;
@@ -64,7 +63,7 @@ public class IndexTreeTest {
 			Log.error(e);
 		}
 		table = new Table("test", columns);
-		parser = new CsvParserS2(table);
+		parser = new CsvParser(table);
 		
 		//FileInputStream is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); // "../SMALL_1_000_000_yellow_tripdata_2015-04.csv"
 		FileInputStream is = new FileInputStream("../SMALL_1_000_000_yellow_tripdata_2015-04.csv"); // testdata
