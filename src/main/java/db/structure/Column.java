@@ -1,6 +1,8 @@
 package db.structure;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import db.data.DataType;
 import zArchive.sj.simpleBD.parseCSV.SOptimDataFromCSV;
@@ -23,6 +25,7 @@ public class Column {
 		//hasToIndexThisColumn = aHasToIndexThisColumn; not useful anymore
 	}
 	
+	protected List<Index> indicesList = new ArrayList<>();
 	
 	/**
 	 * Laissé pour rester compatibles avec les tests unitaires de Nicolas, mais non utilisé par Sylvain
@@ -60,5 +63,9 @@ public class Column {
 	
 	public void parse(String input, ByteBuffer outputBuffer) {
 		this.getDataType().writeToBuffer(input, outputBuffer);
+	}
+
+	public void addIndex(Index index) {
+		this.indicesList.add(index);
 	}
 }

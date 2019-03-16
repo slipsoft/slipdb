@@ -12,6 +12,15 @@ import db.data.Operator;
  */
 public abstract class Index {
 	
+	/**
+	 * Carte des valeurs indexées par cet objet Index - association clef valeur :
+	 * Key est l'identifiant (ex : nom -ou- nom + prénom + age par exemple), Integer
+	 * est l'index dans le fichier binaire issu des .CSV Une seule correspondance
+	 * est possible, pour que ça fonctionne, il faudrait donc remplacer Integer par
+	 * ArrayList<Integer>
+	 */
+	protected Map<Key, ArrayList<Integer>> indexedValuesMap;
+
 	protected static Operator[] compatibleOperatorsList; // Liste des opérateurs compatibles
 	protected Column[] indexedColumnsList; // Liste des colonnes indexées dans cet Index
 	

@@ -9,8 +9,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.dant.utils.Utils;
-
 import db.data.IntegerType;
 import db.data.StringType;
 
@@ -22,7 +20,6 @@ class TableTest {
 	@BeforeEach
 	void setUp() throws Exception {
 
-		Utils currentlyUsedUils = new Utils(); // For thread-safety !
 		columns.add(new Column("col1", new StringType(10)));
 		columns.add(new Column("col2", new IntegerType()));
 		Column[] cols = {columns.get(0)};
@@ -48,7 +45,7 @@ class TableTest {
 
 	@Test
 	final void testGetIndexes() {
-		assertEquals(indexes, table.getIndexes());
+		assertEquals(indexes, table.getIndices());
 	}
 
 	@Test
@@ -56,7 +53,7 @@ class TableTest {
 		Column[] cols = {columns.get(1)};
 		Index index = new IndexHash(cols);
 		table.addIndex(index);
-		assertEquals(index, table.getIndexes().get(1));
+		assertEquals(index, table.getIndices().get(1));
 	}
 
 	@Test
