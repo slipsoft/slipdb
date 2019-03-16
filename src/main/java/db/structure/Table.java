@@ -21,7 +21,7 @@ public class Table {
 	protected String name; // table name
 	protected EasyFile fileLinesOnDisk;
 	protected List<Column> columnsList = new ArrayList<Column>(); // liste des colonnes de la table
-	protected List<Index> indexesList = new ArrayList<Index>();   // liste des index générés pour cette table
+	protected List<Index> indicesList = new ArrayList<Index>();   // liste des index générés pour cette table
 	
 	/** Create a table with a name and a columns list
 	 * @param name name
@@ -43,12 +43,15 @@ public class Table {
 		return columnsList;
 	}
 
-	public List<Index> getIndexes() {
-		return indexesList;
+	public List<Index> getIndices() {
+		return indicesList;
 	}
 	
 	public void addIndex(Index index) {
-		this.indexesList.add(index);
+		this.indicesList.add(index);
+		for (Column column : index.getColumnList()) {
+			column.addIndex(index);
+		}
 	}
 	
 	public int getLineSize() {
