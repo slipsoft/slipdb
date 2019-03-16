@@ -21,7 +21,6 @@ import db.data.DataType;
 import db.data.IntegerArrayList;
 import db.data.Operator;
 import db.structure.Column;
-import db.structure.Index;
 import db.structure.Table;
 import sj.simpleDB.treeIndexing.SIndexingTreeType;
 
@@ -38,7 +37,7 @@ import sj.simpleDB.treeIndexing.SIndexingTreeType;
  */
 
 
-public class IndexTreeCeptionV4 {
+public class IndexTreeCeption {
 	protected SIndexingTreeType treeType; // servira pour l'utilisation de méthodes génériques, pour utiliser le bon type d'arbre et faire les bons cast
 	
 	@SuppressWarnings("rawtypes")
@@ -51,13 +50,13 @@ public class IndexTreeCeptionV4 {
 	// Le dernier arbre contient le TreeMap de tous les binIndex associés à une valeur donnée (non approximée)
 	// -> Ce tableau devra être à chaque fois adapté au type de valeur stockée, par exmemple, pour indexer une colonne de double, les longitudes/latitudes,
 	//    il faudrait qu'il y ait les valeurs 0.1, 0.01, 0.001 : multiplier la valeur par 10, 100, 1000 et en prendre la partie entière.
-	public static double[] arrayMaxDistanceBetweenTwoNumericalElements = {
+	public static double[] arrayMaxDistanceBetweenTwoNumericalElements;/* = {
 		1000000,
 		10000,
 		100, // marche bien pour des int, mal pour des double où seules les décimales changent (et non la partie entière)
-		/*10, 8, 5, 4, 3, 2, 1,*/
+		/*10, 8, 5, 4, 3, 2, 1,* /
 		0 // arbre terminal contenant la donnée fine
-	};
+	};*/
 	
 	// Seulement alloué si l'arbre est un arbre intermédiaire
 	protected TreeMap<Object/*clef, valeur indexée*/, IndexTreeV3> finerSubTrees = null; //new TreeMap<Object, IndexTreeV3>();
@@ -72,16 +71,58 @@ public class IndexTreeCeptionV4 {
 	protected int heightIndex = 0; // par défaut, le permier arbre
 	protected Object associatedRoundValue; // Valeur divisée par arrayMaxDistanceBetweenTwoNumericalElements[heightIndex]
 	
-	public IndexTreeCeptionV4() {
+	public IndexTreeCeption() {
 		// storedValuesClassType défini dans indexColumnFromDisk
-		this(0, null);
+		this(0, null, null, null);
+	}
+	
+
+	/** Création de l'arbre, à hauteur définie
+	 *  @param argHeightIndex
+	 */
+	public IndexTreeCeption(int argHeightIndex, Object argAssociatedRoundValue) {
+		this(argHeightIndex, argAssociatedRoundValue, null, null);
+	}
+	
+	public void initializeMaxDistanceBetweenElementsArray(Object minValue, Object maxValue) {
+		//if (true) return;
+		if (minValue == null || maxValue == null) return;
+		if ((minValue instanceof Number) == false) return;
+		if (minValue.getClass() != maxValue.getClass()) return;
+		
+		double doubleMinAbsValue = Math.abs(((Number) minValue).doubleValue());
+		double doubleMaxAbsValue = Math.abs(((Number) maxValue).doubleValue());
+		double maxAbsValue = Math.max(doubleMinAbsValue, doubleMaxAbsValue);
+		
+		//double interval = doubleMaxValue - doubleMinValue;
+		
+		double divideIterationFactor = 8;
+		double divideBy = maxAbsValue / divideIterationFactor;
+		int maxDepth = 10;
+		
+		arrayMaxDistanceBetweenTwoNumericalElements = new double[maxDepth + 1];
+		for (int depthIndex = 0; depthIndex < maxDepth; depthIndex++) {
+			arrayMaxDistanceBetweenTwoNumericalElements[depthIndex] = divideBy;
+			divideBy /= divideIterationFactor;
+			//maxAbsValue / Math.pow(10, depthIndex);
+		}
+		arrayMaxDistanceBetweenTwoNumericalElements[maxDepth] = 0;
+		
+
+		for (int depthIndex = 0; depthIndex < arrayMaxDistanceBetweenTwoNumericalElements.length; depthIndex++) {
+			System.out.println("At index " + depthIndex + " : " + arrayMaxDistanceBetweenTwoNumericalElements[depthIndex]);
+			//maxAbsValue / Math.pow(10, depthIndex);
+		}
+		
+		
 	}
 	
 	/** Création de l'arbre, à hauteur définie
 	 *  @param argHeightIndex
 	 */
-	public IndexTreeCeptionV4(int argHeightIndex, Object argAssociatedRoundValue) {
+	public IndexTreeCeption(int argHeightIndex, Object argAssociatedRoundValue, Object minValue, Object maxValue) {
 		// storedValuesClassType défini via argAssociatedRoundValue
+		initializeMaxDistanceBetweenElementsArray(minValue, maxValue);
 		if (argAssociatedRoundValue != null)
 			storedValuesClassType = argAssociatedRoundValue.getClass();
 		heightIndex = argHeightIndex;
@@ -153,7 +194,7 @@ public class IndexTreeCeptionV4 {
 		int dataSizeInBytes = columnDataType.getSize();
 		
 		//indexedColumnsList = new Column[1]; // Currently, an IndexTree only supports one column
-		// inutile ici indexedColumnsList[0] = indexThisColumn;
+		//indexedColumnsList[0] = indexThisColumn;
 		
 		int skipBeforeData = dataOffsetInLine; // skip the first values
 		int skipAfterData = totalLineSize - skipBeforeData - dataSizeInBytes; // skip the remaining values
@@ -165,25 +206,62 @@ public class IndexTreeCeptionV4 {
 		// Get a new disposable FileInputStream with the file where all table rows are stored
 		FileInputStream fileAsStream = new FileInputStream(inTable.getFileLinesOnDisk());
 		int lineIndex = 0;
+		long currentBinPosition = 0;
+		long fileSize = inTable.getFileLinesOnDisk().length();
 		
+		//Timer benchTime = new Timer("Temps pris par l'indexation");
+		byte[] columnValueAsByteArray = new byte[dataSizeInBytes];
+		//while (currentBinPosition < fileSize)
 		while (true) {
-
+			
+			/*
+			 	Bench - performances (découpage) :
+			 		Temps total avec tout :
+			 		La gestion de la boucle : 2 ms 
+			 		+ Les skip : 210 ms (un seul skip -> 70 ms, 3 skip -> 210 ms)
+			 		+ Le read  : 340 ms
+			 		+ Le cast  : 350 ms (columnDataType.getValueFromByteArray(columnValueAsByteArray);)
+			 		+ addValue : 380 ms
+				
+			*/
+			/*
+			fileAsStream.skip(skipBeforeData);
+			fileAsStream.skip(dataSizeInBytes);
+			fileAsStream.skip(skipAfterData);
+				-> Prend 210 ms
+			
+			fileAsStream.skip(skipBeforeData + dataSizeInBytes + skipAfterData);
+				-> Prend 70 ms
+			
+			-> D'où la nécessité de faire des colonnes séparées ! (on réduit de BEAUCOUP le temps !)
+			*/
+			
 			// Seeks to the right position in the stream
-			long checkSkipBytesAmount;
-			checkSkipBytesAmount = fileAsStream.skip(skipBeforeData);
-			byte[] columnValueAsByteArray = new byte[dataSizeInBytes];
+			//long checkSkipBytesAmount;
+			fileAsStream.skip(skipBeforeData);
+			//checkSkipBytesAmount = fileAsStream.skip(dataSizeInBytes);
+			//int bytesRead = fileAsStream.read(columnValueAsByteArray); // reads from the stream
+			
+			//byte[] columnValueAsByteArray = new byte[dataSizeInBytes];
 			int bytesRead = fileAsStream.read(columnValueAsByteArray); // reads from the stream
 			if (bytesRead == -1) // end of stream
 				break;
+			
+			
 			Object readValue = columnDataType.getValueFromByteArray(columnValueAsByteArray);
 			this.addValue(readValue, new Integer(lineIndex)); // creating a new Integer is quite slow ><" (but the bottle neck really is I/O on disk)
-			checkSkipBytesAmount = fileAsStream.skip(skipAfterData);
+			
+			
+			fileAsStream.skip(skipAfterData);
+			
+			currentBinPosition += skipBeforeData + dataSizeInBytes + skipAfterData;
+			
 			// Display some contents, debuging :
 			//if (lineIndex % 10000 == 0) Log.info("lineIndex = " + lineIndex + " readValue = " + readValue);
 			
 			lineIndex++;
 		}
-		
+		//benchTime.printms();
 		
 		fileAsStream.close();
 	}

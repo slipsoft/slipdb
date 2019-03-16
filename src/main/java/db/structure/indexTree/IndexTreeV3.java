@@ -89,13 +89,13 @@ public class IndexTreeV3 extends Index {
 	// Le dernier arbre contient le TreeMap de tous les binIndex associés à une valeur donnée (non approximée)
 	// -> Ce tableau devra être à chaque fois adapté au type de valeur stockée, par exmemple, pour indexer une colonne de double, les longitudes/latitudes,
 	//    il faudrait qu'il y ait les valeurs 0.1, 0.01, 0.001 : multiplier la valeur par 10, 100, 1000 et en prendre la partie entière.
-	public static double[] arrayMaxDistanceBetweenTwoNumericalElements = {
+	public static double[] arrayMaxDistanceBetweenTwoNumericalElements;/* = {
 		1000000,
 		10000,
 		100, // marche bien pour des int, mal pour des double où seules les décimales changent (et non la partie entière)
-		/*10, 8, 5, 4, 3, 2, 1,*/
+		/*10, 8, 5, 4, 3, 2, 1,* /
 		0 // arbre terminal contenant la donnée fine
-	};
+	};*/
 	
 	// Seulement alloué si l'arbre est un arbre intermédiaire
 	protected TreeMap<Object/*clef, valeur indexée*/, IndexTreeV3> finerSubTrees = null; //new TreeMap<Object, IndexTreeV3>();
@@ -124,7 +124,7 @@ public class IndexTreeV3 extends Index {
 	}
 	
 	public void initializeMaxDistanceBetweenElementsArray(Object minValue, Object maxValue) {
-		if (true) return;
+		//if (true) return;
 		if (minValue == null || maxValue == null) return;
 		if ((minValue instanceof Number) == false) return;
 		if (minValue.getClass() != maxValue.getClass()) return;
@@ -161,7 +161,7 @@ public class IndexTreeV3 extends Index {
 	 */
 	public IndexTreeV3(int argHeightIndex, Object argAssociatedRoundValue, Object minValue, Object maxValue) {
 		// storedValuesClassType défini via argAssociatedRoundValue
-		//initializeMaxDistanceBetweenElementsArray(minValue, maxValue);
+		initializeMaxDistanceBetweenElementsArray(minValue, maxValue);
 		if (argAssociatedRoundValue != null)
 			storedValuesClassType = argAssociatedRoundValue.getClass();
 		heightIndex = argHeightIndex;

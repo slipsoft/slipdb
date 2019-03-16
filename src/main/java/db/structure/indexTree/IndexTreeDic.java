@@ -23,6 +23,6 @@ package db.structure.indexTree;
  * 
  */
 
-public class IndexTreeDicV1 {
+public class IndexTreeDic {
 
 }
