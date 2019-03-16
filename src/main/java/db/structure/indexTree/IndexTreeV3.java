@@ -18,6 +18,7 @@ import java.util.TreeMap;
 
 import com.dant.utils.EasyFile;
 import com.dant.utils.Log;
+import com.dant.utils.Timer;
 
 import db.data.DataType;
 import db.data.IntegerArrayList;
@@ -202,25 +203,62 @@ public class IndexTreeV3 extends Index {
 		// Get a new disposable FileInputStream with the file where all table rows are stored
 		FileInputStream fileAsStream = new FileInputStream(inTable.getFileLinesOnDisk());
 		int lineIndex = 0;
+		long currentBinPosition = 0;
+		long fileSize = inTable.getFileLinesOnDisk().length();
 		
+		//Timer benchTime = new Timer("Temps pris par l'indexation");
+		byte[] columnValueAsByteArray = new byte[dataSizeInBytes];
+		//while (currentBinPosition < fileSize)
 		while (true) {
-
+			
+			/*
+			 	Bench - performances (découpage) :
+			 		Temps total avec tout :
+			 		La gestion de la boucle : 2 ms 
+			 		+ Les skip : 210 ms (un seul skip -> 70 ms, 3 skip -> 210 ms)
+			 		+ Le read  : 340 ms
+			 		+ Le cast  : 350 ms (columnDataType.getValueFromByteArray(columnValueAsByteArray);)
+			 		+ addValue : 380 ms
+				
+			*/
+			/*
+			fileAsStream.skip(skipBeforeData);
+			fileAsStream.skip(dataSizeInBytes);
+			fileAsStream.skip(skipAfterData);
+				-> Prend 210 ms
+			
+			fileAsStream.skip(skipBeforeData + dataSizeInBytes + skipAfterData);
+				-> Prend 70 ms
+			
+			-> D'où la nécessité de faire des colonnes séparées ! (on réduit de BEAUCOUP le temps !)
+			*/
+			
 			// Seeks to the right position in the stream
-			long checkSkipBytesAmount;
-			checkSkipBytesAmount = fileAsStream.skip(skipBeforeData);
-			byte[] columnValueAsByteArray = new byte[dataSizeInBytes];
+			//long checkSkipBytesAmount;
+			fileAsStream.skip(skipBeforeData);
+			//checkSkipBytesAmount = fileAsStream.skip(dataSizeInBytes);
+			//int bytesRead = fileAsStream.read(columnValueAsByteArray); // reads from the stream
+			
+			//byte[] columnValueAsByteArray = new byte[dataSizeInBytes];
 			int bytesRead = fileAsStream.read(columnValueAsByteArray); // reads from the stream
 			if (bytesRead == -1) // end of stream
 				break;
+			
+			
 			Object readValue = columnDataType.getValueFromByteArray(columnValueAsByteArray);
 			this.addValue(readValue, new Integer(lineIndex)); // creating a new Integer is quite slow ><" (but the bottle neck really is I/O on disk)
-			checkSkipBytesAmount = fileAsStream.skip(skipAfterData);
+			
+			
+			fileAsStream.skip(skipAfterData);
+			
+			currentBinPosition += skipBeforeData + dataSizeInBytes + skipAfterData;
+			
 			// Display some contents, debuging :
 			//if (lineIndex % 10000 == 0) Log.info("lineIndex = " + lineIndex + " readValue = " + readValue);
 			
 			lineIndex++;
 		}
-		
+		//benchTime.printms();
 		
 		fileAsStream.close();
 	}
