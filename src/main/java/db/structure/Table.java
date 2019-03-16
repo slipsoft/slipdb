@@ -134,7 +134,7 @@ public class Table {
 			byte[] columnValueAsByteArray = new byte[column.getSize()];
 			fileAsStream.read(columnValueAsByteArray); // reads from the stream
 			//Log.debug(b); for debug purposes only
-			lineValues.add(column.getDataType().getValueFromByteArray(columnValueAsByteArray));
+			lineValues.add(column.getDataType().readTrueValue(columnValueAsByteArray));
 		}
 		fileAsStream.close();
 		return lineValues;

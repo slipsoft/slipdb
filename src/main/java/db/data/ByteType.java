@@ -23,19 +23,24 @@ public class ByteType extends DataType {
 	}
 
 	@Override
-	public void parse(String input, ByteBuffer outputBuffer) {
+	public void writeToBuffer(String input, ByteBuffer outputBuffer) {
 		outputBuffer.put(Byte.parseByte(input));
 	}
 
 	@Override
-	public Byte parseAndReturnValue(String input, ByteBuffer outputBuffer) {
+	public Byte writeToBufferAndReturnValue(String input, ByteBuffer outputBuffer) {
 		Byte asByte = Byte.parseByte(input);
 		outputBuffer.put(asByte);
 		return asByte;
 	}
 	
 	@Override
-	public Byte getValueFromByteArray(byte[] bytes) {
+	public Byte readTrueValue(byte[] bytes) {
+		return new Byte(bytes[0]); // get the associates byte
+	}
+	
+	@Override
+	public Byte readIndexValue(byte[] bytes) {
 		return new Byte(bytes[0]); // get the associates byte
 	}
 

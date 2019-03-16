@@ -15,13 +15,13 @@ public class StringType extends DataType {
 	}
 	
 	@Override
-	public void parse(String input, ByteBuffer outputBuffer) {
+	public void writeToBuffer(String input, ByteBuffer outputBuffer) {
 		byte[] bytes = Arrays.copyOf(input.getBytes(), this.sizeInBytes);
 		outputBuffer.put(bytes);
 	}
 	
 	@Override
-	public Object parseAndReturnValue(String input, ByteBuffer outputBuffer) {
+	public Object writeToBufferAndReturnValue(String input, ByteBuffer outputBuffer) {
 		byte[] bytes = Arrays.copyOf(input.getBytes(), this.sizeInBytes);
 		outputBuffer.put(bytes);
 		return input;
@@ -34,7 +34,12 @@ public class StringType extends DataType {
 	}
 	
 	@Override
-	public String getValueFromByteArray(byte[] bytes) {
+	public String readTrueValue(byte[] bytes) {
+		return new String(bytes).replaceAll("\0", "");
+	}
+	
+	@Override
+	public String readIndexValue(byte[] bytes) {
 		return new String(bytes).replaceAll("\0", "");
 	}
 

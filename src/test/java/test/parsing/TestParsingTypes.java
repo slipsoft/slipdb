@@ -53,42 +53,42 @@ public class TestParsingTypes {
 		localTimer = new Timer("Parsing de ByteType ");
 		for (int count = 0; count < maxCountOperation; count++) {
 			bBuff.rewind();
-			byteType.parse("78", bBuff);
+			byteType.writeToBuffer("78", bBuff);
 		}
 		localTimer.printms();
 
 		localTimer = new Timer("Parsing de IntegerType ");
 		for (int count = 0; count < maxCountOperation; count++) {
 			bBuff.rewind();
-			integerType.parse("454689586", bBuff);
+			integerType.writeToBuffer("454689586", bBuff);
 		}
 		localTimer.printms();
 
 		localTimer = new Timer("Parsing de LongType ");
 		for (int count = 0; count < maxCountOperation; count++) {
 			bBuff.rewind();
-			longType.parse("45468957895686", bBuff);
+			longType.writeToBuffer("45468957895686", bBuff);
 		}
 		localTimer.printms();
 		
 		localTimer = new Timer("Parsing de FloatType ");
 		for (int count = 0; count < maxCountOperation; count++) {
 			bBuff.rewind();
-			floatType.parse("454689586.2132152", bBuff);
+			floatType.writeToBuffer("454689586.2132152", bBuff);
 		}
 		localTimer.printms();
 		
 		localTimer = new Timer("Parsing de DoubleType ");
 		for (int count = 0; count < maxCountOperation; count++) {
 			bBuff.rewind();
-			doubleType.parse("454689586.2132152", bBuff);
+			doubleType.writeToBuffer("454689586.2132152", bBuff);
 		}
 		localTimer.printms();
 		
 		localTimer = new Timer("Parsing de DateType ");
 		for (int count = 0; count < maxCountOperation; count++) {
 			bBuff.rewind();
-			dateType.parse("2015-04-27 15:45:38", bBuff);
+			dateType.writeToBuffer("2015-04-27 15:45:38", bBuff);
 		}
 		localTimer.printms();
 		

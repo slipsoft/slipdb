@@ -62,11 +62,11 @@ public class Column {
 	}
 	
 	public void parse(String input, ByteBuffer outputBuffer) {
-		this.getDataType()/*storedDataType*/.parse(input, outputBuffer);
+		this.getDataType()/*storedDataType*/.writeToBuffer(input, outputBuffer);
 	}
 	
 	public Object parseAndReturnValue(String input, ByteBuffer outputBuffer) {
-		return this.getDataType().parseAndReturnValue(input, outputBuffer);
+		return this.getDataType().writeToBufferAndReturnValue(input, outputBuffer);
 	}
 	
 	

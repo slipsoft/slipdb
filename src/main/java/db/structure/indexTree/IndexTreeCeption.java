@@ -247,8 +247,8 @@ public class IndexTreeCeption {
 			if (bytesRead == -1) // end of stream
 				break;
 			
+			Object readValue = columnDataType.readIndexValue(columnValueAsByteArray);
 			
-			Object readValue = columnDataType.getValueFromByteArray(columnValueAsByteArray);
 			this.addValue(readValue, new Integer(lineIndex)); // creating a new Integer is quite slow ><" (but the bottle neck really is I/O on disk)
 			
 			
