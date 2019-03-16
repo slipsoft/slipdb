@@ -7,9 +7,13 @@ import org.apache.commons.lang3.ArrayUtils;
 public abstract class DataType {
 	protected int sizeInBytes;
 	protected static Operator[] compatibleOperatorsList;
+	//c'est en fait inutile (merci Nicolas ;) ) : protected final Utils currentUtilsInstance; // doit être initialisé
 	
 	public int getSize() {
 		return sizeInBytes;
+	}
+	
+	public DataType() {
 	}
 	
 	@SuppressWarnings("rawtypes")

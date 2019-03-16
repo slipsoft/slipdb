@@ -1,6 +1,5 @@
 package db.structure.indexTree;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -12,71 +11,34 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 
 import com.dant.utils.EasyFile;
-import com.dant.utils.Log;
-import com.dant.utils.Timer;
 
 import db.data.DataType;
 import db.data.IntegerArrayList;
 import db.data.Operator;
 import db.structure.Column;
 import db.structure.Index;
-import db.structure.IndexTreeOnDiskBlock;
 import db.structure.Table;
 import sj.simpleDB.treeIndexing.SIndexingTreeType;
 
 /**
- * IndexTree, v3 : sauvegarde du plus d'index possible sur le disque.
- * 
- * Pour de très gros fichiers à indexer, il n'y a pas assez de mémoire vive dispo,
- * il faut donc mettre une partie des index sur le disque.
- * Se pose le problème de pouvoir retrouver les données aussi vite que possible.
- * 
- * Sur le principe des zooms successifs, il serait possible de faire des arbres imbriqués : des regroupements de valeurs proches.
- * Pour une seule valeur : valeur réelle -> valeur groupée -> arbre contenant les arbres contenant les valeurs réelles -> bon arbre
- * Pour un interval : min - max réel -> minGroupé, maxGroupé -> arbres contenant les arbres des valeurs fines -> bons arbres, collections à fusionner pour avoir le résultat
- * 
- * Il me semblerait bon d'avoir plus de deux arbres imbriqués, pour pouvoir mettre BEAUCOUP de choses sur le disque.
- * Le principe serait le suivant : Arbre -> Sous-arbres ayant des valeurs plus fines -> ... -> valeurs recherchées
- * 
- * Un arbre (qui peut aussi être un sous-arbre) doit avoir une valeur approchée associée
- * 
- * 
- * Idées pour l'insertion/suppression une fois le fichier chargé :
- * Ajouter un élément au fichier de sauvegarde : simple, ça va à la fin.
- * 
- * -> Il est difficile de modifier un fichier d'index une fois mis sur le disque.
- * Je pense que ce serait une bonne idée d'avoir les insersions en mémoire, et quand il y en a trop, de les écrire sur le disque.
- * Plusieurs arbres d'index, et pour avoir le résultat d'une recherche, fusionner les résultats (vu que ces résultats sont indépendants)
- * 
- * Pour les suppressions, c'est plus compliqué.
- * 
- * 
- * Pour un IndexTreeV3, il y a trois types de structures :
- * -> L'arbre parent qui stocke les arbres intermédiaires
- * -> Les arbres intermédiaires qui redirigent vers les arbres contenant la donnée fine
- * -> Les arbres contenant la donnée fine
- * 
- * L'arbre parent est en fait un arbre intermédiaire.
- * 
- * Pour faire une recherche :
- *   Chaque arbre connait la valeur minimale et maximale recherchée, et la divise par son "maxDistanceBetweenTwoNumericalElements".
- *   Chaque arbre connait sa "hauteur" par rapport à la donnée fine
- *   
- * 
- * 
+ * TreeMapCeption : un arbre dans un arbre...
+ *  V4 !
+ *  Au programme :
+ *  - multi-thread du processus d'indexation
+ *  - lecture des colonnes choisies seulement (benchmarks à réaliser sur ce point)
+ *  - un index sur lequel on peut faire des recherches
+ *  - évaluation dynamique de la distance entre valeurs (arrayMaxDistanceBetweenTwoNumericalElements)
+ *  
+ *
  */
 
 
-
-/**
- * Cette version utilise des ArrayList, c'est un premier test, après, il sera possible de comparer les performances avec un TreeMap !
- * */
-public class IndexTreeV3 extends Index {
+public class IndexTreeCeptionV4 {
 	protected SIndexingTreeType treeType; // servira pour l'utilisation de méthodes génériques, pour utiliser le bon type d'arbre et faire les bons cast
 	
 	@SuppressWarnings("rawtypes")
@@ -110,7 +72,7 @@ public class IndexTreeV3 extends Index {
 	protected int heightIndex = 0; // par défaut, le permier arbre
 	protected Object associatedRoundValue; // Valeur divisée par arrayMaxDistanceBetweenTwoNumericalElements[heightIndex]
 	
-	public IndexTreeV3() {
+	public IndexTreeCeptionV4() {
 		// storedValuesClassType défini dans indexColumnFromDisk
 		this(0, null);
 	}
@@ -118,7 +80,7 @@ public class IndexTreeV3 extends Index {
 	/** Création de l'arbre, à hauteur définie
 	 *  @param argHeightIndex
 	 */
-	public IndexTreeV3(int argHeightIndex, Object argAssociatedRoundValue) {
+	public IndexTreeCeptionV4(int argHeightIndex, Object argAssociatedRoundValue) {
 		// storedValuesClassType défini via argAssociatedRoundValue
 		if (argAssociatedRoundValue != null)
 			storedValuesClassType = argAssociatedRoundValue.getClass();
@@ -167,7 +129,7 @@ public class IndexTreeV3 extends Index {
 	 *  @throws FileNotFoundException 
 	 */
 	public void indexColumnFromDisk(Table inTable, int columnIndex) throws IOException {
-		indexedColumnsList = new Column[0];
+		//indexedColumnsList = new Column[0];
 		
 		List<Column> columnsList = inTable.getColumns();
 		int columnsNumber = columnsList.size();
@@ -190,8 +152,8 @@ public class IndexTreeV3 extends Index {
 		storedValuesClassType = columnDataType.getAssociatedClassType();
 		int dataSizeInBytes = columnDataType.getSize();
 		
-		indexedColumnsList = new Column[1]; // Currently, an IndexTree only supports one column
-		indexedColumnsList[0] = indexThisColumn;
+		//indexedColumnsList = new Column[1]; // Currently, an IndexTree only supports one column
+		// inutile ici indexedColumnsList[0] = indexThisColumn;
 		
 		int skipBeforeData = dataOffsetInLine; // skip the first values
 		int skipAfterData = totalLineSize - skipBeforeData - dataSizeInBytes; // skip the remaining values
@@ -203,62 +165,25 @@ public class IndexTreeV3 extends Index {
 		// Get a new disposable FileInputStream with the file where all table rows are stored
 		FileInputStream fileAsStream = new FileInputStream(inTable.getFileLinesOnDisk());
 		int lineIndex = 0;
-		long currentBinPosition = 0;
-		long fileSize = inTable.getFileLinesOnDisk().length();
 		
-		//Timer benchTime = new Timer("Temps pris par l'indexation");
-		byte[] columnValueAsByteArray = new byte[dataSizeInBytes];
-		//while (currentBinPosition < fileSize)
 		while (true) {
-			
-			/*
-			 	Bench - performances (découpage) :
-			 		Temps total avec tout :
-			 		La gestion de la boucle : 2 ms 
-			 		+ Les skip : 210 ms (un seul skip -> 70 ms, 3 skip -> 210 ms)
-			 		+ Le read  : 340 ms
-			 		+ Le cast  : 350 ms (columnDataType.getValueFromByteArray(columnValueAsByteArray);)
-			 		+ addValue : 380 ms
-				
-			*/
-			/*
-			fileAsStream.skip(skipBeforeData);
-			fileAsStream.skip(dataSizeInBytes);
-			fileAsStream.skip(skipAfterData);
-				-> Prend 210 ms
-			
-			fileAsStream.skip(skipBeforeData + dataSizeInBytes + skipAfterData);
-				-> Prend 70 ms
-			
-			-> D'où la nécessité de faire des colonnes séparées ! (on réduit de BEAUCOUP le temps !)
-			*/
-			
+
 			// Seeks to the right position in the stream
-			//long checkSkipBytesAmount;
-			fileAsStream.skip(skipBeforeData);
-			//checkSkipBytesAmount = fileAsStream.skip(dataSizeInBytes);
-			//int bytesRead = fileAsStream.read(columnValueAsByteArray); // reads from the stream
-			
-			//byte[] columnValueAsByteArray = new byte[dataSizeInBytes];
+			long checkSkipBytesAmount;
+			checkSkipBytesAmount = fileAsStream.skip(skipBeforeData);
+			byte[] columnValueAsByteArray = new byte[dataSizeInBytes];
 			int bytesRead = fileAsStream.read(columnValueAsByteArray); // reads from the stream
 			if (bytesRead == -1) // end of stream
 				break;
-			
-			
 			Object readValue = columnDataType.getValueFromByteArray(columnValueAsByteArray);
 			this.addValue(readValue, new Integer(lineIndex)); // creating a new Integer is quite slow ><" (but the bottle neck really is I/O on disk)
-			
-			
-			fileAsStream.skip(skipAfterData);
-			
-			currentBinPosition += skipBeforeData + dataSizeInBytes + skipAfterData;
-			
+			checkSkipBytesAmount = fileAsStream.skip(skipAfterData);
 			// Display some contents, debuging :
 			//if (lineIndex % 10000 == 0) Log.info("lineIndex = " + lineIndex + " readValue = " + readValue);
 			
 			lineIndex++;
 		}
-		//benchTime.printms();
+		
 		
 		fileAsStream.close();
 	}

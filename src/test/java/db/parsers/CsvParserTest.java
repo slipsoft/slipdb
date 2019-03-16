@@ -14,6 +14,7 @@ import org.junit.jupiter.api.function.Executable;
 
 import com.dant.utils.Log;
 import com.dant.utils.Timer;
+import com.dant.utils.Utils;
 
 import db.data.ByteType;
 import db.data.DateType;
@@ -36,6 +37,7 @@ class CsvParserTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		ArrayList<Column> columns = new ArrayList<Column>();
+		Utils currentlyUsedUils = new Utils(); // For thread-safety !
 		try {
 			columns.add(new Column("VendorID", new ByteType()));
 			columns.add(new Column("tpep_pickup_datetime", new DateType()));

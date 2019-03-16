@@ -2,15 +2,19 @@ package db.data;
 
 import java.nio.ByteBuffer;
 
+
 public class ByteType extends DataType {
 
 	protected final static Operator[] compatibleOperatorsList = {
 		Operator.equals
 	};
-
+	
+	
 	public ByteType() {
+		super();
 		this.sizeInBytes = Byte.BYTES;
 	}
+	
 	
 	@SuppressWarnings("rawtypes")
 	@Override

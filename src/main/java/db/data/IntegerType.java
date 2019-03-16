@@ -11,10 +11,12 @@ public class IntegerType extends DataType {
 		Operator.greaterOrEquals,
 		Operator.lessOrEquals,
 	};
-
+	
 	public IntegerType() {
+		super();
 		this.sizeInBytes = Integer.BYTES;
 	}
+	
 
 	@SuppressWarnings("rawtypes")
 	@Override

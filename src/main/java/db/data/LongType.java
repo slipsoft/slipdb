@@ -2,9 +2,7 @@ package db.data;
 
 import java.nio.ByteBuffer;
 
-import com.dant.utils.Utils;
-
-public class FloatType extends DataType {
+public class LongType extends DataType {
 	
 	protected final static Operator[] compatibleOperatorsList = {
 		Operator.equals,
@@ -14,26 +12,27 @@ public class FloatType extends DataType {
 		Operator.lessOrEquals,
 	};
 	
-	public FloatType() {
+	public LongType() {
 		super();
-		this.sizeInBytes = Float.BYTES;
+		this.sizeInBytes = Long.BYTES;
 	}
 	
+
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Class getAssociatedClassType() {
-		return Float.class;
+		return Long.class;
 	}
 	
 	@Override
 	public void parse(String input, ByteBuffer outputBuffer) {
-		outputBuffer.putFloat(Float.parseFloat(input));
+		outputBuffer.putLong(Long.parseLong(input));
 	}
 	
 	@Override
-	public Float getValueFromByteArray(byte[] bytes) {
+	public Long getValueFromByteArray(byte[] bytes) {
 		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
-		return wrapped.getFloat();
+		return wrapped.getLong();
 	}
 
 }
