@@ -1,6 +1,7 @@
 package db.data;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class StringType extends DataType {
 
@@ -14,7 +15,8 @@ public class StringType extends DataType {
 	
 	@Override
 	public void parse(String input, ByteBuffer outputBuffer) {
-		outputBuffer.put(input.getBytes());
+		byte[] bytes = Arrays.copyOf(input.getBytes(), this.sizeInBytes);
+		outputBuffer.put(bytes);
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -25,7 +27,7 @@ public class StringType extends DataType {
 	
 	@Override
 	public String getValueFromByteArray(byte[] bytes) {
-		return new String(bytes);
+		return new String(bytes).replaceAll("\0", "");
 	}
 
 }
