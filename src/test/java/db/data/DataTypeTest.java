@@ -1,34 +1,55 @@
-package test.parsing;
+package db.data;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.ByteBuffer;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.dant.utils.Log;
 import com.dant.utils.Timer;
-import com.dant.utils.Utils;
-
-import db.data.ByteType;
-import db.data.DateType;
-import db.data.DoubleType;
-import db.data.FloatType;
-import db.data.IntegerType;
-import db.data.LongType;
 
 
-public class TestParsingTypes {
-	
+
+class DataTypeTest {
+
 	@BeforeAll
-	public static void startTest() {
+	static void setUpBeforeClass() throws Exception {
 		//Log.info("setUpBeforeAll");
-		Log.start("target/slipdb_TestParsingTypes.log", 3);
+		Log.start("target/slipdb_DataTypesTest.log", 3);
 		
 	}
-	
+
+	@BeforeEach
+	void setUp() throws Exception {
+	}
+
+	@AfterEach
+	void tearDown() throws Exception {
+	}
+
 	@Test
-	public void testParsingFunctions() {
+	void testGetSize() {
+		assertEquals(1,  new ByteType().getSize());
+		assertEquals(32, new IntegerType().getSize());
+		assertEquals(64, new LongType().getSize());
+		assertEquals(32, new FloatType().getSize());
+		assertEquals(64, new DoubleType().getSize());
+		assertEquals(32, new DateType().getSize());
+		assertEquals(10, new StringType(10).getSize());
+	}
+
+	@Test
+	void testGetAssociatedClassType() {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	void testWriteToBuffer() {
 		
 		int maxCountOperation = 5_000_000;
 		String maxCountOperationStr = "5_000_000";
@@ -111,9 +132,19 @@ public class TestParsingTypes {
 		
 		
 	}
+
+	@Test
+	void testReadTrueValue() {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	void testReadIndexValue() {
+		fail("Not yet implemented");
+	}
 	
 	@AfterAll
-	public static void terminateTest() {
+	static void terminateTest() {
 		
 	}
 }

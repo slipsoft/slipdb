@@ -21,11 +21,6 @@ public abstract class DataType implements Operable {
 	@SuppressWarnings("rawtypes")
 	public abstract Class getAssociatedClassType();
 	
-	public void setSize(int argSizeInBytes) {
-		this.sizeInBytes = argSizeInBytes;
-	}
-
-	
 	abstract public Object writeToBufferAndReturnValue(String input, ByteBuffer outputBuffer);
 	abstract public void writeToBuffer(String input, ByteBuffer outputBuffer);
 	

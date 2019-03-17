@@ -5,4 +5,4 @@
  * Tests autour du parsing
  *
  */
-package test.parsing;
+package db.data;
