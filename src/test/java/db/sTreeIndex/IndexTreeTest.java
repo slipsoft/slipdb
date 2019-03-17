@@ -109,16 +109,16 @@ public class IndexTreeTest {
 		
 		// Index the column on index 4
 		//int indexingColumnIndex = 3; // passanger count
-		int indexingColumnIndex = 4; // trip distance
+		//int indexingColumnIndex = 4; // trip distance
 		//int indexingColumnIndex = 5; // latitude
-		//int indexingColumnIndex = 1; // date pickup
+		int indexingColumnIndex = 1; // date pickup
 		
 		Column indexThisColumn = table.getColumns().get(indexingColumnIndex);
 		
 		System.out.println("OUOUOUOU " + indexThisColumn.minValue + "  " +  indexThisColumn.maxValue);
 
 		//IndexTreeCeption indexingObject = new IndexTreeCeption(0, null, indexThisColumn.minValue, indexThisColumn.maxValue);
-		IndexTreeDic indexingObject = new IndexTreeDic(Float.class);
+		IndexTreeDic indexingObject = new IndexTreeDic();//Integer.class);
 		
 		
 		//indexingObject.initializeMaxDistanceBetweenElementsArray(indexThisColumn.minValue, indexThisColumn.maxValue);
@@ -144,17 +144,22 @@ public class IndexTreeTest {
 		// Get the query result
 		Collection<IntegerArrayList> result;
 		MemUsage.printMemUsage();
-		result = indexingObject.findMatchingBinIndexesInMemory(new Float(20), new Float(25), true); // new Float(20), new Float(21)
-		//result = indexingObject.findMatchingBinIndexes(new Integer(-1000), new Integer(1000), true);
-
-		Date dateFrom = currentlyUsedUils.dateFromString("2015-04-16 00:05:00");
-		Date dateTo = currentlyUsedUils.dateFromString("2015-04-16 00:06:30");
+		
+		
+		Date dateFrom = currentlyUsedUils.dateFromString("2015-04-29 00:05:00");
+		Date dateTo = currentlyUsedUils.dateFromString("2015-04-29 00:10:30");
 		int intDateFrom = Utils.dateToSecInt(dateFrom);
 		int intDateTo = Utils.dateToSecInt(dateTo);
 		
+		
+		//result = indexingObject.findMatchingBinIndexesInMemory(new Float(20), new Float(25), true); // new Float(20), new Float(21)
+		result = indexingObject.findMatchingBinIndexesInMemory(intDateFrom, intDateTo, true);
+		
+		//result = indexingObject.findMatchingBinIndexes(new Integer(-1000), new Integer(1000), true);
+
+		
 		Timer searchQueryTimer = new Timer("Time took to return the matching elements");
 		Timer searchQueryFullTimer = new Timer("Time took to return the matching elements + size evaluation");
-		//result = indexingObject.findMatchingBinIndexes(intDateFrom, intDateTo, true);
 		
 		//result = indexingObject.findMatchingBinIndexes(new Byte((byte)0), new Byte((byte)100), true);
 		//result = indexingObject.findMatchingBinIndexes(new Double(0), new Double(0), true);
@@ -187,8 +192,9 @@ public class IndexTreeTest {
 		
 		Log.info("Depuis le disque : ");
 		Timer searchFromDiskTimer = new Timer("Temps pris pour la recherche du disque");
-		result = indexingObject.findMatchingBinIndexesFromDisk(new Float(20), new Float(25), true);
-		//result = indexingObject.findMatchingBinIndexesFromDisk(intDateFrom, intDateTo, true);
+		
+		//result = indexingObject.findMatchingBinIndexesFromDisk(new Float(20), new Float(25), true);
+		result = indexingObject.findMatchingBinIndexesFromDisk(intDateFrom, intDateTo, true);
 		
 		searchFromDiskTimer.printms();
 		
@@ -210,6 +216,7 @@ public class IndexTreeTest {
 				
 			}
 		}
+		if (result.size() > 0) Log.info("from value = ");
 		Log.info("Number of results = " + numberOfResults);
 		Log.info("Number of lines = " + numberOfLines);
 

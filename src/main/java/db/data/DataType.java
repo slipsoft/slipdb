@@ -12,6 +12,8 @@ public abstract class DataType {
 	
 	protected Object currentValue;
 	
+	//@SuppressWarnings("rawtypes") protected Class associatedIndexClassType;
+	
 	public int getSize() {
 		return sizeInBytes;
 	}
