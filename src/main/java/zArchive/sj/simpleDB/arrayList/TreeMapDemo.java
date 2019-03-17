@@ -4,6 +4,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import db.structure.Key;
+import db.structure.KeyHash;
 
 /**
  * Code issu de https://beginnersbook.com/2014/07/how-to-get-the-sub-map-from-treemap-example-java/
@@ -26,11 +27,11 @@ class TreeMapDemo {
 	            new TreeMap<String, String>();
 
 	    Integer[] objArray = new Integer[] {41, 20};
-	    Key key1 = new Key(objArray);
+	    Key key1 = new KeyHash(objArray);
 	    objArray = new Integer[] {88, 12};
-	    Key key2 = new Key(objArray);
+	    Key key2 = new KeyHash(objArray);
 	    objArray = new Integer[] {841, 2220};
-	    Key key3 = new Key(objArray);
+	    Key key3 = new KeyHash(objArray);
 
 	    TreeMap<Key, String> treemap2 = 
 	            new TreeMap<Key, String>();

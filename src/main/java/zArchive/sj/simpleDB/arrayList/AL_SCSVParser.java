@@ -24,16 +24,16 @@ public class AL_SCSVParser {
 	 *  des colonnes qui doivent être indexées via SIndexingTree
 	 */
 	
-	public Table table;
+	public AL_Table table;
 	public int entrySize;
 	
 	public void initCSVTable() {
 		
 		// Calcul de la taille d'une entrée
 		entrySize = 0;
-		for (int columnIndex = 0; columnIndex < table.getColumns().size(); columnIndex++) {
-			Column currentColumn = table.getColumns().get(columnIndex);
-			entrySize += currentColumn.dataType.dataSize;
+		for (int columnIndex = 0; columnIndex < table.columnList.size(); columnIndex++) {
+			AL_Column currentColumn = table.columnList.get(columnIndex);
+			entrySize += currentColumn.storageType.dataSize;
 		}
 		
 		/*VendorID,
@@ -59,8 +59,8 @@ public class AL_SCSVParser {
 	
 	public byte[] processCSVLine(String csvLine) {
 		String[] valueList = csvLine.split(",");
-		if (valueList.length != table.getColumns().size()) {
-			System.err.println("ERREUR AL_GlobalTest.processCSVLine : valueList.length("+valueList.length+") != testTable.columnList.size()("+table.getColumns().size()+")");
+		if (valueList.length != table.columnList.size()) {
+			System.err.println("ERREUR AL_GlobalTest.processCSVLine : valueList.length("+valueList.length+") != testTable.columnList.size()("+table.columnList.size()+")");
 			return new byte[0];
 		}
 		
@@ -69,9 +69,9 @@ public class AL_SCSVParser {
 		//System.out.println("CSVParser.processCSVLine llocate = " + totalTripSize);
 		
 		//AL_LineMaker lineMaker = new AL_LineMaker();
-		for (int columnIndex = 0; columnIndex < table.getColumns().size(); columnIndex++) {
+		for (int columnIndex = 0; columnIndex < table.columnList.size(); columnIndex++) {
 			String strValue = valueList[columnIndex];
-			Column currentColumn = table.getColumns().get(columnIndex);
+			AL_Column currentColumn = table.columnList.get(columnIndex);
 			
 			
 			float floatValue;
@@ -131,7 +131,7 @@ public class AL_SCSVParser {
 	}
 	
 	// Charger la donnée depuis le fichier CSV
-	public void loadFromCSV(String pathToCSV, String savePath, int maxLineCount, Table table) {
+	public void loadFromCSV(String pathToCSV, String savePath, int maxLineCount, AL_Table table) {
 		this.table = table;
 		initCSVTable(); // à remplacer par this.entrySize = table.getLineSize();
 		

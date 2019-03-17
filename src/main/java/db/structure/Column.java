@@ -1,44 +1,32 @@
 package db.structure;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import db.data.DataType;
-import zArchive.sj.simpleDB.arrayList.AL_SStorageDataType;
-import zArchive.sj.simpleDB.arrayList.Al_SOptimDataFromCSV;
 
 public class Column {
-	
+
 	protected String name = "Nom inconnu";
 	protected DataType storedDataType;
 	
 	public Object minValue = null;
 	public Object maxValue = null;
 
-	// Type de donnée stockée
-	public final AL_SStorageDataType dataType;// = StorageDataType.isUnknown;
-	public final Al_SOptimDataFromCSV optimDataType; // utile pour le cast d'une date -> int par exemple
-	//public final boolean hasToIndexThisColumn; // Indexer cette colonne au chargement
-	
-	public Column(String argName, Al_SOptimDataFromCSV argOptimDataType/*, boolean aHasToIndexThisColumn*/) { //StorageDataType argDataType, StorageDataType argDataTypeInCSV) {
-		this.name = argName;
-		this.dataType = argOptimDataType.realDataType;
-		this.optimDataType = argOptimDataType;
-		//hasToIndexThisColumn = aHasToIndexThisColumn; not useful anymore
-	}
-	
-	
+	protected DataType dataType;
+	protected List<Index> relatedIndicesList = new ArrayList<>();
+
 	/**
-	 * Laissé pour rester compatibles avec les tests unitaires de Nicolas, mais non utilisé par Sylvain
+	 * Columns contructor
+	 *
 	 * @param name
-	 * @param type
+	 * @param dataType
 	 * @param size
 	 */
-	public Column(String name, DataType type) {
-		optimDataType = null;
-		dataType = null;
+	public Column(String name, DataType dataType) {
 		this.name = name;
-		this.storedDataType = type;
-		//hasToIndexThisColumn = false;
+		this.dataType = dataType;
 	}
 
 	public String getName() {
@@ -50,17 +38,17 @@ public class Column {
 	}
 
 	public DataType getDataType() {
-		return storedDataType;
+		return dataType;
 	}
 
-	public void setDataType(DataType type) {
-		this.storedDataType = type;
+	public void setDataType(DataType dataType) {
+		this.dataType = dataType;
 	}
 
 	public int getSize() {
-		return storedDataType.getSize();
+		return dataType.getSize();
 	}
-	
+
 	public void parse(String input, ByteBuffer outputBuffer) {
 		this.getDataType()/*storedDataType*/.writeToBuffer(input, outputBuffer);
 	}
@@ -107,4 +95,7 @@ public class Column {
 	}
 	
 	
+	public void addIndex(Index index) {
+		this.relatedIndicesList.add(index);
+	}
 }

@@ -11,12 +11,12 @@ public class AL_LineMaker {
 	private ArrayList<AL_RowArgument> rowValueList = new ArrayList<AL_RowArgument>();
 	
 	public void addRowValue_int(int value) {
-		AL_RowArgument newArgument = new AL_RowArgument(AL_StorageType.isInteger, new Integer(value));
+		AL_RowArgument newArgument = new AL_RowArgument(AL_SStorageDataType.isInteger, new Integer(value));
 		rowValueList.add(newArgument);
 	}
 	
 	public void addRowValue_str(String value) {
-		AL_RowArgument newArgument = new AL_RowArgument(AL_StorageType.isString, new String(value));
+		AL_RowArgument newArgument = new AL_RowArgument(AL_SStorageDataType.isString, new String(value));
 		rowValueList.add(newArgument);
 	}
 	

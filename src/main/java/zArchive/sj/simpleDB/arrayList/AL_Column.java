@@ -11,14 +11,16 @@ public class AL_Column {
 	public String name; // nom de la colonne
 	
 	// Type de donnée stockée
-	public AL_StorageType storageType = AL_StorageType.isUnknown;
+	public AL_SStorageDataType storageType = AL_SStorageDataType.isUnknown;
 	
 	public ArrayList<Object> dataList = new ArrayList<Object>();
+	
+	public Al_SOptimDataFromCSV optimDataType;
 	
 	//public ArrayList<Integer> intDataList = new ArrayList<Integer>(); // utilisé s'il s'agit d'une recherche sur des strings
 	//public ArrayList<String>  strDataList = new ArrayList<String>();  // utilisé s'il s'agit d'une recherche sur des entiers
 	
-	public AL_Column(String arg_name, AL_StorageType dataType) {
+	public AL_Column(String arg_name, AL_SStorageDataType dataType) {
 		name = arg_name;
 		storageType = dataType;
 	}
@@ -68,7 +70,7 @@ public class AL_Column {
 	 *  @return
 	 */
 	public boolean clearAndFillWith(int fillValue, int countSize) {
-		if (storageType != AL_StorageType.isInteger) return false;
+		if (storageType != AL_SStorageDataType.isInteger) return false;
 		dataList.clear();
 		dataList.ensureCapacity(countSize);
 		for (int count = 1; count <= countSize; count++)
@@ -82,7 +84,7 @@ public class AL_Column {
 	 *  @return
 	 */
 	public boolean clearAndFillWith(String fillValue, int countSize) {
-		if (storageType != AL_StorageType.isInteger) return false;
+		if (storageType != AL_SStorageDataType.isInteger) return false;
 		dataList.clear();
 		dataList.ensureCapacity(countSize);
 		for (int count = 1; count <= countSize; count++)

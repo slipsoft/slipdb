@@ -19,12 +19,12 @@ public class AL_Finder {
 	private ArrayList<AL_FinderArgument> filterList = new ArrayList<AL_FinderArgument>();
 
 	public boolean addFilter(String columnName, AL_FinderArgumentOperation operation, Integer toValue) {
-		AL_RowArgument argument = new AL_RowArgument(AL_StorageType.isInteger, toValue);
+		AL_RowArgument argument = new AL_RowArgument(AL_SStorageDataType.isInteger, toValue);
 		return addFilter(columnName, operation, argument);
 	}
 
 	public boolean addFilter(String columnName, AL_FinderArgumentOperation operation, String toValue) {
-		AL_RowArgument argument = new AL_RowArgument(AL_StorageType.isString, toValue);
+		AL_RowArgument argument = new AL_RowArgument(AL_SStorageDataType.isString, toValue);
 		return addFilter(columnName, operation, argument);
 	}
 	
