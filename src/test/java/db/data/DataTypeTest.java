@@ -3,6 +3,7 @@ package db.data;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -12,10 +13,19 @@ import org.junit.jupiter.api.Test;
 
 import com.dant.utils.Log;
 import com.dant.utils.Timer;
+import com.dant.utils.Utils;
 
 
 
 class DataTypeTest {
+	
+	ByteType    byteType;
+	IntegerType integerType;
+	LongType    longType;
+	FloatType   floatType;
+	DoubleType  doubleType;
+	DateType    dateType;
+	StringType  stringType;
 
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
@@ -26,6 +36,13 @@ class DataTypeTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
+		byteType    = new ByteType();
+		integerType = new IntegerType();
+		longType    = new LongType();
+		floatType   = new FloatType();
+		doubleType  = new DoubleType();
+		dateType    = new DateType();
+		stringType  = new StringType(15);
 	}
 
 	@AfterEach
@@ -34,18 +51,18 @@ class DataTypeTest {
 
 	@Test
 	void testGetSize() {
-		assertEquals(1,  new ByteType().getSize());
-		assertEquals(32, new IntegerType().getSize());
-		assertEquals(64, new LongType().getSize());
-		assertEquals(32, new FloatType().getSize());
-		assertEquals(64, new DoubleType().getSize());
-		assertEquals(32, new DateType().getSize());
-		assertEquals(10, new StringType(10).getSize());
+		assertEquals(1,  byteType.getSize());
+		assertEquals(4, integerType.getSize());
+		assertEquals(8, longType.getSize());
+		assertEquals(4, floatType.getSize());
+		assertEquals(8, doubleType.getSize());
+		assertEquals(4, dateType.getSize());
+		assertEquals(15, stringType.getSize());
 	}
 
 	@Test
 	void testGetAssociatedClassType() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 	@Test
@@ -55,13 +72,6 @@ class DataTypeTest {
 		String maxCountOperationStr = "5_000_000";
 		Timer localTimer;
 		ByteBuffer bBuff = ByteBuffer.allocate(20);
-		
-		ByteType   byteType = new ByteType();
-		DoubleType doubleType = new DoubleType();
-		DateType   dateType = new DateType();
-		IntegerType integerType = new IntegerType();
-		FloatType floatType = new FloatType();
-		LongType longType = new LongType();
 		
 		Log.info("Cout en millisecondes, pour " + maxCountOperationStr + " itérations :");
 		
@@ -135,12 +145,96 @@ class DataTypeTest {
 
 	@Test
 	void testReadTrueValue() {
-		fail("Not yet implemented");
+		ByteBuffer bBuff = ByteBuffer.allocate(20);
+		Object expected;
+		Object actual;
+		byteType.writeToBuffer("78", bBuff);
+		expected = new Byte("78");
+		actual = byteType.readTrueValue(Arrays.copyOf(bBuff.array(), byteType.getSize()));
+		assertEquals(expected, actual);
+		
+		bBuff.rewind();
+		integerType.writeToBuffer("454689586", bBuff);
+		expected = new Integer("454689586");
+		actual = integerType.readTrueValue(Arrays.copyOf(bBuff.array(), integerType.getSize()));
+		assertEquals(expected, actual);
+		
+		bBuff.rewind();
+		longType.writeToBuffer("45468957895686", bBuff);
+		expected = new Long("45468957895686");
+		actual = longType.readTrueValue(Arrays.copyOf(bBuff.array(), longType.getSize()));
+		assertEquals(expected, actual);
+		
+		bBuff.rewind();
+		floatType.writeToBuffer("454689586.2132152", bBuff);
+		expected = new Float("454689586.2132152");
+		actual = floatType.readTrueValue(Arrays.copyOf(bBuff.array(), floatType.getSize()));
+		assertEquals(expected, actual);
+		
+		bBuff.rewind();
+		doubleType.writeToBuffer("454689586.2132152", bBuff);
+		expected = new Double("454689586.2132152");
+		actual = doubleType.readTrueValue(Arrays.copyOf(bBuff.array(), doubleType.getSize()));
+		assertEquals(expected, actual);
+		
+		bBuff.rewind();
+		dateType.writeToBuffer("2015-04-27 15:45:38", bBuff);
+		expected = new Utils().dateFromString("2015-04-27 15:45:38");
+		actual = dateType.readTrueValue(Arrays.copyOf(bBuff.array(), dateType.getSize()));
+		assertEquals(expected, actual);
+		
+		bBuff.rewind();
+		stringType.writeToBuffer("hello world !", bBuff);
+		expected = "hello world !";
+		actual = stringType.readTrueValue(Arrays.copyOf(bBuff.array(), stringType.getSize()));
+		assertEquals(expected, actual);
 	}
 
 	@Test
 	void testReadIndexValue() {
-		fail("Not yet implemented");
+		ByteBuffer bBuff = ByteBuffer.allocate(20);
+		Object expected;
+		Object actual;
+		byteType.writeToBuffer("78", bBuff);
+		expected = new Byte("78");
+		actual = byteType.readIndexValue(Arrays.copyOf(bBuff.array(), byteType.getSize()));
+		assertEquals(expected, actual);
+		
+		bBuff.rewind();
+		integerType.writeToBuffer("454689586", bBuff);
+		expected = new Integer("454689586");
+		actual = integerType.readIndexValue(Arrays.copyOf(bBuff.array(), integerType.getSize()));
+		assertEquals(expected, actual);
+		
+		bBuff.rewind();
+		longType.writeToBuffer("45468957895686", bBuff);
+		expected = new Long("45468957895686");
+		actual = longType.readIndexValue(Arrays.copyOf(bBuff.array(), longType.getSize()));
+		assertEquals(expected, actual);
+		
+		bBuff.rewind();
+		floatType.writeToBuffer("454689586.2132152", bBuff);
+		expected = new Float("454689586.2132152");
+		actual = floatType.readIndexValue(Arrays.copyOf(bBuff.array(), floatType.getSize()));
+		assertEquals(expected, actual);
+		
+		bBuff.rewind();
+		doubleType.writeToBuffer("454689586.2132152", bBuff);
+		expected = new Double("454689586.2132152");
+		actual = doubleType.readIndexValue(Arrays.copyOf(bBuff.array(), doubleType.getSize()));
+		assertEquals(expected, actual);
+		
+		bBuff.rewind();
+		dateType.writeToBuffer("2015-04-27 15:45:38", bBuff);
+		expected = new Integer(1430142338);
+		actual = dateType.readIndexValue(Arrays.copyOf(bBuff.array(), dateType.getSize()));
+		assertEquals(expected, actual);
+		
+		bBuff.rewind();
+		stringType.writeToBuffer("hello world !", bBuff);
+		expected = "hello world !";
+		actual = stringType.readIndexValue(Arrays.copyOf(bBuff.array(), stringType.getSize()));
+		assertEquals(expected, actual);
 	}
 	
 	@AfterAll
