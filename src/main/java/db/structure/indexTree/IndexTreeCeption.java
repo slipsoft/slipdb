@@ -21,11 +21,14 @@ import db.data.DataType;
 import db.data.IntegerArrayList;
 import db.data.Operator;
 import db.structure.Column;
-import db.structure.Index;
 import db.structure.Table;
 import sj.simpleDB.treeIndexing.SIndexingTreeType;
 
 /**
+ * Point très IMPORTANT :
+ * Cette structure n'a pas besoin que la collection retournée par un TreeMap soit classée,
+ * contrairement à IndexTreeDic !
+ * 
  * TreeMapCeption : un arbre dans un arbre...
  *  V4 !
  *  Au programme :
@@ -34,11 +37,54 @@ import sj.simpleDB.treeIndexing.SIndexingTreeType;
  *  - un index sur lequel on peut faire des recherches
  *  - évaluation dynamique de la distance entre valeurs (arrayMaxDistanceBetweenTwoNumericalElements)
  *  
- *
+ *	
+ */
+
+/** INFOS SUR LA V3 (à garder !)
+ * IndexTree, v3 : sauvegarde du plus d'index possible sur le disque.
+ * 
+ * Pour de très gros fichiers à indexer, il n'y a pas assez de mémoire vive dispo,
+ * il faut donc mettre une partie des index sur le disque.
+ * Se pose le problème de pouvoir retrouver les données aussi vite que possible.
+ * 
+ * Sur le principe des zooms successifs, il serait possible de faire des arbres imbriqués : des regroupements de valeurs proches.
+ * Pour une seule valeur : valeur réelle -> valeur groupée -> arbre contenant les arbres contenant les valeurs réelles -> bon arbre
+ * Pour un interval : min - max réel -> minGroupé, maxGroupé -> arbres contenant les arbres des valeurs fines -> bons arbres, collections à fusionner pour avoir le résultat
+ * 
+ * Il me semblerait bon d'avoir plus de deux arbres imbriqués, pour pouvoir mettre BEAUCOUP de choses sur le disque.
+ * Le principe serait le suivant : Arbre -> Sous-arbres ayant des valeurs plus fines -> ... -> valeurs recherchées
+ * 
+ * Un arbre (qui peut aussi être un sous-arbre) doit avoir une valeur approchée associée
+ * 
+ * 
+ * Idées pour l'insertion/suppression une fois le fichier chargé :
+ * Ajouter un élément au fichier de sauvegarde : simple, ça va à la fin.
+ * 
+ * -> Il est difficile de modifier un fichier d'index une fois mis sur le disque.
+ * Je pense que ce serait une bonne idée d'avoir les insersions en mémoire, et quand il y en a trop, de les écrire sur le disque.
+ * Plusieurs arbres d'index, et pour avoir le résultat d'une recherche, fusionner les résultats (vu que ces résultats sont indépendants)
+ * 
+ * Pour les suppressions, c'est plus compliqué.
+ * 
+ * 
+ * Pour un IndexTreeCeption, il y a trois types de structures :
+ * -> L'arbre parent qui stocke les arbres intermédiaires
+ * -> Les arbres intermédiaires qui redirigent vers les arbres contenant la donnée fine
+ * -> Les arbres contenant la donnée fine
+ * 
+ * L'arbre parent est en fait un arbre intermédiaire.
+ * 
+ * Pour faire une recherche :
+ *   Chaque arbre connait la valeur minimale et maximale recherchée, et la divise par son "maxDistanceBetweenTwoNumericalElements".
+ *   Chaque arbre connait sa "hauteur" par rapport à la donnée fine
+ *   
+ * 
+ * 
  */
 
 
-public class IndexTreeCeptionV4 {
+
+public class IndexTreeCeption {
 	protected SIndexingTreeType treeType; // servira pour l'utilisation de méthodes génériques, pour utiliser le bon type d'arbre et faire les bons cast
 	
 	@SuppressWarnings("rawtypes")
@@ -51,16 +97,16 @@ public class IndexTreeCeptionV4 {
 	// Le dernier arbre contient le TreeMap de tous les binIndex associés à une valeur donnée (non approximée)
 	// -> Ce tableau devra être à chaque fois adapté au type de valeur stockée, par exmemple, pour indexer une colonne de double, les longitudes/latitudes,
 	//    il faudrait qu'il y ait les valeurs 0.1, 0.01, 0.001 : multiplier la valeur par 10, 100, 1000 et en prendre la partie entière.
-	public static double[] arrayMaxDistanceBetweenTwoNumericalElements = {
+	public static double[] arrayMaxDistanceBetweenTwoNumericalElements;/* = {
 		1000000,
 		10000,
 		100, // marche bien pour des int, mal pour des double où seules les décimales changent (et non la partie entière)
-		/*10, 8, 5, 4, 3, 2, 1,*/
+		/*10, 8, 5, 4, 3, 2, 1,* /
 		0 // arbre terminal contenant la donnée fine
-	};
+	};*/
 	
 	// Seulement alloué si l'arbre est un arbre intermédiaire
-	protected TreeMap<Object/*clef, valeur indexée*/, IndexTreeV3> finerSubTrees = null; //new TreeMap<Object, IndexTreeV3>();
+	protected TreeMap<Object/*clef, valeur indexée*/, IndexTreeCeption> finerSubTrees = null; //new TreeMap<Object, IndexTreeCeption>();
 	protected TreeMap<Object/*clef, valeur indexée*/, IntegerArrayList/*valeur*/> binIndexesFromValue = null;
 	protected EasyFile fileSaveOnDisk = null;
 	protected static String basePath = "target/treeIndexDiskMemory/";
@@ -72,16 +118,58 @@ public class IndexTreeCeptionV4 {
 	protected int heightIndex = 0; // par défaut, le permier arbre
 	protected Object associatedRoundValue; // Valeur divisée par arrayMaxDistanceBetweenTwoNumericalElements[heightIndex]
 	
-	public IndexTreeCeptionV4() {
+	public IndexTreeCeption() {
 		// storedValuesClassType défini dans indexColumnFromDisk
-		this(0, null);
+		this(0, null, null, null);
+	}
+	
+
+	/** Création de l'arbre, à hauteur définie
+	 *  @param argHeightIndex
+	 */
+	public IndexTreeCeption(int argHeightIndex, Object argAssociatedRoundValue) {
+		this(argHeightIndex, argAssociatedRoundValue, null, null);
+	}
+	
+	public void initializeMaxDistanceBetweenElementsArray(Object minValue, Object maxValue) {
+		//if (true) return;
+		if (minValue == null || maxValue == null) return;
+		if ((minValue instanceof Number) == false) return;
+		if (minValue.getClass() != maxValue.getClass()) return;
+		
+		double doubleMinAbsValue = Math.abs(((Number) minValue).doubleValue());
+		double doubleMaxAbsValue = Math.abs(((Number) maxValue).doubleValue());
+		double maxAbsValue = Math.max(doubleMinAbsValue, doubleMaxAbsValue);
+		
+		//double interval = doubleMaxValue - doubleMinValue;
+		
+		double divideIterationFactor = 8;
+		double divideBy = maxAbsValue / divideIterationFactor;
+		int maxDepth = 10;
+		
+		arrayMaxDistanceBetweenTwoNumericalElements = new double[maxDepth + 1];
+		for (int depthIndex = 0; depthIndex < maxDepth; depthIndex++) {
+			arrayMaxDistanceBetweenTwoNumericalElements[depthIndex] = divideBy;
+			divideBy /= divideIterationFactor;
+			//maxAbsValue / Math.pow(10, depthIndex);
+		}
+		arrayMaxDistanceBetweenTwoNumericalElements[maxDepth] = 0;
+		
+
+		/*for (int depthIndex = 0; depthIndex < arrayMaxDistanceBetweenTwoNumericalElements.length; depthIndex++) {
+			System.out.println("IndexTreeCeption.initializeMaxDistanceBetweenElementsArray : At  index " + depthIndex + " : " + arrayMaxDistanceBetweenTwoNumericalElements[depthIndex]);
+			//maxAbsValue / Math.pow(10, depthIndex);
+		}*/
+		
+		
 	}
 	
 	/** Création de l'arbre, à hauteur définie
 	 *  @param argHeightIndex
 	 */
-	public IndexTreeCeptionV4(int argHeightIndex, Object argAssociatedRoundValue) {
+	public IndexTreeCeption(int argHeightIndex, Object argAssociatedRoundValue, Object minValue, Object maxValue) {
 		// storedValuesClassType défini via argAssociatedRoundValue
+		initializeMaxDistanceBetweenElementsArray(minValue, maxValue);
 		if (argAssociatedRoundValue != null)
 			storedValuesClassType = argAssociatedRoundValue.getClass();
 		heightIndex = argHeightIndex;
@@ -90,13 +178,13 @@ public class IndexTreeCeptionV4 {
 		isTerminalDataTree = (argHeightIndex == (arrayMaxDistanceBetweenTwoNumericalElements.length - 1));
 		// arbre contenant la donnée fine si sa hauteur est la taille de arrayMaxDistanceBetweenTwoNumericalElements
 		if (isTerminalDataTree == false) {
-			finerSubTrees = new TreeMap<Object, IndexTreeV3>(); // TreeMap des sous-arbres
+			finerSubTrees = new TreeMap<Object, IndexTreeCeption>(); // TreeMap des sous-arbres
 		} else {
 			binIndexesFromValue = new TreeMap<Object, IntegerArrayList>(); // TreeMap des valeurs fines
 			//IntegerArrayList -> BinIndexArrayList
 		}
 		if (isRootTree()) {
-			currentSaveFilePath = basePath + "IndexTreeV3_indexSave_" + rootIndexTreeCount + ".bin_tree";
+			currentSaveFilePath = basePath + "IndexTreeCeption_indexSave_" + rootIndexTreeCount + ".bin_tree";
 			fileSaveOnDisk = new EasyFile(currentSaveFilePath);
 			try {
 				fileSaveOnDisk.createFileIfNotExist();
@@ -105,7 +193,6 @@ public class IndexTreeCeptionV4 {
 				e.printStackTrace();
 			}
 			rootIndexTreeCount++;
-			
 		}
 	}
 	
@@ -153,7 +240,7 @@ public class IndexTreeCeptionV4 {
 		int dataSizeInBytes = columnDataType.getSize();
 		
 		//indexedColumnsList = new Column[1]; // Currently, an IndexTree only supports one column
-		// inutile ici indexedColumnsList[0] = indexThisColumn;
+		//indexedColumnsList[0] = indexThisColumn;
 		
 		int skipBeforeData = dataOffsetInLine; // skip the first values
 		int skipAfterData = totalLineSize - skipBeforeData - dataSizeInBytes; // skip the remaining values
@@ -165,25 +252,62 @@ public class IndexTreeCeptionV4 {
 		// Get a new disposable FileInputStream with the file where all table rows are stored
 		FileInputStream fileAsStream = new FileInputStream(inTable.getFileLinesOnDisk());
 		int lineIndex = 0;
+		long currentBinPosition = 0;
+		long fileSize = inTable.getFileLinesOnDisk().length();
 		
+		//Timer benchTime = new Timer("Temps pris par l'indexation");
+		byte[] columnValueAsByteArray = new byte[dataSizeInBytes];
+		//while (currentBinPosition < fileSize)
 		while (true) {
-
+			
+			/*
+			 	Bench - performances (découpage) :
+			 		Temps total avec tout :
+			 		La gestion de la boucle : 2 ms 
+			 		+ Les skip : 210 ms (un seul skip -> 70 ms, 3 skip -> 210 ms)
+			 		+ Le read  : 340 ms
+			 		+ Le cast  : 350 ms (columnDataType.getValueFromByteArray(columnValueAsByteArray);)
+			 		+ addValue : 380 ms
+				
+			*/
+			/*
+			fileAsStream.skip(skipBeforeData);
+			fileAsStream.skip(dataSizeInBytes);
+			fileAsStream.skip(skipAfterData);
+				-> Prend 210 ms
+			
+			fileAsStream.skip(skipBeforeData + dataSizeInBytes + skipAfterData);
+				-> Prend 70 ms
+			
+			-> D'où la nécessité de faire des colonnes séparées ! (on réduit de BEAUCOUP le temps !)
+			*/
+			
 			// Seeks to the right position in the stream
-			long checkSkipBytesAmount;
-			checkSkipBytesAmount = fileAsStream.skip(skipBeforeData);
-			byte[] columnValueAsByteArray = new byte[dataSizeInBytes];
+			//long checkSkipBytesAmount;
+			fileAsStream.skip(skipBeforeData);
+			//checkSkipBytesAmount = fileAsStream.skip(dataSizeInBytes);
+			//int bytesRead = fileAsStream.read(columnValueAsByteArray); // reads from the stream
+			
+			//byte[] columnValueAsByteArray = new byte[dataSizeInBytes];
 			int bytesRead = fileAsStream.read(columnValueAsByteArray); // reads from the stream
 			if (bytesRead == -1) // end of stream
 				break;
+			
 			Object readValue = columnDataType.readIndexValue(columnValueAsByteArray);
+			
 			this.addValue(readValue, new Integer(lineIndex)); // creating a new Integer is quite slow ><" (but the bottle neck really is I/O on disk)
-			checkSkipBytesAmount = fileAsStream.skip(skipAfterData);
+			
+			
+			fileAsStream.skip(skipAfterData);
+			
+			currentBinPosition += skipBeforeData + dataSizeInBytes + skipAfterData;
+			
 			// Display some contents, debuging :
 			//if (lineIndex % 10000 == 0) Log.info("lineIndex = " + lineIndex + " readValue = " + readValue);
 			
 			lineIndex++;
 		}
-		
+		//benchTime.log();
 		
 		fileAsStream.close();
 	}
@@ -219,16 +343,16 @@ public class IndexTreeCeptionV4 {
 			Object maxValueRounded = getBlockNumericalValue(maxValueExact);
 			//Log.info("findMatchingBinIndexesInMemory : maxDistanceBetweenTwoNumericalElements = " + maxDistanceBetweenTwoNumericalElements + "  minValueRounded = " + minValueRounded + "  maxValueRounded = " + maxValueRounded);
 			// Recherche de tous les sous-arbres qui correspondent
-			NavigableMap<Object, IndexTreeV3> finnerSubTrees = finerSubTrees.subMap(minValueRounded, isInclusive, maxValueRounded, isInclusive);
+			NavigableMap<Object, IndexTreeCeption> finnerSubTrees = finerSubTrees.subMap(minValueRounded, isInclusive, maxValueRounded, isInclusive);
 			
 			// Pour tous les sous-arbres, j'appelle cette même fonction, et j'ajoute la valeur de retour à ma collection sumOfBinIndexesCollections
 			//Collection<IntegerArrayList>
 			ArrayList<IntegerArrayList> sumOfBinIndexesCollections = new ArrayList<IntegerArrayList>();
-			Collection<IndexTreeV3> subTreesCollection = finnerSubTrees.values(); // tous les sous-arbres compatibles
+			Collection<IndexTreeCeption> subTreesCollection = finnerSubTrees.values(); // tous les sous-arbres compatibles
 			
 			
 			// Pour tous les sous-arbres compatibles, je prends les éléments qui coïncident
-			for (IndexTreeV3 subTree : subTreesCollection) {
+			for (IndexTreeCeption subTree : subTreesCollection) {
 				Collection<IntegerArrayList> subBinIndexesCollection = subTree.findMatchingBinIndexesInMemory(minValueExact, maxValueExact, isInclusive);
 				if (subBinIndexesCollection != null) {
 					sumOfBinIndexesCollections.addAll(subBinIndexesCollection);
@@ -283,9 +407,9 @@ public class IndexTreeCeptionV4 {
 			// Je crée l'arbre du dessous s'il n'existe pas encore
 			Object indexThisRoundValue = getBlockNumericalValue(argAssociatedValue);
 			
-			IndexTreeV3 subTree = finerSubTrees.get(indexThisRoundValue);
+			IndexTreeCeption subTree = finerSubTrees.get(indexThisRoundValue);
 			if (subTree == null) {
-				subTree = new IndexTreeV3(heightIndex + 1, indexThisRoundValue);
+				subTree = new IndexTreeCeption(heightIndex + 1, indexThisRoundValue);
 				finerSubTrees.put(indexThisRoundValue, subTree); // ajout du sous-arbre à la liste des arbres connus
 			}
 			subTree.addValue(argAssociatedValue, binIndex); // se charge de l'ajout effectif (ou de la création de nouveaux sous-arbres puis de l'ajout effectif)
@@ -354,7 +478,7 @@ public class IndexTreeCeptionV4 {
 	
 	
 	/**
-	Sauvegarde d'un indexTreeV3 sur le disque (et mise en lecture seule, donc) :
+	Sauvegarde d'un IndexTreeCeption sur le disque (et mise en lecture seule, donc) :
 		-> Il faut avoir une organisation très structurée, savoir très rapidement où retrouver les arbres contenant la donnée fine.
 		1) Ecriture de tous les arbres contenant la donnée fine, sur le disque
 		2) La donnée fine des arbres (terminaux) est remplacée par une position et une taille : position de la donnée dans le fichier binaire,
@@ -387,9 +511,9 @@ public class IndexTreeCeptionV4 {
 		
 		writeInDataStream.close();
 		
-		System.out.println("IndexTreeV3.saveOnDisk : debugNumberOfTreesWrittenOnDisk=" + debugNumberOfTreesWrittenOnDisk);
-		System.out.println("IndexTreeV3.saveOnDisk : debugNumberOfExactArrayListValuesWrittenOnDisk=" + debugNumberOfExactArrayListValuesWrittenOnDisk);
-		System.out.println("IndexTreeV3.saveOnDisk : debugNumberOfExactValuesWrittenOnDisk=" + debugNumberOfExactValuesWrittenOnDisk);
+		System.out.println("IndexTreeCeption.saveOnDisk : debugNumberOfTreesWrittenOnDisk=" + debugNumberOfTreesWrittenOnDisk);
+		System.out.println("IndexTreeCeption.saveOnDisk : debugNumberOfExactArrayListValuesWrittenOnDisk=" + debugNumberOfExactArrayListValuesWrittenOnDisk);
+		System.out.println("IndexTreeCeption.saveOnDisk : debugNumberOfExactValuesWrittenOnDisk=" + debugNumberOfExactValuesWrittenOnDisk);
 		
 		
 	}
@@ -427,7 +551,7 @@ public class IndexTreeCeptionV4 {
 		//long fileSize = fileSaveOnDisk.length();
 		RandomAccessFile randFile = new RandomAccessFile(currentSaveFilePath, "r");
 		long fileSize = randFile.length();
-		System.out.println("IndexTreeV3.loadFromDisk : fileSize = " + fileSize + "currentSaveFilePath = " + currentSaveFilePath);
+		System.out.println("IndexTreeCeption.loadFromDisk : fileSize = " + fileSize + "currentSaveFilePath = " + currentSaveFilePath);
 		randFile.seek(fileSize - 8);
 		
 		long routingTableBinIndex = randFile.readLong();
@@ -443,9 +567,9 @@ public class IndexTreeCeptionV4 {
 		
 		randFile.close();
 		
-		System.out.println("IndexTreeV3.loadFromDisk : debugDiskNumberOfTrees=" + debugDiskNumberOfTrees);
-		System.out.println("IndexTreeV3.loadFromDisk : debugDiskNumberOfIntegerArrayList=" + debugDiskNumberOfIntegerArrayList);
-		System.out.println("IndexTreeV3.loadFromDisk : debugDiskNumberOfExactValues=" + debugDiskNumberOfExactValues);
+		System.out.println("IndexTreeCeption.loadFromDisk : debugDiskNumberOfTrees=" + debugDiskNumberOfTrees);
+		System.out.println("IndexTreeCeption.loadFromDisk : debugDiskNumberOfIntegerArrayList=" + debugDiskNumberOfIntegerArrayList);
+		System.out.println("IndexTreeCeption.loadFromDisk : debugDiskNumberOfExactValues=" + debugDiskNumberOfExactValues);
 		
 		/*
 		DataInputStream readFromDataStream = new DataInputStream(new BufferedInputStream(new FileInputStream(fileSaveOnDisk)));
@@ -455,7 +579,7 @@ public class IndexTreeCeptionV4 {
 		readFromDataStream.
 		readFromDataStream.close();*/
 		
-		//System.out.println("IndexTreeV3.findMatchingBinIndexesFromDisk :  reallySkipped = " + Long.toString(reallySkipped) + " fileSize-8 = " + (fileSize - 8));
+		//System.out.println("IndexTreeCeption.findMatchingBinIndexesFromDisk :  reallySkipped = " + Long.toString(reallySkipped) + " fileSize-8 = " + (fileSize - 8));
 		
 		return listOfMatchingArraysOfBinIndexes;
 		
@@ -631,7 +755,7 @@ public class IndexTreeCeptionV4 {
 					Object exactValue = allBinIndexAssociatedValues.get(indexIntegerArrayList);
 					// Liste des binIndex correspondants à la valeur
 					IntegerArrayList binIndexesIntegerArrayList = allBinIndexArrays.get(indexIntegerArrayList); // 
-
+					
 					// Je sauvegarde en mémoire où j'ai écrit les valeurs sur le disque
 					binPositionOfIntegerArrayListValues[indexIntegerArrayList] = writeInDataStream.size();
 					// Nombre de binIndex associés à la valeur actuelle (clef dans le TreeMap)
@@ -666,7 +790,7 @@ public class IndexTreeCeptionV4 {
 				for (int indexIntegerArrayList = 0; indexIntegerArrayList < numberOfIntegerArrayLists; indexIntegerArrayList++) {
 					Object associatedValue = allBinIndexAssociatedValues.get(indexIntegerArrayList); // valeur associée à la IntegerArrayList de binIndex
 					long associatedBinIndex = binPositionOfIntegerArrayListValues[indexIntegerArrayList];
-					writeObjectValueOnDisk(associatedValue, writeInDataStream); // écriture de la valeur
+					writeObjectValueFromDisk(associatedValue, writeInDataStream); // écriture de la valeur
 					writeInDataStream.writeInt((int)associatedBinIndex); // écriture du binIndex où trouver la liste des binIndex
 				}
 				
@@ -683,11 +807,11 @@ public class IndexTreeCeptionV4 {
 				int numberOfSubTrees = finerSubTrees.size();
 				// J'écris le nombre d'arbres dont j'ai la référence
 				writeInDataStream.writeInt(numberOfSubTrees);
-				for (Entry<Object, IndexTreeV3> treeAsEntry : finerSubTrees.entrySet()) {
+				for (Entry<Object, IndexTreeCeption> treeAsEntry : finerSubTrees.entrySet()) {
 					Object associatedValue = treeAsEntry.getKey();
-					IndexTreeV3 subTree = treeAsEntry.getValue();
+					IndexTreeCeption subTree = treeAsEntry.getValue();
 					// Pour chaque arbre, j'écris la valeur associée (clef)...
-					writeObjectValueOnDisk(associatedValue, writeInDataStream); // écriture de la valeur
+					writeObjectValueFromDisk(associatedValue, writeInDataStream); // écriture de la valeur
 					// ...et le binIndex où le trouver (table de routage des valaurs fines ou des sous-arbres)
 					writeInDataStream.writeInt((int)subTree.routingTableBinIndex);
 				}
@@ -699,7 +823,7 @@ public class IndexTreeCeptionV4 {
 			
 		} else if (heightIndex < neededHeight) { // si je suis trop bas (proche du root), j'avance aux sous-arbres suivants
 			
-			for (IndexTreeV3 subTree : finerSubTrees.values()) { // pour tous les sous-arbres, écrire sur le disque
+			for (IndexTreeCeption subTree : finerSubTrees.values()) { // pour tous les sous-arbres, écrire sur le disque
 				subTree.wasWrittenOnDisk = false;
 				subTree.writeAllStoredDataOnDisk(neededHeight, writeInDataStream);
 				if (subTree.wasWrittenOnDisk) {
@@ -716,7 +840,7 @@ public class IndexTreeCeptionV4 {
 	 *  @return
 	 * @throws IOException 
 	 */
-	protected void writeObjectValueOnDisk(Object originalAssociatedValue, DataOutputStream writeInDataStream) throws IOException  {
+	protected void writeObjectValueFromDisk(Object originalAssociatedValue, DataOutputStream writeInDataStream) throws IOException  {
 		
 		if (originalAssociatedValue.getClass() == Float.class)    writeInDataStream.writeFloat(((Float) originalAssociatedValue).floatValue());
 		if (originalAssociatedValue.getClass() == Double.class)   writeInDataStream.writeDouble(((Double) originalAssociatedValue).doubleValue());

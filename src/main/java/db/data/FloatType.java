@@ -22,10 +22,17 @@ public class FloatType extends DataType {
 	public Class getAssociatedClassType() {
 		return Float.class;
 	}
-	
+
 	@Override
 	public void writeToBuffer(String input, ByteBuffer outputBuffer) {
 		outputBuffer.putFloat(Float.parseFloat(input));
+	}
+
+	@Override
+	public Float writeToBufferAndReturnValue(String input, ByteBuffer outputBuffer) {
+		Float asFloat = Float.parseFloat(input);
+		outputBuffer.putFloat(asFloat);
+		return asFloat;
 	}
 	
 	@Override

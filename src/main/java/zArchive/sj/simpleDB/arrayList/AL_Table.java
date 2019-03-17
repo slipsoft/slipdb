@@ -9,6 +9,7 @@ import java.util.ArrayList;
 public class AL_Table {
 	
 	public ArrayList<AL_Column> columnList = new ArrayList<AL_Column>();
+	Al_SOptimDataFromCSV optimDataType;
 	
 	int currentRowNumber = 0; // la taille que doit avoir chaque columnList (nombre d'éléments stockés dans la table actuelle)
 	
@@ -26,6 +27,7 @@ public class AL_Table {
 		return -1;
 	}
 	
+	
 	/*
 	public boolean addColumn_byte(String colName, byte defaultFillValue) {
 		int columnIndex = addColumn_base(colName);
@@ -40,7 +42,7 @@ public class AL_Table {
 		int columnIndex = addColumn_base(colName);
 		if (columnIndex == -1) return false;
 		AL_Column column = columnList.get(columnIndex);
-		column.storageType = AL_StorageType.isInteger;
+		column.storageType = AL_SStorageDataType.isInteger;
 		column.clearAndFillWith(defaultFillValue, currentRowNumber);
 		return true;
 	}
@@ -49,7 +51,7 @@ public class AL_Table {
 		int columnIndex = addColumn_base(colName);
 		if (columnIndex == -1) return false;
 		AL_Column column = columnList.get(columnIndex);
-		column.storageType = AL_StorageType.isString;
+		column.storageType = AL_SStorageDataType.isString;
 		column.clearAndFillWith(defaultFillValue, currentRowNumber);
 		return true;
 	}
@@ -63,7 +65,7 @@ public class AL_Table {
 		int columnIndex = addColumn_base(colName);
 		if (columnIndex == -1) return false;
 		AL_Column column = columnList.get(columnIndex);
-		column.storageType = AL_StorageType.isInteger;
+		column.storageType = AL_SStorageDataType.isInteger;
 		column.clearAndFillWith(defaultFillValue, currentRowNumber);
 		return true;
 	}
@@ -77,7 +79,7 @@ public class AL_Table {
 		int columnIndex = addColumn_base(colName);
 		if (columnIndex == -1) return false;
 		AL_Column column = columnList.get(columnIndex);
-		column.storageType = AL_StorageType.isString;
+		column.storageType = AL_SStorageDataType.isString;
 		column.clearAndFillWith(defaultFillValue, currentRowNumber);
 		return true;
 	}
@@ -90,7 +92,7 @@ public class AL_Table {
 		// Je vérifie qu'aucune colonne n'a le même nom
 		if (findColumnIndex(colName) != -1) return -1;
 		// Ajout de la colonne
-		AL_Column newColumn = new AL_Column(colName, AL_StorageType.isUnknown);
+		AL_Column newColumn = new AL_Column(colName, AL_SStorageDataType.isUnknown);
 		columnList.add(newColumn);
 		return columnList.size() - 1;
 	}
@@ -133,10 +135,10 @@ public class AL_Table {
 			AL_Column columnAtIndex = columnList.get(columnIndex);
 			result += "[" + columnAtIndex.name + "] : ";
 			Object objectAtThisIndex = columnAtIndex.dataList.get(rowIndex);
-			if (columnAtIndex.storageType == AL_StorageType.isInteger) {
+			if (columnAtIndex.storageType == AL_SStorageDataType.isInteger) {
 				result += Integer.toString((Integer) objectAtThisIndex);
 			}
-			if (columnAtIndex.storageType == AL_StorageType.isString) {
+			if (columnAtIndex.storageType == AL_SStorageDataType.isString) {
 				result += new String((String) objectAtThisIndex);
 			}
 			result += "\n";

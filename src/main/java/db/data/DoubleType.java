@@ -30,6 +30,13 @@ public class DoubleType extends DataType {
 	}
 	
 	@Override
+	public Object writeToBufferAndReturnValue(String input, ByteBuffer outputBuffer) {
+		Double valueAsDouble = Double.parseDouble(input);
+		outputBuffer.putDouble(valueAsDouble);
+		return valueAsDouble;
+	}
+	
+	@Override
 	public Double readTrueValue(byte[] bytes) {
 		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
 		return wrapped.getDouble();

@@ -136,7 +136,7 @@ public class AL_GlobalTest {
 		// Recherche d'une distance et d'un nombre de passagers
 		AL_Finder finder = new AL_Finder();
 		finder.addFilter("trip_distance", AL_FinderArgumentOperation.equals, new Integer(12));
-		finder.addFilter("passenger_count", AL_FinderArgumentOperation.equals, new Integer(1));
+		finder.addFilter("passenger_count", AL_FinderArgumentOperation.equals, new Integer(6));
 		ArrayList<Integer> indexList = finder.findMatchingIndexList(testTable, 1000);
 		
 		

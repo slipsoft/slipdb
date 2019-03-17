@@ -27,7 +27,7 @@ import db.data.StringType;
 import db.parsers.CsvParser;
 import db.structure.Column;
 import db.structure.Table;
-import db.structure.indexTree.IndexTreeV3;
+import db.structure.indexTree.IndexTreeCeption;
 
 /***
  * Premier test de multi-thread simple
@@ -43,7 +43,6 @@ public class TestIndexTreeMT1 {
 	
 	static ArrayList<Column> initializeColumnsForNYData() {
 		ArrayList<Column> columns = new ArrayList<Column>();
-		Utils currentlyUsedUils = new Utils(); // For thread-safety !
 		try {
 			columns.add(new Column("VendorID", new ByteType()));
 			columns.add(new Column("tpep_pickup_datetime", new DateType()));
@@ -129,8 +128,8 @@ public class TestIndexTreeMT1 {
 		
 		
 		for (int runCount = 0; runCount < maxRunCount; runCount++) {
-			threadList.get(runCount).start();   // 12,3 s
-			//runnableList.get(runCount).run(); // 25,7 s
+			threadList.get(runCount).start();   // 12,3 s (i3, Sylvain)
+			//runnableList.get(runCount).run(); // 25,7 s (i3, Sylvain)
 		}
 		for (int runCount = 0; runCount < maxRunCount; runCount++) {
 			threadList.get(runCount).join();
@@ -174,7 +173,7 @@ public class TestIndexTreeMT1 {
 		/**
 		 * Note : c'est super le bordel ici, je vais ranger ça ^^'
 		 */
-		IndexTreeV3 indexingObject = new IndexTreeV3();
+		IndexTreeCeption indexingObject = new IndexTreeCeption();
 		//SIndexingTreeFloat indexingFoat = new SIndexingTreeFloat();
 		Log.info("Lancé");
 		

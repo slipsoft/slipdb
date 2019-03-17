@@ -26,7 +26,7 @@ import db.structure.Column;
 import db.structure.Table;
 
 class CsvParserTest {
-	protected CsvParser parser;
+	protected Parser parser;
 	protected Table table;
 	Utils utilsInstance;
 
@@ -63,7 +63,8 @@ class CsvParserTest {
 			Log.error(e);
 		}
 		table = new Table("test", columns);
-		parser = new CsvParser(table);
+		//parser = new CsvParser2(table); // 790 ms
+		parser = new CsvParser(table); // 750 ms
 	}
 
 	@AfterEach

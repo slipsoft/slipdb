@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -22,13 +23,15 @@ import db.data.FloatType;
 import db.data.IntegerArrayList;
 import db.data.StringType;
 import db.parsers.CsvParser;
+import db.parsers.Parser;
 import db.structure.Column;
 import db.structure.Table;
-import db.structure.indexTree.IndexTreeV3;
+import db.structure.indexTree.IndexTreeCeption;
+import db.structure.indexTree.IndexTreeDic;
 
 public class IndexTreeTest {
 
-	protected static CsvParser parser;
+	protected static Parser parser;
 	protected static Table table;
 	protected static Utils currentlyUsedUils = new Utils(); // For thread-safety ! (but, here, it's static so thread unsafe... ^^')
 
@@ -64,8 +67,8 @@ public class IndexTreeTest {
 		table = new Table("test", columns);
 		parser = new CsvParser(table);
 		
-		FileInputStream is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); // "../SMALL_1_000_000_yellow_tripdata_2015-04.csv"
-		//FileInputStream is = new FileInputStream("../SMALL_1_000_000_yellow_tripdata_2015-04.csv"); // testdata
+		//FileInputStream is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); // "../SMALL_1_000_000_yellow_tripdata_2015-04.csv"
+		FileInputStream is = new FileInputStream("../SMALL_100_000_yellow_tripdata_2015-04.csv"); // testdata
 		
 		Timer parseTimer = new Timer("Temps pris par le parsing");
 		parser.parse(is);
@@ -102,7 +105,6 @@ public class IndexTreeTest {
 		/**
 		 * Note : c'est super le bordel ici, je vais ranger ça ^^'
 		 */
-		IndexTreeV3 indexingObject = new IndexTreeV3();
 		//SIndexingTreeFloat indexingFoat = new SIndexingTreeFloat();
 		Log.info("Lancé");
 		
@@ -111,6 +113,16 @@ public class IndexTreeTest {
 		//int indexingColumnIndex = 4; // trip distance
 		//int indexingColumnIndex = 5; // latitude
 		int indexingColumnIndex = 1; // date pickup
+		
+		Column indexThisColumn = table.getColumns().get(indexingColumnIndex);
+		
+		//System.out.println("OUOUOUOU " + indexThisColumn.minValue + "  " +  indexThisColumn.maxValue);
+		
+		//IndexTreeCeption indexingObject = new IndexTreeCeption(0, null, indexThisColumn.minValue, indexThisColumn.maxValue);
+		IndexTreeDic indexingObject = new IndexTreeDic();//Integer.class);
+		
+		
+		//indexingObject.initializeMaxDistanceBetweenElementsArray(indexThisColumn.minValue, indexThisColumn.maxValue);
 		
 		// Index the column from the disk
 		// -> reading fron the disk is quite slow
@@ -123,7 +135,8 @@ public class IndexTreeTest {
 		
 		// Ecriture sur le disque
 		Timer writeIndexToDiskTimer = new Timer("Temps pris pour l'écriture sur disque");
-		indexingObject.saveOnDisk();
+		//indexingObject.flushOnDisk();
+		//indexingObject.saveOnDisk(false); // première sauvegarde, écraser ce qui existe déjà
 		writeIndexToDiskTimer.log();
 		
 		
@@ -133,18 +146,30 @@ public class IndexTreeTest {
 		// Get the query result
 		Collection<IntegerArrayList> result;
 		MemUsage.printMemUsage();
-		//result = indexingObject.findMatchingBinIndexes(new Float(0), new Float(10000), true); // new Float(20), new Float(21)
+		
+		
+		Date dateFrom = currentlyUsedUils.dateFromString("2015-04-04 00:01:00");
+		Date dateTo = currentlyUsedUils.dateFromString("2015-04-04 00:19:52");
+		int intDateFrom = Utils.dateToSecInt(dateFrom);
+		int intDateTo = Utils.dateToSecInt(dateTo);
+		
+		/*Object searchFromValue = new Float(12.78641);
+		Object searchToValue = new Float(14.748621);*/
+
+		Object searchFromValue = intDateFrom;
+		Object searchToValue = intDateTo;
+		
+		result = indexingObject.findMatchingBinIndexesInMemory(searchFromValue, searchToValue, true); // new Float(20), new Float(21)
+		//result = indexingObject.findMatchingBinIndexesInMemory(intDateFrom, intDateTo, true);
+		
 		//result = indexingObject.findMatchingBinIndexes(new Integer(-1000), new Integer(1000), true);
 
-		Date dateFrom = currentlyUsedUils.dateFromString("2015-04-16 00:05:00");
-		Date dateTo = currentlyUsedUils.dateFromString("2015-04-16 00:06:30");
-		int intDateFrom = currentlyUsedUils.dateToSecInt(dateFrom);
-		int intDateTo = currentlyUsedUils.dateToSecInt(dateTo);
 		
 		Timer searchQueryTimer = new Timer("Time took to return the matching elements");
 		Timer searchQueryFullTimer = new Timer("Time took to return the matching elements + size evaluation");
-		result = indexingObject.findMatchingBinIndexes(intDateFrom, intDateTo, true);
+		
 		//result = indexingObject.findMatchingBinIndexes(new Byte((byte)0), new Byte((byte)100), true);
+		//result = indexingObject.findMatchingBinIndexes(new Double(0), new Double(0), true);
 		
 		
 		MemUsage.printMemUsage();
@@ -174,7 +199,9 @@ public class IndexTreeTest {
 		
 		Log.info("Depuis le disque : ");
 		Timer searchFromDiskTimer = new Timer("Temps pris pour la recherche du disque");
-		result = indexingObject.findMatchingBinIndexesFromDisk(intDateFrom, intDateTo, true);
+
+		result = indexingObject.findMatchingBinIndexesFromDisk(searchFromValue, searchToValue, true);
+		//result = indexingObject.findMatchingBinIndexesFromDisk(intDateFrom, intDateTo, true);
 		searchFromDiskTimer.log();
 		
 		// Iterates over all the results
@@ -186,12 +213,12 @@ public class IndexTreeTest {
 			numberOfLines++;
 			for (Integer index : list) {
 				// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
-				/*Log.info("  index = " + index);
 				List<Object> objList = table.getValuesOfLineById(index);
 				Object indexedValue = objList.get(indexingColumnIndex);
+				Log.info("  index = " + index + "   val = " + indexedValue);
 				
 				//Log.info("  valeur indexée = " + indexedValue);
-				Log.info("  objList = " + objList);*/
+				//Log.info("  objList = " + objList);
 				
 			}
 		}

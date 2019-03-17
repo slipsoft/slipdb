@@ -20,6 +20,13 @@ public class StringType extends DataType {
 		outputBuffer.put(bytes);
 	}
 	
+	@Override
+	public Object writeToBufferAndReturnValue(String input, ByteBuffer outputBuffer) {
+		byte[] bytes = Arrays.copyOf(input.getBytes(), this.sizeInBytes);
+		outputBuffer.put(bytes);
+		return input;
+	}
+	
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Class getAssociatedClassType() {

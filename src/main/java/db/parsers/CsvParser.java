@@ -14,6 +14,19 @@ import com.dant.utils.Timer;
 import db.structure.Column;
 import db.structure.Table;
 
+
+/**
+ * CsvParser : CsvParser version 2
+ * 
+ * But de ce parser :
+ * - Evaluer le minimum et maximum de chaque colonne
+ * - Sauvegarder chaque colonne dans un fichier séparé
+ * PAS BESOIN : split les résultats pour avoir des colonnes de tailles raisonnables, et pouvoir indexer en multi-thread (exemple : 1_000_000 par colonne)
+ * Il est possible de faire du multi-thread sur un seul fichier, c'est même plus simple et plus rapide !!
+ * 
+ */
+
+
 public class CsvParser extends Parser {
 	
 	protected static String csvSeparator = ","; // the CSV separator used to delimit fields
@@ -22,6 +35,14 @@ public class CsvParser extends Parser {
 		super(schema);
 	}
 	
+	
+	
+	
+	/** Lecture du CSV depuis un InputStream (peu importe la provenance)
+	 *  Exécution mono-thread, en l'état, faire du multi-thread serait super super compliqué
+	 *  
+	 *  Chaque ligne a son propre fichier binaire.
+	 */
 	@Override
 	public void parse(InputStream input, int limit) {
 		int currentLineCount = 0;
@@ -47,7 +68,16 @@ public class CsvParser extends Parser {
 		} catch (IOException e) {
 			Log.error(e);
 		}
-
+		
+		
+		/*
+		for (int columnIndex = 0; columnIndex < schema.getColumns().size(); columnIndex++) {
+			Column currentCol = schema.getColumns().get(columnIndex);
+			//if (currentCol.minValue != null && currentCol.maxValue != null)
+				System.out.println("Col " + columnIndex + " min = " + currentCol.minValue + "  max = " + currentCol.maxValue);
+			
+		}*/
+		
 		//MemUsage.printMemUsage();
 		//timer.printms();
 	}
@@ -77,10 +107,23 @@ public class CsvParser extends Parser {
 			String strValue = valueList[columnIndex];
 			Column currentColumn = schema.getColumns().get(columnIndex);
 			// Converts the string value into an array of bytes representing the same data
-			currentColumn.parse(strValue, entryBuffer);
+			Object currentValue = currentColumn.parseAndReturnValue(strValue, entryBuffer);
+			if (currentColumn.minValue == null) currentColumn.minValue = currentValue;
+			if (currentColumn.maxValue == null) currentColumn.maxValue = currentValue;
+			if (currentColumn.compareValues(currentValue, currentColumn.maxValue) == 1) {
+				currentColumn.maxValue = currentValue;
+			}
+			if (currentColumn.compareValues(currentValue, currentColumn.minValue) == -1) {
+				currentColumn.minValue = currentValue;
+			}
+			
 		}
 		// returns the CSV line as an array of rightly typed data, as bytes
 		return entryBuffer.array();
 	}
-
+	
+	
+	
+	
+	
 }
