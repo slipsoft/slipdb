@@ -2,8 +2,6 @@ package db.data;
 
 import java.nio.ByteBuffer;
 
-import com.dant.utils.Utils;
-
 public class FloatType extends DataType {
 	
 	protected final static Operator[] compatibleOperatorsList = {
