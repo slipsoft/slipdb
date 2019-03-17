@@ -78,7 +78,7 @@ public class TestIndexTreeMT1 {
 		//Timer parseTimer = new Timer("Temps pris par le parsing de " + tableName);
 		newParser.parse(is);
 		is.close();
-		//parseTimer.printms();
+		//parseTimer.log();
 		return newTable;
 	}
 	
@@ -136,7 +136,7 @@ public class TestIndexTreeMT1 {
 			threadList.get(runCount).join();
 		}
 		
-		parseTimer.printms();
+		parseTimer.log();
 		
 		/**
 		 * En première idée, pour parser :
@@ -163,7 +163,7 @@ public class TestIndexTreeMT1 {
 			floatArray[(int)i] = nb;
 			nb++;
 		}
-		time.printms();
+		time.log();
 		MemUsage.printMemUsage();
 		
 	}*/
@@ -191,12 +191,12 @@ public class TestIndexTreeMT1 {
 		MemUsage.printMemUsage();
 		indexingObject.indexColumnFromDisk(table, indexingColumnIndex);
 		MemUsage.printMemUsage();
-		loadFromDiskTimer.printms();
+		loadFromDiskTimer.log();
 		
 		// Ecriture sur le disque
 		Timer writeIndexToDiskTimer = new Timer("Temps pris pour l'écriture sur disque");
 		indexingObject.saveOnDisk();
-		writeIndexToDiskTimer.printms();
+		writeIndexToDiskTimer.log();
 		
 		
 		Log.info("Fini");
@@ -222,7 +222,7 @@ public class TestIndexTreeMT1 {
 		
 		
 		MemUsage.printMemUsage();
-		searchQueryTimer.printms();
+		searchQueryTimer.log();
 		
 		// Iterates over all the results
 		int numberOfResults = 0, numberOfLines = 0;
@@ -241,7 +241,7 @@ public class TestIndexTreeMT1 {
 				
 			}
 		}
-		searchQueryFullTimer.printms();
+		searchQueryFullTimer.log();
 		Log.info("Number of results = " + numberOfResults);
 		Log.info("Number of lines = " + numberOfLines);
 		
@@ -249,7 +249,7 @@ public class TestIndexTreeMT1 {
 		Log.info("Depuis le disque : ");
 		Timer searchFromDiskTimer = new Timer("Temps pris pour la recherche du disque");
 		result = indexingObject.findMatchingBinIndexesFromDisk(intDateFrom, intDateTo, true);
-		searchFromDiskTimer.printms();
+		searchFromDiskTimer.log();
 		
 		// Iterates over all the results
 		numberOfResults = 0;

@@ -256,7 +256,7 @@ public class IndexTreeV3 extends Index {
 			
 			lineIndex++;
 		}
-		//benchTime.printms();
+		//benchTime.log();
 		
 		fileAsStream.close();
 	}
