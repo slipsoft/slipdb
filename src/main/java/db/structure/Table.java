@@ -8,9 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.dant.utils.EasyFile;
-import com.dant.utils.Log;
 
-import zArchive.sj.simpleBD.parseCSV.SOptimDataFromCSV;
+import db.data.DataType;
 
 /**
  * A simple SQL-like table, consisting of 
@@ -82,20 +81,14 @@ public class Table {
 	 *  @return
 	 * @throws Exception 
 	 */
-	public boolean addColumn(String colName, SOptimDataFromCSV optimDataType/*, boolean hasToIndexThisColumn*/) throws Exception {
+	public boolean addColumn(String colName, DataType dataType) throws Exception {
 		if (columnExist(colName)) throw new Exception("Column already exists, colName = " + colName);
 		// Ajout de la colonne
-		Column newColumn = new Column(colName, optimDataType);//, hasToIndexThisColumn);
+		Column newColumn = new Column(colName, dataType);
 		columnsList.add(newColumn);
 		return true;
 	}
 
-	/*
-	public boolean addColumn(String colName, SOptimDataFromCSV optimDataType) throws Exception {
-		return addColumn(colName, optimDataType, false);
-	}*/
-	
-	
 	/** Trouver l'index d'une colonne à partir de son nom, dans la liste columns
 	 *  @param colName  nom de la colonne à rechercher
 	 *  @return -1 si introuvable, un entier >= 0 si existe
@@ -109,7 +102,7 @@ public class Table {
 		}
 		return -1;
 	}
-	
+
 	/**
 	 * 
 	 * @param lineId is the position of the line, 0 being the first loaded line from the file (CSV for New York taxis)
@@ -145,7 +138,4 @@ public class Table {
 	public EasyFile getFileLinesOnDisk() {
 		return fileLinesOnDisk;
 	}
-	
-	
-	
 }
