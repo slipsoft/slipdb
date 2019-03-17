@@ -149,7 +149,7 @@ public class IndexTreeV3 extends Index {
 		
 
 		for (int depthIndex = 0; depthIndex < arrayMaxDistanceBetweenTwoNumericalElements.length; depthIndex++) {
-			System.out.println("At index " + depthIndex + " : " + arrayMaxDistanceBetweenTwoNumericalElements[depthIndex]);
+			System.out.println("initializeMaxDistanceBetweenElementsArray : At index " + depthIndex + " : " + arrayMaxDistanceBetweenTwoNumericalElements[depthIndex]);
 			//maxAbsValue / Math.pow(10, depthIndex);
 		}
 		

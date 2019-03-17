@@ -25,7 +25,8 @@ import db.parsers.CsvParser;
 import db.parsers.Parser;
 import db.structure.Column;
 import db.structure.Table;
-import db.structure.indexTree.IndexTreeV3;
+import db.structure.indexTree.IndexTreeCeption;
+import db.structure.indexTree.IndexTreeDic;
 
 public class IndexTreeTest {
 
@@ -116,7 +117,9 @@ public class IndexTreeTest {
 		
 		System.out.println("OUOUOUOU " + indexThisColumn.minValue + "  " +  indexThisColumn.maxValue);
 
-		IndexTreeV3 indexingObject = new IndexTreeV3(0, null, indexThisColumn.minValue, indexThisColumn.maxValue);
+		//IndexTreeCeption indexingObject = new IndexTreeCeption(0, null, indexThisColumn.minValue, indexThisColumn.maxValue);
+		IndexTreeDic indexingObject = new IndexTreeDic(Float.class);
+		
 		
 		//indexingObject.initializeMaxDistanceBetweenElementsArray(indexThisColumn.minValue, indexThisColumn.maxValue);
 		
@@ -141,7 +144,7 @@ public class IndexTreeTest {
 		// Get the query result
 		Collection<IntegerArrayList> result;
 		MemUsage.printMemUsage();
-		result = indexingObject.findMatchingBinIndexes(new Float(20), new Float(25), true); // new Float(20), new Float(21)
+		result = indexingObject.findMatchingBinIndexesInMemory(new Float(20), new Float(25), true); // new Float(20), new Float(21)
 		//result = indexingObject.findMatchingBinIndexes(new Integer(-1000), new Integer(1000), true);
 
 		Date dateFrom = currentlyUsedUils.dateFromString("2015-04-16 00:05:00");

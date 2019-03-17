@@ -1,6 +1,6 @@
-package zArchive.sj.simpleBD.parseCSV;
+package zArchive.sj.simpleDB.arrayList;
 
-public enum SStorageDataType {
+public enum AL_SStorageDataType {
 	isUnknown(-1),
 	isByte(1),
 	isChar(2),
@@ -16,7 +16,7 @@ public enum SStorageDataType {
 	
 	public final byte dataSize;
 	
-	private SStorageDataType(int arg_dataSize) {
+	private AL_SStorageDataType(int arg_dataSize) {
 		dataSize = (byte) arg_dataSize;
 		
 	}

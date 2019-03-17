@@ -10,7 +10,7 @@ import java.util.List;
 import com.dant.utils.EasyFile;
 import com.dant.utils.Log;
 
-import zArchive.sj.simpleBD.parseCSV.SOptimDataFromCSV;
+import zArchive.sj.simpleDB.arrayList.Al_SOptimDataFromCSV;
 
 /**
  * A simple SQL-like table, consisting of 
@@ -84,7 +84,7 @@ public class Table {
 	 *  @return
 	 * @throws Exception 
 	 */
-	public boolean addColumn(String colName, SOptimDataFromCSV optimDataType/*, boolean hasToIndexThisColumn*/) throws Exception {
+	public boolean addColumn(String colName, Al_SOptimDataFromCSV optimDataType/*, boolean hasToIndexThisColumn*/) throws Exception {
 		if (columnExist(colName)) throw new Exception("Column already exists, colName = " + colName);
 		// Ajout de la colonne
 		Column newColumn = new Column(colName, optimDataType);//, hasToIndexThisColumn);

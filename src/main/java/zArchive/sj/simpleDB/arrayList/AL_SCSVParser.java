@@ -1,4 +1,4 @@
-package zArchive.sj.simpleBD.parseCSV;
+package zArchive.sj.simpleDB.arrayList;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -17,7 +17,7 @@ import db.structure.Table;
 
 
 
-public class SCSVParser {
+public class AL_SCSVParser {
 	
 	
 	/** Pour le test de l'indexation, ici, faire l'indexation
@@ -106,11 +106,11 @@ public class SCSVParser {
 				break;
 			case floatToByte :
 				floatValue = Float.parseFloat(strValue);
-				tripAsByteBuffer.put(SOptimDataFromCSV.convertFloatToByte(floatValue));
+				tripAsByteBuffer.put(Al_SOptimDataFromCSV.convertFloatToByte(floatValue));
 				break;
 			case floatToShort :
 				floatValue = Float.parseFloat(strValue);
-				tripAsByteBuffer.putShort(SOptimDataFromCSV.convertFloatToShort(floatValue));
+				tripAsByteBuffer.putShort(Al_SOptimDataFromCSV.convertFloatToShort(floatValue));
 				break;
 			//case isString : // pas de prise en charge des strings pour le moment
 			//	break;

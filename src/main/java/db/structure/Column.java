@@ -3,8 +3,8 @@ package db.structure;
 import java.nio.ByteBuffer;
 
 import db.data.DataType;
-import zArchive.sj.simpleBD.parseCSV.SOptimDataFromCSV;
-import zArchive.sj.simpleBD.parseCSV.SStorageDataType;
+import zArchive.sj.simpleDB.arrayList.AL_SStorageDataType;
+import zArchive.sj.simpleDB.arrayList.Al_SOptimDataFromCSV;
 
 public class Column {
 	
@@ -15,11 +15,11 @@ public class Column {
 	public Object maxValue = null;
 
 	// Type de donnée stockée
-	public final SStorageDataType dataType;// = StorageDataType.isUnknown;
-	public final SOptimDataFromCSV optimDataType; // utile pour le cast d'une date -> int par exemple
+	public final AL_SStorageDataType dataType;// = StorageDataType.isUnknown;
+	public final Al_SOptimDataFromCSV optimDataType; // utile pour le cast d'une date -> int par exemple
 	//public final boolean hasToIndexThisColumn; // Indexer cette colonne au chargement
 	
-	public Column(String argName, SOptimDataFromCSV argOptimDataType/*, boolean aHasToIndexThisColumn*/) { //StorageDataType argDataType, StorageDataType argDataTypeInCSV) {
+	public Column(String argName, Al_SOptimDataFromCSV argOptimDataType/*, boolean aHasToIndexThisColumn*/) { //StorageDataType argDataType, StorageDataType argDataTypeInCSV) {
 		this.name = argName;
 		this.dataType = argOptimDataType.realDataType;
 		this.optimDataType = argOptimDataType;
