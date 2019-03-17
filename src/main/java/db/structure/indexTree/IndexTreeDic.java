@@ -89,12 +89,12 @@ public class IndexTreeDic {
 		rootIndexTreeCount++;
 	}
 	
+	/*
 	@SuppressWarnings("rawtypes")
 	protected void setStoredValuesClassType(DataType argStoredValuesClassType) {
 		//storedValuesClassType = argStoredValuesClassType;
-		
 		//storedValueDataByteSize
-	}
+	}*/
 	
 	
 	/** Index a column and 
