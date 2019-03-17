@@ -125,7 +125,7 @@ public class AL_GlobalTest {
 
 
 		printMemUsage();
-		timer.printms();
+		timer.log();
 	}
 	
 	public void globalTestWithCSV(String pathToCSV) {

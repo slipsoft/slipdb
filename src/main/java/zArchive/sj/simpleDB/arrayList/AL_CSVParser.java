@@ -17,7 +17,7 @@ import db.structure.Table;
 
 
 
-public class AL_SCSVParser {
+public class AL_CSVParser {
 	
 	
 	/** Pour le test de l'indexation, ici, faire l'indexation
@@ -179,6 +179,6 @@ public class AL_SCSVParser {
 		
 		
 		MemUsage.printMemUsage();
-		timer.printms();
+		timer.log();
 	}
 }

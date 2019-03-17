@@ -307,7 +307,7 @@ public class IndexTreeCeption {
 			
 			lineIndex++;
 		}
-		//benchTime.printms();
+		//benchTime.log();
 		
 		fileAsStream.close();
 	}

@@ -79,7 +79,7 @@ class CsvParserTest {
 				FileInputStream is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
 				Timer parseTimer = new Timer("Temps pris par le parsing");
 				parser.parse(is);
-				parseTimer.printms();
+				parseTimer.log();
 			}
 		};
 		assertDoesNotThrow(exec);
