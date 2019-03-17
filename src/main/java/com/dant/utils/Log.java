@@ -10,102 +10,154 @@ import org.apache.commons.lang3.ArrayUtils;
 
 public class Log {
 	protected static volatile int level = 0;
-	protected static String prefix = "LOG";
 	protected static EasyFile file;
 	
 	public static int getLevel() {
 		return level;
 	}
 
+	/**
+	 * Set log level.
+	 * It determines how much messages are displayed in the console.
+	 * 
+	 * @param level - 0: quiet, 1: info, 2: debug, 3: stacktrace
+	 */
 	public static void setLevel(int level) {
 		Log.level = level;
 	}
 
+	/**
+	 * Start a log session by setting its file and level.
+	 * The level determines how much messages are displayed in the console.
+	 * 
+	 * @param file
+	 * @param level - 0: quiet, 1: info, 2: debug, 3: stacktrace
+	 */
 	public static void start(String file, int level) {
 		Log.level = level;
 		Log.file = new EasyFile(file);
 	}
-
-	/**
-	 * Print a debug message in the standard output if verbose
-	 * @param msg
-	 */
-	public static void debug(Object msg) {
-		debug(msg, prefix);
-	}
-
-	/**
-	 * Print a debug message in the standard output if verbose
-	 * @param msg
-	 * @param prefix
-	 */
-	public static void debug(Object msg, String prefix) {
-		if (Log.level > 1) {
-			String str = msg.toString();
-			if (msg.getClass().isArray()) {
-				str = ArrayUtils.toString(msg);
-			}
-			info(str, prefix);
-		}
-	}
 	
 	/**
-	 * Print an info message
+	 * Log an info message.
+	 * Print in the standard output if log level >= 1.
+	 * 
 	 * @param msg
 	 */
 	public static void info(String msg) {
-		info(msg, prefix);
+		logInfoMessage(msg, "", 3);
 	}
 	
 	/**
-	 * Print an info message
+	 * Log an info message.
+	 * Print in the standard output if log level >= 1.
+	 * 
 	 * @param msg
 	 * @param prefix
 	 */
 	public static void info(String msg, String prefix) {
-		msg = "INFO " + prefixString(prefix) + msg;
-		if (Log.level > 0) {
+		logInfoMessage(msg, prefix, 3);
+	}
+	
+	protected static void logInfoMessage(String msg, String prefix, int depth) {
+		msg = prefixString("INFO/" + prefix) + msg + getCaller(depth);
+		if (Log.level >= 1) {
 			System.out.println(msg);
 		}
 		append(msg);
 	}
-	
+
 	/**
-	 * Print an error message in the standard output
-	 * @param msg
+	 * Log & Print a debug message if log level >= 2.
+	 * 
+	 * @param obj
 	 */
-	public static void error(String msg) {
-		error(msg, prefix);
+	public static void debug(Object obj) {
+		logDebugMessage(obj, "", 3);
 	}
-	
+
 	/**
-	 * Print an error message in the standard output
-	 * @param msg
+	 * Log & Print a debug message if log level >= 2.
+	 * 
+	 * @param obj
 	 * @param prefix
 	 */
-	public static void error(String msg, String prefix) {
-		msg = "ERROR " + prefixString(prefix) + msg;
-		System.err.println(msg);
-		append(msg);
+	public static void debug(Object obj, String prefix) {
+		logDebugMessage(obj, prefix, 3);
+	}
+	
+	protected static void logDebugMessage(Object obj, String prefix, int depth) {
+		if (Log.level >= 2) {
+			String msg = obj.toString();
+			if (obj.getClass().isArray()) {
+				msg = ArrayUtils.toString(obj);
+			}
+			msg = prefixString("DEBUG/" + prefix) + msg + getCaller(depth);
+			System.out.println(msg);
+			append(msg);
+		}
 	}
 	
 	/**
-	 * Print an error message in the standard output
+	 * Log & Print an error message.
+	 * Print StackTrace in the standard output if log level >= 3.
+	 * 
 	 * @param msg
 	 */
 	public static void error(Exception e) {
-		error(e, prefix);
+		logErrorMessage(e.getMessage(), "", 3);
+		if (Log.level >= 3) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
-	 * Print an error message in the standard output
+	 * Log & Print an error message.
+	 * Print StackTrace in the standard output if log level >= 3.
+	 * 
 	 * @param msg
 	 * @param prefix
 	 */
 	public static void error(Exception e, String prefix) {
-		error(e.getMessage(), prefix);
-		if (Log.level > 2) {
+		logErrorMessage(e.getMessage(), prefix, 3);
+		if (Log.level >= 3) {
 			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Log & Print an error message.
+	 * Print StackTrace in the standard output if log level >= 3.
+	 * 
+	 * @param msg
+	 */
+	public static void error(String msg) {
+		logErrorMessage(msg, "", 3);
+	}
+	
+	/**
+	 * Log & Print an error message.
+	 * Print StackTrace in the standard output if log level >= 3.
+	 * 
+	 * @param msg
+	 * @param prefix
+	 */
+	public static void error(String msg, String prefix) {
+		logErrorMessage(msg, prefix, 3);
+	}
+	
+	protected static void logErrorMessage(String msg, String prefix, int depth) {
+		msg = prefixString("ERROR/" + prefix) + msg + getCaller(depth);
+		System.err.println(msg);
+		append(msg);
+	}
+	
+	public static String getCaller(int depth) {
+		if (level >= 2) {
+			StackTraceElement elem =  new Throwable().getStackTrace()[depth];
+			return " (" + elem.getFileName() + ":" + elem.getLineNumber() + ")";
+		} else {
+			return "";
 		}
 	}
 	
@@ -122,10 +174,9 @@ public class Log {
 				String date = df.format(new Date());
 				fw.write(date + " " + msg + "\n");
 			} catch (IOException e) {
-				msg = "ERROR " + prefixString(prefix) + e.getMessage();
+				msg = prefixString("ERROR") + e.getMessage();
 				System.err.println(msg);
 			}
 		}
 	}
-
 }

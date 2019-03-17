@@ -48,49 +48,49 @@ public class TestParsingTypes {
 		for (int count = 0; count < maxCountOperation; count++) {
 			bBuff.rewind();
 		}
-		localTimer.printms();
+		localTimer.log();
 		
 		localTimer = new Timer("Parsing de ByteType ");
 		for (int count = 0; count < maxCountOperation; count++) {
 			bBuff.rewind();
 			byteType.writeToBuffer("78", bBuff);
 		}
-		localTimer.printms();
+		localTimer.log();
 
 		localTimer = new Timer("Parsing de IntegerType ");
 		for (int count = 0; count < maxCountOperation; count++) {
 			bBuff.rewind();
 			integerType.writeToBuffer("454689586", bBuff);
 		}
-		localTimer.printms();
+		localTimer.log();
 
 		localTimer = new Timer("Parsing de LongType ");
 		for (int count = 0; count < maxCountOperation; count++) {
 			bBuff.rewind();
 			longType.writeToBuffer("45468957895686", bBuff);
 		}
-		localTimer.printms();
+		localTimer.log();
 		
 		localTimer = new Timer("Parsing de FloatType ");
 		for (int count = 0; count < maxCountOperation; count++) {
 			bBuff.rewind();
 			floatType.writeToBuffer("454689586.2132152", bBuff);
 		}
-		localTimer.printms();
+		localTimer.log();
 		
 		localTimer = new Timer("Parsing de DoubleType ");
 		for (int count = 0; count < maxCountOperation; count++) {
 			bBuff.rewind();
 			doubleType.writeToBuffer("454689586.2132152", bBuff);
 		}
-		localTimer.printms();
+		localTimer.log();
 		
 		localTimer = new Timer("Parsing de DateType ");
 		for (int count = 0; count < maxCountOperation; count++) {
 			bBuff.rewind();
 			dateType.writeToBuffer("2015-04-27 15:45:38", bBuff);
 		}
-		localTimer.printms();
+		localTimer.log();
 		
 		/** Valeurs mise à jour (Sylvain)
 		 	Pour 5_000_000 opérations : 

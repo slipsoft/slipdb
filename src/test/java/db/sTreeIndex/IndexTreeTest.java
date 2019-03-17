@@ -69,7 +69,7 @@ public class IndexTreeTest {
 		
 		Timer parseTimer = new Timer("Temps pris par le parsing");
 		parser.parse(is);
-		parseTimer.printms();
+		parseTimer.log();
 		
 		Log.info("setUpBeforeAll OK");
 	}
@@ -91,7 +91,7 @@ public class IndexTreeTest {
 			floatArray[(int)i] = nb;
 			nb++;
 		}
-		time.printms();
+		time.log();
 		MemUsage.printMemUsage();
 		
 	}*/
@@ -119,12 +119,12 @@ public class IndexTreeTest {
 		MemUsage.printMemUsage();
 		indexingObject.indexColumnFromDisk(table, indexingColumnIndex);
 		MemUsage.printMemUsage();
-		loadFromDiskTimer.printms();
+		loadFromDiskTimer.log();
 		
 		// Ecriture sur le disque
 		Timer writeIndexToDiskTimer = new Timer("Temps pris pour l'écriture sur disque");
 		indexingObject.saveOnDisk();
-		writeIndexToDiskTimer.printms();
+		writeIndexToDiskTimer.log();
 		
 		
 		Log.info("Fini");
@@ -148,7 +148,7 @@ public class IndexTreeTest {
 		
 		
 		MemUsage.printMemUsage();
-		searchQueryTimer.printms();
+		searchQueryTimer.log();
 		
 		// Iterates over all the results
 		int numberOfResults = 0, numberOfLines = 0;
@@ -167,7 +167,7 @@ public class IndexTreeTest {
 				
 			}
 		}
-		searchQueryFullTimer.printms();
+		searchQueryFullTimer.log();
 		Log.info("Number of results = " + numberOfResults);
 		Log.info("Number of lines = " + numberOfLines);
 		
@@ -175,7 +175,7 @@ public class IndexTreeTest {
 		Log.info("Depuis le disque : ");
 		Timer searchFromDiskTimer = new Timer("Temps pris pour la recherche du disque");
 		result = indexingObject.findMatchingBinIndexesFromDisk(intDateFrom, intDateTo, true);
-		searchFromDiskTimer.printms();
+		searchFromDiskTimer.log();
 		
 		// Iterates over all the results
 		numberOfResults = 0;

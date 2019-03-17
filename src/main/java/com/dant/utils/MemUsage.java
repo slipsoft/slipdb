@@ -17,7 +17,7 @@ public class MemUsage {
 		
 		long usedMemory = allocatedMemory - freeMemory;
 		
-		Log.info("Used Memory = " + format.format(usedMemory / 1024));
+		Log.logInfoMessage("Usage: " + format.format(usedMemory / 1024), "MEMORY", 3);
 		
 		/*
 		Log.info("free memory: " + format.format(freeMemory / 1024));
