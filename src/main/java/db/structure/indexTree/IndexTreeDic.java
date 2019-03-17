@@ -190,6 +190,12 @@ public class IndexTreeDic {
 			Object readValue = columnDataType.readIndexValue(columnValueAsByteArray);
 			this.addValue(readValue, new Integer(lineIndex)); // creating a new Integer is quite slow ><" (but the bottle neck really is I/O on disk)
 			
+			/*
+			 S'il y a trop de valeurs mises en mémoire, j'écris l'index sur le disque et je retiens le nom du fichier écrit.
+			 
+			 
+			 
+			 */
 			
 			fileAsStream.skip(skipAfterData);
 			
@@ -423,13 +429,13 @@ public class IndexTreeDic {
 		int binIndexOfIntegerArrayList = ((int)routingTableBinIndex + 4) + findValueIndexBy_keyIndex * diskEntrySize; //  binIndex de la table de routage + 
 		int whereToFindAssociatedBinIndex = binIndexOfIntegerArrayList + storedValueDataByteSize; // la position où lire le binIndex de la donnée
 		
-		randFile.seek(binIndexOfIntegerArrayList);
-		Object associatedValue = readObjectValueFromDisk(randFile, storedValuesClassType); // (débug) valeur associée
+		//randFile.seek(binIndexOfIntegerArrayList);
+		//Object associatedValue = readObjectValueFromDisk(randFile, storedValuesClassType); // (débug) valeur associée
 		
 		randFile.seek(whereToFindAssociatedBinIndex);
 		
 		findValueIndexBy_binIndex = randFile.readInt();
-		Log.info("IndexTreeDis.findValueIndexBySimpleReading : associatedValue = " + associatedValue + "  asDate = " + Utils.dateFromSecInt((Integer)associatedValue));
+		//Log.info("IndexTreeDis.findValueIndexByDichotomy : associatedValue = " + associatedValue + "  asDate = " + Utils.dateFromSecInt((Integer)associatedValue));
 		
 		return intervalStartIndex;
 		
@@ -535,14 +541,12 @@ public class IndexTreeDic {
 		//Log.info("IndexTreeDic.findMatchingBinIndexesFromDisk : AsDate :");
 		//Log.info("IndexTreeDic.findMatchingBinIndexesFromDisk : begin = " + Utils.dateFromSecInt((Integer)minValueExact) + "  end = " + Utils.dateFromSecInt((Integer)maxValueExact));
 		
-
-		
 		
 		if (keyIndexOfMax == -1 && keyIndexOfMin != -1) {
 			keyIndexOfMax = totalNumberOfDistinctValues - 1;
 		}
 		int integerArrayListTotalCount = keyIndexOfMax - keyIndexOfMin + 1;
-		Log.info("IndexTreeDic.findMatchingBinIndexesFromDisk : integerArrayListTotalCount = " + integerArrayListTotalCount);
+		//Log.info("IndexTreeDic.findMatchingBinIndexesFromDisk : integerArrayListTotalCount = " + integerArrayListTotalCount);
 		
 		if (minBinIndex != -1) {
 			randFile.seek(minBinIndex); // premier seek
@@ -564,8 +568,8 @@ public class IndexTreeDic {
 		
 		randFile.close();
 		
-		System.out.println("IndexTreeDic.loadFromDisk : debugDiskNumberOfIntegerArrayList=" + debugDiskNumberOfIntegerArrayList);
-		System.out.println("IndexTreeDic.loadFromDisk : debugDiskNumberOfExactValuesEvaluated=" + debugDiskNumberOfExactValuesEvaluated);
+		//System.out.println("IndexTreeDic.loadFromDisk : debugDiskNumberOfIntegerArrayList=" + debugDiskNumberOfIntegerArrayList);
+		//System.out.println("IndexTreeDic.loadFromDisk : debugDiskNumberOfExactValuesEvaluated=" + debugDiskNumberOfExactValuesEvaluated);
 		
 		return listOfMatchingArraysOfBinIndexes;
 	}

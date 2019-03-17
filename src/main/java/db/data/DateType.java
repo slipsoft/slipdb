@@ -16,6 +16,9 @@ public class DateType extends DataType {
 		Operator.lessOrEquals,
 	};
 	
+	
+	//public static int dateFastFalse = Utils.dateToSecInt(Utils.dateFromStringNoThreadSafe("2015-04-13 21:18:50"));
+	
 	// Nécessaire pour rendre les opérations trhead-safe, il ne peut pas y avoir de Utils ayant des méthodes statiques utilisant les mêmes objets instanciés.
 	// (sous peine d'exceptions dus à des problèmes de concurrence)
 	// Et ne pas utiliser de synchronized ou volatile, de préférence, cela réduirait grandement les performances)

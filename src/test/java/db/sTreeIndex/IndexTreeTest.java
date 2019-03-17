@@ -221,7 +221,6 @@ public class IndexTreeTest {
 				
 			}
 		}
-		if (result.size() > 0) Log.info("from value = ");
 		Log.info("Number of results = " + numberOfResults);
 		Log.info("Number of lines = " + numberOfLines);
 
