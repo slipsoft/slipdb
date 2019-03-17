@@ -3,7 +3,7 @@ package db.structure;
 import java.util.ArrayList;
 import java.util.Map;
 
-import db.data.Operator;
+import db.data.Operable;
 
 /**
  * Classe Index, permettant d'indexer une ou plusieurs colonnes Exemple :
@@ -11,7 +11,7 @@ import db.data.Operator;
  * naissance ...
  * 
  */
-public abstract class Index {
+public abstract class Index implements Operable {
 
 	/**
 	 * Carte des valeurs indexées par cet objet Index - association clef valeur :
@@ -21,8 +21,6 @@ public abstract class Index {
 	 * ArrayList<Integer>
 	 */
 	protected Map<Key, ArrayList<Integer>> indexedValuesMap;
-
-	protected static Operator[] compatibleOperatorsList; // Liste des opérateurs compatibles
 	protected Column[] indexedColumnsList; // Liste des colonnes indexées dans cet Index
 
 	/**
