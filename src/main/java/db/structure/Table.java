@@ -18,7 +18,7 @@ public class Table {
 
 	protected static String basePath = "target/tables/";
 	protected String name; // table name
-	protected EasyFile fileLinesOnDisk;
+	protected EasyFile fileLinesOnDisk; // <- les fichiers de sauvegarde des colonnes sont désormais indépendants
 	protected List<Column> columnsList = new ArrayList<Column>(); // liste des colonnes de la table
 	protected List<Index> indicesList = new ArrayList<Index>();   // liste des index générés pour cette table
 	

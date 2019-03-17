@@ -21,8 +21,9 @@ import db.structure.Table;
  * But de ce parser :
  * - Evaluer le minimum et maximum de chaque colonne
  * - Sauvegarder chaque colonne dans un fichier séparé
- * - Split les résultats pour avoir des colonnes de tailles raisonnables, et pouvoir indexer en multi-thread (exemple : 1_000_000 par colonne)
- *
+ * PAS BESOIN : split les résultats pour avoir des colonnes de tailles raisonnables, et pouvoir indexer en multi-thread (exemple : 1_000_000 par colonne)
+ * Il est possible de faire du multi-thread sur un seul fichier, c'est même plus simple et plus rapide !!
+ * 
  */
 
 
@@ -34,6 +35,14 @@ public class CsvParser extends Parser {
 		super(schema);
 	}
 	
+	
+	
+	
+	/** Lecture du CSV depuis un InputStream (peu importe la provenance)
+	 *  Exécution mono-thread, en l'état, faire du multi-thread serait super super compliqué
+	 *  
+	 *  Chaque ligne a son propre fichier binaire.
+	 */
 	@Override
 	public void parse(InputStream input, int limit) {
 		int currentLineCount = 0;

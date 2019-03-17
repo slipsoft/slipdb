@@ -134,7 +134,7 @@ public class IndexTreeTest {
 		
 		// Ecriture sur le disque
 		Timer writeIndexToDiskTimer = new Timer("Temps pris pour l'écriture sur disque");
-		indexingObject.saveOnDisk();
+		indexingObject.saveOnDisk(false); // première sauvegarde, écraser ce qui existe déjà
 		writeIndexToDiskTimer.printms();
 		
 		
@@ -151,9 +151,14 @@ public class IndexTreeTest {
 		int intDateFrom = Utils.dateToSecInt(dateFrom);
 		int intDateTo = Utils.dateToSecInt(dateTo);
 		
+		/*Object searchFromValue = new Float(12.78641);
+		Object searchToValue = new Float(14.748621);*/
+
+		Object searchFromValue = intDateFrom;
+		Object searchToValue = intDateTo;
 		
-		//result = indexingObject.findMatchingBinIndexesInMemory(new Float(20), new Float(25), true); // new Float(20), new Float(21)
-		result = indexingObject.findMatchingBinIndexesInMemory(intDateFrom, intDateTo, true);
+		result = indexingObject.findMatchingBinIndexesInMemory(searchFromValue, searchToValue, true); // new Float(20), new Float(21)
+		//result = indexingObject.findMatchingBinIndexesInMemory(intDateFrom, intDateTo, true);
 		
 		//result = indexingObject.findMatchingBinIndexes(new Integer(-1000), new Integer(1000), true);
 
@@ -193,8 +198,8 @@ public class IndexTreeTest {
 		Log.info("Depuis le disque : ");
 		Timer searchFromDiskTimer = new Timer("Temps pris pour la recherche du disque");
 		
-		//result = indexingObject.findMatchingBinIndexesFromDisk(new Float(20), new Float(25), true);
-		result = indexingObject.findMatchingBinIndexesFromDisk(intDateFrom, intDateTo, true);
+		result = indexingObject.findMatchingBinIndexesFromDisk(searchFromValue, searchToValue, true);
+		//result = indexingObject.findMatchingBinIndexesFromDisk(intDateFrom, intDateTo, true);
 		
 		searchFromDiskTimer.printms();
 		
