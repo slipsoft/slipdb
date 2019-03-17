@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -67,7 +68,7 @@ public class IndexTreeTest {
 		parser = new CsvParser(table);
 		
 		//FileInputStream is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); // "../SMALL_1_000_000_yellow_tripdata_2015-04.csv"
-		FileInputStream is = new FileInputStream("../SMALL_1_000_000_yellow_tripdata_2015-04.csv"); // testdata
+		FileInputStream is = new FileInputStream("../SMALL_100_000_yellow_tripdata_2015-04.csv"); // testdata
 		
 		Timer parseTimer = new Timer("Temps pris par le parsing");
 		parser.parse(is);
@@ -115,8 +116,8 @@ public class IndexTreeTest {
 		
 		Column indexThisColumn = table.getColumns().get(indexingColumnIndex);
 		
-		System.out.println("OUOUOUOU " + indexThisColumn.minValue + "  " +  indexThisColumn.maxValue);
-
+		//System.out.println("OUOUOUOU " + indexThisColumn.minValue + "  " +  indexThisColumn.maxValue);
+		
 		//IndexTreeCeption indexingObject = new IndexTreeCeption(0, null, indexThisColumn.minValue, indexThisColumn.maxValue);
 		IndexTreeDic indexingObject = new IndexTreeDic();//Integer.class);
 		
@@ -134,7 +135,8 @@ public class IndexTreeTest {
 		
 		// Ecriture sur le disque
 		Timer writeIndexToDiskTimer = new Timer("Temps pris pour l'écriture sur disque");
-		indexingObject.saveOnDisk(false); // première sauvegarde, écraser ce qui existe déjà
+		//indexingObject.flushOnDisk();
+		//indexingObject.saveOnDisk(false); // première sauvegarde, écraser ce qui existe déjà
 		writeIndexToDiskTimer.log();
 		
 		
@@ -146,8 +148,8 @@ public class IndexTreeTest {
 		MemUsage.printMemUsage();
 		
 		
-		Date dateFrom = currentlyUsedUils.dateFromString("2015-04-29 00:05:00");
-		Date dateTo = currentlyUsedUils.dateFromString("2015-04-29 00:10:30");
+		Date dateFrom = currentlyUsedUils.dateFromString("2015-04-04 00:01:00");
+		Date dateTo = currentlyUsedUils.dateFromString("2015-04-04 00:19:52");
 		int intDateFrom = Utils.dateToSecInt(dateFrom);
 		int intDateTo = Utils.dateToSecInt(dateTo);
 		
@@ -211,12 +213,12 @@ public class IndexTreeTest {
 			numberOfLines++;
 			for (Integer index : list) {
 				// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
-				/*Log.info("  index = " + index);
 				List<Object> objList = table.getValuesOfLineById(index);
 				Object indexedValue = objList.get(indexingColumnIndex);
+				Log.info("  index = " + index + "   val = " + indexedValue);
 				
 				//Log.info("  valeur indexée = " + indexedValue);
-				Log.info("  objList = " + objList);*/
+				//Log.info("  objList = " + objList);
 				
 			}
 		}

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.dant.utils.EasyFile;
 import com.dant.utils.Log;
@@ -61,16 +62,21 @@ public class IndexTreeDic {
 	 * 
 	 * 
 	 */
-	
+	public int flushOnDiskOnceReachedThisFileNumber = 500_000;
 	
 	// Contient tous les index des données indexées
 	protected TreeMap<Object/*clef, valeur indexée*/, IntegerArrayList/*valeur*/> associatedBinIndexes = new TreeMap<Object, IntegerArrayList>();
 	//protected EasyFile fileStoringDataBlocks; // link between the disk and onDiskDataBlocks
 	protected EasyFile fileSaveOnDisk = null;
 	protected String currentSaveFilePath = null;
-	protected static String basePath = "target/treeIndexDiskMemory/";
+	protected static String basePath = "target/IndexTreeDic_DiskMemory/";
 	protected static int rootIndexTreeCount = 0;
 	
+	// Thread-safe
+	protected static AtomicInteger nextIndexTreeDicUniqueId = new AtomicInteger(1);
+	protected int indexTreeDicUniqueId; // id unique de cet index
+	protected final String baseSaveFilePath, suffixSaveFilePath;
+	protected int uniqueFileIdForThisTree = 1;
 
 	// storedValuesClassType et storedValueDataByteSize sont définis dans indexColumnFromDisk(...)
 	// -> c'est à dire au moment d'indexer une colonne
@@ -80,7 +86,12 @@ public class IndexTreeDic {
 	
 	
 	public IndexTreeDic() {//(Class argStoredValuesClassType) {
-		currentSaveFilePath = basePath + "IndexTreeDic_indexSave_" + rootIndexTreeCount + ".bin_tree";
+		
+		indexTreeDicUniqueId = nextIndexTreeDicUniqueId.addAndGet(1);
+		baseSaveFilePath = basePath + "IndexTreeDic_" + indexTreeDicUniqueId + "_"; // id arbre _ id(nombre) fichier
+		suffixSaveFilePath = ".idc_bin";
+		
+		currentSaveFilePath = basePath + "IndexTreeDic_indexSave_" + indexTreeDicUniqueId + ".bin_tree";
 		fileSaveOnDisk = new EasyFile(currentSaveFilePath);
 		try {
 			fileSaveOnDisk.createFileIfNotExist();
@@ -99,6 +110,11 @@ public class IndexTreeDic {
 		//storedValueDataByteSize
 	}*/
 	
+	// Il ne peut pas y avoir de Append sur un fichier
+	// Liste des noms de fichiers sauvegardés sur le disque
+	protected ArrayList<String> indexWrittenOnDiskFilePathsArray = new ArrayList<String>();
+	protected int indexWrittenOnDiskFileCount = 0;
+	//protected String indexWrittenOnDiskBasePath = "target/treeIndexDiskMemory/";
 	
 	/** Index a column and 
 	 *  @param inTable
@@ -147,9 +163,12 @@ public class IndexTreeDic {
 		long currentBinPosition = 0;
 		long fileSize = inTable.getFileLinesOnDisk().length();
 		
+		int inMemoryResults = 0;
+		
 		//Timer benchTime = new Timer("Temps pris par l'indexation");
 		byte[] columnValueAsByteArray = new byte[dataSizeInBytes];
 		while (currentBinPosition < fileSize) {
+			
 		//while (true) {
 			
 			/*
@@ -189,6 +208,13 @@ public class IndexTreeDic {
 			
 			Object readValue = columnDataType.readIndexValue(columnValueAsByteArray);
 			this.addValue(readValue, new Integer(lineIndex)); // creating a new Integer is quite slow ><" (but the bottle neck really is I/O on disk)
+			inMemoryResults++;
+			
+			if (inMemoryResults > flushOnDiskOnceReachedThisFileNumber) {
+				flushOnDisk();
+				System.out.println("indexColumnFromDisk : SAVE ON DISK !!");
+				inMemoryResults = 0;
+			}
 			
 			/*
 			 S'il y a trop de valeurs mises en mémoire, j'écris l'index sur le disque et je retiens le nom du fichier écrit.
@@ -209,6 +235,8 @@ public class IndexTreeDic {
 		//benchTime.printms();
 		
 		fileAsStream.close();
+		
+		flushOnDisk();
 	}
 	
 	
@@ -256,19 +284,33 @@ public class IndexTreeDic {
 	int debugNumberOfExactArrayListValuesWrittenOnDisk = 0;
 	int debugNumberOfExactValuesWrittenOnDisk = 0;
 	
+	
+	public void flushOnDisk() throws IOException {
+		if (associatedBinIndexes.size() == 0) return;
+		
+		String saveFileName = baseSaveFilePath + uniqueFileIdForThisTree + suffixSaveFilePath;
+		uniqueFileIdForThisTree++;
+		EasyFile fileInstance = new EasyFile(saveFileName);
+		fileInstance.createFileIfNotExist();
+		saveOnDisk(fileInstance, false);
+		indexWrittenOnDiskFilePathsArray.add(saveFileName);
+		associatedBinIndexes = new TreeMap<Object, IntegerArrayList>(); // réinitialisation
+		
+	}
+	
 	/** Ecrire l'index sur le disque
 	 *  @param appendAtTheEnd   mettre à true pour écrire les données sur le disque
 	 *  @throws IOException
 	 */
-	public void saveOnDisk(boolean appendAtTheEnd) throws IOException {
-		
-		DataOutputStream writeInDataStream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(fileSaveOnDisk, appendAtTheEnd)));
+	protected void saveOnDisk(EasyFile writeOnFile, boolean appendAtTheEnd) throws IOException {
+		//fileSaveOnDisk
+		DataOutputStream writeInDataStream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(writeOnFile, appendAtTheEnd)));
 		
 		writeAllStoredDataOnDisk(writeInDataStream);
 		writeInDataStream.close();
 		
-		System.out.println("IndexTreeCeption.saveOnDisk : debugNumberOfExactArrayListValuesWrittenOnDisk=" + debugNumberOfExactArrayListValuesWrittenOnDisk);
-		System.out.println("IndexTreeCeption.saveOnDisk : debugNumberOfExactValuesWrittenOnDisk=" + debugNumberOfExactValuesWrittenOnDisk);
+		//System.out.println("IndexTreeCeption.saveOnDisk : debugNumberOfExactArrayListValuesWrittenOnDisk=" + debugNumberOfExactArrayListValuesWrittenOnDisk);
+		//System.out.println("IndexTreeCeption.saveOnDisk : debugNumberOfExactValuesWrittenOnDisk=" + debugNumberOfExactValuesWrittenOnDisk);
 		
 	}
 	
@@ -332,12 +374,13 @@ public class IndexTreeDic {
 	 *  @param randFile
 	 *  @param routingTableBinIndex
 	 *  @param getTheSmallestApprochingValue   true si prendre la valeur approchée la plus petite, false si prendre la plus grande
+	 *  @return true si la valeur recherchée est valide, (utilise getTheSmallestApprochingValue)
 	 *  @throws IOException
 	 */
-	public long findValueIndexByDichotomy(Object searchValue, RandomAccessFile randFile, long routingTableBinIndex, boolean getTheSmallestApprochingValue) throws IOException {
+	public boolean findValueIndexByDichotomy(Object searchValue, RandomAccessFile randFile, long routingTableBinIndex, boolean getTheSmallestApprochingValue) throws IOException {
 		randFile.seek(routingTableBinIndex);
 		int totalNumberOfDistinctValues = randFile.readInt();
-		if (totalNumberOfDistinctValues <= 0) return 0;
+		if (totalNumberOfDistinctValues <= 0) return false;
 		
 		int diskEntrySize = storedValueDataByteSize + 4; // nombre d'octets pris par chaque entrée (valeur + binIndex)
 		
@@ -398,7 +441,7 @@ public class IndexTreeDic {
 		}
 		// if (lastApprochingValue == null) return;
 		
-		// Si l'index trouvé ne correspond pas exactemenbt à la valeur recherchée,
+		// Si l'index trouvé ne correspond pas exactement à la valeur recherchée,
 		// je peux prendre la valeur inférieure la plus proche,
 		// ou la valeur supérieure la plus proche.
 		
@@ -416,28 +459,49 @@ public class IndexTreeDic {
 					intervalStartIndex++;
 				}
 			}
-			int maxIntervalValue = totalNumberOfDistinctValues - 1;
-			int minIntervalValue = 0;
-			if (intervalStartIndex > maxIntervalValue)  intervalStartIndex = maxIntervalValue;
-			if (intervalStartIndex < minIntervalValue)  intervalStartIndex = minIntervalValue;
-			
 		}
+
+		int maxIntervalValue = totalNumberOfDistinctValues - 1;
+		int minIntervalValue = 0;
+		if (intervalStartIndex > maxIntervalValue)  intervalStartIndex = maxIntervalValue;
+		if (intervalStartIndex < minIntervalValue)  intervalStartIndex = minIntervalValue;
 		
-		
-		//intervalStartIndex++;
-		findValueIndexBy_keyIndex = intervalStartIndex;
-		int binIndexOfIntegerArrayList = ((int)routingTableBinIndex + 4) + findValueIndexBy_keyIndex * diskEntrySize; //  binIndex de la table de routage + 
+		int binIndexOfIntegerArrayList = ((int)routingTableBinIndex + 4) + intervalStartIndex * diskEntrySize; //  binIndex de la table de routage + offset dans cette table (binIndex de l'entrée)
 		int whereToFindAssociatedBinIndex = binIndexOfIntegerArrayList + storedValueDataByteSize; // la position où lire le binIndex de la donnée
 		
-		//randFile.seek(binIndexOfIntegerArrayList);
-		//Object associatedValue = readObjectValueFromDisk(randFile, storedValuesClassType); // (débug) valeur associée
+		randFile.seek(binIndexOfIntegerArrayList);
+		Object associatedValue = readObjectValueFromDisk(randFile, storedValuesClassType); // (débug) valeur associée
 		
-		randFile.seek(whereToFindAssociatedBinIndex);
+		// Je regarde si cette entrée est valide :
+		/**
+			Cas non valide :
+			le min est après la valeur maximale
+			le max est avant la valeur minimale
+		 */
+		boolean findTheMinimum =  ! getTheSmallestApprochingValue;
+		// si je dois trouver la valeur approchée la plus faible (!= le plus grande)
+		// la valeur n'est valide que si 
+		// Si je dois trouver le minimum et que je suis à la dernière valeur connue
+		if (findTheMinimum && intervalStartIndex == maxIntervalValue) { 
+			int comp = compareValues(searchValue, associatedValue);
+			// le minimum (valeur recherchée) est plus grand que la dernière valeur, c'est invalide.
+			if (comp == 1) return false; 
+		}
+
+		// Si je dois trouver le maximum et que je suis à la première valeur connue
+		if ((findTheMinimum == false) && intervalStartIndex == minIntervalValue) { 
+			int comp = compareValues(searchValue, associatedValue);
+			// le maximum (valeur recherchée) est plus petit que la première valeur, c'est invalide.
+			if (comp == -1) return false; 
+		}
 		
+		//randFile.seek(whereToFindAssociatedBinIndex);
+		
+		findValueIndexBy_keyIndex = intervalStartIndex;
 		findValueIndexBy_binIndex = randFile.readInt();
 		//Log.info("IndexTreeDis.findValueIndexByDichotomy : associatedValue = " + associatedValue + "  asDate = " + Utils.dateFromSecInt((Integer)associatedValue));
 		
-		return intervalStartIndex;
+		return true;
 		
 	}
 
@@ -489,84 +553,137 @@ public class IndexTreeDic {
 			Optimiser : faire le moins de seek/skip possibles
 		 */
 		
-		
-		//long fileSize = fileSaveOnDisk.length();
-		RandomAccessFile randFile = new RandomAccessFile(currentSaveFilePath, "r");
-		long fileSize = randFile.length();
-		//System.out.println("IndexTreeDic.loadFromDisk : fileSize = " + fileSize + "currentSaveFilePath = " + currentSaveFilePath);
-		randFile.seek(fileSize - 8);
-		
-		long routingTableBinIndex = randFile.readLong();
-		
-		randFile.seek(routingTableBinIndex);
-		int totalNumberOfDistinctValues = randFile.readInt();
-		
-		ArrayList<IntegerArrayList> listOfMatchingArraysOfBinIndexes = new ArrayList<IntegerArrayList>();
-		
-		// Lecture de la table de routage
-		
-		// Pas besoin de récursvité pour l'arbre avec dichotomie
-		/** 1) Je cherche le binIndex de la valeur minimale, puis de la valeur maximale
-		 *  2) Je vais à tous les index, je mets les valeurs en mémoire.
-		 */
-		long minBinIndex = -1;
-		//long maxBinIndex = -1;
-		int keyIndexOfMin = -1;
-		int keyIndexOfMax = -1;
-		//inutile int integerArrayListLoadCount = 0; // nombre de listes à charger en mémoire (optimisé de faire ainsi)
-		// Je recherche le premier index : la valeur antérieure doit être inférieure à minValue, et la valeur actuelle supérieure ou égale à minValue
-		
-		
-		
-		
-		// Trouver le minimum
-		//findValueIndexBySimpleReading(minValueExact, randFile, routingTableBinIndex);
-		findValueIndexByDichotomy(minValueExact, randFile, routingTableBinIndex, false); // valeur approchée la plus grande
-		keyIndexOfMin = findValueIndexBy_keyIndex;
-		minBinIndex   = findValueIndexBy_binIndex;
-		
-		//Log.info("IndexTreeDec.findMatchingBinIndexesFromDisk : ");
-		//if (findValueIndexBy_keyIndex != keyIndexOfMin) Log.info("ERRRRRRRRRRRRRRRRRRRR findValueIndexBy_keyIndex("+findValueIndexBy_keyIndex+") != keyIndexOfMin("+keyIndexOfMin+")");
-		//if (findValueIndexBy_binIndex != minBinIndex) Log.info("ERRRRRRRRRRRRRRRRRRRR findValueIndexBy_binIndex("+findValueIndexBy_binIndex+") != minBinIndex("+minBinIndex+")");
-		
-		// Trouver le maximum
-		findValueIndexByDichotomy(maxValueExact, randFile, routingTableBinIndex, true); // valeur approchée la plus petite
-		keyIndexOfMax = findValueIndexBy_keyIndex;
-		// inutile maxBinIndex   = findValueIndexBy_binIndex;
-		
-		// DEBUG à garder !
-		//Log.info("IndexTreeDic.findMatchingBinIndexesFromDisk : keyIndexOfMin = " + keyIndexOfMin + "  keyIndexOfMax = " + keyIndexOfMax);
-		//Log.info("IndexTreeDic.findMatchingBinIndexesFromDisk : minBinIndex = " + minBinIndex + "  maxBinIndex = " + maxBinIndex);
-		//Log.info("IndexTreeDic.findMatchingBinIndexesFromDisk : minValueExact = " + minValueExact + "  maxValueExact = " + maxValueExact);
-		//Log.info("IndexTreeDic.findMatchingBinIndexesFromDisk : AsDate :");
-		//Log.info("IndexTreeDic.findMatchingBinIndexesFromDisk : begin = " + Utils.dateFromSecInt((Integer)minValueExact) + "  end = " + Utils.dateFromSecInt((Integer)maxValueExact));
-		
-		
-		if (keyIndexOfMax == -1 && keyIndexOfMin != -1) {
-			keyIndexOfMax = totalNumberOfDistinctValues - 1;
-		}
-		int integerArrayListTotalCount = keyIndexOfMax - keyIndexOfMin + 1;
-		//Log.info("IndexTreeDic.findMatchingBinIndexesFromDisk : integerArrayListTotalCount = " + integerArrayListTotalCount);
-		
-		if (minBinIndex != -1) {
-			randFile.seek(minBinIndex); // premier seek
-			listOfMatchingArraysOfBinIndexes.ensureCapacity(integerArrayListTotalCount);
-			// Lecture de tous les IntegerArrayList de binIndex
-			for (int integerArrayListCount = 0; integerArrayListCount < integerArrayListTotalCount; integerArrayListCount++) {
-				int binIndexTotalCount = randFile.readInt(); // nombre de binIndex stockés
-				IntegerArrayList binIndexesList = new IntegerArrayList();
-				binIndexesList.ensureCapacity(binIndexTotalCount);
-				for (int binIndexCout = 0; binIndexCout < binIndexTotalCount; binIndexCout++) {
-					int binIndex = randFile.readInt();
-					binIndexesList.add(binIndex);
+		class SearchInFile implements Runnable {
+			
+			private final String filePath;
+			
+			public ArrayList<IntegerArrayList> listOfLocalMatchingArraysOfBinIndexes = new ArrayList<IntegerArrayList>();
+			
+			public SearchInFile(String argFilePath) throws IOException {
+				filePath = argFilePath;
+			}
+			
+			public void doSearch() throws IOException {
+				
+				//long fileSize = fileSaveOnDisk.length();
+				RandomAccessFile randFile = new RandomAccessFile(filePath, "r");
+				long fileSize = randFile.length();
+				//System.out.println("IndexTreeDic.loadFromDisk : fileSize = " + fileSize + "currentSaveFilePath = " + currentSaveFilePath);
+				randFile.seek(fileSize - 8);
+				
+				long routingTableBinIndex = randFile.readLong();
+				
+				randFile.seek(routingTableBinIndex);
+				int totalNumberOfDistinctValues = randFile.readInt();
+				
+				
+				// Lecture de la table de routage
+				
+				// Pas besoin de récursvité pour l'arbre avec dichotomie
+				/** 1) Je cherche le binIndex de la valeur minimale, puis de la valeur maximale
+				 *  2) Je vais à tous les index, je mets les valeurs en mémoire.
+				 */
+				long minBinIndex = -1;
+				//long maxBinIndex = -1;
+				int keyIndexOfMin = -1;
+				int keyIndexOfMax = -1;
+				//inutile int integerArrayListLoadCount = 0; // nombre de listes à charger en mémoire (optimisé de faire ainsi)
+				// Je recherche le premier index : la valeur antérieure doit être inférieure à minValue, et la valeur actuelle supérieure ou égale à minValue
+				
+				
+				
+				
+				// Trouver le minimum
+				//findValueIndexBySimpleReading(minValueExact, randFile, routingTableBinIndex);
+				boolean validValue;
+				validValue = findValueIndexByDichotomy(minValueExact, randFile, routingTableBinIndex, false); // valeur approchée la plus grande
+				if (validValue == false) {
+					randFile.close();
+					return;
 				}
-				listOfMatchingArraysOfBinIndexes.add(binIndexesList);
+				keyIndexOfMin = findValueIndexBy_keyIndex;
+				minBinIndex   = findValueIndexBy_binIndex;
+				
+				//Log.info("IndexTreeDec.findMatchingBinIndexesFromDisk : ");
+				//if (findValueIndexBy_keyIndex != keyIndexOfMin) Log.info("ERRRRRRRRRRRRRRRRRRRR findValueIndexBy_keyIndex("+findValueIndexBy_keyIndex+") != keyIndexOfMin("+keyIndexOfMin+")");
+				//if (findValueIndexBy_binIndex != minBinIndex) Log.info("ERRRRRRRRRRRRRRRRRRRR findValueIndexBy_binIndex("+findValueIndexBy_binIndex+") != minBinIndex("+minBinIndex+")");
+				
+				// Trouver le maximum
+				validValue = findValueIndexByDichotomy(maxValueExact, randFile, routingTableBinIndex, true); // valeur approchée la plus petite
+				if (validValue == false) {
+					randFile.close();
+					return;
+				}
+				keyIndexOfMax = findValueIndexBy_keyIndex;
+				// inutile maxBinIndex   = findValueIndexBy_binIndex;
+				
+				// DEBUG à garder !
+				//Log.info("IndexTreeDic.findMatchingBinIndexesFromDisk : keyIndexOfMin = " + keyIndexOfMin + "  keyIndexOfMax = " + keyIndexOfMax);
+				//Log.info("IndexTreeDic.findMatchingBinIndexesFromDisk : minBinIndex = " + minBinIndex + "  maxBinIndex = " + maxBinIndex);
+				//Log.info("IndexTreeDic.findMatchingBinIndexesFromDisk : minValueExact = " + minValueExact + "  maxValueExact = " + maxValueExact);
+				//Log.info("IndexTreeDic.findMatchingBinIndexesFromDisk : AsDate :");
+				//Log.info("IndexTreeDic.findMatchingBinIndexesFromDisk : begin = " + Utils.dateFromSecInt((Integer)minValueExact) + "  end = " + Utils.dateFromSecInt((Integer)maxValueExact));
+				
+				
+				if (keyIndexOfMax == -1 && keyIndexOfMin != -1) {
+					keyIndexOfMax = totalNumberOfDistinctValues - 1;
+				}
+				int integerArrayListTotalCount = keyIndexOfMax - keyIndexOfMin + 1;
+				//Log.info("IndexTreeDic.findMatchingBinIndexesFromDisk : integerArrayListTotalCount = " + integerArrayListTotalCount);
+				
+				if (minBinIndex != -1) {
+					randFile.seek(minBinIndex); // premier seek
+					listOfLocalMatchingArraysOfBinIndexes.ensureCapacity(integerArrayListTotalCount);
+					// Lecture de tous les IntegerArrayList de binIndex
+					for (int integerArrayListCount = 0; integerArrayListCount < integerArrayListTotalCount; integerArrayListCount++) {
+						int binIndexTotalCount = randFile.readInt(); // nombre de binIndex stockés
+						IntegerArrayList binIndexesList = new IntegerArrayList();
+						binIndexesList.ensureCapacity(binIndexTotalCount);
+						for (int binIndexCout = 0; binIndexCout < binIndexTotalCount; binIndexCout++) {
+							int binIndex = randFile.readInt();
+							binIndexesList.add(binIndex);
+						}
+						listOfLocalMatchingArraysOfBinIndexes.add(binIndexesList);
+					}
+				}
+				
+				//searchInDiskData(randFile, listOfMatchingArraysOfBinIndexes, minValueExact, maxValueExact, isInclusive, currentHeight);
+				
+				randFile.close();
+			}
+			
+			@Override
+			public void run() {
+				try {
+					doSearch();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		
-		//searchInDiskData(randFile, listOfMatchingArraysOfBinIndexes, minValueExact, maxValueExact, isInclusive, currentHeight);
+		// Ouvre tous les fichiers où les index sont sauvegardés (threads séparés), 
 		
-		randFile.close();
+
+		ArrayList<IntegerArrayList> listOfMatchingArraysOfBinIndexes = new ArrayList<IntegerArrayList>();
+		
+		//Runnable searchInF
+		ArrayList<SearchInFile> runnableSearches = new ArrayList<SearchInFile>();
+		
+		//int filesNb = indexWrittenOnDiskFilePathsArray.size();
+		for (String filePath : indexWrittenOnDiskFilePathsArray) {
+			SearchInFile searchInFile = new SearchInFile(filePath);
+			//runnableSearches.add(e)
+			searchInFile.doSearch();
+			listOfMatchingArraysOfBinIndexes.addAll(searchInFile.listOfLocalMatchingArraysOfBinIndexes);
+			System.out.println("Recherche OK pour " + filePath);
+		}
+		
+		//saveFileName
+
+
+		//listOfMatchingArraysOfBinIndexes.addAll(listOfLocalMatchingArraysOfBinIndexes);
+		
 		
 		//System.out.println("IndexTreeDic.loadFromDisk : debugDiskNumberOfIntegerArrayList=" + debugDiskNumberOfIntegerArrayList);
 		//System.out.println("IndexTreeDic.loadFromDisk : debugDiskNumberOfExactValuesEvaluated=" + debugDiskNumberOfExactValuesEvaluated);
