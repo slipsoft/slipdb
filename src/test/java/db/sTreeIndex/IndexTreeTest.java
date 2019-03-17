@@ -149,7 +149,7 @@ public class IndexTreeTest {
 		
 		
 		Date dateFrom = currentlyUsedUils.dateFromString("2015-04-04 00:01:00");
-		Date dateTo = currentlyUsedUils.dateFromString("2015-04-04 00:19:52");
+		Date dateTo = currentlyUsedUils.dateFromString("2015-04-04 00:18:57");
 		int intDateFrom = Utils.dateToSecInt(dateFrom);
 		int intDateTo = Utils.dateToSecInt(dateTo);
 		
