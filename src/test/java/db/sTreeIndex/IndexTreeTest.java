@@ -79,7 +79,9 @@ public class IndexTreeTest {
 		is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
 		parser.parse(is, !isTheFirstParsing); isTheFirstParsing = false;
 		is.close();
-
+		
+		// -> Go faire le parsing multi-thread maintenant !!
+		
 		is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
 		parser.parse(is, !isTheFirstParsing); isTheFirstParsing = false;
 		is.close();
