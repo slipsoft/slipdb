@@ -6,6 +6,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 
 public abstract class DataType {
+	public String name;
 	protected int sizeInBytes;
 	protected static Operator[] compatibleOperatorsList;
 	//c'est en fait inutile (merci Nicolas ;) ) : protected final Utils currentUtilsInstance; // doit être initialisé

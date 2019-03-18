@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.dant.entity.ColumnEntity;
 import db.data.DataType;
 
 public class Column {
@@ -22,7 +23,6 @@ public class Column {
 	 *
 	 * @param name
 	 * @param dataType
-	 * @param size
 	 */
 	public Column(String name, DataType dataType) {
 		this.name = name;
@@ -97,5 +97,9 @@ public class Column {
 	
 	public void addIndex(Index index) {
 		this.relatedIndicesList.add(index);
+	}
+
+	public ColumnEntity convertToEntity() {
+		return new ColumnEntity(this.name, this.dataType.name);
 	}
 }

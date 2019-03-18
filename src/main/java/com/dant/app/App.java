@@ -3,6 +3,7 @@ package com.dant.app;
 import com.dant.exception.RuntimeExceptionMapper;
 import com.dant.filter.GsonProvider;
 
+import javax.annotation.PostConstruct;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 import java.util.HashSet;
@@ -17,7 +18,8 @@ public class App extends Application {
 	@Override
 	public Set<Object> getSingletons() {
 		Set<Object> sets = new HashSet<>(1);
-		sets.add(new TestEndpoint());
+		sets.add(new DBEndpoint());
+		sets.add(new TableEndpoint());
 		return sets;
 	}
 

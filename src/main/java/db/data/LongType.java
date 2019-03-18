@@ -3,6 +3,7 @@ package db.data;
 import java.nio.ByteBuffer;
 
 public class LongType extends DataType {
+	public String name = "Long";
 	
 	protected final static Operator[] compatibleOperatorsList = {
 		Operator.equals,

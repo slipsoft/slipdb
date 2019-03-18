@@ -6,7 +6,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.dant.entity.ColumnEntity;
+import com.dant.entity.IndexEntity;
+import com.dant.entity.TableEntity;
 import com.dant.utils.EasyFile;
 
 import db.data.DataType;
@@ -143,4 +147,11 @@ public class Table {
 	public EasyFile getFileLinesOnDisk() {
 		return fileLinesOnDisk;
 	}
+
+	public TableEntity convertToEntity () {
+        ArrayList<ColumnEntity> allColumns = this.columnsList.stream().map(Column::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
+        ArrayList<IndexEntity> allIndexes = this.indicesList.stream().map(Index::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
+        String name = this.name;
+        return new TableEntity(name, allColumns, allIndexes);
+    }
 }

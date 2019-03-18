@@ -1,8 +1,12 @@
 package db.structure;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import com.dant.entity.ColumnEntity;
+import com.dant.entity.IndexEntity;
 import db.data.Operator;
 
 /**
@@ -49,5 +53,9 @@ public abstract class Index {
 	 */
 	public Column[] getColumnList() {
 		return indexedColumnsList;
+	}
+
+	public IndexEntity convertToEntity() {
+		return new IndexEntity(Arrays.stream(this.indexedColumnsList).map(Column::convertToEntity).toArray(ColumnEntity[]::new));
 	}
 }

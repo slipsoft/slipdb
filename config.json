@@ -1,0 +1,15 @@
+{
+  "tableNamePattern": "^[a-zA-Z0-9]{3,15}$",
+  "columnNamePattern": "^[a-zA-Z0-9]{3,15}$",
+  "NTPHostName": "fr.pool.ntp.org",
+  "DataTypes": {
+    "Byte": "ByteType",
+    "Date": "DateType",
+    "Double": "DoubleType",
+    "Float": "FloatType",
+    "Integer": "IntegerType",
+    "Integer[]": "IntegerArrayList",
+    "Long": "LongType",
+    "String": "StringType"
+  }
+}

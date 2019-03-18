@@ -3,6 +3,7 @@ package db.data;
 import java.nio.ByteBuffer;
 
 public class IntegerType extends DataType {
+	public String name = "Integer";
 	
 	protected final static Operator[] compatibleOperatorsList = {
 		Operator.equals,

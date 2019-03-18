@@ -3,7 +3,10 @@ package com.dant.utils;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Utils {
 
@@ -55,5 +58,20 @@ public class Utils {
 		} catch (ParseException e) {
 			return null; //new Date();
 		}
+	}
+
+	public static boolean validateRegex(String pattern, String toMatch) {
+		Pattern p = Pattern.compile(pattern);
+		Matcher m = p.matcher(toMatch);
+		return m.matches();
+	}
+
+	public static boolean validateClass(String className) {
+		try {
+			Class classToTest = Class.forName(className);
+		} catch (Exception exp) {
+			return false;
+		}
+		return true;
 	}
 }

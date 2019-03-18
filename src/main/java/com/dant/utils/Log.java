@@ -9,7 +9,7 @@ import java.util.Date;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class Log {
-	protected static volatile int level = 0;
+	protected static volatile int level = 2;
 	protected static EasyFile file;
 	
 	public static int getLevel() {

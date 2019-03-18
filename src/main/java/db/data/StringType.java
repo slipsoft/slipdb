@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class StringType extends DataType {
+	public String name = "String";
 
 	protected final static Operator[] compatibleOperatorsList = {
 		Operator.equals
