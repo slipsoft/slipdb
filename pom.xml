@@ -6,7 +6,7 @@
 	<groupId>com.dant</groupId>
 	<artifactId>dant</artifactId>
 	<packaging>war</packaging>
-	<version>1.0</version>
+	<version>1.0.0-beta</version>
 	<name>dant</name>
 	<properties>
 		<resteasy.version>3.1.0.Final</resteasy.version>
@@ -76,6 +76,35 @@
 					</webApp>
 					<scanIntervalSeconds>2</scanIntervalSeconds>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.github.kongchen</groupId>
+				<artifactId>swagger-maven-plugin</artifactId>
+				<version>3.1.6</version>
+				<configuration>
+					<apiSources>
+						<apiSource>
+							<springmvc>false</springmvc>
+							<locations>
+								<location>com.dant.app</location>
+							</locations>
+							<info>
+								<title>slipdb</title>
+								<version>1.0.0-beta</version>
+							</info>
+							<outputPath>docs</outputPath>
+							<swaggerDirectory>docs</swaggerDirectory>
+						</apiSource>
+					</apiSources>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
