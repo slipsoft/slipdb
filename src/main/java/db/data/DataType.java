@@ -2,12 +2,9 @@ package db.data;
 
 import java.nio.ByteBuffer;
 
-import org.apache.commons.lang3.ArrayUtils;
 
-
-public abstract class DataType {
+public abstract class DataType implements Operable {
 	protected int sizeInBytes;
-	protected static Operator[] compatibleOperatorsList;
 	//c'est en fait inutile (merci Nicolas ;) ) : protected final Utils currentUtilsInstance; // doit être initialisé
 	
 	protected Object currentValue;
@@ -23,14 +20,6 @@ public abstract class DataType {
 	
 	@SuppressWarnings("rawtypes")
 	public abstract Class getAssociatedClassType();
-	
-	public void setSize(int argSizeInBytes) {
-		this.sizeInBytes = argSizeInBytes;
-	}
-	
-	public boolean isOperatorCompatible(Operator op) {
-		return ArrayUtils.contains(compatibleOperatorsList, op);
-	}
 	
 	abstract public Object writeToBufferAndReturnValue(String input, ByteBuffer outputBuffer);
 	abstract public void writeToBuffer(String input, ByteBuffer outputBuffer);

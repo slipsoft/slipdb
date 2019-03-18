@@ -67,8 +67,8 @@ public class IndexTreeTest {
 		table = new Table("test", columns);
 		parser = new CsvParser(table);
 		
-		//FileInputStream is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); // "../SMALL_1_000_000_yellow_tripdata_2015-04.csv"
-		FileInputStream is = new FileInputStream("../SMALL_100_000_yellow_tripdata_2015-04.csv"); // testdata
+		FileInputStream is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); // "../SMALL_1_000_000_yellow_tripdata_2015-04.csv"
+//		FileInputStream is = new FileInputStream("../SMALL_100_000_yellow_tripdata_2015-04.csv"); // testdata
 		
 		Timer parseTimer = new Timer("Temps pris par le parsing");
 		parser.parse(is);
