@@ -135,9 +135,9 @@ public class Table {
 		fileAsStream.close();
 		return lineValues;
 	}
-	
-	public OutputStream tableToOutputStream() throws IOException {
-		return new FileOutputStream(fileLinesOnDisk);
+
+	public OutputStream tableToOutputStream(boolean appendAtTheEnd) throws IOException {
+		return new FileOutputStream(fileLinesOnDisk, appendAtTheEnd);
 	}
 	
 	public EasyFile getFileLinesOnDisk() {

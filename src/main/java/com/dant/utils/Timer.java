@@ -49,6 +49,10 @@ public class Timer {
 	public long getms() {
 		return duration() / ONE_MILLION;
 	}
+
+	public long getseconds() {
+		return duration() / ONE_BILLION;
+	}
 	
 	/**
 	 * Duration String using the appropriate format.

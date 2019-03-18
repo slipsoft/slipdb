@@ -75,7 +75,7 @@ public class TestIndexTreeMT1 {
 		CsvParser newParser = new CsvParser(newTable);
 		FileInputStream is = new FileInputStream(filePathOnDisk);
 		//Timer parseTimer = new Timer("Temps pris par le parsing de " + tableName);
-		newParser.parse(is);
+		newParser.parse(is, false); // Supprimer les données déjà écrites
 		is.close();
 		//parseTimer.log();
 		return newTable;
