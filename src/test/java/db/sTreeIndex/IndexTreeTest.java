@@ -68,7 +68,9 @@ public class IndexTreeTest {
 		parser = new CsvParser(table);
 		
 		FileInputStream is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); // "../SMALL_1_000_000_yellow_tripdata_2015-04.csv"
-//		FileInputStream is = new FileInputStream("../SMALL_100_000_yellow_tripdata_2015-04.csv"); // testdata
+		
+		//FileInputStream is = new FileInputStream("../SMALL_1_000_000_yellow_tripdata_2015-04.csv"); // testdata
+		//FileInputStream is = new FileInputStream("D:/L3 DANT disque D/yellow_tripdata_2015-04.csv");
 		
 		Timer parseTimer = new Timer("Temps pris par le parsing");
 		parser.parse(is);
@@ -204,6 +206,8 @@ public class IndexTreeTest {
 		//result = indexingObject.findMatchingBinIndexesFromDisk(intDateFrom, intDateTo, true);
 		searchFromDiskTimer.log();
 		
+		boolean showAllResults = false;
+		
 		// Iterates over all the results
 		numberOfResults = 0;
 		numberOfLines = 0;
@@ -211,22 +215,22 @@ public class IndexTreeTest {
 			//Log.info("list size = " + list.size());
 			numberOfResults += list.size();
 			numberOfLines++;
-			for (Integer index : list) {
-				// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
-				List<Object> objList = table.getValuesOfLineById(index);
-				Object indexedValue = objList.get(indexingColumnIndex);
-				Log.info("  index = " + index + "   val = " + indexedValue);
-				
-				//Log.info("  valeur indexée = " + indexedValue);
-				//Log.info("  objList = " + objList);
-				
+
+			if (showAllResults) {
+				for (Integer index : list) {
+					// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
+					List<Object> objList = table.getValuesOfLineById(index);
+					Object indexedValue = objList.get(indexingColumnIndex);
+					Log.info("  index = " + index + "   val = " + indexedValue);
+					
+					//Log.info("  valeur indexée = " + indexedValue);
+					//Log.info("  objList = " + objList);
+					
+				}
 			}
 		}
 		Log.info("Number of results = " + numberOfResults);
 		Log.info("Number of lines = " + numberOfLines);
-
-		
-		
 		
 	}
 	
