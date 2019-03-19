@@ -61,7 +61,7 @@ public class Timer {
 	public String pretty() {
 		long duration = duration();
 		if (duration - TEN_MILLIONS < 0) {
-			return new DecimalFormat("##.00 millis").format((double) duration / ONE_MILLION);
+			return new DecimalFormat("#0.00 millis").format((double) duration / ONE_MILLION);
 		} else if (duration - ONE_BILLION < 0) {
 			return new DecimalFormat("##0.000 s").format((double) duration / ONE_BILLION);
 		} else {

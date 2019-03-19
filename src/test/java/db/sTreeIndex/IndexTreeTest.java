@@ -38,7 +38,7 @@ public class IndexTreeTest {
 	@BeforeAll
 	static void setUpBeforeAll() throws Exception {
 		Log.info("setUpBeforeAll");
-		Log.start("target/slipdb_indexingTreeTest.log", 3);
+		Log.start("indexingTreeTest", 3);
 		//if (true) return;
 		ArrayList<Column> columns = new ArrayList<Column>();
 		try {
