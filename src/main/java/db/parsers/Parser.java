@@ -48,7 +48,7 @@ public abstract class Parser {
 			Timer timeTookTimer = new Timer("Temps écoulé");
 			while (totalEntryCount != limit) {
 				if (localReadEntryNb % showInfoEveryParsedLines == 0 && showInfoEveryParsedLines != -1) {
-					Log.info("Parser : nombre de résultats (local) parsés = " + localReadEntryNb + "   temps écoulé = " + timeTookTimer.getseconds() + " s");
+					Log.info("Parser : nombre de résultats (local) parsés = " + localReadEntryNb + "   temps écoulé = " + timeTookTimer.pretty());
 				}
 				
 				String entryString = this.processReader(bRead);
