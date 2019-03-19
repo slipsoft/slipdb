@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import com.dant.utils.EasyFile;
 import com.dant.utils.Log;
 
@@ -244,12 +246,15 @@ public class IndexTreeV2 extends Index {
 	
 	
 	// -> Is it still useful ? (compatibleOperatorsList)
-	protected final static Operator[] compatibleOperatorsList = {
-		Operator.equals,
-		Operator.greater,
-		Operator.less,
-		Operator.greaterOrEquals,
-		Operator.lessOrEquals,
-	};
+	@Override
+	public boolean isOperatorCompatible(Operator op) {
+		return ArrayUtils.contains(new Operator[] {
+			Operator.equals,
+			Operator.greater,
+			Operator.less,
+			Operator.greaterOrEquals,
+			Operator.lessOrEquals,
+		}, op);
+	}
 	
 }

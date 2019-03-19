@@ -15,6 +15,7 @@ import com.dant.utils.EasyFile;
 
 import com.dant.utils.Log;
 import db.data.DataType;
+import db.data.Filter;
 
 /**
  * A simple SQL-like table, consisting of 
@@ -148,11 +149,26 @@ public class Table {
 	public EasyFile getFileLinesOnDisk() {
 		return fileLinesOnDisk;
 	}
+	
+	/**
+	 * Returns the best index to use for a given filter
+	 * @param filter
+	 * @return
+	 * @throws Exception 
+	 */
+	public Index findBestIndex(Filter filter) throws Exception {
+		for (Index index : indicesList) {
+			if (index.canBeUsedWithFilter(filter)) {
+				return index;
+			}
+		}
+		throw new Exception("no index can be used with this filter");
+	}
 
 	public TableEntity convertToEntity () {
 		String name = this.name;
 		ArrayList<ColumnEntity> allColumns = this.columnsList.stream().map(Column::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
-        // ArrayList<IndexEntity> allIndexes = this.indicesList.stream().map(Index::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
+		// ArrayList<IndexEntity> allIndexes = this.indicesList.stream().map(Index::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
 		return new TableEntity(name, allColumns);
-    }
+	}
 }

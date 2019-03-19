@@ -3,6 +3,9 @@ package db.structure;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.apache.commons.lang3.ArrayUtils;
+
+import db.data.Filter;
 import db.data.Operable;
 
 /**
@@ -47,5 +50,11 @@ public abstract class Index implements Operable {
 	 */
 	public Column[] getColumnList() {
 		return indexedColumnsList;
+	}
+	
+	public boolean canBeUsedWithFilter(Filter filter) {
+		boolean containsColumn = ArrayUtils.contains(indexedColumnsList, filter.getColumn());
+		boolean isOperatorCompatible = this.isOperatorCompatible(filter.getOperator());
+		return containsColumn && isOperatorCompatible;
 	}
 }

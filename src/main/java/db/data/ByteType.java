@@ -2,14 +2,11 @@ package db.data;
 
 import java.nio.ByteBuffer;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 
 public class ByteType extends DataType {
-
 	public static boolean sizeIsRequired = false;
-
-	protected final static Operator[] compatibleOperatorsList = {
-		Operator.equals
-	};
 	
 	public ByteType() {
 		super();
@@ -45,4 +42,10 @@ public class ByteType extends DataType {
 		return new Byte(bytes[0]); // get the associates byte
 	}
 
+	@Override
+	public boolean isOperatorCompatible(Operator op) {
+		return ArrayUtils.contains(new Operator[] {
+			Operator.equals
+		}, op);
+	}
 }
