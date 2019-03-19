@@ -13,7 +13,7 @@ class LogTest {
 
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
-		Log.start("target/slipdb.log", 3);
+		Log.start("logTest", 3);
 	}
 
 	@BeforeEach
@@ -41,7 +41,7 @@ class LogTest {
 			
 			@Override
 			public void execute() throws Throwable {
-				Log.start("target/slipdb.log", 3);
+				Log.start("logTest", 3);
 			}
 		};
 		assertDoesNotThrow(exec);

@@ -32,7 +32,7 @@ class CsvParserTest {
 
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
-		Log.start("target/slipdb.log", 3);
+		Log.start("csvParserTest", 3);
 	}
 
 	@BeforeEach

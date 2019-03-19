@@ -30,7 +30,7 @@ class DataTypeTest {
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
 		//Log.info("setUpBeforeAll");
-		Log.start("target/slipdb_DataTypesTest.log", 3);
+		Log.start("dataTypesTest", 3);
 		
 	}
 

@@ -96,7 +96,7 @@ public class TestIndexTreeMT1 {
 	@BeforeAll
 	static void setUpBeforeAll() throws Exception {
 		Log.info("setUpBeforeAll");
-		Log.start("target/slipdb_indexingTreeTest.log", 3);
+		Log.start("indexingTreeTest", 3);
 
 		
 		//createFileCopies(10);

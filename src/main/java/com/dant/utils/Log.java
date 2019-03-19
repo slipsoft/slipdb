@@ -32,10 +32,12 @@ public class Log {
 	 * 
 	 * @param file
 	 * @param level - 0: quiet, 1: info, 2: debug, 3: stacktrace
+	 * @throws IOException 
 	 */
-	public static void start(String file, int level) {
+	public static void start(String file, int level) throws IOException {
 		Log.level = level;
-		Log.file = new EasyFile(file);
+		Log.file = new EasyFile("target/logs/" + file + ".log");
+		Log.file.createFileIfNotExist();
 	}
 	
 	/**
@@ -169,7 +171,6 @@ public class Log {
 	private static void append(String msg) {
 		if (file != null) {
 			try (FileWriter fw = new FileWriter(file, true)) {
-				file.createFileIfNotExist();
 				DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 				String date = df.format(new Date());
 				fw.write(date + " " + msg + "\n");

@@ -1,11 +1,16 @@
 # ![SlipDb](docs/slipdb.png)
 
+[![Build Status](https://travis-ci.com/slipsoft/slipdb.svg?branch=master)](https://travis-ci.com/slipsoft/slipdb)
+[![Coverage Status](https://coveralls.io/repos/github/slipsoft/slipdb/badge.svg?branch=feat%2Fsmall-details)](https://coveralls.io/github/slipsoft/slipdb?branch=feat%2Fsmall-details)
+
 A distributed, index based, search engine.
 
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+These instructions will get you a copy of the project up and running on your
+local machine for development and testing purposes. See deployment for notes on
+how to deploy the project on a live system.
 
 ### Prerequisites
 
@@ -39,16 +44,27 @@ mvn test
 
 _not deployable yet..._
 
+## Documentation
+
+### API
+
+The API documentation can be find [here](https://slipsoft.github.io/slipdb/).
+
 ## Built With
 
 -   [Maven](https://maven.apache.org/) - Dependency Management
 -   [Jetty](https://www.eclipse.org/jetty/) - HTTP Server
 -   [JBoss RestEasy](https://resteasy.github.io/) - RestFull Framework
+-   [swagger-maven-plugin](https://github.com/kongchen/swagger-maven-plugin) -
+    OpenApi doc generation
+-   [swagger-ui](https://github.com/swagger-api/swagger-ui) - Web view for the
+    API documentation
 
 ## Authors
 
 -   **Sylvain JOUBE** - [SylvainLune](https://github.com/SylvainLune)
--   **Etienne LELOUËt** - [etienne-lelouet](https://github.com/etienne-lelouet)
+-   **Etienne LELOUËT** - [etienne-lelouet](https://github.com/etienne-lelouet)
 -   **Nicolas PEUGNET** - [n-peugnet](https://github.com/n-peugnet)
 
-See also the list of [contributors](https://github.com/slipsoft/slipdb/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/slipsoft/slipdb/contributors)
+who participated in this project.
