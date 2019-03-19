@@ -10,6 +10,7 @@
 	<name>dant</name>
 	<properties>
 		<resteasy.version>3.1.0.Final</resteasy.version>
+		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
 	</properties>
 	<dependencies>
 		<!-- JAX-RS lib -->
@@ -105,6 +106,24 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.7.6.201602180812</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.eluder.coveralls</groupId>
+				<artifactId>coveralls-maven-plugin</artifactId>
+				<version>4.3.0</version>
 			</plugin>
 		</plugins>
 		<pluginManagement>

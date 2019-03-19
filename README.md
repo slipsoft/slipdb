@@ -1,6 +1,7 @@
 # ![SlipDb](docs/slipdb.png)
 
 [![Build Status](https://travis-ci.com/slipsoft/slipdb.svg?branch=master)](https://travis-ci.com/slipsoft/slipdb)
+[![Coverage Status](https://coveralls.io/repos/github/slipsoft/slipdb/badge.svg?branch=feat%2Fsmall-details)](https://coveralls.io/github/slipsoft/slipdb?branch=feat%2Fsmall-details)
 
 A distributed, index based, search engine.
 
