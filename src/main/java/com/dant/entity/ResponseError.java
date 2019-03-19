@@ -1,5 +1,7 @@
 package com.dant.entity;
 
+import com.google.gson.Gson;
+
 public class ResponseError {
 
     public Location location;
@@ -10,6 +12,11 @@ public class ResponseError {
         this.location = location;
         this.type = type;
         this.message = message;
+    }
+
+    public String toString() {
+        Gson gson = new Gson();
+        return gson.toJson(this);
     }
 
 }

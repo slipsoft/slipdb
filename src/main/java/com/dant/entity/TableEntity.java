@@ -7,13 +7,9 @@ import db.structure.Database;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
-
-import com.dant.utils.Utils;
-import db.structure.Index;
 import db.structure.Table;
 
-public class TableEntity {
-    public String name;
+public class TableEntity extends Entity {
     public ArrayList<ColumnEntity> allColumns;
     public ArrayList<IndexEntity> allIndexes;
 
@@ -33,25 +29,22 @@ public class TableEntity {
         return gson.toJson(this);
     }
 
-    public void validate(ArrayList<String> errors) {
-        Gson gson = new Gson();
-        if (this.name == null) {
-            errors.add(gson.toJson(new ResponseError(Location.createTable, Type.missingData, "name property is missing")));
-        } else {
+    public void validate(ArrayList<ResponseError> errors) {
+        if (this.name == null || this.name.length() == 0) {
+            errors.add(new ResponseError(Location.createTable, Type.missingData, "Table name property is missing"));
             if (!com.dant.utils.Utils.validateRegex(Database.getInstance().config.tableNamePattern, this.name)) {
-                errors.add(gson.toJson(new ResponseError(Location.createTable, Type.invalidData, "name property is invalid: " + this.name)));
+                errors.add(new ResponseError(Location.createTable, Type.invalidData, "Table name property is invalid: " + this.name));
             }
         }
-        if (this.allColumns == null) {
-            errors.add(gson.toJson(new ResponseError(Location.createTable, Type.missingData, "column list is missing")));
+        if (this.allColumns == null || this.allColumns.size() == 0) {
+            errors.add(new ResponseError(Location.createTable, Type.missingData, "column list is missing"));
         } else {
-            this.allColumns.stream().forEach(c ->validate(errors));
+            this.allColumns.stream().forEach(c -> c.validate(errors));
         }
     }
 
     public Table convertToTable() throws IOException{
         ArrayList<Column> allColumns = this.allColumns.stream().map(ColumnEntity::convertToColumn).collect(Collectors.toCollection(ArrayList::new));
-//        ArrayList<Index> allIndexes = this.allColumns.stream().map(IndexEntity::convertToIndex).collect(Collectors.toCollection(ArrayList::new));
         return new Table(this.name, allColumns);
     }
 }

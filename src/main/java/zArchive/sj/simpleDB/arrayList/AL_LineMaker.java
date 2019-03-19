@@ -16,7 +16,7 @@ public class AL_LineMaker {
 	}
 	
 	public void addRowValue_str(String value) {
-		AL_RowArgument newArgument = new AL_RowArgument(AL_SStorageDataType.isString, new String(value));
+		AL_RowArgument newArgument = new AL_RowArgument(AL_SStorageDataType.isString, value);
 		rowValueList.add(newArgument);
 	}
 	

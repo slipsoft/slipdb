@@ -5,5 +5,5 @@ public enum AL_FinderArgumentOperation {
 	equals,
 	strictSuperior,
 	largeInferior,
-	largeSuperior;
+	largeSuperior
 }

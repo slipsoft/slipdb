@@ -4,12 +4,11 @@ import java.nio.ByteBuffer;
 
 
 public class ByteType extends DataType {
-	public String name = "Byte";
 
 	protected final static Operator[] compatibleOperatorsList = {
 		Operator.equals
 	};
-	
+	public String name = "Byte";
 	
 	public ByteType() {
 		super();

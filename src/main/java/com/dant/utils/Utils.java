@@ -1,12 +1,18 @@
 package com.dant.utils;
 
+import com.dant.entity.Entity;
+import com.dant.entity.HttpResponse;
+
+import javax.ws.rs.core.Response;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Utils {
 
@@ -73,5 +79,14 @@ public class Utils {
 			return false;
 		}
 		return true;
+	}
+
+	public static Response generateResponse (int statusCode, String message, String type, Object entity) {
+		return Response.status(statusCode).entity(new HttpResponse(message, entity)).type(type).build();
+	}
+
+	public static boolean isNameDuplicate(ArrayList<Entity> entities, String toCheck) {
+		ArrayList<Entity> duplicates = entities.stream().filter(e -> e.name.equals(toCheck)).collect(Collectors.toCollection(ArrayList::new));
+		return duplicates.size() <= 0;
 	}
 }

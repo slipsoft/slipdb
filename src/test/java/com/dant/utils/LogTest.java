@@ -26,8 +26,8 @@ class LogTest {
 
 	@Test
 	void testGetLevel() {
-		assertEquals(3, Log.getLevel());;
-	}
+		assertEquals(3, Log.getLevel());
+    }
 
 	@Test
 	void testSetLevel() {

@@ -5,9 +5,13 @@ import com.dant.exception.BadRequestException;
 import com.dant.utils.Log;
 import com.google.gson.Gson;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import javax.ws.rs.core.Response;
+import com.dant.utils.Utils;
 
 public final class Database {
 
@@ -33,20 +37,66 @@ public final class Database {
         public static final Database INSTANCE = new Database();
     }
 
-    public void addTable(ArrayList<TableEntity> allTables) throws BadRequestException {
+    public Response addTables(ArrayList<TableEntity> allTableEntities) throws BadRequestException {
+        ArrayList<ResponseError> errors = new ArrayList<>();
 
-        ArrayList<String> errors = new ArrayList<>();
-        Gson gson = new Gson();
-        for (TableEntity table : allTables) {
-            table.validate(errors);
-        }
+        ArrayList<String> names = new ArrayList<>();
+
+        //a really dirty way of checking for duplicate, but it can always be improved later
+        /*for (TableEntity table : allTableEntities) {
+            if (table.name == null)
+                continue;
+
+            if (names.stream().anyMatch(n -> table.name.equals(n))) {
+                errors.add(new ResponseError(Location.createTable, Type.invalidData, "table name is duplicate"));
+            }
+
+            if (allTables.stream().anyMatch(n -> table.name.equals(n.name))) {
+                errors.add(new ResponseError(Location.createTable, Type.invalidData, "table name is duplicate"));
+            }
+            names.add(table.name);
+        }*/
+
+        allTableEntities.stream().forEach(t -> t.validate(errors));
 
         if(errors.size() > 0) {
-            // throw new Error blabla
+            return com.dant.utils.Utils.generateResponse(400, "error", "application/json", errors);
+        } else {
+            ArrayList<Table> tablesToAdd = allTableEntities.stream().map(t -> {
+                try {
+                    return t.convertToTable();
+                } catch (IOException exp) {
+                    throw new RuntimeException("unable to create tables");
+                }
+            }).collect(Collectors.toCollection(ArrayList::new));
+            tablesToAdd.stream().forEach(t -> allTables.add(t));
         }
+
+        return com.dant.utils.Utils.generateResponse(200, "ok", "application/json", "table successfully inserted");
     }
 
-    public ArrayList<Table> getTables() {
+    public Response getTable(String tableName) {
+        if (!com.dant.utils.Utils.validateRegex(config.tableNamePattern, tableName)) {
+            ResponseError error = new ResponseError(Location.getTable, Type.invalidData, "Table name is invalid");
+            return com.dant.utils.Utils.generateResponse(400, "error", "application/json", error);
+        }
+        Optional<Table> tableOptional = allTables.stream().filter(t -> t.name.equals(tableName)).findFirst();
+        if (tableOptional.isPresent()) {
+            Table table = tableOptional.get();
+            return com.dant.utils.Utils.generateResponse(200, "ok", "application/json", table);
+        } else {
+            ResponseError error = new ResponseError(Location.getTable, Type.invalidData, "Table was not found");
+            return com.dant.utils.Utils.generateResponse(400, "error", "application/json", error);
+        }
+
+    }
+
+    public ArrayList<Table> getAllTables() {
         return allTables;
+    }
+
+    public Response getTables() {
+        ArrayList<TableEntity> allTableEntities = allTables.stream().map(Table::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
+        return com.dant.utils.Utils.generateResponse(200, "ok", "application/json", allTableEntities);
     }
 }

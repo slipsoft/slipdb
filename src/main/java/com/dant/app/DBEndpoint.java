@@ -2,11 +2,15 @@ package com.dant.app;
 
 import com.dant.entity.HttpResponse;
 import com.dant.entity.TableEntity;
+import com.dant.exception.BadRequestException;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import db.structure.Database;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 
 /**
  * Created by pitton on 2017-02-20.
@@ -19,21 +23,24 @@ public class DBEndpoint {
     @PUT
     @Path("/tables")
     public Response createTable(String body) {
-        TableEntity table = new Gson().fromJson(body, TableEntity.class);
-        Database.getInstance().addTable(table);
-        return Response.status(200).build();
+        Type tableListType = new TypeToken<ArrayList<TableEntity>>(){}.getType();
+        ArrayList<TableEntity> allTables = new Gson().fromJson(body, tableListType);
+        if (allTables.size() == 0) {
+            throw new BadRequestException("No table found in request body");
+        } else {
+            return Database.getInstance().addTables(allTables);
+        }
     }
 
     @GET
     @Path("/tables")
-    public HttpResponse getTables() {
-        return new HttpResponse("ok", "allTables", Database.getInstance().getTables());
+    public Response getTables() {
+        return Database.getInstance().getTables();
     }
 
     @POST
     @Path("/tables/{tableName}")
-    public void updateTable(@QueryParam("tableName") String tableName) {
-
-        Response.status(200).build();
+    public Response updateTable(@QueryParam("tableName") String tableName) {
+        return Database.getInstance().getTable(tableName);
     }
 }

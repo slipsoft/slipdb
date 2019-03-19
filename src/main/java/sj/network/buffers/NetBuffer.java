@@ -163,24 +163,30 @@ public class NetBuffer { // fonctionnement synchrone, non thread-safe
 	public boolean currentData_isInteger() {
 		if (currentReadPos >= dataList.size()) return false;
 		NetBufferData data = dataList.get(currentReadPos);
-		if (data.dataType.equals(NetBufferDataType.INTEGER))
-			return true;
-		return false;
-	}
-	public boolean currentData_isDouble()    { NetBufferData data = dataList.get(currentReadPos); if (data.dataType.equals(NetBufferDataType.DOUBLE))     return true; return false; }
-	public boolean currentData_isString()    { NetBufferData data = dataList.get(currentReadPos); if (data.dataType.equals(NetBufferDataType.STRING))     return true; return false; }
-	public boolean currentData_isByteArray() { NetBufferData data = dataList.get(currentReadPos); if (data.dataType.equals(NetBufferDataType.BYTE_ARRAY)) return true; return false; }
-	public boolean currentData_isBoolean()   { NetBufferData data = dataList.get(currentReadPos); if (data.dataType.equals(NetBufferDataType.BOOLEAN))    return true; return false; }
-	public boolean currentData_isByte()     { NetBufferData data = dataList.get(currentReadPos); if (data.dataType.equals(NetBufferDataType.BYTE))        return true; return false; }
+        return data.dataType.equals(NetBufferDataType.INTEGER);
+    }
+	public boolean currentData_isDouble()    { NetBufferData data = dataList.get(currentReadPos);
+        return data.dataType.equals(NetBufferDataType.DOUBLE);
+    }
+	public boolean currentData_isString()    { NetBufferData data = dataList.get(currentReadPos);
+        return data.dataType.equals(NetBufferDataType.STRING);
+    }
+	public boolean currentData_isByteArray() { NetBufferData data = dataList.get(currentReadPos);
+        return data.dataType.equals(NetBufferDataType.BYTE_ARRAY);
+    }
+	public boolean currentData_isBoolean()   { NetBufferData data = dataList.get(currentReadPos);
+        return data.dataType.equals(NetBufferDataType.BOOLEAN);
+    }
+	public boolean currentData_isByte()     { NetBufferData data = dataList.get(currentReadPos);
+        return data.dataType.equals(NetBufferDataType.BYTE);
+    }
 	public boolean currentData_isInt()       { return currentData_isInteger(); }
 	public boolean currentData_isStr()       { return currentData_isStr(); }
 	public boolean currentData_isBool()      { return currentData_isBool(); }
 	public boolean currentData_isLong() {
 		NetBufferData data = dataList.get(currentReadPos);
-		if (data.dataType.equals(NetBufferDataType.LONG))
-			return true;
-		return false;
-	}
+        return data.dataType.equals(NetBufferDataType.LONG);
+    }
 	
 	
 	//public boolean currentData_isInteger()    throws IndexOutOfBoundsException { NetBufferData data = dataList.get(currentReadPos); if (data.dataType.equals(NetBufferDataType.INTEGER))    return true; return false; }

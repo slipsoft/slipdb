@@ -51,8 +51,8 @@ public class CsvParser extends Parser {
 		//MemUsage.printMemUsage();
 		try (
 				BufferedReader bRead = new BufferedReader(new InputStreamReader(input));
-				DataOutputStream bWrite = new DataOutputStream(new BufferedOutputStream(schema.tableToOutputStream()));
-		) {
+				DataOutputStream bWrite = new DataOutputStream(new BufferedOutputStream(schema.tableToOutputStream()))
+        ) {
 			while (currentLineCount != limit) {
 				String readCSVLine = bRead.readLine();
 	

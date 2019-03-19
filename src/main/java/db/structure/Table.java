@@ -13,6 +13,7 @@ import com.dant.entity.IndexEntity;
 import com.dant.entity.TableEntity;
 import com.dant.utils.EasyFile;
 
+import com.dant.utils.Log;
 import db.data.DataType;
 
 /**
@@ -32,8 +33,8 @@ public class Table {
 	 */
 	
 	/** Create a table with a name and a columns list
-	 * @param name name
-	 * @param columns
+	 * @param name
+	 * @param columnsList
 	 * @throws IOException
 	 */
 	public Table(String argName, List<Column> argColumnsList) throws IOException {
@@ -149,9 +150,9 @@ public class Table {
 	}
 
 	public TableEntity convertToEntity () {
-        ArrayList<ColumnEntity> allColumns = this.columnsList.stream().map(Column::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
-        ArrayList<IndexEntity> allIndexes = this.indicesList.stream().map(Index::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
-        String name = this.name;
-        return new TableEntity(name, allColumns, allIndexes);
+		String name = this.name;
+		ArrayList<ColumnEntity> allColumns = this.columnsList.stream().map(c -> c.convertToEntity()).collect(Collectors.toCollection(ArrayList::new));
+		ArrayList<IndexEntity> allIndexes = this.indicesList.stream().map(Index::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
+		return new TableEntity(name, allColumns, allIndexes);
     }
 }

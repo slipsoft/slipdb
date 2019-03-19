@@ -6,6 +6,8 @@ import db.structure.Index;
 public class IndexEntity {
     public ColumnEntity[] columnsToIndex;
 
+    public String name;
+
     public IndexEntity (ColumnEntity[] columnsToIndex) {
         this.columnsToIndex = columnsToIndex;
     }

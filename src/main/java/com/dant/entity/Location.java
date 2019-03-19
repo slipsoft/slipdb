@@ -2,11 +2,21 @@ package com.dant.entity;
 
 
 public enum Location {
-    createTable,
-    updateTable,
-    deleteTable,
-    addIndex,
-    updateIndex,
-    DeleteIndex,
-    loadCSV
+    createTable("createTable"),
+    updateTable("updateTable"),
+    deleteTable("deleteTable"),
+    getTable("getTable"),
+    addIndex("addIndex"),
+    deleteIndex("deleteIndex"),
+    loadCSV("loadCSV");
+
+    private final String fieldDescription;
+
+    Location(String value) {
+        fieldDescription = value;
+    }
+
+    public String getFieldDescription() {
+        return fieldDescription;
+    }
 }
