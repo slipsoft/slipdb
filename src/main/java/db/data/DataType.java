@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 
 
 public abstract class DataType implements Operable {
+
 	protected int sizeInBytes;
 	//c'est en fait inutile (merci Nicolas ;) ) : protected final Utils currentUtilsInstance; // doit être initialisé
 	

@@ -9,7 +9,7 @@ import db.data.Operable;
  * Classe Index, permettant d'indexer une ou plusieurs colonnes Exemple :
  * Indexer selon le nom ou selon le nom + prénom ou nom + prénom + date de
  * naissance ...
- * 
+ *
  */
 public abstract class Index implements Operable {
 
@@ -26,7 +26,7 @@ public abstract class Index implements Operable {
 	/**
 	 * Constructor, not always used. The simple constructor with no arguments is
 	 * used by the TreeMap indexing class.
-	 * 
+	 *
 	 * @param columnsToIndex la liste des colonnes à indexer
 	 */
 	public Index(Column[] columnsToIndex) {

@@ -9,7 +9,6 @@ public class ByteType extends DataType {
 		Operator.equals
 	};
 	
-	
 	public ByteType() {
 		super();
 		this.sizeInBytes = Byte.BYTES;
