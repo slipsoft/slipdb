@@ -1,4 +1,4 @@
-package sj.network.tcp;
+package sj.network.tcpAndBuffers;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,9 +9,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import sj.network.buffers.NetBuffer;
-import sj.network.buffers.NetBufferData;
 
 
 /** TCPClientThread

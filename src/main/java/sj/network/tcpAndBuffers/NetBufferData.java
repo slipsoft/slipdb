@@ -1,4 +1,4 @@
-package sj.network.buffers;
+package sj.network.tcpAndBuffers;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;

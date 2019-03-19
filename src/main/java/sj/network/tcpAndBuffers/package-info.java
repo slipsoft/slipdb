@@ -41,4 +41,4 @@
  * un bug ou une suggestion d'amélioration : sylvain.joube@gmail.com
  * 
  */
-package sj.network.tcp;
+package sj.network.tcpAndBuffers;

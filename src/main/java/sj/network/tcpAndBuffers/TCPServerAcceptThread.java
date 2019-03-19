@@ -1,4 +1,4 @@
-package sj.network.tcp;
+package sj.network.tcpAndBuffers;
 
 import java.io.IOException;
 import java.net.ServerSocket;
