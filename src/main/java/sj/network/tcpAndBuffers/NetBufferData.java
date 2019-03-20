@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * Décrit une donnée utilisée dans le NetBuffer
  * Pas totalement commenté, par manque de temps (mais les noms des méthodes sont explicites)
- *
+ * 
  */
 
 public class NetBufferData {
@@ -18,8 +18,9 @@ public class NetBufferData {
 	public Boolean booleanData = null;
 	public Byte byteData = null;
 	public byte[] byteArrayData = null;
+	// C'était fait en rush, je coredai mieu maintenant (plus dans la philosophie objet)
 
-
+	
 	public NetBufferData(byte arg_byteData) {
 		dataType = NetBufferDataType.BYTE;
 		byteData = new Byte(arg_byteData);
@@ -217,5 +218,39 @@ public class NetBufferData {
 	public byte[] encodeToByteArray() {
 		
 	}*/
+	
+	private boolean dataIsEqual(Object myData, Object otherData) {
+		if ((myData == null) ^ (otherData == null)) return false;
+		if (myData == null) return true; // les deux sont null donc
+		return myData.equals(otherData);
+	}
+	
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o == null) return false;
+		if (this.getClass() != o.getClass()) return false;
+		
+		NetBufferData compareTo = (NetBufferData) o;
+		
+		if (this.dataType.equals(compareTo.dataType) == false) return false;
+		
+		if ( dataIsEqual(integerData, compareTo.integerData) == false
+		  || dataIsEqual(doubleData, compareTo.doubleData) == false
+		  || dataIsEqual(longData, compareTo.longData) == false
+		  || dataIsEqual(stringData, compareTo.stringData) == false
+		  || dataIsEqual(booleanData, compareTo.booleanData) == false
+		  || dataIsEqual(byteData, compareTo.byteData) == false
+		  || dataIsEqual(byteArrayData, compareTo.byteArrayData) == false)
+			return false;
+		
+		return true;
+	}
+	
+	public static boolean checkEquals(NetBufferData buffData1, NetBufferData buffData2) {
+		if ((buffData1 == null) ^ (buffData2 == null)) return false;
+		if (buffData1 == null) return true;
+		return buffData1.equals(buffData2);
+	}
 	
 }

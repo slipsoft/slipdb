@@ -197,6 +197,48 @@ public class NetBuffer { // fonctionnement synchrone, non thread-safe
 		readFromReceivedRawData();
 	}
 	
+	public NetBufferData getDataAtPosition(int index) {
+		if (index >= dataList.size()) return null;
+		return dataList.get(index);
+	}
+	
+	/** Créer un buffer à partir d'un array de byte
+	 *  Pareil que new NetBuffer(byteArray) mais en statique.
+	 *  @param arg_receivedRawData
+	 *  @return
+	 */
+	public static NetBuffer getBufferFromByteArray(byte[] arg_receivedRawData) {
+		NetBuffer result = new NetBuffer(arg_receivedRawData);
+		return result;
+	}
+	
+	public static boolean compareNetBuffers(NetBuffer buff1, NetBuffer buff2) {
+		/*if (buff1 == null && buff2 != null) return false;
+		if (buff1 != null && buff2 == null) return false;*/
+		//System.out.println("----> NetBuffer.compareNetBuffers : 1");
+		if ((buff1 == null) ^ (buff2 == null)) return false; // xor, l'un des deux est null mais pas l'autre
+		if (buff1 == null && buff2 == null) return true;
+		//System.out.println("----> NetBuffer.compareNetBuffers : 2");
+		int dataListSize = buff1.dataList.size();
+		if (dataListSize != buff2.dataList.size()) return false;
+		//System.out.println("----> NetBuffer.compareNetBuffers : 3");
+		
+		for (int dataIndex = 0; dataIndex < dataListSize; dataIndex++) {
+			NetBufferData data1 = buff1.getDataAtPosition(dataIndex);
+			NetBufferData data2 = buff2.getDataAtPosition(dataIndex);
+			//System.out.println("----> NetBuffer.compareNetBuffers : data " + dataIndex + "...");
+			if (NetBufferData.checkEquals(data1,  data2) == false) return false;
+			//System.out.println("----> NetBuffer.compareNetBuffers : data " + dataIndex + " OK !");
+		}
+		return true;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o == null) return false;
+		if (o.getClass() != getClass()) return false;
+		return NetBuffer.compareNetBuffers(this, (NetBuffer) o);
+	}
 	
 	/** Copier les donnes brutes du buffer de réception
 	 * @param arg_threadReceivedBytesFULL
@@ -312,6 +354,7 @@ public class NetBuffer { // fonctionnement synchrone, non thread-safe
 		}
 		
 		int currentPosInRawDataBuffer = 0 + 4; // 4 octets pour indiquer la taille totale du buffer contenant les données
+		int receivedDataCount = 0;
 		
 		while (currentPosInRawDataBuffer < receivedRawData.length) {
 			
@@ -399,7 +442,9 @@ public class NetBuffer { // fonctionnement synchrone, non thread-safe
 				
 			default : break;
 			}
+			receivedDataCount++;
 		}
+		//System.out.println("----> NetBuffer.readFromReceivedRawData : receivedDataCount = " + receivedDataCount);
 		
 		
 	}

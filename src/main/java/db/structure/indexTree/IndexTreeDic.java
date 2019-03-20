@@ -480,6 +480,7 @@ public class IndexTreeDic {
 		}
 		int maxIntervalValue = totalNumberOfDistinctValues - 1;
 		int minIntervalValue = 0;
+		// // Ne devrait JAMAIS arriver ->
 		if (intervalStartIndex > maxIntervalValue) { Log.error("TARENTULE - erreur dichotomie 1 @IndexTreeDic.findValueIndexByDichotomy"); return localResultAsFalse; } // Ne devrait JAMAIS arriver
 		if (intervalStartIndex < minIntervalValue) { Log.error("TARENTULE - erreur dichotomie 2 @IndexTreeDic.findValueIndexByDichotomy"); return localResultAsFalse; } // Ne devrait JAMAIS arriver
 		

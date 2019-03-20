@@ -8,7 +8,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -65,7 +64,7 @@ public class Utils {
 			return null; //new Date();
 		}
 	}
-
+	
 	public static boolean validateRegex(String pattern, String toMatch) {
 		Pattern p = Pattern.compile(pattern);
 		Matcher m = p.matcher(toMatch);
