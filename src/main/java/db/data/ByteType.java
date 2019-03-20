@@ -5,10 +5,11 @@ import java.nio.ByteBuffer;
 
 public class ByteType extends DataType {
 
+	public static boolean sizeIsRequired = false;
+
 	protected final static Operator[] compatibleOperatorsList = {
 		Operator.equals
 	};
-	
 	
 	public ByteType() {
 		super();

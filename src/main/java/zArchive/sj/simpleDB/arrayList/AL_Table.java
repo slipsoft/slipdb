@@ -139,7 +139,7 @@ public class AL_Table {
 				result += Integer.toString((Integer) objectAtThisIndex);
 			}
 			if (columnAtIndex.storageType == AL_SStorageDataType.isString) {
-				result += new String((String) objectAtThisIndex);
+				result += (String) objectAtThisIndex;
 			}
 			result += "\n";
 		}

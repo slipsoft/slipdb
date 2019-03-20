@@ -3,7 +3,10 @@ package db.structure;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import com.dant.entity.ColumnEntity;
+import com.dant.utils.Log;
 import db.data.DataType;
 
 public class Column {
@@ -22,7 +25,6 @@ public class Column {
 	 *
 	 * @param name
 	 * @param dataType
-	 * @param size
 	 */
 	public Column(String name, DataType dataType) {
 		this.name = name;
@@ -97,5 +99,14 @@ public class Column {
 	
 	public void addIndex(Index index) {
 		this.relatedIndicesList.add(index);
+	}
+
+	public ColumnEntity convertToEntity() {
+		int typeClassSize = this.dataType.getSize();
+		String typeClassName = this.dataType.getClass().getName();
+		String DataTypesClassPathPrefix = Database.getInstance().config.DataTypesClassPathPrefix;
+
+		String type = Database.getInstance().config.DataTypes.entrySet().stream().filter(e -> (DataTypesClassPathPrefix + e.getValue()).equals(typeClassName)).map(Map.Entry::getKey).findFirst().get();
+		return new ColumnEntity(this.name, type, typeClassSize);
 	}
 }

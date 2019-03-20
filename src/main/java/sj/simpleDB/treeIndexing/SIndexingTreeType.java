@@ -6,7 +6,7 @@ public enum SIndexingTreeType {
 	integerAsValue,
 	longAsValue,
 	floatAsValue,
-	doubleAsValue;
-	
-	
+	doubleAsValue
+
+
 }

@@ -4,6 +4,8 @@ import java.nio.ByteBuffer;
 
 
 public class DoubleType extends DataType {
+
+	public static boolean sizeIsRequired = false;
 	
 	protected final static Operator[] compatibleOperatorsList = {
 		Operator.equals,

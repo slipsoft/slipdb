@@ -19,7 +19,7 @@ public enum Al_SOptimDataFromCSV {
 	
 	public final AL_SStorageDataType realDataType;
 	
-	private Al_SOptimDataFromCSV(AL_SStorageDataType argRealDataType) {
+	Al_SOptimDataFromCSV(AL_SStorageDataType argRealDataType) {
 		realDataType = argRealDataType;
 	}
 

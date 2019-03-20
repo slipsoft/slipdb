@@ -7,6 +7,8 @@ import java.util.Date;
 import com.dant.utils.Utils;
 
 public class DateType extends DataType {
+
+	public static boolean sizeIsRequired = false;
 	
 	protected final static Operator[] compatibleOperatorsList = {
 		Operator.equals,
