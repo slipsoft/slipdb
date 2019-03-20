@@ -188,7 +188,7 @@ public class NetworkTests {
 		
 		assertEquals(true, tcpServ.isListening(), "Serveur : Le serveur n'a pas pu ouvrir le port demandé.");
 		assertEquals(null, tcpServ.accept(), "Serveur : Aucun client n'était attendu.");
-
+		
 		localLog.log("Client : Création & connexion du client");
 		
 		TCPClient tcpClient = new TCPClient();
@@ -218,7 +218,7 @@ public class NetworkTests {
 			}
 			Thread.sleep(sleepTimeMsTry);
 		}
-
+		
 		localLog.log("Serveur : Client accepté par le serveur !");
 		
 		assertEquals(true, accepedClient != null, "Serveur : Le serveur n'a pas accepté le client, alors que le client est bien connecté.");
@@ -242,7 +242,7 @@ public class NetworkTests {
 			}
 			Thread.sleep(sleepTimeMsTry);
 		}
-
+		
 		localLog.log("Serveur : Réception du message par le serveur");
 		
 		assertEquals(true, receivedMessage != null, "Serveur : message du client non reçu.");
@@ -260,12 +260,11 @@ public class NetworkTests {
 			}
 			Thread.sleep(sleepTimeMsTry);
 		}
-
+		
 		localLog.log("Client : stopper le client");
-
+		
 		assertEquals(true, stopSuccess, "Echec de stop sur le TCPClient.");
 		
-
 		localLog.log("Tout s'est bien passé !!!");
 		return true;
 		
