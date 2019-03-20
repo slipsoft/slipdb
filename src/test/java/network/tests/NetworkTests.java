@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import sj.network.tcpAndBuffers.NetBuffer;
+import sj.network.tcpAndBuffers.TCPClient;
+import sj.network.tcpAndBuffers.TCPServer;
 
 public class NetworkTests {
 	
@@ -22,6 +24,9 @@ public class NetworkTests {
 	public static void tearEverythingDown() {
 		
 	}
+	
+	
+	
 	
 	@Test
 	public void testNetBuffer() {
@@ -44,11 +49,11 @@ public class NetworkTests {
 		byte[] asByteArray = buff.convertToByteArray();
 		
 		NetBuffer checkBuffer = NetBuffer.getBufferFromByteArray(asByteArray);
-
+		
 		assertEquals(true, buff.equals(checkBuffer), "Problème dans la fonction NetBuffer.getBufferFromByteArray(...)");
 		
 		// Test vite fait (les fonctions sont très simples, les bugs sont rares et visibles)
-
+		
 		assertEquals(false, checkBuffer.currentData_isDouble());
 		assertEquals(false, checkBuffer.currentData_isString());
 		assertEquals(false, checkBuffer.currentData_isByteArray());
@@ -151,7 +156,121 @@ public class NetworkTests {
 		
 		assertEquals(true, Arrays.equals(writtenByteArray, receivedByteArray));
 		
+	}
+	
+	
+	@Test
+	public void testTcp() {
+		
+		int choosenPort = 28756;
+		TCPServer tcpServ = new TCPServer(choosenPort);
+		try {
+			testTCP_withServer(tcpServ, choosenPort);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		tcpServ.close(); // <- super important !
 		
 	}
+	
+	
+	public boolean testTCP_withServer(TCPServer tcpServ, int choosenPort) throws InterruptedException {
+		
+		class LocalLog {
+			public void log(String message) {
+				System.out.println("testTCP_withServer : " + message);
+			}
+		}
+		
+		LocalLog localLog = new LocalLog();
+		localLog.log("Serveur : Initialisation...");
+		//localLog.log("");
+		
+		assertEquals(true, tcpServ.isListening(), "Serveur : Le serveur n'a pas pu ouvrir le port demandé.");
+		assertEquals(null, tcpServ.accept(), "Serveur : Aucun client n'était attendu.");
+
+		localLog.log("Client : Création & connexion du client");
+		
+		TCPClient tcpClient = new TCPClient();
+		tcpClient.connect("localhost", choosenPort);
+		
+		int maxTryNb = 100;
+		int sleepTimeMsTry = 10;
+		boolean connectionSuccess = false;
+		for (int iTry = 0; iTry < maxTryNb; iTry++) {
+			if (tcpClient.isConnected()) {
+				connectionSuccess = true;
+				break;
+			}
+			Thread.sleep(sleepTimeMsTry);
+		}
+		
+		localLog.log("Client : Client connecté !");
+		
+		assertEquals(true, connectionSuccess, "Client : Echec de la connexion au serveur local.");
+		
+		// Accepter le client
+		TCPClient accepedClient = null;
+		for (int iTry = 0; iTry < maxTryNb; iTry++) {
+			accepedClient = tcpServ.accept();
+			if (accepedClient != null) {
+				break;
+			}
+			Thread.sleep(sleepTimeMsTry);
+		}
+
+		localLog.log("Serveur : Client accepté par le serveur !");
+		
+		assertEquals(true, accepedClient != null, "Serveur : Le serveur n'a pas accepté le client, alors que le client est bien connecté.");
+		
+		
+		String checkString = "Je suis une chaîne de caractères avec des c@rac1ër€s spéciaux #\"ç^^$^¤*µ &&& ! ";
+		NetBuffer sentMessage = new NetBuffer();
+		sentMessage.writeBool(true);
+		sentMessage.writeString(checkString);
+
+		localLog.log("Client : Envoi d'un message au serveur");
+		
+		boolean bienEnvoye = tcpClient.sendMessage(sentMessage);
+		assertEquals(true, bienEnvoye, "Client : Message du TCPClient non envoyé.");
+
+		NetBuffer receivedMessage = null;
+		for (int iTry = 0; iTry < maxTryNb; iTry++) {
+			receivedMessage = accepedClient.getNewMessage();
+			if (receivedMessage != null) {
+				break;
+			}
+			Thread.sleep(sleepTimeMsTry);
+		}
+
+		localLog.log("Serveur : Réception du message par le serveur");
+		
+		assertEquals(true, receivedMessage != null, "Serveur : message du client non reçu.");
+		
+		assertEquals(true, receivedMessage.equals(sentMessage), "Serveur : le message envoyé du client ne correspond pas au message reçu du serveur.");
+		
+		
+		tcpClient.stop();
+		
+		boolean stopSuccess = false;
+		for (int iTry = 0; iTry < maxTryNb; iTry++) {
+			if (tcpClient.isStillActive() == false) {
+				stopSuccess = true;
+				break;
+			}
+			Thread.sleep(sleepTimeMsTry);
+		}
+
+		localLog.log("Client : stopper le client");
+
+		assertEquals(true, stopSuccess, "Echec de stop sur le TCPClient.");
+		
+
+		localLog.log("Tout s'est bien passé !!!");
+		return true;
+		
+	}
+	
+	
 	
 }
