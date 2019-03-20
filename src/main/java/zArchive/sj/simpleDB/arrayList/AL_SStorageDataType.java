@@ -16,7 +16,7 @@ public enum AL_SStorageDataType {
 	
 	public final byte dataSize;
 	
-	private AL_SStorageDataType(int arg_dataSize) {
+	AL_SStorageDataType(int arg_dataSize) {
 		dataSize = (byte) arg_dataSize;
 		
 	}

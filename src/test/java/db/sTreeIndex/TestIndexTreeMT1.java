@@ -211,8 +211,8 @@ public class TestIndexTreeMT1 {
 		
 		Date dateFrom = currentlyUsedUils.dateFromString("2015-04-16 00:05:00");
 		Date dateTo = currentlyUsedUils.dateFromString("2015-04-16 00:06:30");
-		int intDateFrom = currentlyUsedUils.dateToSecInt(dateFrom);
-		int intDateTo = currentlyUsedUils.dateToSecInt(dateTo);
+		int intDateFrom = Utils.dateToSecInt(dateFrom);
+		int intDateTo = Utils.dateToSecInt(dateTo);
 		
 		Timer searchQueryTimer = new Timer("Time took to return the matching elements");
 		Timer searchQueryFullTimer = new Timer("Time took to return the matching elements + size evaluation");

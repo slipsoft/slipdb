@@ -3,6 +3,8 @@ package db.data;
 import java.nio.ByteBuffer;
 
 public class FloatType extends DataType {
+
+	public static boolean sizeIsRequired = false;
 	
 	protected final static Operator[] compatibleOperatorsList = {
 		Operator.equals,

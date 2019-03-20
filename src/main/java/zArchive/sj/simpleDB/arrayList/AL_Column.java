@@ -88,7 +88,7 @@ public class AL_Column {
 		dataList.clear();
 		dataList.ensureCapacity(countSize);
 		for (int count = 1; count <= countSize; count++)
-			dataList.add(new String(fillValue));
+			dataList.add(fillValue);
 		return true;
 	}
 	

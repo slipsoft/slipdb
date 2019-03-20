@@ -38,7 +38,7 @@ public class NetBufferData {
 	}
 	public NetBufferData(String arg_stringData) {
 		dataType = NetBufferDataType.STRING;
-		stringData = new String(arg_stringData);
+		stringData = arg_stringData;
 	}
 	public NetBufferData(byte[] arg_byteArrayData) {
 		dataType = NetBufferDataType.BYTE_ARRAY;
@@ -70,7 +70,7 @@ public class NetBufferData {
 			
 		case STRING :
 			String writeString = "";
-			if (stringData != null) writeString = new String(stringData);
+			if (stringData != null) writeString = stringData;
 			byte[] strAsBytes = writeString.getBytes(StandardCharsets.UTF_8);
 			int totalBuffSize = 1 + 4 + strAsBytes.length;
 			

@@ -16,7 +16,7 @@ import db.structure.KeyHash;
 @SuppressWarnings("unused")
 class TreeMapDemo {
 	
-	public static void main(String args[]) {
+	public static void main(String[] args) {
 		mainTreeMapDemo();
 	}
 	
