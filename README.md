@@ -1,7 +1,7 @@
 # ![SlipDb](docs/slipdb.png)
 
 [![Build Status](https://travis-ci.com/slipsoft/slipdb.svg?branch=master)](https://travis-ci.com/slipsoft/slipdb)
-[![Coverage Status](https://coveralls.io/repos/github/slipsoft/slipdb/badge.svg?branch=feat%2Fsmall-details)](https://coveralls.io/github/slipsoft/slipdb?branch=feat%2Fsmall-details)
+[![Coverage Status](https://coveralls.io/repos/github/slipsoft/slipdb/badge.svg?branch=master)](https://coveralls.io/github/slipsoft/slipdb?branch=master)
 
 A distributed, index based, search engine.
 
@@ -48,7 +48,7 @@ _not deployable yet..._
 
 ### API
 
-The API documentation can be find [here](https://slipsoft.github.io/slipdb/).
+The API documentation can be found [here](https://slipsoft.github.io/slipdb/).
 
 ## Built With
 
