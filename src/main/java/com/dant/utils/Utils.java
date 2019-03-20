@@ -72,9 +72,10 @@ public class Utils {
 		return m.matches();
 	}
 
-	public static boolean validateClass(String className) {
+	public static boolean validateClass(String className, int size) {
 		try {
 			Class classToTest = Class.forName(className);
+
 		} catch (Exception exp) {
 			return false;
 		}

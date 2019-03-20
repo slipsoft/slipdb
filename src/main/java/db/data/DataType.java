@@ -5,7 +5,10 @@ import java.nio.ByteBuffer;
 
 public abstract class DataType implements Operable {
 
+	public static boolean sizeIsRequired; // nécessaire au bon fonctionnement de l'API, si set à true => public static int maxSizeInBytes = [max]; obligatoire
+
 	protected int sizeInBytes;
+
 	//c'est en fait inutile (merci Nicolas ;) ) : protected final Utils currentUtilsInstance; // doit être initialisé
 	
 	protected Object currentValue;

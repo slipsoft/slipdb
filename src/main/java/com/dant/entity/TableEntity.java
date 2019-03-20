@@ -1,5 +1,6 @@
 package com.dant.entity;
 
+import com.dant.utils.Log;
 import com.google.gson.Gson;
 import db.structure.Column;
 import db.structure.Database;
@@ -39,7 +40,13 @@ public class TableEntity extends Entity {
         if (this.allColumns == null || this.allColumns.size() == 0) {
             errors.add(new ResponseError(Location.createTable, Type.missingData, "column list is missing"));
         } else {
-            this.allColumns.stream().forEach(c -> c.validate(errors));
+            this.allColumns.stream().forEach(c -> {
+                try {
+                    c.validate(errors);
+                } catch (Exception exp) {
+                    Log.error(exp);
+                }
+            });
         }
     }
 

@@ -3,6 +3,7 @@ package com.dant.app;
 import com.dant.entity.HttpResponse;
 import com.dant.entity.TableEntity;
 import com.dant.exception.BadRequestException;
+import com.dant.utils.Log;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import db.structure.Database;
@@ -38,9 +39,14 @@ public class DBEndpoint {
         return Database.getInstance().getTables();
     }
 
-    @POST
+    @GET
     @Path("/tables/{tableName}")
-    public Response updateTable(@QueryParam("tableName") String tableName) {
-        return Database.getInstance().getTable(tableName);
+    public Response updateTable(@PathParam("tableName") String tableName) {
+        try {
+            return Database.getInstance().getTable(tableName);
+        } catch (Exception exp) {
+            Log.error(exp);
+        }
+        return null;
     }
 }

@@ -151,8 +151,8 @@ public class Table {
 
 	public TableEntity convertToEntity () {
 		String name = this.name;
-		ArrayList<ColumnEntity> allColumns = this.columnsList.stream().map(c -> c.convertToEntity()).collect(Collectors.toCollection(ArrayList::new));
-		ArrayList<IndexEntity> allIndexes = this.indicesList.stream().map(Index::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
-		return new TableEntity(name, allColumns, allIndexes);
+		ArrayList<ColumnEntity> allColumns = this.columnsList.stream().map(Column::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
+        // ArrayList<IndexEntity> allIndexes = this.indicesList.stream().map(Index::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
+		return new TableEntity(name, allColumns);
     }
 }

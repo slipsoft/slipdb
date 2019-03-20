@@ -43,7 +43,7 @@ public final class Database {
         ArrayList<String> names = new ArrayList<>();
 
         //a really dirty way of checking for duplicate, but it can always be improved later
-        /*for (TableEntity table : allTableEntities) {
+        for (TableEntity table : allTableEntities) {
             if (table.name == null)
                 continue;
 
@@ -51,11 +51,11 @@ public final class Database {
                 errors.add(new ResponseError(Location.createTable, Type.invalidData, "table name is duplicate"));
             }
 
-            if (allTables.stream().anyMatch(n -> table.name.equals(n.name))) {
+            if (this.allTables.stream().anyMatch(n -> table.name.equals(n.name))) {
                 errors.add(new ResponseError(Location.createTable, Type.invalidData, "table name is duplicate"));
             }
             names.add(table.name);
-        }*/
+        }
 
         allTableEntities.stream().forEach(t -> t.validate(errors));
 
@@ -83,7 +83,7 @@ public final class Database {
         Optional<Table> tableOptional = allTables.stream().filter(t -> t.name.equals(tableName)).findFirst();
         if (tableOptional.isPresent()) {
             Table table = tableOptional.get();
-            return com.dant.utils.Utils.generateResponse(200, "ok", "application/json", table);
+            return com.dant.utils.Utils.generateResponse(200, "ok", "application/json", table.convertToEntity());
         } else {
             ResponseError error = new ResponseError(Location.getTable, Type.invalidData, "Table was not found");
             return com.dant.utils.Utils.generateResponse(400, "error", "application/json", error);
@@ -96,6 +96,7 @@ public final class Database {
     }
 
     public Response getTables() {
+        Log.debug("ici1");
         ArrayList<TableEntity> allTableEntities = allTables.stream().map(Table::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
         return com.dant.utils.Utils.generateResponse(200, "ok", "application/json", allTableEntities);
     }

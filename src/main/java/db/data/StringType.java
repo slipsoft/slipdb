@@ -4,6 +4,10 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class StringType extends DataType {
+
+	public static boolean sizeIsRequired = true;
+	public static int maxSizeInBytes = 65535; //obligatoire si sizeIsRequired => true:
+
 	protected final static Operator[] compatibleOperatorsList = {
 		Operator.equals
 	};
