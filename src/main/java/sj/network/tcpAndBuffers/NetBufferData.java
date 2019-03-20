@@ -2,6 +2,7 @@ package sj.network.tcpAndBuffers;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 /**
  * Décrit une donnée utilisée dans le NetBuffer
@@ -222,6 +223,12 @@ public class NetBufferData {
 	private boolean dataIsEqual(Object myData, Object otherData) {
 		if ((myData == null) ^ (otherData == null)) return false;
 		if (myData == null) return true; // les deux sont null donc
+		if (myData.getClass() != otherData.getClass()) return false;
+		
+		if (myData.getClass() == byte[].class) {
+			return Arrays.equals((byte[])myData, (byte[])otherData);
+		}
+		
 		return myData.equals(otherData);
 	}
 	

@@ -108,6 +108,9 @@ public class NetBuffer { // fonctionnement synchrone, non thread-safe
 		if (data.longData == null) return 0; // ne devrait pas arriver si le message est lu dans le bon ordre
 		return data.longData;
 	}
+	public long readInt64() {
+		return readLong();
+	}
 	
 	public double readDouble() {
 		if (currentReadPos >= dataList.size()) return 0;
@@ -454,12 +457,14 @@ public class NetBuffer { // fonctionnement synchrone, non thread-safe
 	 * @return
 	 */
 	public boolean isEqualTo(NetBuffer otherBuffer) {
+		return equals(otherBuffer);
+		/*
 		if (otherBuffer == null) return false;
 		// méthode bourrine, pas optimisée du tout : PAR MANQUE DE TEMPS !
 		byte[] thisBufferAsByteArray = this.convertToByteArray();
 		byte[] otherBufferAsByteArray = otherBuffer.convertToByteArray();
 		boolean areEqual = Arrays.equals(thisBufferAsByteArray, otherBufferAsByteArray);
-		return areEqual;
+		return areEqual; */
 	}
 	
 	
