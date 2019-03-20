@@ -29,8 +29,12 @@ import sj.simpleDB.treeIndexing.SIndexingTreeType;
  * Cette structure n'a pas besoin que la collection retournée par un TreeMap soit classée,
  * contrairement à IndexTreeDic !
  * 
+ * L'IndexTreeCeption n'est plus utilisé, mais gardé pour la manière (pas bête !) dont j'ai développé ça !
+ * C'est légèrement moins performant que via dichotomie, une fois sur le disque, mais l'IMMENSE avantage de cette méthode et que la source n'a pas
+ * à être ordonnée. L'IndexTreeDic utilise la (merveilleuse) propriété des TreeMap qui peuvent classer les éléments par ordre croissant/décroissant !!
+ * 
  * TreeMapCeption : un arbre dans un arbre...
- *  V4 !
+ *  V4 ! (non réalisé)
  *  Au programme :
  *  - multi-thread du processus d'indexation
  *  - lecture des colonnes choisies seulement (benchmarks à réaliser sur ce point)
@@ -40,7 +44,11 @@ import sj.simpleDB.treeIndexing.SIndexingTreeType;
  *	
  */
 
-/** INFOS SUR LA V3 (à garder !)
+/** 
+ * IndexTreeV3 est devenu -> IndexTreeCeption
+ * IndexTreeV4 n'existe pas, j'ai repris en partie le code de la V3 pour faire l'IndexTreeDic.
+ * 
+ * INFOS SUR LA V3 (à garder !)
  * IndexTree, v3 : sauvegarde du plus d'index possible sur le disque.
  * 
  * Pour de très gros fichiers à indexer, il n'y a pas assez de mémoire vive dispo,
