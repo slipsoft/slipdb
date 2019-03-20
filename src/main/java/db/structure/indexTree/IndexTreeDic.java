@@ -267,7 +267,9 @@ public class IndexTreeDic {
 	
 	public boolean checkIfCompatibleObjectType(Object inputObject) {
 		if (inputObject == null) return false;
-		return inputObject.getClass() == storedValuesClassType;
+		//return inputObject.getClass() == storedValuesClassType; <- moins clair, je trouve
+		if (inputObject.getClass() != storedValuesClassType) return false;
+		return true;
 	}
 	
 	/** Only gets the matching binIndexes from memory, not from stored data on disk
