@@ -76,16 +76,23 @@ public final class Database {
     }
 
     public Response getTable(String tableName) {
-        if (!com.dant.utils.Utils.validateRegex(config.tableNamePattern, tableName)) {
-            ResponseError error = new ResponseError(Location.getTable, Type.invalidData, "Table name is invalid");
-            return com.dant.utils.Utils.generateResponse(400, "error", "application/json", error);
-        }
-        Optional<Table> tableOptional = allTables.stream().filter(t -> t.name.equals(tableName)).findFirst();
-        if (tableOptional.isPresent()) {
-            Table table = tableOptional.get();
+        Table table = getTableByName(tableName);
+        if (table != null) {
             return com.dant.utils.Utils.generateResponse(200, "ok", "application/json", table.convertToEntity());
         } else {
             ResponseError error = new ResponseError(Location.getTable, Type.invalidData, "Table was not found");
+            return com.dant.utils.Utils.generateResponse(400, "error", "application/json", error);
+        }
+
+    }
+
+    public Response deleteTable(String tableName) {
+        Table table = getTableByName(tableName);
+        if (table != null) {
+            allTables.remove(table);
+            return com.dant.utils.Utils.generateResponse(200, "ok", "application/json", "table successfully removed");
+        } else {
+            ResponseError error = new ResponseError(Location.deleteTable, Type.invalidData, "Table was not found");
             return com.dant.utils.Utils.generateResponse(400, "error", "application/json", error);
         }
 
@@ -96,8 +103,17 @@ public final class Database {
     }
 
     public Response getTables() {
-        Log.debug("ici1");
         ArrayList<TableEntity> allTableEntities = allTables.stream().map(Table::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
         return com.dant.utils.Utils.generateResponse(200, "ok", "application/json", allTableEntities);
+    }
+
+    public Table getTableByName(String tableName) {
+        if (com.dant.utils.Utils.validateRegex(config.tableNamePattern, tableName)) {
+            Optional<Table> tableOptional = allTables.stream().filter(t -> t.name.equals(tableName)).findFirst();
+            if (tableOptional.isPresent()) {
+                return tableOptional.get();
+            }
+        }
+        return null;
     }
 }

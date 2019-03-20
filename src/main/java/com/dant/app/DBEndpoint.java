@@ -1,6 +1,8 @@
 package com.dant.app;
 
 import com.dant.entity.HttpResponse;
+import com.dant.entity.Location;
+import com.dant.entity.ResponseError;
 import com.dant.entity.TableEntity;
 import com.dant.exception.BadRequestException;
 import com.dant.utils.Log;
@@ -25,11 +27,16 @@ public class DBEndpoint {
     @Path("/tables")
     public Response createTable(String body) {
         Type tableListType = new TypeToken<ArrayList<TableEntity>>(){}.getType();
-        ArrayList<TableEntity> allTables = new Gson().fromJson(body, tableListType);
-        if (allTables.size() == 0) {
-            throw new BadRequestException("No table found in request body");
-        } else {
-            return Database.getInstance().addTables(allTables);
+        try {
+            ArrayList<TableEntity> allTables = new Gson().fromJson(body, tableListType);
+            if (allTables.size() == 0) {
+                throw new BadRequestException("No table found in request body");
+            } else {
+                return Database.getInstance().addTables(allTables);
+            }
+        } catch (Exception exp) { //Todo improve on error handling by catching only specific exception types
+            Log.error(exp);
+            throw new BadRequestException("invalid table body, check your args");
         }
     }
 
@@ -41,12 +48,13 @@ public class DBEndpoint {
 
     @GET
     @Path("/tables/{tableName}")
-    public Response updateTable(@PathParam("tableName") String tableName) {
-        try {
-            return Database.getInstance().getTable(tableName);
-        } catch (Exception exp) {
-            Log.error(exp);
-        }
-        return null;
+    public Response getTable(@PathParam("tableName") String tableName) {
+        return Database.getInstance().getTable(tableName);
+    }
+
+    @DELETE
+    @Path("/tables/{tableName}")
+    public Response deleteTable(@PathParam("tableName") String tableName) {
+        return Database.getInstance().deleteTable(tableName);
     }
 }
