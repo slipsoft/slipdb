@@ -30,7 +30,7 @@ class DataTypeTest {
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
 		//Log.info("setUpBeforeAll");
-		Log.start("dataTypesTest", 3);
+		Log.start("dataTypesTest", 2);
 		
 	}
 
@@ -68,8 +68,8 @@ class DataTypeTest {
 	@Test
 	void testWriteToBuffer() {
 		
-		int maxCountOperation = 5_000_000;
-		String maxCountOperationStr = "5_000_000";
+		int maxCountOperation = 1_000_000;
+		String maxCountOperationStr = "1_000_000";
 		Timer localTimer;
 		ByteBuffer bBuff = ByteBuffer.allocate(20);
 		
