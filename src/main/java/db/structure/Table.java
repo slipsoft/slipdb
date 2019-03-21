@@ -1,6 +1,7 @@
 package db.structure;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -9,11 +10,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.dant.entity.ColumnEntity;
-import com.dant.entity.IndexEntity;
 import com.dant.entity.TableEntity;
 import com.dant.utils.EasyFile;
 
-import com.dant.utils.Log;
 import db.data.DataType;
 
 /**
@@ -85,25 +84,27 @@ public class Table {
 		return this.columnsList.stream().anyMatch(col -> col.getName() == name);
 	}
 	
-	/** Ajout d'une colonne
-	 *  @param colName
-	 *  @param defaultFillValue
-	 *  @return
-	 * @throws Exception 
+	/**
+	 * Ajout d'une colonne
+	 * @param colName
+	 * @param defaultFillValue
+	 * @return
+	 * @throws Exception
 	 */
 	public boolean addColumn(String colName, DataType dataType) throws Exception {
 		if (columnExist(colName)) throw new Exception("Column already exists, colName = " + colName);
 		// Ajout de la colonne
-		Column newColumn = new Column(colName, dataType);
+		Column newColumn = new Column(colName, dataType).setNumber(columnsList.size());
 		columnsList.add(newColumn);
 		return true;
 	}
 
-	/** Trouver l'index d'une colonne à partir de son nom, dans la liste columns
-	 *  @param colName  nom de la colonne à rechercher
-	 *  @return -1 si introuvable, un entier >= 0 si existe
+	/**
+	 * Trouver l'index d'une colonne à partir de son nom, dans la liste columns
+	 * @param colName  nom de la colonne à rechercher
+	 * @return -1 si introuvable, un entier >= 0 si existe
 	 */
-	public int findColumnIndex(String colName) {
+	public int findColumnNumber(String colName) {
 		for (int colIndex = 0; colIndex < columnsList.size(); colIndex++) {
 			Column columnAtIndex = columnsList.get(colIndex);
 			if (columnAtIndex.name.equals(colName)) {
@@ -111,6 +112,15 @@ public class Table {
 			}
 		}
 		return -1;
+	}
+
+	/**
+	 * Give each column a number
+	 */
+	public void setColumnsNumber(String colName) {
+		for (int colIndex = 0; colIndex < columnsList.size(); colIndex++) {
+			columnsList.get(colIndex).setNumber(colIndex);
+		}
 	}
 
 	/**
@@ -141,7 +151,7 @@ public class Table {
 		return lineValues;
 	}
 
-	public OutputStream tableToOutputStream(boolean appendAtTheEnd) throws IOException {
+	public OutputStream tableToOutputStream(boolean appendAtTheEnd) throws FileNotFoundException {
 		return new FileOutputStream(fileLinesOnDisk, appendAtTheEnd);
 	}
 	
@@ -152,7 +162,7 @@ public class Table {
 	public TableEntity convertToEntity () {
 		String name = this.name;
 		ArrayList<ColumnEntity> allColumns = this.columnsList.stream().map(Column::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
-        // ArrayList<IndexEntity> allIndexes = this.indicesList.stream().map(Index::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
+		// ArrayList<IndexEntity> allIndexes = this.indicesList.stream().map(Index::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
 		return new TableEntity(name, allColumns);
-    }
+	}
 }

@@ -84,7 +84,7 @@ class CsvParserTest {
 		};
 		assertDoesNotThrow(exec);
 		Log.debug(table.getValuesOfLineById(0), "entry/0");
-		Log.debug(table.getValuesOfLineById(70), "entry/70");
+		Log.debug(table.getValuesOfLineById(69), "entry/69");
 		List<Object> expected = new ArrayList<Object>();
 		expected.add((byte) 2);
 		expected.add(utilsInstance.dateFromString("2015-04-09 19:29:33"));

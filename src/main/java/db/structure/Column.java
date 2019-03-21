@@ -12,6 +12,7 @@ public class Column {
 
 	protected String name = "Nom inconnu";
 	protected DataType storedDataType;
+	protected int number;
 	
 	protected Object minValue = null;
 	protected Object maxValue = null;
@@ -34,16 +35,23 @@ public class Column {
 		return name;
 	}
 
-	public void setName(String name) {
+	public Column setName(String name) {
 		this.name = name;
+		return this;
+	}
+
+	public Column setNumber(int number) {
+		this.number = number;
+		return this;
 	}
 
 	public DataType getDataType() {
 		return dataType;
 	}
 
-	public void setDataType(DataType dataType) {
+	public Column setDataType(DataType dataType) {
 		this.dataType = dataType;
+		return this;
 	}
 
 	public int getSize() {
