@@ -183,6 +183,8 @@ public class IndexTreeTest {
 		Object searchFromValue = intDateFrom;
 		Object searchToValue = intDateTo;
 		
+		
+		// à faire : supprimer la recherche en mémoire, il n'y a plus rien en mémoire.
 		result = indexingObject.findMatchingBinIndexesInMemory(searchFromValue, searchToValue, true); // new Float(20), new Float(21)
 		
 		

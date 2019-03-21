@@ -303,7 +303,7 @@ public class IndexTreeCeption {
 			
 			Object readValue = columnDataType.readIndexValue(columnValueAsByteArray);
 			
-			this.addValue(readValue, new Integer(lineIndex)); // creating a new Integer is quite slow ><" (but the bottle neck really is I/O on disk)
+			this.addValue(readValue, lineIndex); // creating a new Integer is quite slow ><" (but the bottle neck really is I/O on disk)
 			
 			
 			fileAsStream.skip(skipAfterData);
@@ -318,6 +318,8 @@ public class IndexTreeCeption {
 		//benchTime.log();
 		
 		fileAsStream.close();
+		saveOnDisk();
+		
 	}
 	
 	// Plus tard, pour optimiser : protected final int divideAndGroupBy; // Grouper les valeurs en lot
@@ -409,7 +411,7 @@ public class IndexTreeCeption {
 	 *  @param binIndex position (dans le fichier binaire global) de la donnée stockée dans la table
 	 */
 	public void addValue(Object argAssociatedValue, Integer binIndex) {
-		
+		//System.out.println("Ception.addValue : binIndex = " + binIndex);
 		if (maxDistanceBetweenTwoNumericalElements != 0) {
 			// Ce n'est pas un arbre terminal, je recherche l'arbre en dessous et je lui demande d'ajouter cette valeur.
 			// Je crée l'arbre du dessous s'il n'existe pas encore

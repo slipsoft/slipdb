@@ -1,7 +1,9 @@
 package db.structure.indexTree;
 
 import java.io.BufferedOutputStream;
+import java.io.DataInput;
 import java.io.DataInputStream;
+import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -320,10 +322,8 @@ public class IndexTreeDic extends Index {
 	protected void saveOnDisk(EasyFile writeOnFile, boolean appendAtTheEnd) throws IOException {
 		//fileSaveOnDisk
 		DataOutputStream writeInDataStream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(writeOnFile, appendAtTheEnd)));
-		
 		writeAllStoredDataOnDisk(writeInDataStream);
 		writeInDataStream.close();
-		
 		//System.out.println("IndexTreeCeption.saveOnDisk : debugNumberOfExactArrayListValuesWrittenOnDisk=" + debugNumberOfExactArrayListValuesWrittenOnDisk);
 		//System.out.println("IndexTreeCeption.saveOnDisk : debugNumberOfExactValuesWrittenOnDisk=" + debugNumberOfExactValuesWrittenOnDisk);
 		
@@ -935,12 +935,9 @@ public class IndexTreeDic extends Index {
 			runnableSearchesList.add(searchInFile);
 		}
 		
-		boolean useMultiThread = useMultithreadSearch;
-		
-		
 		for (SearchInFile searchInFile : runnableSearchesList) {
 			
-			if (useMultiThread) {
+			if (useMultithreadSearch) {
 				// Si Multi-thread :
 				Thread newSearchThread = new Thread(searchInFile);
 				threadsRunningSearchesList.add(newSearchThread);
@@ -1001,20 +998,25 @@ public class IndexTreeDic extends Index {
 		return listOfMatchingArraysOfBinIndexes;
 	}
 	
-	/** Probably not very fast ><"
-	 *  Même very very lent, indeed :'(
-	 *  @param originalAssociatedValue
-	 *  @return
-	 * @throws IOException 
+	/**
+	 * 
+	 * @param originalAssociatedValue
+	 * @param writeInDataOutput 
+	 * @throws IOException
 	 */
-	protected void writeObjectValueOnDisk(Object originalAssociatedValue, DataOutputStream writeInDataStream) throws IOException  {
+	protected void writeObjectValueOnDisk(Object originalAssociatedValue, DataOutput writeInDataOutput) throws IOException  {
 		
-		if (originalAssociatedValue.getClass() == Float.class)    writeInDataStream.writeFloat(((Float) originalAssociatedValue).floatValue());
-		if (originalAssociatedValue.getClass() == Double.class)   writeInDataStream.writeDouble(((Double) originalAssociatedValue).doubleValue());
-		if (originalAssociatedValue.getClass() == Byte.class)     writeInDataStream.writeByte(((Byte) originalAssociatedValue).byteValue());
-		if (originalAssociatedValue.getClass() == Integer.class)  writeInDataStream.writeInt(((Integer) originalAssociatedValue).intValue());
-		if (originalAssociatedValue.getClass() == Long.class)     writeInDataStream.writeFloat(((Long) originalAssociatedValue).longValue());
-		
+		if (originalAssociatedValue.getClass() == Float.class)    { writeInDataOutput.writeFloat(((Float) originalAssociatedValue).floatValue());    return; }
+		if (originalAssociatedValue.getClass() == Double.class)   { writeInDataOutput.writeDouble(((Double) originalAssociatedValue).doubleValue()); return; }
+		if (originalAssociatedValue.getClass() == Byte.class)     { writeInDataOutput.writeByte(((Byte) originalAssociatedValue).byteValue());       return; }
+		if (originalAssociatedValue.getClass() == Integer.class)  { writeInDataOutput.writeInt(((Integer) originalAssociatedValue).intValue());      return; }
+		if (originalAssociatedValue.getClass() == Long.class)     { writeInDataOutput.writeFloat(((Long) originalAssociatedValue).longValue());      return; }
+		if (originalAssociatedValue.getClass() == String.class)   {
+			byte[] stringAsByteAray = ((String)originalAssociatedValue).getBytes();
+			writeInDataOutput.writeShort(stringAsByteAray.length); // taille du string, sur 2 octets
+			writeInDataOutput.write(stringAsByteAray); // string en tant qu'array
+			return;
+		}
 	}
 	
 	/** Probably not very fast ><"
@@ -1023,38 +1025,51 @@ public class IndexTreeDic extends Index {
 	 *  @return
 	 * @throws IOException 
 	 */
-	@SuppressWarnings("rawtypes") // J'utilise Class pour rendre générique ma fonction
-	protected Object readObjectValueFromDisk(DataInputStream readFromDataStream, Class dataClassType) throws IOException  {
+	/*@SuppressWarnings("rawtypes") // J'utilise Class pour rendre générique ma fonction
+	protected Object readObjectValueFromDisk(DataInputStream dataClassType, Class dataClassType) throws IOException  {
 		
-		Object result = null;
+		if (dataClassType == Float.class)    { return new Float(readFromDataStream.readFloat()); }// new Float() : il le fait tout seul et essaie d'optimiser le truc, je pense !
+		if (dataClassType == Double.class)   { return new Double(readFromDataStream.readDouble()); }
+		if (dataClassType == Byte.class)     { return new Byte(readFromDataStream.readByte()); }
+		if (dataClassType == Integer.class)  { return new Integer(readFromDataStream.readInt()); }
+		if (dataClassType == Long.class)     { return new Long(readFromDataStream.readLong()); }
+		if (dataClassType == String.class)   {
+			short stringAsByteArrayLength = readFromDataStream.readShort(); // 2 octets
+			byte[] stringAsByteAray = new byte[stringAsByteArrayLength];
+			int stringAsByteArrayCheckLength = readFromDataStream.read(stringAsByteAray, 0, stringAsByteAray.length);
+			if (stringAsByteArrayLength != stringAsByteArrayCheckLength) throw new IOException("readObjectValueFromDisk : stringAsByteArrayLength("+stringAsByteArrayLength+") != stringAsByteArrayCheckLength("+stringAsByteArrayCheckLength+")");
+			return new String(stringAsByteAray);
+		}
 		
-		if (dataClassType == Float.class)    result = new Float(readFromDataStream.readFloat()); // new Float() : il le fait tout seul et essaie d'optimiser le truc, je pense !
-		if (dataClassType == Double.class)   result = new Double(readFromDataStream.readDouble());
-		if (dataClassType == Byte.class)     result = new Byte(readFromDataStream.readByte());
-		if (dataClassType == Integer.class)  result = new Integer(readFromDataStream.readInt());
-		if (dataClassType == Long.class)     result = new Long(readFromDataStream.readLong());
-		
-		return result;
-	}
+		return null;
+	}*/
 	
-	/** Probably not very fast ><"
-	 *  Même very very lent, indeed :'(
-	 *  @param originalAssociatedValue
+	/**
+	 * @param dataInput   randAccessFile ou dataClassType
+	 * @param dataClassType   
+	 *  
+	 *  readFromDataStream
 	 *  @return
 	 * @throws IOException 
 	 */
 	@SuppressWarnings("rawtypes") // J'utilise Class pour rendre générique ma fonction
-	protected Object readObjectValueFromDisk(RandomAccessFile randAccessFile, Class dataClassType) throws IOException  {
+	protected Object readObjectValueFromDisk(DataInput dataInput, Class dataClassType) throws IOException  {
 		
-		Object result = null;
+		if (dataClassType == Float.class)    { return new Float(dataInput.readFloat()); }// new Float() : il le fait tout seul et essaie d'optimiser le truc, je pense !
+		if (dataClassType == Double.class)   { return new Double(dataInput.readDouble()); }
+		if (dataClassType == Byte.class)     { return new Byte(dataInput.readByte()); }
+		if (dataClassType == Integer.class)  { return new Integer(dataInput.readInt()); }
+		if (dataClassType == Long.class)     { return new Long(dataInput.readLong()); }
+		if (dataClassType == String.class)   {
+			short stringAsByteArrayLength = dataInput.readShort(); // 2 octets
+			byte[] stringAsByteAray = new byte[stringAsByteArrayLength];
+			//int stringAsByteArrayCheckLength = 
+			dataInput.readFully(stringAsByteAray, 0, stringAsByteAray.length);
+			//if (stringAsByteArrayLength != stringAsByteArrayCheckLength) throw new IOException("readObjectValueFromDisk : stringAsByteArrayLength("+stringAsByteArrayLength+") != stringAsByteArrayCheckLength("+stringAsByteArrayCheckLength+")");
+			return new String(stringAsByteAray);
+		}
 		
-		if (dataClassType == Float.class)    result = new Float(randAccessFile.readFloat()); // new Float() : il le fait tout seul et essaie d'optimiser le truc, je pense !
-		if (dataClassType == Double.class)   result = new Double(randAccessFile.readDouble());
-		if (dataClassType == Byte.class)     result = new Byte(randAccessFile.readByte());
-		if (dataClassType == Integer.class)  result = new Integer(randAccessFile.readInt());
-		if (dataClassType == Long.class)     result = new Long(randAccessFile.readLong());
-		
-		return result;
+		return null;
 	}
 	
 	/** Juste pour avoir un nom plus clair que compareValues,
@@ -1072,6 +1087,10 @@ public class IndexTreeDic extends Index {
 			if (asDouble1 == asDouble2)  return 0;
 			if (asDouble1 > asDouble2)   return 1;
 	      /*if (asDouble1 < asDouble2)*/ return -1;
+		}
+		
+		if (value1 instanceof String) {
+			///String value1AsString
 		}
 		
 		return 0;
