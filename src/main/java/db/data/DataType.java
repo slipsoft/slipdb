@@ -25,10 +25,28 @@ public abstract class DataType implements Operable {
 	@SuppressWarnings("rawtypes")
 	public abstract Class getAssociatedClassType();
 	
-	abstract public Object writeToBufferAndReturnValue(String input, ByteBuffer outputBuffer);
-	abstract public void writeToBuffer(String input, ByteBuffer outputBuffer);
+	/**
+	 * Convert String input into typed data, write it on the given buffer then returns it.
+	 * @param input - raw string input
+	 * @param outputBuffer
+	 * @return converted data
+	 * @throws IllegalArgumentException
+	 */
+	abstract public Object writeToBuffer(String input, ByteBuffer outputBuffer) throws IllegalArgumentException;
 	
+	/**
+	 * Convert bytes input into typed data
+	 * @param bytes
+	 * @return converted data
+	 */
 	abstract public Object readTrueValue(byte[] bytes);
-	abstract public Object readIndexValue(byte[] bytes); // return Key object in the future
+	
+	/**
+	 * Convert bytes input into typed data optimized for Indexes
+	 * TODO integrate Key object in the future
+	 * @param bytes
+	 * @return
+	 */
+	abstract public Object readIndexValue(byte[] bytes);
 
 }

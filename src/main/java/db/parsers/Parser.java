@@ -83,19 +83,11 @@ public abstract class Parser {
 		ByteBuffer entryBuffer = ByteBuffer.allocate(lineByteSize);
 		
 		// for each column, parse and write data into entryBuffer
-		for (int columnIndex = 0; columnIndex < schema.getColumns().size(); columnIndex++) {
-			String valueString = valuesArray[columnIndex];
-			Column currentColumn = schema.getColumns().get(columnIndex);
+		for (int i = 0; i < schema.getColumns().size(); i++) {
+			Column currentColumn = schema.getColumns().get(i);
 			// Converts the string value into an array of bytes representing the same data
-			Object currentValue = currentColumn.parseAndReturnValue(valueString, entryBuffer);
-			if (currentColumn.minValue == null) currentColumn.minValue = currentValue;
-			if (currentColumn.maxValue == null) currentColumn.maxValue = currentValue;
-			if (currentColumn.compareValues(currentValue, currentColumn.maxValue) == 1) {
-				currentColumn.maxValue = currentValue;
-			}
-			if (currentColumn.compareValues(currentValue, currentColumn.minValue) == -1) {
-				currentColumn.minValue = currentValue;
-			}
+			Object currentValue = currentColumn.writeToBuffer(valuesArray[i], entryBuffer);
+			currentColumn.evaluateMinMax(currentValue);
 		}
 		// returns the CSV line as an array of rightly typed data, as bytes
 		// return entryBuffer.array(); deso je vois pas à quoi ça sert

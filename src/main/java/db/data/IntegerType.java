@@ -27,12 +27,7 @@ public class IntegerType extends DataType {
 	}
 	
 	@Override
-	public void writeToBuffer(String input, ByteBuffer outputBuffer) {
-		outputBuffer.putInt(Integer.parseInt(input));
-	}
-	
-	@Override
-	public Integer writeToBufferAndReturnValue(String input, ByteBuffer outputBuffer) {
+	public Integer writeToBuffer(String input, ByteBuffer outputBuffer) {
 		Integer asInteger = Integer.parseInt(input);
 		outputBuffer.putInt(asInteger);
 		return asInteger;

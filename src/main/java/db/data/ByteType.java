@@ -24,12 +24,7 @@ public class ByteType extends DataType {
 	}
 
 	@Override
-	public void writeToBuffer(String input, ByteBuffer outputBuffer) {
-		outputBuffer.put(Byte.parseByte(input));
-	}
-
-	@Override
-	public Byte writeToBufferAndReturnValue(String input, ByteBuffer outputBuffer) {
+	public Byte writeToBuffer(String input, ByteBuffer outputBuffer) {
 		Byte asByte = Byte.parseByte(input);
 		outputBuffer.put(asByte);
 		return asByte;

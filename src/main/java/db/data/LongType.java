@@ -27,12 +27,7 @@ public class LongType extends DataType {
 	}
 	
 	@Override
-	public void writeToBuffer(String input, ByteBuffer outputBuffer) {
-		outputBuffer.putLong(Long.parseLong(input));
-	}
-	
-	@Override
-	public Long writeToBufferAndReturnValue(String input, ByteBuffer outputBuffer) {
+	public Long writeToBuffer(String input, ByteBuffer outputBuffer) {
 		Long asLong = Long.parseLong(input);
 		outputBuffer.putLong(asLong);
 		return asLong;
