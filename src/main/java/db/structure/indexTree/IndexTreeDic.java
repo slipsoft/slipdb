@@ -25,6 +25,7 @@ import com.dant.utils.Utils;
 import db.data.DataType;
 import db.data.IntegerArrayList;
 import db.structure.Column;
+import db.structure.Index;
 import db.structure.Table;
 
 /**
@@ -38,7 +39,7 @@ import db.structure.Table;
  * 
  * ~ Code de Sylvain, idée (dichotomie) de Nicolas ~
  * 
- * Bench de IndexTreeDic vs IndexTree pour mesurer les performances des deux méthodes
+ * Bench de IndexTreeDic vs IndexTreeCeption pour mesurer les performances des deux méthodes
  * 
  * Indexer via un TreeMap, et une recherche par dichotomie sur le disque.
  * Le TreeMap contenant les valeurs donnera une collection classée par ordre croissant de ses clefs,
@@ -55,9 +56,12 @@ import db.structure.Table;
  * -> Améliorer le CsvParser pour qu'il stocke les colonnes indépendament, ou qu'il "split" les fichiers tous les 1_000_000 de données
  * -> Pour chaque colonne, sauvegarder 
  * 
+ * Il faut un score pour classer les colonnes/index, prendre, pour la première requete, l'Index associé ayant le score le plus élevé :
+ * -> nombre de valeurs différentes dans l'arbre, pour tenter de limiter un maximum les résultats.
+ * 
  */
 
-public class IndexTreeDic {
+public class IndexTreeDic extends Index {
 	
 	/**
 	 * Il y a donc une seule TreeMap pour ce type d'index (contrairement à IndexTreeCeption)
@@ -215,7 +219,7 @@ public class IndexTreeDic {
 				break;
 			
 			Object readValue = columnDataType.readIndexValue(columnValueAsByteArray);
-			this.addValue(readValue, new Integer(lineIndex)); // creating a new Integer is quite slow ><" (but the bottle neck really is I/O on disk)
+			this.addValue(readValue, lineIndex); // new Integer() creating a new Integer is quite slow ><" (but the bottle neck really is I/O on disk)
 			inMemoryResults++;
 			
 			if (inMemoryResults > flushOnDiskOnceReachedThisFileNumber) {
