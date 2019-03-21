@@ -43,7 +43,7 @@ public class IndexTreeTest {
 		ArrayList<Column> columns = new ArrayList<Column>();
 		try {
 			columns.add(new Column("VendorID", new ByteType()));
-			columns.add(new Column("tpep_pickup_datetime", new DateType()));
+			columns.add(new Column("tpep_pickup_datetime", new StringType(19)));//new DateType())); //
 			columns.add(new Column("tpep_dropoff_datetime", new DateType()));
 			columns.add(new Column("passenger_count", new ByteType()));
 			columns.add(new Column("trip_distance", new FloatType()));
@@ -82,9 +82,10 @@ public class IndexTreeTest {
 		
 		// -> Go faire le parsing multi-thread maintenant !!
 		
+		/*
 		is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
 		parser.parse(is, !isTheFirstParsing); isTheFirstParsing = false;
-		is.close();
+		is.close();*/
 		
 		
 		/*is = new FileInputStream("D:/L3 DANT disque D/yellow_tripdata_2015-04.csv");
@@ -180,8 +181,11 @@ public class IndexTreeTest {
 		/*Object searchFromValue = new Float(12.78641);
 		Object searchToValue = new Float(14.748621);*/
 
-		Object searchFromValue = intDateFrom;
-		Object searchToValue = intDateTo;
+		String stringDateFrom = "2015-04-04 00:01:00";
+		String stringDateTo = "2015-04-04 00:18:57";
+		
+		Object searchFromValue = stringDateFrom;//intDateFrom;//
+		Object searchToValue = stringDateTo;//intDateTo;//
 		
 		
 		// à faire : supprimer la recherche en mémoire, il n'y a plus rien en mémoire.
@@ -260,7 +264,7 @@ public class IndexTreeTest {
 		
 	}
 	
-	@Test
+	//@Test
 	void testIndexTreeCeption() throws IOException {
 		//if (true) return;
 		/**

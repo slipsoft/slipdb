@@ -310,7 +310,7 @@ public class IndexTreeDic extends Index {
 		fileInstance.createFileIfNotExist();
 		saveOnDisk(fileInstance, false);
 		indexWrittenOnDiskFilePathsArray.add(saveFileName);
-		associatedBinIndexes = new TreeMap<Object, IntegerArrayList>(); // réinitialisation
+		//associatedBinIndexes = new TreeMap<Object, IntegerArrayList>(); // réinitialisation
 		
 		if (showMemUsageAtEachFlush) MemUsage.printMemUsage();
 	}
@@ -1015,6 +1015,7 @@ public class IndexTreeDic extends Index {
 			byte[] stringAsByteAray = ((String)originalAssociatedValue).getBytes();
 			writeInDataOutput.writeShort(stringAsByteAray.length); // taille du string, sur 2 octets
 			writeInDataOutput.write(stringAsByteAray); // string en tant qu'array
+			//Log.info("stringAsByteAray.length = " + stringAsByteAray.length + " originalAssociatedValue = " + originalAssociatedValue);
 			return;
 		}
 	}
@@ -1091,6 +1092,13 @@ public class IndexTreeDic extends Index {
 		
 		if (value1 instanceof String) {
 			///String value1AsString
+			// Faire une super-classe à IndexTreeDic et IndexTreeCeption, pour ne pas mettre de côté IndexTreeCeption
+			String string1 = (String) value1;
+			String string2 = (String) value2;
+			int comparedValues = string1.compareTo(string2);
+			if (comparedValues > 0) return 1;
+			if (comparedValues < 0) return -1;
+			return 0;
 		}
 		
 		return 0;
