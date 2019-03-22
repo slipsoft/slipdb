@@ -1042,38 +1042,9 @@ public class IndexTreeDic extends Index {
 		}
 	}
 	
-	/** Probably not very fast ><"
-	 *  Même very very lent, indeed :'(
-	 *  @param originalAssociatedValue
-	 *  @return
-	 * @throws IOException 
-	 */
-	/*@SuppressWarnings("rawtypes") // J'utilise Class pour rendre générique ma fonction
-	protected Object readObjectValueFromDisk(DataInputStream dataClassType, Class dataClassType) throws IOException  {
-		
-		if (dataClassType == Float.class)    { return new Float(readFromDataStream.readFloat()); }// new Float() : il le fait tout seul et essaie d'optimiser le truc, je pense !
-		if (dataClassType == Double.class)   { return new Double(readFromDataStream.readDouble()); }
-		if (dataClassType == Byte.class)     { return new Byte(readFromDataStream.readByte()); }
-		if (dataClassType == Integer.class)  { return new Integer(readFromDataStream.readInt()); }
-		if (dataClassType == Long.class)     { return new Long(readFromDataStream.readLong()); }
-		if (dataClassType == String.class)   {
-			short stringAsByteArrayLength = readFromDataStream.readShort(); // 2 octets
-			byte[] stringAsByteAray = new byte[stringAsByteArrayLength];
-			int stringAsByteArrayCheckLength = readFromDataStream.read(stringAsByteAray, 0, stringAsByteAray.length);
-			if (stringAsByteArrayLength != stringAsByteArrayCheckLength) throw new IOException("readObjectValueFromDisk : stringAsByteArrayLength("+stringAsByteArrayLength+") != stringAsByteArrayCheckLength("+stringAsByteArrayCheckLength+")");
-			return new String(stringAsByteAray);
-		}
-		
-		return null;
-	}*/
-	
 	/**
 	 * @param dataInput   randAccessFile ou dataClassType
 	 * @param dataClassType   
-	 *  
-	 *  DataInput
-	 *  
-	 *  readFromDataStream
 	 *  @return
 	 * @throws IOException 
 	 */

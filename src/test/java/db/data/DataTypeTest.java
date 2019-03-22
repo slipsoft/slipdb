@@ -75,7 +75,7 @@ class DataTypeTest {
 		
 		Log.info("Cout en millisecondes, pour " + maxCountOperationStr + " itérations :");
 		
-		localTimer = new Timer("Cout de fonctionnement de la boule pour " + maxCountOperationStr + " opérations ");
+		localTimer = new Timer("Cout de fonctionnement de la boucle pour " + maxCountOperationStr + " opérations ");
 		for (int count = 0; count < maxCountOperation; count++) {
 			bBuff.rewind();
 		}

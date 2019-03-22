@@ -44,7 +44,7 @@ public class IndexTreeTest {
 		try {
 			columns.add(new Column("VendorID", new ByteType()));
 			// -> On a bien les mêmes résultats en castant la date et en la traîtant comme une string
-			columns.add(new Column("tpep_pickup_datetime", new StringType(19)));//new DateType())); //
+			columns.add(new Column("tpep_pickup_datetime", new DateType())); //new StringType(19)));//
 			columns.add(new Column("tpep_dropoff_datetime", new DateType()));//new StringType(19))); // 
 			columns.add(new Column("passenger_count", new ByteType()));
 			columns.add(new Column("trip_distance", new FloatType()));
@@ -191,8 +191,8 @@ public class IndexTreeTest {
 		Object searchToValue = new Float(14.748621);*/
 
 		
-		Object searchFromValue = stringDateFrom;//intDateFrom;//
-		Object searchToValue = stringDateTo;//intDateTo;//
+		Object searchFromValue = intDateFrom;//stringDateFrom;//
+		Object searchToValue = intDateTo;//stringDateTo;//
 		
 		
 		// à faire : supprimer la recherche en mémoire, il n'y a plus rien en mémoire.
@@ -272,7 +272,7 @@ public class IndexTreeTest {
 		
 	}
 	
-	//@Test
+	@Test
 	void testIndexTreeCeption() throws IOException {
 		//if (true) return;
 		/**

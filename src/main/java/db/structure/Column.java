@@ -98,6 +98,15 @@ public class Column {
 			return -1;
 		}
 		
+		if (value1 instanceof String) {
+			String string1 = (String) value1;
+			String string2 = (String) value2;
+			int comparedValues = string1.compareTo(string2);
+			if (comparedValues > 0) return 1;
+			if (comparedValues < 0) return -1;
+			return 0;
+		}
+		
 		return 0;
 		
 		/*
