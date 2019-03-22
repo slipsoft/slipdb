@@ -43,7 +43,7 @@ public class IndexTreeTest {
 		ArrayList<Column> columns = new ArrayList<Column>();
 		try {
 			columns.add(new Column("VendorID", new ByteType()));
-			columns.add(new Column("tpep_pickup_datetime", new StringType(19)));//new DateType())); //
+			columns.add(new Column("tpep_pickup_datetime", new DateType())); //new StringType(19)));//
 			columns.add(new Column("tpep_dropoff_datetime", new DateType()));
 			columns.add(new Column("passenger_count", new ByteType()));
 			columns.add(new Column("trip_distance", new FloatType()));
@@ -76,7 +76,9 @@ public class IndexTreeTest {
 		boolean isTheFirstParsing = true;
 		
 		// Fichiers identiques, donc 2 fois plus de résultats !
-		is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
+		
+		//is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
+		is = new FileInputStream("../SMALL_10_000_yellow_tripdata_2015-04.csv");
 		parser.parse(is, !isTheFirstParsing); isTheFirstParsing = false;
 		is.close();
 		
@@ -172,25 +174,24 @@ public class IndexTreeTest {
 		Collection<IntegerArrayList> result;
 		MemUsage.printMemUsage();
 		
+		String stringDateFrom = "2015-04-04 00:00:00";//"2015-04-04 00:01:00";//
+		String stringDateTo = "2015-04-04 03:20:00";//"2015-04-04 00:18:57";//
 		
-		Date dateFrom = currentlyUsedUils.dateFromString("2015-04-04 00:01:00");
-		Date dateTo = currentlyUsedUils.dateFromString("2015-04-04 00:18:57");
+		Date dateFrom = currentlyUsedUils.dateFromString(stringDateFrom);
+		Date dateTo = currentlyUsedUils.dateFromString(stringDateTo);
 		int intDateFrom = Utils.dateToSecInt(dateFrom);
 		int intDateTo = Utils.dateToSecInt(dateTo);
 		
 		/*Object searchFromValue = new Float(12.78641);
 		Object searchToValue = new Float(14.748621);*/
 
-		String stringDateFrom = "2015-04-04 00:01:00";
-		String stringDateTo = "2015-04-04 00:18:57";
 		
-		Object searchFromValue = stringDateFrom;//intDateFrom;//
-		Object searchToValue = stringDateTo;//intDateTo;//
+		Object searchFromValue = intDateFrom;//stringDateFrom;//
+		Object searchToValue = intDateTo;//stringDateTo;//
 		
 		
 		// à faire : supprimer la recherche en mémoire, il n'y a plus rien en mémoire.
 		result = indexingObject.findMatchingBinIndexesInMemory(searchFromValue, searchToValue, true); // new Float(20), new Float(21)
-		
 		
 		//result = indexingObject.findMatchingBinIndexesInMemory(intDateFrom, intDateTo, true);
 		
@@ -206,6 +207,7 @@ public class IndexTreeTest {
 		
 		MemUsage.printMemUsage();
 		searchQueryTimer.log();
+		Column indexingColumn = table.getColumns().get(indexingColumnIndex);
 		
 		// Iterates over all the results
 		int numberOfResults = 0, numberOfLines = 0;
@@ -215,12 +217,12 @@ public class IndexTreeTest {
 			numberOfLines++;
 			for (Integer index : list) {
 				// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
-				/*Log.info("  index = " + index);
+				//Log.info("  index = " + index);
 				List<Object> objList = table.getValuesOfLineById(index);
 				Object indexedValue = objList.get(indexingColumnIndex);
-				
-				//Log.info("  valeur indexée = " + indexedValue);
-				Log.info("  objList = " + objList);*/
+				//indexingColumn.getDataType().
+				Log.info("  valeur indexée = " + indexedValue);
+				//Log.info("  objList = " + objList);
 				
 			}
 		}

@@ -178,6 +178,10 @@ public class IndexTreeDic extends Index {
 		long fileSize = inTable.getFileLinesOnDisk().length();
 		
 		int inMemoryResults = 0;
+
+		String stringDateFrom = "2015-04-04 00:01:00";
+		String stringDateTo = "2015-04-04 00:18:57";
+		int resultCount = 0;
 		
 		//Timer benchTime = new Timer("Temps pris par l'indexation");
 		byte[] columnValueAsByteArray = new byte[dataSizeInBytes];
@@ -224,6 +228,12 @@ public class IndexTreeDic extends Index {
 			this.addValue(readValue, lineIndex); // new Integer() creating a new Integer is quite slow ><" (but the bottle neck really is I/O on disk)
 			inMemoryResults++;
 			
+			/*String valueAsString = (String) readValue;
+			if ( (valueAsString.compareTo(stringDateFrom) >= 0) && (valueAsString.compareTo(stringDateTo) <= 0) ) {
+				Log.info("readValue = " + readValue);
+				resultCount++;
+			}*/
+			
 			if (inMemoryResults > flushOnDiskOnceReachedThisFileNumber) {
 				flushOnDisk();
 				if (forceGarbageCollectorAtEachFlush) System.gc();
@@ -250,6 +260,7 @@ public class IndexTreeDic extends Index {
 		//benchTime.printms();
 		
 		fileAsStream.close();
+		Log.info("resultCount = " + resultCount);
 		
 		flushOnDisk();
 	}
@@ -294,7 +305,7 @@ public class IndexTreeDic extends Index {
 		NavigableMap<Object, IntegerArrayList> subTree = associatedBinIndexes.subMap(minValueExact, isInclusive, maxValueExact, isInclusive);
 		Collection<IntegerArrayList> collectionValues = subTree.values();
 		return collectionValues;
-
+		
 	}
 	
 	int debugNumberOfExactArrayListValuesWrittenOnDisk = 0;
