@@ -14,12 +14,15 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Utils {
-
-	public static DateFormat staticDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+	
+	protected final static String dateFormatString = "yyyy-MM-dd HH:mm:ss";
+	// bien mettre MM pour "month" et HH pour le format 24H et non 12H. (cause des bugs lors du parsing sinon !!)
+	
+	public static DateFormat staticDateFormat = new SimpleDateFormat(dateFormatString);
 	
 	// Opérations sur les dates
 	// Instance thread-safe de DateFormat
-	public DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+	public DateFormat dateFormat = new SimpleDateFormat(dateFormatString);
 	
 	// Les fonctions static utilisant ne instance donnée (DateFormat) ne sont pas thread-safe.
 	// Cette fonction NE DOIT PAS être static

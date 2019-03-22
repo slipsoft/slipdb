@@ -58,6 +58,10 @@ public class Column {
 		return dataType.getSize();
 	}
 	
+	public int getDataSize() {
+		return dataType.getSize();
+	}
+	
 	public Object writeToBuffer(String input, ByteBuffer outputBuffer) {
 		return this.getDataType().writeToBuffer(input, outputBuffer);
 	}

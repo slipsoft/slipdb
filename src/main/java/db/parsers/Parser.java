@@ -11,8 +11,11 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 import com.dant.utils.Log;
+import com.dant.utils.MemUsage;
 import com.dant.utils.Timer;
 
+import db.data.DataType;
+import db.data.StringType;
 import db.structure.Column;
 import db.structure.Table;
 
@@ -48,9 +51,14 @@ public abstract class Parser {
 		) {
 			String entryString;
 			Timer timeTookTimer = new Timer("Temps écoulé");
+			
 			while ((entryString = processReader(bRead)) != null && totalEntryCount != limit) {
+				
+				// entryString : "entrée", ligne lue (d'un fichier CSV par exemple pour CSVParser)
+				
 				if (showInfoEveryParsedLines != -1 && localReadEntryNb % showInfoEveryParsedLines == 0) {
 					Log.info("Parser : nombre de résultats (local) parsés = " + localReadEntryNb + "   temps écoulé = " + timeTookTimer.pretty());
+					MemUsage.printMemUsage();
 				}
 				
 				try {
@@ -74,6 +82,8 @@ public abstract class Parser {
 		}
 	}
 	
+	
+	
 	protected final void writeEntry(String entryString, OutputStream output) throws IncorrectEntryException, IOException {
 		String[] valuesArray = processEntry(entryString);
 
@@ -88,8 +98,20 @@ public abstract class Parser {
 		// for each column, parse and write data into entryBuffer
 			for (int i = 0; i < schema.getColumns().size(); i++) {
 				Column currentColumn = schema.getColumns().get(i);
+				
+				/*
+				DataType columnDataType = currentColumn.getDataType();
+				
+				if (columnDataType.getClass() == StringType.class) {
+					
+					//Log.error("currentValue = " + currentValue);
+				}
+				currentColumn.getDataSize();
+				*/
+				
 				// Converts the string value into an array of bytes representing the same data
 				Object currentValue = currentColumn.writeToBuffer(valuesArray[i], entryBuffer);
+				
 				currentColumn.evaluateMinMax(currentValue);
 				entry[i] = currentValue;
 			}

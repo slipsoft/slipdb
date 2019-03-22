@@ -43,8 +43,9 @@ public class IndexTreeTest {
 		ArrayList<Column> columns = new ArrayList<Column>();
 		try {
 			columns.add(new Column("VendorID", new ByteType()));
-			columns.add(new Column("tpep_pickup_datetime", new DateType())); //new StringType(19)));//
-			columns.add(new Column("tpep_dropoff_datetime", new DateType()));
+			// -> On a bien les mêmes résultats en castant la date et en la traîtant comme une string
+			columns.add(new Column("tpep_pickup_datetime", new StringType(19)));//new DateType())); //
+			columns.add(new Column("tpep_dropoff_datetime", new DateType()));//new StringType(19))); // 
 			columns.add(new Column("passenger_count", new ByteType()));
 			columns.add(new Column("trip_distance", new FloatType()));
 			columns.add(new Column("pickup_longitude", new DoubleType()));
@@ -67,22 +68,26 @@ public class IndexTreeTest {
 		table = new Table("test", columns);
 		parser = new CsvParser(table);
 		
-		//FileInputStream is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); // "../SMALL_1_000_000_yellow_tripdata_2015-04.csv"
-		
-		//FileInputStream is = new FileInputStream("../SMALL_1_000_000_yellow_tripdata_2015-04.csv"); // testdata
-		
 		Timer parseTimer = new Timer("Temps pris par le parsing");
 		FileInputStream is;
 		boolean isTheFirstParsing = true;
 		
 		// Fichiers identiques, donc 2 fois plus de résultats !
 		
-		is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
-		//is = new FileInputStream("../SMALL_1_000_000_yellow_tripdata_2015-04.csv");
+		//is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
+		is = new FileInputStream("../SMALL_100_000_yellow_tripdata_2015-04.csv");
 		parser.parse(is, !isTheFirstParsing); isTheFirstParsing = false;
 		is.close();
 		
+		
+		
+		/*is = new FileInputStream("../SMALL_100_000_yellow_tripdata_2015-04.csv");
+		parser.parse(is, !isTheFirstParsing); isTheFirstParsing = false;
+		is.close();*/
+		
+		
 		// -> Go faire le parsing multi-thread maintenant !!
+		// Nécessaire d'avoir plusieurs fichiers, à voir plus tard.
 		
 		/*
 		is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
@@ -186,8 +191,8 @@ public class IndexTreeTest {
 		Object searchToValue = new Float(14.748621);*/
 
 		
-		Object searchFromValue = intDateFrom;//stringDateFrom;//
-		Object searchToValue = intDateTo;//stringDateTo;//
+		Object searchFromValue = stringDateFrom;//intDateFrom;//
+		Object searchToValue = stringDateTo;//intDateTo;//
 		
 		
 		// à faire : supprimer la recherche en mémoire, il n'y a plus rien en mémoire.

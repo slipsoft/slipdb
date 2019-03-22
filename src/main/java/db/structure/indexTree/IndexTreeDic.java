@@ -526,7 +526,8 @@ public class IndexTreeDic extends Index {
 				if (intervalStartIndex < 0)
 						return localResultAsFalse;
 				
-				//int checkEntryBinPos = ((int)routingTableBinIndex + 4) + intervalStartIndex * diskEntrySize;
+				int checkEntryBinPos = ((int)routingTableBinIndex + 4) + intervalStartIndex * diskEntrySize;
+				randFile.seek(checkEntryBinPos);
 				Object checkValue = readObjectValueFromDisk(randFile, storedValuesClassType);
 				int checkFirstValueIsHigher = firstValueIsHigherThatSecondValue(searchValue, checkValue);
 				if (checkFirstValueIsHigher != 1) {
@@ -1010,6 +1011,8 @@ public class IndexTreeDic extends Index {
 		return listOfMatchingArraysOfBinIndexes;
 	}
 	
+	
+	//public static boolean debugWriteOnce = true;
 	/**
 	 * 
 	 * @param originalAssociatedValue
@@ -1018,6 +1021,9 @@ public class IndexTreeDic extends Index {
 	 */
 	protected void writeObjectValueOnDisk(Object originalAssociatedValue, DataOutput writeInDataOutput) throws IOException  {
 		
+		//if (originalAssociatedValue.getClass() != String.class)
+		// ancien débug	Log.info("originalAssociatedValue.getClass() != String.class - originalAssociatedValue = " + originalAssociatedValue);
+		
 		if (originalAssociatedValue.getClass() == Float.class)    { writeInDataOutput.writeFloat(((Float) originalAssociatedValue).floatValue());    return; }
 		if (originalAssociatedValue.getClass() == Double.class)   { writeInDataOutput.writeDouble(((Double) originalAssociatedValue).doubleValue()); return; }
 		if (originalAssociatedValue.getClass() == Byte.class)     { writeInDataOutput.writeByte(((Byte) originalAssociatedValue).byteValue());       return; }
@@ -1025,9 +1031,13 @@ public class IndexTreeDic extends Index {
 		if (originalAssociatedValue.getClass() == Long.class)     { writeInDataOutput.writeFloat(((Long) originalAssociatedValue).longValue());      return; }
 		if (originalAssociatedValue.getClass() == String.class)   {
 			byte[] stringAsByteAray = ((String)originalAssociatedValue).getBytes();
-			writeInDataOutput.writeShort(stringAsByteAray.length); // taille du string, sur 2 octets
+			//if (stringAsByteAray.length != 19) Log.error("stringAsByteAray.length != 19 ->  "+ stringAsByteAray.length);
+			//writeInDataOutput.writeInt(19);//stringAsByteAray.length); // taille du string, sur 2 octets
 			writeInDataOutput.write(stringAsByteAray); // string en tant qu'array
-			//Log.info("stringAsByteAray.length = " + stringAsByteAray.length + " originalAssociatedValue = " + originalAssociatedValue);
+			/* débug if (debugWriteOnce) {
+				Log.info("stringAsByteAray.length = " + stringAsByteAray.length + " originalAssociatedValue = " + originalAssociatedValue);
+				debugWriteOnce = false;
+			}*/
 			return;
 		}
 	}
@@ -1061,6 +1071,8 @@ public class IndexTreeDic extends Index {
 	 * @param dataInput   randAccessFile ou dataClassType
 	 * @param dataClassType   
 	 *  
+	 *  DataInput
+	 *  
 	 *  readFromDataStream
 	 *  @return
 	 * @throws IOException 
@@ -1074,12 +1086,17 @@ public class IndexTreeDic extends Index {
 		if (dataClassType == Integer.class)  { return new Integer(dataInput.readInt()); }
 		if (dataClassType == Long.class)     { return new Long(dataInput.readLong()); }
 		if (dataClassType == String.class)   {
-			short stringAsByteArrayLength = dataInput.readShort(); // 2 octets
+			//dataInput.skipBytes(1);
+			int stringAsByteArrayLength = storedValueDataByteSize;//19;//dataInput.readInt(); // 2 octets
 			byte[] stringAsByteAray = new byte[stringAsByteArrayLength];
 			//int stringAsByteArrayCheckLength = 
 			dataInput.readFully(stringAsByteAray, 0, stringAsByteAray.length);
+			String resultString = new String(stringAsByteAray);
+			
+			// débug Log.error("stringAsByteAray.length = " + stringAsByteAray.length + " resultString = " + resultString);
+			
 			//if (stringAsByteArrayLength != stringAsByteArrayCheckLength) throw new IOException("readObjectValueFromDisk : stringAsByteArrayLength("+stringAsByteArrayLength+") != stringAsByteArrayCheckLength("+stringAsByteArrayCheckLength+")");
-			return new String(stringAsByteAray);
+			return resultString;
 		}
 		
 		return null;
