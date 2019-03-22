@@ -56,12 +56,12 @@ public class StringType extends DataType {
 	
 	@Override
 	public String readTrueValue(byte[] bytes) {
-		return new String(bytes).replaceAll("\0", "");
+		return new String(bytes).replaceAll(stringPaddingChar, ""); // "\0" -> stringPaddingChar
 	}
 	
 	@Override
 	public String readIndexValue(byte[] bytes) {
-		return new String(bytes).replaceAll("\0", "");
+		return new String(bytes).replaceAll(stringPaddingChar, ""); // "\0" -> stringPaddingChar
 	}
 
 	@Override
