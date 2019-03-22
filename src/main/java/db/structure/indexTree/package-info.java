@@ -18,6 +18,27 @@
 
 
 /**
+	2019 - 03 - 22
+	
+	L'IndexTreeDic est fonctionnel, et il est possible de charger autant de donnée qu'on veut.
+	-> Parser et indexer se fait en mono-thread
+		-> Pour prendre en charge me multi-thread, parser plusieurs fichiers à la fois, et écrire dans plusieurs fichiers, idem pour l'indexing (pas prioritaire)
+	-> Rechercher des valeurs se fait en multi-thread (stable et fiable)
+		-> Recherche sur chaque fichier d'index flush sur le disque simultanément
+	
+	Je pense que parser et charger l'ensemble des CSV des taxis de NY ne devrait pas prendre plus de 2h, sur une seule machine (en mono-thread)
+	La recherche sur disque sera sans doute assez rapide, également (même sur 200Go+), probablement pas plus de 10 secondes pour de la donnée fine
+	
+	- Au-delà du multi-thread (perf x4 si 4 coeurs), l faut que le multi-noeud soit fonctionnel.
+	- Il faut également prendre totalement en charge les fonctions SELECT … WHERE … GROUP BY  (FROM la table principale)
+	-> J'implémente ça, maintenant (2019-03-22, 21h)
+	
+	SELECT : sélectionner une colonne
+*/
+
+
+
+/**
 	-------- Recherches pour la V4 de TreeIndex --------
 */
 

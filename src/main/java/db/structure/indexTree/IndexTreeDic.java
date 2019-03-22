@@ -180,8 +180,8 @@ public class IndexTreeDic extends Index {
 		
 		int inMemoryResults = 0;
 
-		String stringDateFrom = "2015-04-04 00:01:00";
-		String stringDateTo = "2015-04-04 00:18:57";
+		// ancien débug 12h-24H à garder au cas où re-bug  String stringDateFrom = "2015-04-04 00:01:00";
+		//String stringDateTo = "2015-04-04 00:18:57";
 		int resultCount = 0;
 		
 		//Timer benchTime = new Timer("Temps pris par l'indexation");
@@ -229,7 +229,7 @@ public class IndexTreeDic extends Index {
 			this.addValue(readValue, lineIndex); // new Integer() creating a new Integer is quite slow ><" (but the bottle neck really is I/O on disk)
 			inMemoryResults++;
 			
-			/*String valueAsString = (String) readValue;
+			/*ancien débug 12h-24H à garder au cas où re-bug String valueAsString = (String) readValue;
 			if ( (valueAsString.compareTo(stringDateFrom) >= 0) && (valueAsString.compareTo(stringDateTo) <= 0) ) {
 				Log.info("readValue = " + readValue);
 				resultCount++;
