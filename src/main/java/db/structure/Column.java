@@ -6,16 +6,16 @@ import java.util.List;
 import java.util.Map;
 
 import com.dant.entity.ColumnEntity;
-import com.dant.utils.Log;
 import db.data.DataType;
 
 public class Column {
 
 	protected String name = "Nom inconnu";
 	protected DataType storedDataType;
+	protected int number;
 	
-	public Object minValue = null;
-	public Object maxValue = null;
+	protected Object minValue = null;
+	protected Object maxValue = null;
 
 	protected DataType dataType;
 	protected List<Index> relatedIndicesList = new ArrayList<>();
@@ -35,30 +35,43 @@ public class Column {
 		return name;
 	}
 
-	public void setName(String name) {
+	public Column setName(String name) {
 		this.name = name;
+		return this;
+	}
+
+	public Column setNumber(int number) {
+		this.number = number;
+		return this;
 	}
 
 	public DataType getDataType() {
 		return dataType;
 	}
 
-	public void setDataType(DataType dataType) {
+	public Column setDataType(DataType dataType) {
 		this.dataType = dataType;
+		return this;
 	}
 
 	public int getSize() {
 		return dataType.getSize();
 	}
-
-	public void parse(String input, ByteBuffer outputBuffer) {
-		this.getDataType()/*storedDataType*/.writeToBuffer(input, outputBuffer);
+	
+	public Object writeToBuffer(String input, ByteBuffer outputBuffer) {
+		return this.getDataType().writeToBuffer(input, outputBuffer);
 	}
 	
-	public Object parseAndReturnValue(String input, ByteBuffer outputBuffer) {
-		return this.getDataType().writeToBufferAndReturnValue(input, outputBuffer);
+	public void evaluateMinMax(Object value) {
+		if (minValue == null) minValue = value;
+		if (maxValue == null) maxValue = value;
+		if (compareValues(value, maxValue) == 1) {
+			maxValue = value;
+		}
+		if (compareValues(value, minValue) == -1) {
+			minValue = value;
+		}
 	}
-	
 	
 	public int compareValues(Object value1, Object value2) {
 		if (value1 == null || value2 == null) return 0;

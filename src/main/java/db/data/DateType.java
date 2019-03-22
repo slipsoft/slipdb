@@ -28,15 +28,9 @@ public class DateType extends DataType {
 	public Class getAssociatedClassType() {
 		return Integer.class;
 	}
-
-	@Override
-	public void writeToBuffer(String input, ByteBuffer outputBuffer) {
-		int dateAsInt = Utils.dateToSecInt(utilsInstance.dateFromString(input));
-		outputBuffer.putInt(dateAsInt);
-	}
 	
 	@Override
-	public Integer writeToBufferAndReturnValue(String input, ByteBuffer outputBuffer) {
+	public Integer writeToBuffer(String input, ByteBuffer outputBuffer) {
 		Integer dateAsInt = Utils.dateToSecInt(utilsInstance.dateFromString(input));
 		outputBuffer.putInt(dateAsInt);
 		return dateAsInt;

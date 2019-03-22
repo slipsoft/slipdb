@@ -15,13 +15,7 @@ public class StringType extends DataType {
 	}
 	
 	@Override
-	public void writeToBuffer(String input, ByteBuffer outputBuffer) {
-		byte[] bytes = Arrays.copyOf(input.getBytes(), this.sizeInBytes);
-		outputBuffer.put(bytes);
-	}
-	
-	@Override
-	public Object writeToBufferAndReturnValue(String input, ByteBuffer outputBuffer) {
+	public Object writeToBuffer(String input, ByteBuffer outputBuffer) {
 		byte[] bytes = Arrays.copyOf(input.getBytes(), this.sizeInBytes);
 		outputBuffer.put(bytes);
 		return input;
