@@ -5,5 +5,7 @@ public enum Operator {
 	greater,
 	less,
 	greaterOrEquals,
-	lessOrEquals
+	lessOrEquals,
+	in,
+	between
 }

@@ -4,22 +4,13 @@ import java.nio.ByteBuffer;
 //import java.util.Date;
 import java.util.Date;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import com.dant.utils.Utils;
 
 public class DateType extends DataType {
 
 	public static boolean sizeIsRequired = false;
-	
-	protected final static Operator[] compatibleOperatorsList = {
-		Operator.equals,
-		Operator.greater,
-		Operator.less,
-		Operator.greaterOrEquals,
-		Operator.lessOrEquals,
-	};
-	
-	
-	//public static int dateFastFalse = Utils.dateToSecInt(Utils.dateFromStringNoThreadSafe("2015-04-13 21:18:50"));
 	
 	// Nécessaire pour rendre les opérations trhead-safe, il ne peut pas y avoir de Utils ayant des méthodes statiques utilisant les mêmes objets instanciés.
 	// (sous peine d'exceptions dus à des problèmes de concurrence)
@@ -63,5 +54,16 @@ public class DateType extends DataType {
 	public Integer readIndexValue(byte[] bytes) {
 		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
 		return wrapped.getInt();
+	}
+
+	@Override
+	public boolean isOperatorCompatible(Operator op) {
+		return ArrayUtils.contains(new Operator[] {
+			Operator.equals,
+			Operator.greater,
+			Operator.less,
+			Operator.greaterOrEquals,
+			Operator.lessOrEquals,
+		}, op);
 	}
 }

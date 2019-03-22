@@ -2,17 +2,11 @@ package db.data;
 
 import java.nio.ByteBuffer;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 public class IntegerType extends DataType {
 
 	public static boolean sizeIsRequired = false;
-	
-	protected final static Operator[] compatibleOperatorsList = {
-		Operator.equals,
-		Operator.greater,
-		Operator.less,
-		Operator.greaterOrEquals,
-		Operator.lessOrEquals,
-	};
 	
 	public IntegerType() {
 		super();
@@ -48,6 +42,17 @@ public class IntegerType extends DataType {
 	public Integer readIndexValue(byte[] bytes) {
 		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
 		return wrapped.getInt();
+	}
+
+	@Override
+	public boolean isOperatorCompatible(Operator op) {
+		return ArrayUtils.contains(new Operator[] {
+			Operator.equals,
+			Operator.greater,
+			Operator.less,
+			Operator.greaterOrEquals,
+			Operator.lessOrEquals,
+		}, op);
 	}
 
 }
