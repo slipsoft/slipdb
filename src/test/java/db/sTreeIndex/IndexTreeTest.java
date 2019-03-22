@@ -38,7 +38,7 @@ public class IndexTreeTest {
 	@BeforeAll
 	static void setUpBeforeAll() throws Exception {
 		Log.info("setUpBeforeAll");
-		Log.start("indexingTreeTest", 3);
+		Log.start("indexingTreeTest", 2);
 		//if (true) return;
 		ArrayList<Column> columns = new ArrayList<Column>();
 		try {
@@ -78,7 +78,7 @@ public class IndexTreeTest {
 		// Fichiers identiques, donc 2 fois plus de résultats !
 		
 		//is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
-		is = new FileInputStream("../SMALL_10_000_yellow_tripdata_2015-04.csv");
+		is = new FileInputStream("../SMALL_1_000_000_yellow_tripdata_2015-04.csv");
 		parser.parse(is, !isTheFirstParsing); isTheFirstParsing = false;
 		is.close();
 		
@@ -215,6 +215,7 @@ public class IndexTreeTest {
 			//Log.info("list size = " + list.size());
 			numberOfResults += list.size();
 			numberOfLines++;
+			if (false)
 			for (Integer index : list) {
 				// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
 				//Log.info("  index = " + index);
@@ -285,7 +286,7 @@ public class IndexTreeTest {
 		
 		//System.out.println("OUOUOUOU " + indexThisColumn.minValue + "  " +  indexThisColumn.maxValue);
 		
-		IndexTreeCeption indexingObject = new IndexTreeCeption(0, null, indexThisColumn.minValue, indexThisColumn.maxValue);
+		IndexTreeCeption indexingObject = new IndexTreeCeption(0, null, indexThisColumn.getMinValue(), indexThisColumn.getMaxValue());
 		//IndexTreeDic indexingObject = new IndexTreeDic();//Integer.class);
 		
 		

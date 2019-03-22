@@ -3,14 +3,11 @@ package db.data;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-public class StringType extends DataType {
+import org.apache.commons.lang3.ArrayUtils;
 
+public class StringType extends DataType {
 	public static boolean sizeIsRequired = true;
 	public static int maxSizeInBytes = 65535; //obligatoire si sizeIsRequired => true:
-
-	protected final static Operator[] compatibleOperatorsList = {
-		Operator.equals
-	};
 	
 	public StringType(int size) {
 		super();
@@ -18,13 +15,7 @@ public class StringType extends DataType {
 	}
 	
 	@Override
-	public void writeToBuffer(String input, ByteBuffer outputBuffer) {
-		byte[] bytes = Arrays.copyOf(input.getBytes(), this.sizeInBytes);
-		outputBuffer.put(bytes);
-	}
-	
-	@Override
-	public Object writeToBufferAndReturnValue(String input, ByteBuffer outputBuffer) {
+	public Object writeToBuffer(String input, ByteBuffer outputBuffer) {
 		byte[] bytes = Arrays.copyOf(input.getBytes(), this.sizeInBytes);
 		outputBuffer.put(bytes);
 		return input;
@@ -44,6 +35,13 @@ public class StringType extends DataType {
 	@Override
 	public String readIndexValue(byte[] bytes) {
 		return new String(bytes).replaceAll("\0", "");
+	}
+
+	@Override
+	public boolean isOperatorCompatible(Operator op) {
+		return ArrayUtils.contains(new Operator[] {
+			Operator.equals
+		}, op);
 	}
 
 }

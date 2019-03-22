@@ -2,17 +2,11 @@ package db.data;
 
 import java.nio.ByteBuffer;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 public class LongType extends DataType {
 
 	public static boolean sizeIsRequired = false;
-	
-	protected final static Operator[] compatibleOperatorsList = {
-		Operator.equals,
-		Operator.greater,
-		Operator.less,
-		Operator.greaterOrEquals,
-		Operator.lessOrEquals,
-	};
 	
 	public LongType() {
 		super();
@@ -27,12 +21,7 @@ public class LongType extends DataType {
 	}
 	
 	@Override
-	public void writeToBuffer(String input, ByteBuffer outputBuffer) {
-		outputBuffer.putLong(Long.parseLong(input));
-	}
-	
-	@Override
-	public Long writeToBufferAndReturnValue(String input, ByteBuffer outputBuffer) {
+	public Long writeToBuffer(String input, ByteBuffer outputBuffer) {
 		Long asLong = Long.parseLong(input);
 		outputBuffer.putLong(asLong);
 		return asLong;
@@ -48,6 +37,17 @@ public class LongType extends DataType {
 	public Long readIndexValue(byte[] bytes) {
 		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
 		return wrapped.getLong();
+	}
+
+	@Override
+	public boolean isOperatorCompatible(Operator op) {
+		return ArrayUtils.contains(new Operator[] {
+			Operator.equals,
+			Operator.greater,
+			Operator.less,
+			Operator.greaterOrEquals,
+			Operator.lessOrEquals,
+		}, op);
 	}
 
 }

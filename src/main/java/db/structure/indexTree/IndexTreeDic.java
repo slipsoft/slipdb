@@ -26,6 +26,7 @@ import com.dant.utils.Utils;
 
 import db.data.DataType;
 import db.data.IntegerArrayList;
+import db.data.Operator;
 import db.structure.Column;
 import db.structure.Index;
 import db.structure.Table;
@@ -1113,6 +1114,14 @@ public class IndexTreeDic extends Index {
 		}
 		
 		return 0;
+	}
+
+
+
+	@Override
+	public boolean isOperatorCompatible(Operator op) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 	
 	// compareValues : nom pas clair !
