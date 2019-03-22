@@ -75,7 +75,7 @@ public class IndexTreeTest {
 		// Fichiers identiques, donc 2 fois plus de résultats !
 		
 		//is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
-		is = new FileInputStream("../SMALL_100_000_yellow_tripdata_2015-04.csv");
+		is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
 		parser.parse(is, !isTheFirstParsing); isTheFirstParsing = false;
 		is.close();
 		
