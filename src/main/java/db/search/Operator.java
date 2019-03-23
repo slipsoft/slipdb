@@ -1,4 +1,4 @@
-package db.data;
+package db.search;
 
 public enum Operator {
 	equals,

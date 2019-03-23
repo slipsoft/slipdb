@@ -1,4 +1,4 @@
-package db.data;
+package db.search;
 
 import db.structure.Column;
 import db.structure.Index;

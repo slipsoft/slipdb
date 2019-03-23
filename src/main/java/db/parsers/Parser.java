@@ -14,8 +14,6 @@ import com.dant.utils.Log;
 import com.dant.utils.MemUsage;
 import com.dant.utils.Timer;
 
-import db.data.DataType;
-import db.data.StringType;
 import db.structure.Column;
 import db.structure.Table;
 

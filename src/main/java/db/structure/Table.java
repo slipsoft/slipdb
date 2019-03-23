@@ -14,7 +14,7 @@ import com.dant.entity.TableEntity;
 import com.dant.utils.EasyFile;
 
 import db.data.DataType;
-import db.data.Filter;
+import db.search.Filter;
 
 /**
  * A simple SQL-like table, consisting of 

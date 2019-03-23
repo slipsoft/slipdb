@@ -5,8 +5,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import db.data.Filter;
-import db.data.Operable;
+import db.search.Filter;
+import db.search.Operable;
 
 /**
  * Classe Index, permettant d'indexer une ou plusieurs colonnes Exemple :

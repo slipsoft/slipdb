@@ -19,7 +19,7 @@ import com.dant.utils.EasyFile;
 
 import db.data.DataType;
 import db.data.IntegerArrayList;
-import db.data.Operator;
+import db.search.Operator;
 import db.structure.Column;
 import db.structure.Table;
 import sj.simpleDB.treeIndexing.SIndexingTreeType;

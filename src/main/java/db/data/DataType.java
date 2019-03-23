@@ -2,6 +2,8 @@ package db.data;
 
 import java.nio.ByteBuffer;
 
+import db.search.Operable;
+
 
 public abstract class DataType implements Operable {
 
