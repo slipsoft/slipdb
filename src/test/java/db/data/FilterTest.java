@@ -10,6 +10,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
+import db.search.Filter;
+import db.search.Operator;
 import db.structure.Column;
 import db.structure.Index;
 import db.structure.IndexHash;

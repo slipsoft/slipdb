@@ -1,4 +1,4 @@
-package db.data;
+package db.search;
 
 import java.util.ArrayList;
 import java.util.List;

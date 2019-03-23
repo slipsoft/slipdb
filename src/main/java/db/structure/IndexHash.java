@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import db.data.Operator;
+import db.search.Operator;
 
 public class IndexHash extends Index {
 

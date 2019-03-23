@@ -4,6 +4,8 @@ import java.nio.ByteBuffer;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import db.search.Operator;
+
 
 public class ByteType extends DataType {
 	public static boolean sizeIsRequired = false;
