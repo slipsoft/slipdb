@@ -51,7 +51,7 @@ public class Table {
 	public List<Column> getColumns() {
 		return columnsList;
 	}
-
+	
 	public List<Index> getIndices() {
 		return indicesList;
 	}

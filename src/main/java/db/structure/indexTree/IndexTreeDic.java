@@ -79,8 +79,8 @@ public class IndexTreeDic extends Index {
 	// Contient tous les index des données indexées
 	protected TreeMap<Object/*clef, valeur indexée*/, IntegerArrayList/*valeur*/> associatedBinIndexes = new TreeMap<Object, IntegerArrayList>();
 	//protected EasyFile fileStoringDataBlocks; // link between the disk and onDiskDataBlocks
-	protected EasyFile fileSaveOnDisk = null;
-	protected String currentSaveFilePath = null;
+	//protected EasyFile fileSaveOnDisk = null;
+	//protected String currentSaveFilePath = null;
 	protected static String basePath = "target/IndexTreeDic_DiskMemory/";
 	protected static int rootIndexTreeCount = 0;
 	
@@ -103,14 +103,14 @@ public class IndexTreeDic extends Index {
 		baseSaveFilePath = basePath + "IndexTreeDic_" + indexTreeDicUniqueId + "_"; // id arbre _ id(nombre) fichier
 		suffixSaveFilePath = ".idc_bin";
 		
-		currentSaveFilePath = basePath + "IndexTreeDic_indexSave_" + indexTreeDicUniqueId + ".bin_tree";
+		/*currentSaveFilePath = basePath + "IndexTreeDic_indexSave_" + indexTreeDicUniqueId + ".bin_tree";
 		fileSaveOnDisk = new EasyFile(currentSaveFilePath);
 		try {
 			fileSaveOnDisk.createFileIfNotExist();
 		} catch (IOException e) {
 			fileSaveOnDisk = null;
 			e.printStackTrace();
-		}
+		}*/
 		//storedValuesClassType = argStoredValuesClassType;
 		rootIndexTreeCount++;
 	}
@@ -322,7 +322,7 @@ public class IndexTreeDic extends Index {
 		fileInstance.createFileIfNotExist();
 		saveOnDisk(fileInstance, false);
 		indexWrittenOnDiskFilePathsArray.add(saveFileName);
-		//associatedBinIndexes = new TreeMap<Object, IntegerArrayList>(); // réinitialisation
+		associatedBinIndexes = new TreeMap<Object, IntegerArrayList>(); // réinitialisation
 		
 		if (showMemUsageAtEachFlush) MemUsage.printMemUsage();
 	}
@@ -842,8 +842,8 @@ public class IndexTreeDic extends Index {
 				
 				long routingTableBinIndex = randFile.readLong();
 				
-				randFile.seek(routingTableBinIndex);
-				int totalNumberOfDistinctValues = randFile.readInt();
+				//randFile.seek(routingTableBinIndex);
+				//int totalNumberOfDistinctValues = randFile.readInt();
 				
 				
 				// Lecture de la table de routage

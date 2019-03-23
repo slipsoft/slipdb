@@ -1,5 +1,7 @@
 package db.sTreeIndex;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,6 +30,8 @@ import db.structure.Column;
 import db.structure.Table;
 import db.structure.indexTree.IndexTreeCeption;
 import db.structure.indexTree.IndexTreeDic;
+import db.structure.indexTree.SGlobalHandler;
+import db.structure.indexTree.STableHandler;
 
 public class IndexTreeTest {
 
@@ -39,72 +43,40 @@ public class IndexTreeTest {
 	static void setUpBeforeAll() throws Exception {
 		Log.info("setUpBeforeAll");
 		Log.start("indexingTreeTest", 2);
-		//if (true) return;
-		ArrayList<Column> columns = new ArrayList<Column>();
-		try {
-			columns.add(new Column("VendorID", new ByteType()));
-			// -> On a bien les mêmes résultats en castant la date et en la traîtant comme une string
-			columns.add(new Column("tpep_pickup_datetime", new DateType())); //new StringType(19)));//
-			columns.add(new Column("tpep_dropoff_datetime", new DateType()));//new StringType(19))); // 
-			columns.add(new Column("passenger_count", new ByteType()));
-			columns.add(new Column("trip_distance", new FloatType()));
-			columns.add(new Column("pickup_longitude", new DoubleType()));
-			columns.add(new Column("pickup_latitude", new DoubleType()));
-			columns.add(new Column("RateCodeID", new ByteType()));
-			columns.add(new Column("store_and_fwd_flag", new StringType(1)));
-			columns.add(new Column("dropoff_longitude", new DoubleType()));
-			columns.add(new Column("dropoff_latitude", new DoubleType()));
-			columns.add(new Column("payment_type",  new ByteType()));
-			columns.add(new Column("fare_amount", new FloatType()));
-			columns.add(new Column("extra", new FloatType()));
-			columns.add(new Column("mta_tax", new FloatType()));
-			columns.add(new Column("tip_amount", new FloatType()));
-			columns.add(new Column("tolls_amount", new FloatType()));
-			columns.add(new Column("improvement_surcharge", new FloatType()));
-			columns.add(new Column("total_amount", new FloatType()));
-		} catch (Exception e) {
-			Log.error(e);
-		}
-		table = new Table("test", columns);
-		parser = new CsvParser(table);
+		
+		STableHandler tableHandler = SGlobalHandler.initializeTable("NYtest");
+		assertEquals(true, tableHandler != null);
+		
+		tableHandler.addColumn("VendorID", new ByteType());
+		// -> On a bien les mêmes résultats en castant la date et en la traîtant comme une string
+		tableHandler.addColumn("tpep_pickup_datetime", new DateType()); //new StringType(19));//
+		tableHandler.addColumn("tpep_dropoff_datetime", new DateType());//new StringType(19)); // 
+		tableHandler.addColumn("passenger_count", new ByteType());
+		tableHandler.addColumn("trip_distance", new FloatType());
+		tableHandler.addColumn("pickup_longitude", new DoubleType());
+		tableHandler.addColumn("pickup_latitude", new DoubleType());
+		tableHandler.addColumn("RateCodeID", new ByteType());
+		tableHandler.addColumn("store_and_fwd_flag", new StringType(1));
+		tableHandler.addColumn("dropoff_longitude", new DoubleType());
+		tableHandler.addColumn("dropoff_latitude", new DoubleType());
+		tableHandler.addColumn("payment_type",  new ByteType());
+		tableHandler.addColumn("fare_amount", new FloatType());
+		tableHandler.addColumn("extra", new FloatType());
+		tableHandler.addColumn("mta_tax", new FloatType());
+		tableHandler.addColumn("tip_amount", new FloatType());
+		tableHandler.addColumn("tolls_amount", new FloatType());
+		tableHandler.addColumn("improvement_surcharge", new FloatType());
+		tableHandler.addColumn("total_amount", new FloatType());
+		
+		table = tableHandler.createTable();
 		
 		Timer parseTimer = new Timer("Temps pris par le parsing");
-		FileInputStream is;
-		boolean isTheFirstParsing = true;
-		
-		// Fichiers identiques, donc 2 fois plus de résultats !
-		
-		//is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
-		is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
-		parser.parse(is, !isTheFirstParsing); isTheFirstParsing = false;
-		is.close();
-		
-		
-		
-		/*is = new FileInputStream("../SMALL_100_000_yellow_tripdata_2015-04.csv");
-		parser.parse(is, !isTheFirstParsing); isTheFirstParsing = false;
-		is.close();*/
-		
+		tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv");
+		// tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); Fichiers identiques, donc 2 fois plus de résultats !
+		parseTimer.log();
 		
 		// -> Go faire le parsing multi-thread maintenant !!
 		// Nécessaire d'avoir plusieurs fichiers, à voir plus tard.
-		
-		/*
-		is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
-		parser.parse(is, !isTheFirstParsing); isTheFirstParsing = false;
-		is.close();*/
-		
-		
-		/*is = new FileInputStream("D:/L3 DANT disque D/yellow_tripdata_2015-04.csv");
-		parser.parse(is, !isTheFirstParsing); isTheFirstParsing = false;
-		is.close();*/
-		
-		
-		/*is = new FileInputStream("../SMALL_100_000_yellow_tripdata_2015-04.csv");
-		parser.parse(is, !isTheFirstParsing); isTheFirstParsing = false;
-		is.close();*/
-		
-		parseTimer.log();
 		
 		Log.info("setUpBeforeAll OK");
 	}
@@ -272,7 +244,7 @@ public class IndexTreeTest {
 		
 	}
 	
-	@Test
+	//@Test
 	void testIndexTreeCeption() throws IOException {
 		//if (true) return;
 		/**
