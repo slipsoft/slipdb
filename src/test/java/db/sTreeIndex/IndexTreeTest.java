@@ -2,9 +2,7 @@ package db.sTreeIndex;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -24,7 +22,6 @@ import db.data.DoubleType;
 import db.data.FloatType;
 import db.data.IntegerArrayList;
 import db.data.StringType;
-import db.parsers.CsvParser;
 import db.parsers.Parser;
 import db.structure.Column;
 import db.structure.Table;
@@ -35,16 +32,18 @@ import db.structure.indexTree.STableHandler;
 
 public class IndexTreeTest {
 
-	protected static Parser parser;
+	//protected static Parser parser;
 	protected static Table table;
 	protected static Utils currentlyUsedUils = new Utils(); // For thread-safety ! (but, here, it's static so thread unsafe... ^^')
-
+	protected static STableHandler tableHandler;
+	
+	
 	@BeforeAll
 	static void setUpBeforeAll() throws Exception {
 		Log.info("setUpBeforeAll");
 		Log.start("indexingTreeTest", 2);
 		
-		STableHandler tableHandler = SGlobalHandler.initializeTable("NYtest");
+		tableHandler = SGlobalHandler.initializeTable("NYtest");
 		assertEquals(true, tableHandler != null);
 		
 		tableHandler.addColumn("VendorID", new ByteType());
@@ -71,7 +70,7 @@ public class IndexTreeTest {
 		table = tableHandler.createTable();
 		
 		Timer parseTimer = new Timer("Temps pris par le parsing");
-		tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv");
+		tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
 		// tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); Fichiers identiques, donc 2 fois plus de résultats !
 		parseTimer.log();
 		
@@ -117,6 +116,8 @@ public class IndexTreeTest {
 		//int indexingColumnIndex = 4; // trip distance
 		//int indexingColumnIndex = 5; // latitude
 		int indexingColumnIndex = 1; // date pickup
+		
+		//tableHandler.indexColumnWithTree("");
 		
 		Column indexThisColumn = table.getColumns().get(indexingColumnIndex);
 		

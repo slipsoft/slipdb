@@ -17,7 +17,7 @@ public class StringType extends DataType {
 		this.sizeInBytes = size;
 	}
 
-	public final String stringPaddingChar = "_";
+	public final String stringPaddingChar = "\0";
 	
 	
 	
@@ -31,7 +31,6 @@ public class StringType extends DataType {
 		if (input.length() < sizeInBytes) {
 			input = StringUtils.rightPad(input, sizeInBytes, stringPaddingChar);
 			//Log.info("padding  str -> " + input);
-			
 		}
 		
 		byte[] bytes;

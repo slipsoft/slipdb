@@ -25,7 +25,7 @@ public class Table {
 	protected String name; // table name
 	protected EasyFile fileLinesOnDisk; // <- les fichiers de sauvegarde des colonnes sont désormais indépendants
 	protected List<Column> columnsList = new ArrayList<Column>(); // liste des colonnes de la table
-	protected List<Index> indicesList = new ArrayList<Index>();   // liste des index générés pour cette table
+	protected List<Index> indexesList = new ArrayList<Index>();   // liste des index générés pour cette table
 	
 	/**
 	 * Plus tard : Evolution, pour permettre le multi-thread, sauvegarder et indexer plus vite, avoir plusieurs fichiers par colonne, sauvegarde des données en entrée par colonne.
@@ -53,11 +53,11 @@ public class Table {
 	}
 	
 	public List<Index> getIndices() {
-		return indicesList;
+		return indexesList;
 	}
 	
 	public void addIndex(Index index) {
-		this.indicesList.add(index);
+		this.indexesList.add(index);
 		for (Column column : index.getColumnList()) {
 			column.addIndex(index);
 		}
@@ -99,7 +99,7 @@ public class Table {
 		columnsList.add(newColumn);
 		return true;
 	}
-
+	
 	/**
 	 * Trouver l'index d'une colonne à partir de son nom, dans la liste columns
 	 * @param colName  nom de la colonne à rechercher
@@ -167,7 +167,7 @@ public class Table {
 	 * @throws Exception 
 	 */
 	public Index findBestIndex(Filter filter) throws Exception {
-		for (Index index : indicesList) {
+		for (Index index : indexesList) {
 			if (index.canBeUsedWithFilter(filter)) {
 				return index;
 			}
