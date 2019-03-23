@@ -6,6 +6,7 @@ import java.util.Date;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import com.dant.utils.Log;
 import com.dant.utils.Utils;
 
 public class DateType extends DataType {
@@ -33,6 +34,13 @@ public class DateType extends DataType {
 	public Integer writeToBuffer(String input, ByteBuffer outputBuffer) {
 		Integer dateAsInt = Utils.dateToSecInt(utilsInstance.dateFromString(input));
 		outputBuffer.putInt(dateAsInt);
+		/*
+		Utilisé pour chercher un big (qui s'sst évéré être le passage du format 12H au format 24H
+		int debugSearchForDate = Utils.dateToSecInt(Utils.dateFromStringNoThreadSafe(("2015-04-04 00:18:57")));
+		if (debugSearchForDate == dateAsInt) {
+			Log.error("AHAH : debugSearchForDate == dateAsInt " +  dateAsInt + "   input = " +input);
+		}*/
+		
 		return dateAsInt;
 	}
 	

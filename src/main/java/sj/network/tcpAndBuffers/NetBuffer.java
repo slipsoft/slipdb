@@ -1,4 +1,4 @@
-package sj.network.buffers;
+package sj.network.tcpAndBuffers;
 
 //import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -108,6 +108,9 @@ public class NetBuffer { // fonctionnement synchrone, non thread-safe
 		if (data.longData == null) return 0; // ne devrait pas arriver si le message est lu dans le bon ordre
 		return data.longData;
 	}
+	public long readInt64() {
+		return readLong();
+	}
 	
 	public double readDouble() {
 		if (currentReadPos >= dataList.size()) return 0;
@@ -161,32 +164,19 @@ public class NetBuffer { // fonctionnement synchrone, non thread-safe
 	
 	// Vérification des types de données
 	public boolean currentData_isInteger() {
-		if (currentReadPos >= dataList.size()) return false;
+		//if (currentReadPos >= dataList.size()) return false;
 		NetBufferData data = dataList.get(currentReadPos);
         return data.dataType.equals(NetBufferDataType.INTEGER);
     }
-	public boolean currentData_isDouble()    { NetBufferData data = dataList.get(currentReadPos);
-        return data.dataType.equals(NetBufferDataType.DOUBLE);
-    }
-	public boolean currentData_isString()    { NetBufferData data = dataList.get(currentReadPos);
-        return data.dataType.equals(NetBufferDataType.STRING);
-    }
-	public boolean currentData_isByteArray() { NetBufferData data = dataList.get(currentReadPos);
-        return data.dataType.equals(NetBufferDataType.BYTE_ARRAY);
-    }
-	public boolean currentData_isBoolean()   { NetBufferData data = dataList.get(currentReadPos);
-        return data.dataType.equals(NetBufferDataType.BOOLEAN);
-    }
-	public boolean currentData_isByte()     { NetBufferData data = dataList.get(currentReadPos);
-        return data.dataType.equals(NetBufferDataType.BYTE);
-    }
-	public boolean currentData_isInt()       { return currentData_isInteger(); }
-	public boolean currentData_isStr()       { return currentData_isStr(); }
-	public boolean currentData_isBool()      { return currentData_isBool(); }
-	public boolean currentData_isLong() {
-		NetBufferData data = dataList.get(currentReadPos);
-        return data.dataType.equals(NetBufferDataType.LONG);
-    }
+	public boolean currentData_isDouble()    { NetBufferData data = dataList.get(currentReadPos); return data.dataType.equals(NetBufferDataType.DOUBLE); }
+	public boolean currentData_isString()    { NetBufferData data = dataList.get(currentReadPos); return data.dataType.equals(NetBufferDataType.STRING); }
+	public boolean currentData_isByteArray() { NetBufferData data = dataList.get(currentReadPos); return data.dataType.equals(NetBufferDataType.BYTE_ARRAY); }
+	public boolean currentData_isBoolean()   { NetBufferData data = dataList.get(currentReadPos); return data.dataType.equals(NetBufferDataType.BOOLEAN); }
+	public boolean currentData_isByte()      { NetBufferData data = dataList.get(currentReadPos); return data.dataType.equals(NetBufferDataType.BYTE); }
+	public boolean currentData_isLong()      { NetBufferData data = dataList.get(currentReadPos); return data.dataType.equals(NetBufferDataType.LONG); }
+	public boolean currentData_isInt()       { return currentData_isInteger(); } // écriture abrégée
+	public boolean currentData_isStr()       { return currentData_isString(); } // écriture abrégée
+	public boolean currentData_isBool()      { return currentData_isBoolean(); } // écriture abrégée
 	
 	
 	//public boolean currentData_isInteger()    throws IndexOutOfBoundsException { NetBufferData data = dataList.get(currentReadPos); if (data.dataType.equals(NetBufferDataType.INTEGER))    return true; return false; }
@@ -210,6 +200,48 @@ public class NetBuffer { // fonctionnement synchrone, non thread-safe
 		readFromReceivedRawData();
 	}
 	
+	public NetBufferData getDataAtPosition(int index) {
+		if (index >= dataList.size()) return null;
+		return dataList.get(index);
+	}
+	
+	/** Créer un buffer à partir d'un array de byte
+	 *  Pareil que new NetBuffer(byteArray) mais en statique.
+	 *  @param arg_receivedRawData
+	 *  @return
+	 */
+	public static NetBuffer getBufferFromByteArray(byte[] arg_receivedRawData) {
+		NetBuffer result = new NetBuffer(arg_receivedRawData);
+		return result;
+	}
+	
+	public static boolean compareNetBuffers(NetBuffer buff1, NetBuffer buff2) {
+		/*if (buff1 == null && buff2 != null) return false;
+		if (buff1 != null && buff2 == null) return false;*/
+		//System.out.println("----> NetBuffer.compareNetBuffers : 1");
+		if ((buff1 == null) ^ (buff2 == null)) return false; // xor, l'un des deux est null mais pas l'autre
+		if (buff1 == null && buff2 == null) return true;
+		//System.out.println("----> NetBuffer.compareNetBuffers : 2");
+		int dataListSize = buff1.dataList.size();
+		if (dataListSize != buff2.dataList.size()) return false;
+		//System.out.println("----> NetBuffer.compareNetBuffers : 3");
+		
+		for (int dataIndex = 0; dataIndex < dataListSize; dataIndex++) {
+			NetBufferData data1 = buff1.getDataAtPosition(dataIndex);
+			NetBufferData data2 = buff2.getDataAtPosition(dataIndex);
+			//System.out.println("----> NetBuffer.compareNetBuffers : data " + dataIndex + "...");
+			if (NetBufferData.checkEquals(data1,  data2) == false) return false;
+			//System.out.println("----> NetBuffer.compareNetBuffers : data " + dataIndex + " OK !");
+		}
+		return true;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o == null) return false;
+		if (o.getClass() != getClass()) return false;
+		return NetBuffer.compareNetBuffers(this, (NetBuffer) o);
+	}
 	
 	/** Copier les donnes brutes du buffer de réception
 	 * @param arg_threadReceivedBytesFULL
@@ -325,6 +357,7 @@ public class NetBuffer { // fonctionnement synchrone, non thread-safe
 		}
 		
 		int currentPosInRawDataBuffer = 0 + 4; // 4 octets pour indiquer la taille totale du buffer contenant les données
+		int receivedDataCount = 0;
 		
 		while (currentPosInRawDataBuffer < receivedRawData.length) {
 			
@@ -412,7 +445,9 @@ public class NetBuffer { // fonctionnement synchrone, non thread-safe
 				
 			default : break;
 			}
+			receivedDataCount++;
 		}
+		//System.out.println("----> NetBuffer.readFromReceivedRawData : receivedDataCount = " + receivedDataCount);
 		
 		
 	}
@@ -422,12 +457,14 @@ public class NetBuffer { // fonctionnement synchrone, non thread-safe
 	 * @return
 	 */
 	public boolean isEqualTo(NetBuffer otherBuffer) {
+		return equals(otherBuffer);
+		/*
 		if (otherBuffer == null) return false;
 		// méthode bourrine, pas optimisée du tout : PAR MANQUE DE TEMPS !
 		byte[] thisBufferAsByteArray = this.convertToByteArray();
 		byte[] otherBufferAsByteArray = otherBuffer.convertToByteArray();
 		boolean areEqual = Arrays.equals(thisBufferAsByteArray, otherBufferAsByteArray);
-		return areEqual;
+		return areEqual; */
 	}
 	
 	

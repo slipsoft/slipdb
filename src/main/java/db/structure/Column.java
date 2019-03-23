@@ -58,6 +58,10 @@ public class Column {
 		return dataType.getSize();
 	}
 	
+	public int getDataSize() {
+		return dataType.getSize();
+	}
+	
 	public Object writeToBuffer(String input, ByteBuffer outputBuffer) {
 		return this.getDataType().writeToBuffer(input, outputBuffer);
 	}
@@ -72,6 +76,14 @@ public class Column {
 			minValue = value;
 		}
 	}
+
+	public Object getMinValue() {
+		return minValue;
+	}
+	
+	public Object getMaxValue() {
+		return maxValue;
+	}
 	
 	public int compareValues(Object value1, Object value2) {
 		if (value1 == null || value2 == null) return 0;
@@ -84,6 +96,15 @@ public class Column {
 			if (asDouble1 == asDouble2) return 0;
 			if (asDouble1 > asDouble2) return 1;
 			return -1;
+		}
+		
+		if (value1 instanceof String) {
+			String string1 = (String) value1;
+			String string2 = (String) value2;
+			int comparedValues = string1.compareTo(string2);
+			if (comparedValues > 0) return 1;
+			if (comparedValues < 0) return -1;
+			return 0;
 		}
 		
 		return 0;

@@ -8,19 +8,21 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Utils {
-
-	public static DateFormat staticDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+	
+	protected final static String dateFormatString = "yyyy-MM-dd HH:mm:ss";
+	// bien mettre MM pour "month" et HH pour le format 24H et non 12H. (cause des bugs lors du parsing sinon !!)
+	
+	public static DateFormat staticDateFormat = new SimpleDateFormat(dateFormatString);
 	
 	// Opérations sur les dates
 	// Instance thread-safe de DateFormat
-	public DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+	public DateFormat dateFormat = new SimpleDateFormat(dateFormatString);
 	
 	// Les fonctions static utilisant ne instance donnée (DateFormat) ne sont pas thread-safe.
 	// Cette fonction NE DOIT PAS être static
@@ -65,7 +67,7 @@ public class Utils {
 			return null; //new Date();
 		}
 	}
-
+	
 	public static boolean validateRegex(String pattern, String toMatch) {
 		Pattern p = Pattern.compile(pattern);
 		Matcher m = p.matcher(toMatch);

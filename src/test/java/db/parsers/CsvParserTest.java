@@ -48,7 +48,7 @@ class CsvParserTest {
 			columns.add(new Column("pickup_longitude", new DoubleType()));
 			columns.add(new Column("pickup_latitude", new DoubleType()));
 			columns.add(new Column("RateCodeID", new ByteType()));
-			columns.add(new Column("store_and_fwd_flag", new StringType(3)));
+			columns.add(new Column("store_and_fwd_flag", new StringType(3))); // <- Longueur de 1, test du padding
 			columns.add(new Column("dropoff_longitude", new DoubleType()));
 			columns.add(new Column("dropoff_latitude", new DoubleType()));
 			columns.add(new Column("payment_type", new ByteType()));

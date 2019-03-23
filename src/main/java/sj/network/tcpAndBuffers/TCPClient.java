@@ -1,11 +1,9 @@
-package sj.network.tcp;
+package sj.network.tcpAndBuffers;
 
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import sj.network.buffers.NetBuffer;
 
 /** Principe du TCPClient :
  * Un thread est créé pour recevoir les messages.

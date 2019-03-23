@@ -1,4 +1,4 @@
-package sj.network.buffers;
+package sj.network.tcpAndBuffers;
 
 /** Types de données stockées par NetBufferData
  * 

@@ -1,7 +1,9 @@
 package db.structure.indexTree;
 
 import java.io.BufferedOutputStream;
+import java.io.DataInput;
 import java.io.DataInputStream;
+import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -24,7 +26,9 @@ import com.dant.utils.Utils;
 
 import db.data.DataType;
 import db.data.IntegerArrayList;
+import db.data.Operator;
 import db.structure.Column;
+import db.structure.Index;
 import db.structure.Table;
 
 /**
@@ -38,7 +42,7 @@ import db.structure.Table;
  * 
  * ~ Code de Sylvain, idée (dichotomie) de Nicolas ~
  * 
- * Bench de IndexTreeDic vs IndexTree pour mesurer les performances des deux méthodes
+ * Bench de IndexTreeDic vs IndexTreeCeption pour mesurer les performances des deux méthodes
  * 
  * Indexer via un TreeMap, et une recherche par dichotomie sur le disque.
  * Le TreeMap contenant les valeurs donnera une collection classée par ordre croissant de ses clefs,
@@ -55,9 +59,12 @@ import db.structure.Table;
  * -> Améliorer le CsvParser pour qu'il stocke les colonnes indépendament, ou qu'il "split" les fichiers tous les 1_000_000 de données
  * -> Pour chaque colonne, sauvegarder 
  * 
+ * Il faut un score pour classer les colonnes/index, prendre, pour la première requete, l'Index associé ayant le score le plus élevé :
+ * -> nombre de valeurs différentes dans l'arbre, pour tenter de limiter un maximum les résultats.
+ * 
  */
 
-public class IndexTreeDic {
+public class IndexTreeDic extends Index {
 	
 	/**
 	 * Il y a donc une seule TreeMap pour ce type d'index (contrairement à IndexTreeCeption)
@@ -172,6 +179,10 @@ public class IndexTreeDic {
 		long fileSize = inTable.getFileLinesOnDisk().length();
 		
 		int inMemoryResults = 0;
+
+		// ancien débug 12h-24H à garder au cas où re-bug  String stringDateFrom = "2015-04-04 00:01:00";
+		//String stringDateTo = "2015-04-04 00:18:57";
+		int resultCount = 0;
 		
 		//Timer benchTime = new Timer("Temps pris par l'indexation");
 		byte[] columnValueAsByteArray = new byte[dataSizeInBytes];
@@ -215,8 +226,14 @@ public class IndexTreeDic {
 				break;
 			
 			Object readValue = columnDataType.readIndexValue(columnValueAsByteArray);
-			this.addValue(readValue, new Integer(lineIndex)); // creating a new Integer is quite slow ><" (but the bottle neck really is I/O on disk)
+			this.addValue(readValue, lineIndex); // new Integer() creating a new Integer is quite slow ><" (but the bottle neck really is I/O on disk)
 			inMemoryResults++;
+			
+			/*ancien débug 12h-24H à garder au cas où re-bug String valueAsString = (String) readValue;
+			if ( (valueAsString.compareTo(stringDateFrom) >= 0) && (valueAsString.compareTo(stringDateTo) <= 0) ) {
+				Log.info("readValue = " + readValue);
+				resultCount++;
+			}*/
 			
 			if (inMemoryResults > flushOnDiskOnceReachedThisFileNumber) {
 				flushOnDisk();
@@ -244,6 +261,7 @@ public class IndexTreeDic {
 		//benchTime.printms();
 		
 		fileAsStream.close();
+		Log.info("resultCount = " + resultCount);
 		
 		flushOnDisk();
 	}
@@ -267,7 +285,9 @@ public class IndexTreeDic {
 	
 	public boolean checkIfCompatibleObjectType(Object inputObject) {
 		if (inputObject == null) return false;
-		return inputObject.getClass() == storedValuesClassType;
+		//return inputObject.getClass() == storedValuesClassType; <- moins clair, je trouve
+		if (inputObject.getClass() != storedValuesClassType) return false;
+		return true;
 	}
 	
 	/** Only gets the matching binIndexes from memory, not from stored data on disk
@@ -286,7 +306,7 @@ public class IndexTreeDic {
 		NavigableMap<Object, IntegerArrayList> subTree = associatedBinIndexes.subMap(minValueExact, isInclusive, maxValueExact, isInclusive);
 		Collection<IntegerArrayList> collectionValues = subTree.values();
 		return collectionValues;
-
+		
 	}
 	
 	int debugNumberOfExactArrayListValuesWrittenOnDisk = 0;
@@ -302,7 +322,7 @@ public class IndexTreeDic {
 		fileInstance.createFileIfNotExist();
 		saveOnDisk(fileInstance, false);
 		indexWrittenOnDiskFilePathsArray.add(saveFileName);
-		associatedBinIndexes = new TreeMap<Object, IntegerArrayList>(); // réinitialisation
+		//associatedBinIndexes = new TreeMap<Object, IntegerArrayList>(); // réinitialisation
 		
 		if (showMemUsageAtEachFlush) MemUsage.printMemUsage();
 	}
@@ -314,10 +334,8 @@ public class IndexTreeDic {
 	protected void saveOnDisk(EasyFile writeOnFile, boolean appendAtTheEnd) throws IOException {
 		//fileSaveOnDisk
 		DataOutputStream writeInDataStream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(writeOnFile, appendAtTheEnd)));
-		
 		writeAllStoredDataOnDisk(writeInDataStream);
 		writeInDataStream.close();
-		
 		//System.out.println("IndexTreeCeption.saveOnDisk : debugNumberOfExactArrayListValuesWrittenOnDisk=" + debugNumberOfExactArrayListValuesWrittenOnDisk);
 		//System.out.println("IndexTreeCeption.saveOnDisk : debugNumberOfExactValuesWrittenOnDisk=" + debugNumberOfExactValuesWrittenOnDisk);
 		
@@ -478,6 +496,7 @@ public class IndexTreeDic {
 		}
 		int maxIntervalValue = totalNumberOfDistinctValues - 1;
 		int minIntervalValue = 0;
+		// // Ne devrait JAMAIS arriver ->
 		if (intervalStartIndex > maxIntervalValue) { Log.error("TARENTULE - erreur dichotomie 1 @IndexTreeDic.findValueIndexByDichotomy"); return localResultAsFalse; } // Ne devrait JAMAIS arriver
 		if (intervalStartIndex < minIntervalValue) { Log.error("TARENTULE - erreur dichotomie 2 @IndexTreeDic.findValueIndexByDichotomy"); return localResultAsFalse; } // Ne devrait JAMAIS arriver
 		
@@ -507,7 +526,8 @@ public class IndexTreeDic {
 				if (intervalStartIndex < 0)
 						return localResultAsFalse;
 				
-				//int checkEntryBinPos = ((int)routingTableBinIndex + 4) + intervalStartIndex * diskEntrySize;
+				int checkEntryBinPos = ((int)routingTableBinIndex + 4) + intervalStartIndex * diskEntrySize;
+				randFile.seek(checkEntryBinPos);
 				Object checkValue = readObjectValueFromDisk(randFile, storedValuesClassType);
 				int checkFirstValueIsHigher = firstValueIsHigherThatSecondValue(searchValue, checkValue);
 				if (checkFirstValueIsHigher != 1) {
@@ -928,12 +948,9 @@ public class IndexTreeDic {
 			runnableSearchesList.add(searchInFile);
 		}
 		
-		boolean useMultiThread = useMultithreadSearch;
-		
-		
 		for (SearchInFile searchInFile : runnableSearchesList) {
 			
-			if (useMultiThread) {
+			if (useMultithreadSearch) {
 				// Si Multi-thread :
 				Thread newSearchThread = new Thread(searchInFile);
 				threadsRunningSearchesList.add(newSearchThread);
@@ -994,60 +1011,66 @@ public class IndexTreeDic {
 		return listOfMatchingArraysOfBinIndexes;
 	}
 	
-	/** Probably not very fast ><"
-	 *  Même very very lent, indeed :'(
-	 *  @param originalAssociatedValue
-	 *  @return
-	 * @throws IOException 
+	
+	//public static boolean debugWriteOnce = true;
+	/**
+	 * 
+	 * @param originalAssociatedValue
+	 * @param writeInDataOutput 
+	 * @throws IOException
 	 */
-	protected void writeObjectValueOnDisk(Object originalAssociatedValue, DataOutputStream writeInDataStream) throws IOException  {
+	protected void writeObjectValueOnDisk(Object originalAssociatedValue, DataOutput writeInDataOutput) throws IOException  {
 		
-		if (originalAssociatedValue.getClass() == Float.class)    writeInDataStream.writeFloat(((Float) originalAssociatedValue).floatValue());
-		if (originalAssociatedValue.getClass() == Double.class)   writeInDataStream.writeDouble(((Double) originalAssociatedValue).doubleValue());
-		if (originalAssociatedValue.getClass() == Byte.class)     writeInDataStream.writeByte(((Byte) originalAssociatedValue).byteValue());
-		if (originalAssociatedValue.getClass() == Integer.class)  writeInDataStream.writeInt(((Integer) originalAssociatedValue).intValue());
-		if (originalAssociatedValue.getClass() == Long.class)     writeInDataStream.writeFloat(((Long) originalAssociatedValue).longValue());
+		//if (originalAssociatedValue.getClass() != String.class)
+		// ancien débug	Log.info("originalAssociatedValue.getClass() != String.class - originalAssociatedValue = " + originalAssociatedValue);
 		
+		if (originalAssociatedValue.getClass() == Float.class)    { writeInDataOutput.writeFloat(((Float) originalAssociatedValue).floatValue());    return; }
+		if (originalAssociatedValue.getClass() == Double.class)   { writeInDataOutput.writeDouble(((Double) originalAssociatedValue).doubleValue()); return; }
+		if (originalAssociatedValue.getClass() == Byte.class)     { writeInDataOutput.writeByte(((Byte) originalAssociatedValue).byteValue());       return; }
+		if (originalAssociatedValue.getClass() == Integer.class)  { writeInDataOutput.writeInt(((Integer) originalAssociatedValue).intValue());      return; }
+		if (originalAssociatedValue.getClass() == Long.class)     { writeInDataOutput.writeFloat(((Long) originalAssociatedValue).longValue());      return; }
+		if (originalAssociatedValue.getClass() == String.class)   {
+			byte[] stringAsByteAray = ((String)originalAssociatedValue).getBytes();
+			//if (stringAsByteAray.length != 19) Log.error("stringAsByteAray.length != 19 ->  "+ stringAsByteAray.length);
+			//writeInDataOutput.writeInt(19);//stringAsByteAray.length); // taille du string, sur 2 octets
+			writeInDataOutput.write(stringAsByteAray); // string en tant qu'array
+			/* débug if (debugWriteOnce) {
+				Log.info("stringAsByteAray.length = " + stringAsByteAray.length + " originalAssociatedValue = " + originalAssociatedValue);
+				debugWriteOnce = false;
+			}*/
+			return;
+		}
 	}
 	
-	/** Probably not very fast ><"
-	 *  Même very very lent, indeed :'(
-	 *  @param originalAssociatedValue
+	/**
+	 * @param dataInput   randAccessFile ou dataClassType
+	 * @param dataClassType   
 	 *  @return
 	 * @throws IOException 
 	 */
 	@SuppressWarnings("rawtypes") // J'utilise Class pour rendre générique ma fonction
-	protected Object readObjectValueFromDisk(DataInputStream readFromDataStream, Class dataClassType) throws IOException  {
+	protected Object readObjectValueFromDisk(DataInput dataInput, Class dataClassType) throws IOException  {
 		
-		Object result = null;
+		if (dataClassType == Float.class)    { return new Float(dataInput.readFloat()); }// new Float() : il le fait tout seul et essaie d'optimiser le truc, je pense !
+		if (dataClassType == Double.class)   { return new Double(dataInput.readDouble()); }
+		if (dataClassType == Byte.class)     { return new Byte(dataInput.readByte()); }
+		if (dataClassType == Integer.class)  { return new Integer(dataInput.readInt()); }
+		if (dataClassType == Long.class)     { return new Long(dataInput.readLong()); }
+		if (dataClassType == String.class)   {
+			//dataInput.skipBytes(1);
+			int stringAsByteArrayLength = storedValueDataByteSize;//19;//dataInput.readInt(); // 2 octets
+			byte[] stringAsByteAray = new byte[stringAsByteArrayLength];
+			//int stringAsByteArrayCheckLength = 
+			dataInput.readFully(stringAsByteAray, 0, stringAsByteAray.length);
+			String resultString = new String(stringAsByteAray);
+			
+			// débug Log.error("stringAsByteAray.length = " + stringAsByteAray.length + " resultString = " + resultString);
+			
+			//if (stringAsByteArrayLength != stringAsByteArrayCheckLength) throw new IOException("readObjectValueFromDisk : stringAsByteArrayLength("+stringAsByteArrayLength+") != stringAsByteArrayCheckLength("+stringAsByteArrayCheckLength+")");
+			return resultString;
+		}
 		
-		if (dataClassType == Float.class)    result = new Float(readFromDataStream.readFloat()); // new Float() : il le fait tout seul et essaie d'optimiser le truc, je pense !
-		if (dataClassType == Double.class)   result = new Double(readFromDataStream.readDouble());
-		if (dataClassType == Byte.class)     result = new Byte(readFromDataStream.readByte());
-		if (dataClassType == Integer.class)  result = new Integer(readFromDataStream.readInt());
-		if (dataClassType == Long.class)     result = new Long(readFromDataStream.readLong());
-		
-		return result;
-	}
-	
-	/** Probably not very fast ><"
-	 *  Même very very lent, indeed :'(
-	 *  @param originalAssociatedValue
-	 *  @return
-	 * @throws IOException 
-	 */
-	@SuppressWarnings("rawtypes") // J'utilise Class pour rendre générique ma fonction
-	protected Object readObjectValueFromDisk(RandomAccessFile randAccessFile, Class dataClassType) throws IOException  {
-		
-		Object result = null;
-		
-		if (dataClassType == Float.class)    result = new Float(randAccessFile.readFloat()); // new Float() : il le fait tout seul et essaie d'optimiser le truc, je pense !
-		if (dataClassType == Double.class)   result = new Double(randAccessFile.readDouble());
-		if (dataClassType == Byte.class)     result = new Byte(randAccessFile.readByte());
-		if (dataClassType == Integer.class)  result = new Integer(randAccessFile.readInt());
-		if (dataClassType == Long.class)     result = new Long(randAccessFile.readLong());
-		
-		return result;
+		return null;
 	}
 	
 	/** Juste pour avoir un nom plus clair que compareValues,
@@ -1067,7 +1090,26 @@ public class IndexTreeDic {
 	      /*if (asDouble1 < asDouble2)*/ return -1;
 		}
 		
+		if (value1 instanceof String) {
+			///String value1AsString
+			// Faire une super-classe à IndexTreeDic et IndexTreeCeption, pour ne pas mettre de côté IndexTreeCeption
+			String string1 = (String) value1;
+			String string2 = (String) value2;
+			int comparedValues = string1.compareTo(string2);
+			if (comparedValues > 0) return 1;
+			if (comparedValues < 0) return -1;
+			return 0;
+		}
+		
 		return 0;
+	}
+
+
+
+	@Override
+	public boolean isOperatorCompatible(Operator op) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 	
 	// compareValues : nom pas clair !

@@ -43,8 +43,9 @@ public class IndexTreeTest {
 		ArrayList<Column> columns = new ArrayList<Column>();
 		try {
 			columns.add(new Column("VendorID", new ByteType()));
-			columns.add(new Column("tpep_pickup_datetime", new DateType()));
-			columns.add(new Column("tpep_dropoff_datetime", new DateType()));
+			// -> On a bien les mêmes résultats en castant la date et en la traîtant comme une string
+			columns.add(new Column("tpep_pickup_datetime", new DateType())); //new StringType(19)));//
+			columns.add(new Column("tpep_dropoff_datetime", new DateType()));//new StringType(19))); // 
 			columns.add(new Column("passenger_count", new ByteType()));
 			columns.add(new Column("trip_distance", new FloatType()));
 			columns.add(new Column("pickup_longitude", new DoubleType()));
@@ -67,24 +68,31 @@ public class IndexTreeTest {
 		table = new Table("test", columns);
 		parser = new CsvParser(table);
 		
-		//FileInputStream is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); // "../SMALL_1_000_000_yellow_tripdata_2015-04.csv"
-		
-		//FileInputStream is = new FileInputStream("../SMALL_1_000_000_yellow_tripdata_2015-04.csv"); // testdata
-		
 		Timer parseTimer = new Timer("Temps pris par le parsing");
 		FileInputStream is;
 		boolean isTheFirstParsing = true;
 		
 		// Fichiers identiques, donc 2 fois plus de résultats !
+		
+		//is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
 		is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
 		parser.parse(is, !isTheFirstParsing); isTheFirstParsing = false;
 		is.close();
+		
+		
+		
+		/*is = new FileInputStream("../SMALL_100_000_yellow_tripdata_2015-04.csv");
+		parser.parse(is, !isTheFirstParsing); isTheFirstParsing = false;
+		is.close();*/
+		
 		
 		// -> Go faire le parsing multi-thread maintenant !!
+		// Nécessaire d'avoir plusieurs fichiers, à voir plus tard.
 		
+		/*
 		is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
 		parser.parse(is, !isTheFirstParsing); isTheFirstParsing = false;
-		is.close();
+		is.close();*/
 		
 		
 		/*is = new FileInputStream("D:/L3 DANT disque D/yellow_tripdata_2015-04.csv");
@@ -124,7 +132,7 @@ public class IndexTreeTest {
 	}*/
 	
 	@Test
-	void testIndexingTreeInt() throws IOException {
+	void testIndexTreeDic() throws IOException {
 		//if (true) return;
 		/**
 		 * Note : c'est super le bordel ici, je vais ranger ça ^^'
@@ -144,6 +152,147 @@ public class IndexTreeTest {
 		
 		//IndexTreeCeption indexingObject = new IndexTreeCeption(0, null, indexThisColumn.minValue, indexThisColumn.maxValue);
 		IndexTreeDic indexingObject = new IndexTreeDic();//Integer.class);
+		
+		
+		//indexingObject.initializeMaxDistanceBetweenElementsArray(indexThisColumn.minValue, indexThisColumn.maxValue);
+		
+		// Index the column from the disk
+		// -> reading fron the disk is quite slow
+		// --> a very cool optimization will be to index a bunch of columns at the same time
+		Timer loadFromDiskTimer = new Timer("Time took to index this column, from disk");
+		MemUsage.printMemUsage();
+		indexingObject.indexColumnFromDisk(table, indexingColumnIndex);
+		MemUsage.printMemUsage();
+		loadFromDiskTimer.log();
+		
+		// Ecriture sur le disque
+		Timer writeIndexToDiskTimer = new Timer("Temps pris pour l'écriture sur disque");
+		//indexingObject.flushOnDisk();
+		//indexingObject.saveOnDisk(false); // première sauvegarde, écraser ce qui existe déjà
+		writeIndexToDiskTimer.log();
+		
+		
+		Log.info("Fini");
+		Log.info("OBJECT RESULT :");
+		
+		// Get the query result
+		Collection<IntegerArrayList> result;
+		MemUsage.printMemUsage();
+		
+		String stringDateFrom = "2015-04-04 00:00:00";//"2015-04-04 00:01:00";//
+		String stringDateTo = "2015-04-04 03:20:00";//"2015-04-04 00:18:57";//
+		
+		Date dateFrom = currentlyUsedUils.dateFromString(stringDateFrom);
+		Date dateTo = currentlyUsedUils.dateFromString(stringDateTo);
+		int intDateFrom = Utils.dateToSecInt(dateFrom);
+		int intDateTo = Utils.dateToSecInt(dateTo);
+		
+		/*Object searchFromValue = new Float(12.78641);
+		Object searchToValue = new Float(14.748621);*/
+
+		
+		Object searchFromValue = intDateFrom;//stringDateFrom;//
+		Object searchToValue = intDateTo;//stringDateTo;//
+		
+		
+		// à faire : supprimer la recherche en mémoire, il n'y a plus rien en mémoire.
+		result = indexingObject.findMatchingBinIndexesInMemory(searchFromValue, searchToValue, true); // new Float(20), new Float(21)
+		
+		//result = indexingObject.findMatchingBinIndexesInMemory(intDateFrom, intDateTo, true);
+		
+		//result = indexingObject.findMatchingBinIndexes(new Integer(-1000), new Integer(1000), true);
+
+		
+		Timer searchQueryTimer = new Timer("Time took to return the matching elements");
+		Timer searchQueryFullTimer = new Timer("Time took to return the matching elements + size evaluation");
+		
+		//result = indexingObject.findMatchingBinIndexes(new Byte((byte)0), new Byte((byte)100), true);
+		//result = indexingObject.findMatchingBinIndexes(new Double(0), new Double(0), true);
+		
+		
+		MemUsage.printMemUsage();
+		searchQueryTimer.log();
+		Column indexingColumn = table.getColumns().get(indexingColumnIndex);
+		
+		// Iterates over all the results
+		int numberOfResults = 0, numberOfLines = 0;
+		for (IntegerArrayList list : result) {
+			//Log.info("list size = " + list.size());
+			numberOfResults += list.size();
+			numberOfLines++;
+			if (false)
+			for (Integer index : list) {
+				// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
+				//Log.info("  index = " + index);
+				List<Object> objList = table.getValuesOfLineById(index);
+				Object indexedValue = objList.get(indexingColumnIndex);
+				//indexingColumn.getDataType().
+				Log.info("  valeur indexée = " + indexedValue);
+				//Log.info("  objList = " + objList);
+				
+			}
+		}
+		searchQueryFullTimer.log();
+		Log.info("Number of results = " + numberOfResults);
+		Log.info("Number of lines = " + numberOfLines);
+		
+		
+		Log.info("Depuis le disque : ");
+		Timer searchFromDiskTimer = new Timer("Temps pris pour la recherche du disque");
+
+		result = indexingObject.findMatchingBinIndexesFromDisk(searchFromValue, searchToValue, true);
+		//result = indexingObject.findMatchingBinIndexesFromDisk(intDateFrom, intDateTo, true);
+		searchFromDiskTimer.log();
+		
+		boolean showAllResults = false;
+		
+		// Iterates over all the results
+		numberOfResults = 0;
+		numberOfLines = 0;
+		for (IntegerArrayList list : result) {
+			//Log.info("list size = " + list.size());
+			numberOfResults += list.size();
+			numberOfLines++;
+
+			if (showAllResults) {
+				for (Integer index : list) {
+					// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
+					List<Object> objList = table.getValuesOfLineById(index);
+					Object indexedValue = objList.get(indexingColumnIndex);
+					Log.info("  index = " + index + "   val = " + indexedValue);
+					
+					//Log.info("  valeur indexée = " + indexedValue);
+					//Log.info("  objList = " + objList);
+					
+				}
+			}
+		}
+		Log.info("Number of results = " + numberOfResults);
+		Log.info("Number of lines = " + numberOfLines);
+		
+	}
+	
+	@Test
+	void testIndexTreeCeption() throws IOException {
+		//if (true) return;
+		/**
+		 * Note : c'est super le bordel ici, je vais ranger ça ^^'
+		 */
+		//SIndexingTreeFloat indexingFoat = new SIndexingTreeFloat();
+		Log.info("Lancé");
+		
+		// Index the column on index 4
+		//int indexingColumnIndex = 3; // passanger count
+		//int indexingColumnIndex = 4; // trip distance
+		//int indexingColumnIndex = 5; // latitude
+		int indexingColumnIndex = 1; // date pickup
+		
+		Column indexThisColumn = table.getColumns().get(indexingColumnIndex);
+		
+		//System.out.println("OUOUOUOU " + indexThisColumn.minValue + "  " +  indexThisColumn.maxValue);
+		
+		IndexTreeCeption indexingObject = new IndexTreeCeption(0, null, indexThisColumn.getMinValue(), indexThisColumn.getMaxValue());
+		//IndexTreeDic indexingObject = new IndexTreeDic();//Integer.class);
 		
 		
 		//indexingObject.initializeMaxDistanceBetweenElementsArray(indexThisColumn.minValue, indexThisColumn.maxValue);
