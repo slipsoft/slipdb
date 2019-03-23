@@ -17,33 +17,25 @@ public class StringType extends DataType {
 		this.sizeInBytes = size;
 	}
 
-	public final String stringPaddingChar = "_";
-	
+	public final String stringPaddingChar = "\0";
+	// -> Je laisse comme ça si ça te vas, Nicolas, pour qu'on puisse vérifier s'il n'y a bien pas de caractère 0 dans les string ?
+	// /!\ stringPaddingChar ne DOIT PAS se trouver dans les String des données lues en entrée, sous peine de corrompre les données
 	
 	
 	@Override
-	public Object writeToBuffer(String input, ByteBuffer outputBuffer) {
+	public Object writeToBuffer(String input, ByteBuffer outputBuffer) {		
 		
-		/* débug OK ! if ("2015-04-02 21:12:28".equals(input)) {//2015-04-04 10:17:26
-			Log.error("FOUNd input  input = " + input);
-		}*/
-		
+		/* inutile si (stringPaddingChar == "\0")
 		if (input.length() < sizeInBytes) {
 			input = StringUtils.rightPad(input, sizeInBytes, stringPaddingChar);
-			//Log.info("padding  str -> " + input);
-			
-		}
+		}*/
 		
 		byte[] bytes;
-		if (input.length() > sizeInBytes)
+		if (input.length() != sizeInBytes)
 			bytes = Arrays.copyOf(input.getBytes(), this.sizeInBytes);
 		else
 			bytes = input.getBytes();
 		
-		//bytes[2] = 0;
-		/*if (input.length() != sizeInBytes) {
-			Log.info("input.length() != sizeInBytes -> " + input.length() + " != " + sizeInBytes + "  bytes = " + bytes.length + "  str -> " + new String(bytes));
-		} débug */
 		outputBuffer.put(bytes);
 		return input;
 	}
