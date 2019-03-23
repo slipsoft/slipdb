@@ -318,6 +318,7 @@ public class IndexTreeDic extends Index {
 		
 		String saveFileName = baseSaveFilePath + uniqueFileIdForThisTree + suffixSaveFilePath;
 		uniqueFileIdForThisTree++;
+		// -> TRES IMPORTANT : évaluer la distance moyenne entre deux éléments de l'index, pour savoir quel index donnera le moins de résultats !
 		EasyFile fileInstance = new EasyFile(saveFileName);
 		fileInstance.createFileIfNotExist();
 		saveOnDisk(fileInstance, false);
@@ -803,6 +804,18 @@ public class IndexTreeDic extends Index {
 		return findValueIndexBy_keyIndex;
 	}*/
 	
+	/** Fonction pour évaluer le nombre de résultats (binIndex) trouvés, sans retourner les résultats
+	 *  -> PAS SUR : Du coup, pour que ça aille plus vite, écrire le nombre d'éléments de chaque liste avant son binIndex (int) ?
+	 *    -> Faire un benchmark pour ça. pour l'instant, je laisse comme c'est
+	 * @param minValueExact
+	 * @param maxValueExact
+	 * @param isInclusive
+	 * @return
+	 */
+	public int evaluateResultNumber(Object minValueExact, Object maxValueExact, boolean isInclusive) {
+		return 0;
+	}
+	
 	/** Gets the matching results from disk !
 	 *  
 	 *  @param minValue
@@ -811,7 +824,7 @@ public class IndexTreeDic extends Index {
 	 *  @return la collection contenant tous les binIndex correspondants
 	 * @throws IOException 
 	 */
-	public Collection<IntegerArrayList> findMatchingBinIndexesFromDisk(Object minValueExact, Object maxValueExact, boolean isInclusive) throws IOException { // NavigableMap<Integer, IntegerArrayList> findSubTree
+	public Collection<IntegerArrayList> findMatchingBinIndexesFromDisk(Object minValueExact, Object maxValueExact, boolean isInclusive, boolean justEvaluateResultNumber) throws IOException { // NavigableMap<Integer, IntegerArrayList> findSubTree
 		debugDiskNumberOfIntegerArrayList = 0;
 		debugDiskNumberOfExactValuesEvaluated = 0;
 		
@@ -908,6 +921,7 @@ public class IndexTreeDic extends Index {
 					// Lecture de tous les IntegerArrayList de binIndex
 					for (int integerArrayListCount = 0; integerArrayListCount < integerArrayListTotalCount; integerArrayListCount++) {
 						int binIndexTotalCount = randFile.readInt(); // nombre de binIndex stockés
+						
 						IntegerArrayList binIndexesList = new IntegerArrayList();
 						binIndexesList.ensureCapacity(binIndexTotalCount);
 						for (int binIndexCout = 0; binIndexCout < binIndexTotalCount; binIndexCout++) {

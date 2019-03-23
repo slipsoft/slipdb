@@ -27,8 +27,8 @@ import db.structure.Column;
 import db.structure.Table;
 import db.structure.indexTree.IndexTreeCeption;
 import db.structure.indexTree.IndexTreeDic;
-import db.structure.indexTree.SGlobalHandler;
-import db.structure.indexTree.STableHandler;
+import db.structure.recherches.SGlobalHandler;
+import db.structure.recherches.STableHandler;
 
 public class IndexTreeTest {
 
@@ -103,7 +103,7 @@ public class IndexTreeTest {
 	}*/
 	
 	@Test
-	void testIndexTreeDic() throws IOException {
+	void testIndexTreeDic() throws Exception {
 		//if (true) return;
 		/**
 		 * Note : c'est super le bordel ici, je vais ranger ça ^^'
@@ -117,7 +117,9 @@ public class IndexTreeTest {
 		//int indexingColumnIndex = 5; // latitude
 		int indexingColumnIndex = 1; // date pickup
 		
-		//tableHandler.indexColumnWithTree("");
+		tableHandler.indexColumnWithTree(1);//"tpep_pickup_datetime");
+		
+		
 		
 		Column indexThisColumn = table.getColumns().get(indexingColumnIndex);
 		
@@ -213,7 +215,7 @@ public class IndexTreeTest {
 		Log.info("Depuis le disque : ");
 		Timer searchFromDiskTimer = new Timer("Temps pris pour la recherche du disque");
 
-		result = indexingObject.findMatchingBinIndexesFromDisk(searchFromValue, searchToValue, true);
+		result = indexingObject.findMatchingBinIndexesFromDisk(searchFromValue, searchToValue, true, false);
 		//result = indexingObject.findMatchingBinIndexesFromDisk(intDateFrom, intDateTo, true);
 		searchFromDiskTimer.log();
 		
@@ -226,7 +228,8 @@ public class IndexTreeTest {
 			//Log.info("list size = " + list.size());
 			numberOfResults += list.size();
 			numberOfLines++;
-
+			//Log.info("Line("+numberOfLines+") : nb=" + list.size());
+			
 			if (showAllResults) {
 				for (Integer index : list) {
 					// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);

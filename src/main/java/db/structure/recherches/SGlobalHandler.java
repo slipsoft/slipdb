@@ -1,4 +1,4 @@
-package db.structure.indexTree;
+package db.structure.recherches;
 
 import java.util.ArrayList;
 

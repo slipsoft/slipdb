@@ -1,4 +1,4 @@
-package db.structure.indexTree;
+package db.structure.recherches;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -9,8 +9,8 @@ import java.util.List;
 import db.data.DataType;
 import db.parsers.CsvParser;
 import db.structure.Column;
-import db.structure.Index;
 import db.structure.Table;
+import db.structure.indexTree.IndexTreeDic;
 
 public class STableHandler {
 	
@@ -58,17 +58,23 @@ public class STableHandler {
 		firstTimeParsingData = false;
 		
 	}
-
-	public void indexColumnWithTree(String columnName) throws Exception {
+	
+	protected int getColumnIndex(String columnName) throws Exception {
 		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");
 		List<Column> columnList = associatedTable.getColumns();
 		for (int colIndex = 0; colIndex < columnList.size(); colIndex++) {
 			Column currentColumn = columnList.get(colIndex);
 			if (currentColumn.getName().equals(columnName)) {
-				indexColumnWithTree(colIndex);
-				return;
+				return colIndex;
 			}
 		}
+		return -1;
+	}
+	
+	public void indexColumnWithTree(String columnName) throws Exception {
+		int colIndex = getColumnIndex(columnName);
+		if (colIndex == -1) throw new Exception("Colonne introuvable, impossible de l'indexer.");
+		indexColumnWithTree(colIndex);
 	}
 
 	public void indexColumnWithTree(int columnIndex) throws Exception {
@@ -79,10 +85,20 @@ public class STableHandler {
 		IndexTreeDic indexingObject = new IndexTreeDic();
 		indexTreeList.add(indexingObject);
 		indexingObject.indexColumnFromDisk(associatedTable, columnIndex);
-		
-		
-		
 	}
+	
+	//public boolean makeQuery(STableQuery query) {
+		
+	//}
+	
+	/*
+	public ArrayList<Integer> findIndexedResultsOfColumn(String comumnName, Object minValue, Object maxValue, boolean inclusive) {
+		int colIndex = getColumnIndex(comumnName);
+		if (colIndex == -1) throw new Exception("Colonne introuvable, impossible de faire une recherche sur ses index.");
+		//return findIndexedResultsOfColumn();
+		
+		
+	}*/
 	
 	
 	
