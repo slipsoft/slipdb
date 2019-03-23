@@ -14,7 +14,7 @@ import com.dant.entity.TableEntity;
 import com.dant.utils.EasyFile;
 
 import db.data.DataType;
-import db.data.Filter;
+import db.search.Filter;
 
 /**
  * A simple SQL-like table, consisting of 
@@ -52,7 +52,7 @@ public class Table {
 		return columnsList;
 	}
 	
-	public List<Index> getIndices() {
+	public List<Index> getIndexes() {
 		return indexesList;
 	}
 	
@@ -178,7 +178,7 @@ public class Table {
 	public TableEntity convertToEntity () {
 		String name = this.name;
 		ArrayList<ColumnEntity> allColumns = this.columnsList.stream().map(Column::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
-		// ArrayList<IndexEntity> allIndexes = this.indicesList.stream().map(Index::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
+		// ArrayList<IndexEntity> allIndexes = this.indexesList.stream().map(Index::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
 		return new TableEntity(name, allColumns);
 	}
 }

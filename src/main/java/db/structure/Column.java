@@ -18,7 +18,7 @@ public class Column {
 	protected Object maxValue = null;
 
 	protected DataType dataType;
-	protected List<Index> relatedIndicesList = new ArrayList<>();
+	protected List<Index> relatedIndexesList = new ArrayList<>();
 
 	/**
 	 * Columns contructor
@@ -132,7 +132,7 @@ public class Column {
 	
 	
 	public void addIndex(Index index) {
-		this.relatedIndicesList.add(index);
+		this.relatedIndexesList.add(index);
 	}
 
 	public ColumnEntity convertToEntity() {

@@ -26,7 +26,7 @@ import com.dant.utils.Utils;
 
 import db.data.DataType;
 import db.data.IntegerArrayList;
-import db.data.Operator;
+import db.search.Operator;
 import db.structure.Column;
 import db.structure.Index;
 import db.structure.Table;

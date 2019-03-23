@@ -1,4 +1,4 @@
-package db.data;
+package db.search;
 
 public class Sort {
 	protected Direction direction;

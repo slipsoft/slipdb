@@ -6,8 +6,9 @@ import java.util.Date;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import com.dant.utils.Log;
 import com.dant.utils.Utils;
+
+import db.search.Operator;
 
 public class DateType extends DataType {
 
