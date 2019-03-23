@@ -25,7 +25,7 @@ public class Table {
 	protected String name; // table name
 	protected EasyFile fileLinesOnDisk; // <- les fichiers de sauvegarde des colonnes sont désormais indépendants
 	protected List<Column> columnsList = new ArrayList<Column>(); // liste des colonnes de la table
-	protected List<Index> indicesList = new ArrayList<Index>();   // liste des index générés pour cette table
+	protected List<Index> indexesList = new ArrayList<Index>();   // liste des index générés pour cette table
 	
 	/**
 	 * Plus tard : Evolution, pour permettre le multi-thread, sauvegarder et indexer plus vite, avoir plusieurs fichiers par colonne, sauvegarde des données en entrée par colonne.
@@ -52,12 +52,12 @@ public class Table {
 		return columnsList;
 	}
 
-	public List<Index> getIndices() {
-		return indicesList;
+	public List<Index> getIndexes() {
+		return indexesList;
 	}
 	
 	public void addIndex(Index index) {
-		this.indicesList.add(index);
+		this.indexesList.add(index);
 		for (Column column : index.getColumnList()) {
 			column.addIndex(index);
 		}
@@ -167,7 +167,7 @@ public class Table {
 	 * @throws Exception 
 	 */
 	public Index findBestIndex(Filter filter) throws Exception {
-		for (Index index : indicesList) {
+		for (Index index : indexesList) {
 			if (index.canBeUsedWithFilter(filter)) {
 				return index;
 			}
@@ -178,7 +178,7 @@ public class Table {
 	public TableEntity convertToEntity () {
 		String name = this.name;
 		ArrayList<ColumnEntity> allColumns = this.columnsList.stream().map(Column::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
-		// ArrayList<IndexEntity> allIndexes = this.indicesList.stream().map(Index::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
+		// ArrayList<IndexEntity> allIndexes = this.indexesList.stream().map(Index::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
 		return new TableEntity(name, allColumns);
 	}
 }
