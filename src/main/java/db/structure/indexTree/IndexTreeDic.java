@@ -1,5 +1,6 @@
 package db.structure.indexTree;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
@@ -12,12 +13,14 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.dant.utils.BufferedDataInputStreamCustom;
 import com.dant.utils.EasyFile;
 import com.dant.utils.Log;
 import com.dant.utils.MemUsage;
@@ -133,6 +136,15 @@ public class IndexTreeDic extends Index {
 	 *  @param columnIndex
 	 *  @throws FileNotFoundException 
 	 */
+	
+
+	String stringDateFrom = "2015-04-04 00:00:00";//"2015-04-04 00:01:00";//
+	String stringDateTo = "2015-04-04 03:20:00";//"2015-04-04 00:18:57";//
+	Date dateFrom = Utils.dateFromStringNoThreadSafe(stringDateFrom);
+	Date dateTo = Utils.dateFromStringNoThreadSafe(stringDateTo);
+	int intDateFrom = Utils.dateToSecInt(dateFrom);
+	int intDateTo = Utils.dateToSecInt(dateTo);
+	
 	public void indexColumnFromDisk(Table inTable, int columnIndex) throws IOException {
 		//indexedColumnsList = new Column[0];
 		
@@ -173,21 +185,24 @@ public class IndexTreeDic extends Index {
 		//Log.info("skipBeforeData = " + skipBeforeData + " dataSizeInBytes = " + dataSizeInBytes + "  skipAfterData = " + skipAfterData, "SIndexingTree.indexColumnFromDisk");
 		
 		// Get a new disposable FileInputStream with the file where all table rows are stored
-		FileInputStream fileAsStream = new FileInputStream(inTable.getFileLinesOnDisk());
+		BufferedDataInputStreamCustom fileAsStream = new BufferedDataInputStreamCustom(new FileInputStream(inTable.getFileLinesOnDisk()));//new DataInputStream(new BufferedInputStream());
 		int lineIndex = 0;
 		long currentBinPosition = 0;
 		long fileSize = inTable.getFileLinesOnDisk().length();
 		
 		int inMemoryResults = 0;
-
+		
 		// ancien débug 12h-24H à garder au cas où re-bug  String stringDateFrom = "2015-04-04 00:01:00";
 		//String stringDateTo = "2015-04-04 00:18:57";
 		int resultCount = 0;
 		
 		//Timer benchTime = new Timer("Temps pris par l'indexation");
 		byte[] columnValueAsByteArray = new byte[dataSizeInBytes];
+		byte colListSize = (byte) columnsList.size();
+		
+		boolean benchFullRead = true;
+		
 		while (currentBinPosition < fileSize) {
-			
 		//while (true) {
 			
 			/*
@@ -198,9 +213,7 @@ public class IndexTreeDic extends Index {
 			 		+ Le read  : 340 ms
 			 		+ Le cast  : 350 ms (columnDataType.getValueFromByteArray(columnValueAsByteArray);)
 			 		+ addValue : 380 ms
-				
-			*/
-			/*
+			 
 			fileAsStream.skip(skipBeforeData);
 			fileAsStream.skip(dataSizeInBytes);
 			fileAsStream.skip(skipAfterData);
@@ -212,29 +225,72 @@ public class IndexTreeDic extends Index {
 			-> D'où la nécessité de faire des colonnes séparées ! (on réduit de BEAUCOUP le temps !)
 			*/
 			
-			// Seeks to the right position in the stream
-			//long checkSkipBytesAmount;
-			fileAsStream.skip(skipBeforeData);
-			//checkSkipBytesAmount = fileAsStream.skip(dataSizeInBytes);
-			//int bytesRead = fileAsStream.read(columnValueAsByteArray); // reads from the stream
-			
+			if (benchFullRead == false) {
+				// Seeks to the right position in the stream
+				
+				fileAsStream.skipForce(skipBeforeData);
+				/*long checkSkipBytesAmount = fileAsStream.skipBytes(skipBeforeData); //
+				if (checkSkipBytesAmount != skipBeforeData) {
+					Log.error("Fu Skip of .... 1");
+				}*/
+				
+				
+				//int bytesRead = 
+						fileAsStream.readFully(columnValueAsByteArray); // reads from the stream
+				//if (bytesRead == -1) // end of stream
+				//	break;
+				
+				//fileAsStream.readFully(columnValueAsByteArray);
+				Object readValue = columnDataType.readIndexValue(columnValueAsByteArray);//fileAsStream, columnValueAsByteArray);
+				this.addValue(readValue, lineIndex); // new Integer() creating a new Integer is quite slow ><" (but the bottle neck really is I/O on disk)
+				
+				int valueAsInt = ((Integer) readValue).intValue();
+				if (intDateFrom <= valueAsInt && valueAsInt <= intDateTo) {
+					resultCount++;
+				}
+				
+				/*ancien débug 12h-24H à garder au cas où re-bug String valueAsString = (String) readValue;
+				if ( (valueAsString.compareTo(stringDateFrom) >= 0) && (valueAsString.compareTo(stringDateTo) <= 0) ) {
+					Log.info("readValue = " + readValue);
+					resultCount++;
+				}*/
+				
+				fileAsStream.skipForce(skipAfterData);
+				
+				/*
+				checkSkipBytesAmount = fileAsStream.skipBytes(skipAfterData);
 
-			//fileAsStream.skip(skipBeforeData + storedValueDataByteSize + skipAfterData);
+				if (checkSkipBytesAmount != skipAfterData) {
+					Log.error("Fu Skip of .... 2");
+				}*/
+				
+				currentBinPosition += totalLineSize; // = skipBeforeData + storedValueDataByteSize + skipAfterData;
+			} else {
+				
+				// Bench : lecture de tous les champs de l'objet VS lecture d'un seul champ
+				for (byte iColumn = 0; iColumn < colListSize; iColumn++) {
+					Column col = columnsList.get(iColumn);
+					
+					/*byte[] bArr = new byte[col.getDataSize()];
+					int bytesRead = fileAsStream.read(bArr); // reads from the stream
+					if (bytesRead == -1) // end of stream
+						break;*/
+					
+					//byte[] dataAsByteArray = new byte[col.getDataSize()];
+					//fileAsStream.readFully(dataAsByteArray); // renvoie une exception si les données n'ont pas pu être lues
+					
+					Object readValue = col.getDataType().readIndexValue(fileAsStream);
+					if (iColumn == columnIndex) {
+						this.addValue(readValue, lineIndex);
+					}
+				}
+	
+				currentBinPosition += totalLineSize;
+			}
 			
-			int bytesRead = fileAsStream.read(columnValueAsByteArray); // reads from the stream
-			if (bytesRead == -1) // end of stream
-				break;
-			
-			Object readValue = columnDataType.readIndexValue(columnValueAsByteArray);
-			this.addValue(readValue, lineIndex); // new Integer() creating a new Integer is quite slow ><" (but the bottle neck really is I/O on disk)
 			inMemoryResults++;
 			
-			/*ancien débug 12h-24H à garder au cas où re-bug String valueAsString = (String) readValue;
-			if ( (valueAsString.compareTo(stringDateFrom) >= 0) && (valueAsString.compareTo(stringDateTo) <= 0) ) {
-				Log.info("readValue = " + readValue);
-				resultCount++;
-			}*/
-			
+			// S'il y a trop de valeurs mises en mémoire, j'écris l'index sur le disque et je retiens le nom du fichier écrit.
 			if (inMemoryResults > flushOnDiskOnceReachedThisFileNumber) {
 				flushOnDisk();
 				if (forceGarbageCollectorAtEachFlush) System.gc();
@@ -242,16 +298,6 @@ public class IndexTreeDic extends Index {
 				inMemoryResults = 0;
 			}
 			
-			/*
-			 S'il y a trop de valeurs mises en mémoire, j'écris l'index sur le disque et je retiens le nom du fichier écrit.
-			 
-			 
-			 
-			 */
-			
-			fileAsStream.skip(skipAfterData);
-			
-			currentBinPosition += skipBeforeData + storedValueDataByteSize + skipAfterData;
 			
 			// Display some contents, debuging :
 			//if (lineIndex % 10000 == 0) Log.info("lineIndex = " + lineIndex + " readValue = " + readValue);
@@ -261,7 +307,7 @@ public class IndexTreeDic extends Index {
 		//benchTime.printms();
 		
 		fileAsStream.close();
-		Log.info("resultCount = " + resultCount);
+		Log.info("MMMMMMMM resultCount = " + resultCount);
 		
 		flushOnDisk();
 	}

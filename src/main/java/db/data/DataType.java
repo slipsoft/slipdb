@@ -1,5 +1,7 @@
 package db.data;
 
+import java.io.DataInput;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import db.search.Operable;
@@ -50,5 +52,35 @@ public abstract class DataType implements Operable {
 	 * @return
 	 */
 	abstract public Object readIndexValue(byte[] bytes);
+
+	/** Lire directement d'un DataInput la valeur, et non plus à partir d'un tableau d'octets comme readIndexValue(byte[])
+	 *  @param dataInput
+	 *  @return
+	 *  @throws IOException
+	 */
+	public Object readIndexValue(DataInput dataInput) throws IOException {
+		byte[] dataAsByteArray = new byte[sizeInBytes];
+		dataInput.readFully(dataAsByteArray); // renvoie une exception si les données n'ont pas pu être lues
+		return readIndexValue(dataAsByteArray);		
+	}
+
+	public Object readIndexValue(DataInput dataInput, byte[] emptyExactSizeByteArray) throws IOException {
+		dataInput.readFully(emptyExactSizeByteArray); // renvoie une exception si les données n'ont pas pu être lues
+		return readIndexValue(emptyExactSizeByteArray);
+	}
+	
+	protected byte[] readIndexValueAsByteArray(DataInput dataInput) throws IOException {
+
+		/*if (dataInput instanceof InputStream) {
+		    byte[] dataAsByteArray = new byte[sizeInBytes];
+			int bytesRead = ((InputStream)dataInput).read(dataAsByteArray); // reads from the stream
+			if (bytesRead == -1) // end of stream
+				break;
+		}*/
+		
+		byte[] dataAsByteArray = new byte[sizeInBytes];
+		dataInput.readFully(dataAsByteArray); // renvoie une exception si les données n'ont pas pu être lues
+		return dataAsByteArray;
+	}
 
 }

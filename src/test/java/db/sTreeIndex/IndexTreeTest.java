@@ -37,6 +37,7 @@ public class IndexTreeTest {
 	protected static Utils currentlyUsedUils = new Utils(); // For thread-safety ! (but, here, it's static so thread unsafe... ^^')
 	protected static STableHandler tableHandler;
 	
+	protected static boolean parseAgain = false;
 	
 	@BeforeAll
 	static void setUpBeforeAll() throws Exception {
@@ -69,10 +70,12 @@ public class IndexTreeTest {
 		
 		table = tableHandler.createTable();
 		
-		Timer parseTimer = new Timer("Temps pris par le parsing");
-		tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
-		// tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); Fichiers identiques, donc 2 fois plus de résultats !
-		parseTimer.log();
+		if (parseAgain) {
+			Timer parseTimer = new Timer("Temps pris par le parsing");
+			tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv");
+			// tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); Fichiers identiques, donc 2 fois plus de résultats !
+			parseTimer.log();
+		}
 		
 		// -> Go faire le parsing multi-thread maintenant !!
 		// Nécessaire d'avoir plusieurs fichiers, à voir plus tard.
@@ -117,7 +120,7 @@ public class IndexTreeTest {
 		//int indexingColumnIndex = 5; // latitude
 		int indexingColumnIndex = 1; // date pickup
 		
-		tableHandler.indexColumnWithTree(1);//"tpep_pickup_datetime");
+		//tableHandler.indexColumnWithTree(1);//"tpep_pickup_datetime");
 		
 		
 		

@@ -1,5 +1,8 @@
 package db.data;
 
+import java.io.DataInput;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -38,7 +41,7 @@ public class ByteType extends DataType {
 	public Byte readIndexValue(byte[] bytes) {
 		return new Byte(bytes[0]); // get the associates byte
 	}
-
+	
 	@Override
 	public boolean isOperatorCompatible(Operator op) {
 		return ArrayUtils.contains(new Operator[] {

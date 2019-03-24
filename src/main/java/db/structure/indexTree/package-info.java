@@ -54,6 +54,9 @@
 	-> Charger les données parsées sans avoir à les re-parser (csv)
 	-> Faire la recherche sur une colonne indexée
 	
+	2019-03-24
+	-> Avoir la liste des colonnes à indexer, les indexer pendant le parsing ou plus tard
+	
 	
 	SELECT … WHERE … GROUP BY
 	
