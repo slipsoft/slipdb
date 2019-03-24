@@ -10,16 +10,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
-import db.search.Filter;
 import db.search.Operator;
+import db.search.Predicate;
 import db.structure.Column;
 import db.structure.Index;
 import db.structure.IndexHash;
 import db.structure.Table;
 
-class FilterTest {
+class PredicateTest {
 	Column column;
-	Filter filter;
+	Predicate predicate;
 	Table table;
 	ArrayList<Column> columns = new ArrayList<Column>();
 
@@ -30,7 +30,7 @@ class FilterTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		column = new Column("testcolumn", new StringType(12));
-		filter = new Filter(column, Operator.equals, "test");
+		predicate = new Predicate(column, Operator.equals, "test");
 		columns.add(column);
 		table = new Table("testtable", columns);
 	}
@@ -44,29 +44,29 @@ class FilterTest {
 		Executable exec = new Executable() {
 			@Override
 			public void execute() throws Throwable {
-				filter.findBestIndex(table);
+				predicate.findBestIndex(table);
 			}
 		};
 		assertThrows(Exception.class, exec);
 		Index index = new IndexHash(new Column[] {column});
 		table.addIndex(index);
 		assertDoesNotThrow(exec);
-		assertEquals(index, filter.getIndex());
+		assertEquals(index, predicate.getIndex());
 	}
 
 	@Test
 	void testGetColumn() {
-		assertEquals(column, filter.getColumn());
+		assertEquals(column, predicate.getColumn());
 	}
 
 	@Test
 	void testGetOperator() {
-		assertEquals(Operator.equals, filter.getOperator());
+		assertEquals(Operator.equals, predicate.getOperator());
 	}
 
 	@Test
 	void testGetIndex() {
-		assertEquals(null, filter.getIndex());
+		assertEquals(null, predicate.getIndex());
 	}
 
 }
