@@ -21,6 +21,7 @@ import db.data.DateType;
 import db.data.DoubleType;
 import db.data.FloatType;
 import db.data.IntegerArrayList;
+import db.data.LongArrayList;
 import db.data.StringType;
 import db.parsers.Parser;
 import db.structure.Column;
@@ -37,7 +38,7 @@ public class IndexTreeTest {
 	protected static Utils currentlyUsedUils = new Utils(); // For thread-safety ! (but, here, it's static so thread unsafe... ^^')
 	protected static STableHandler tableHandler;
 	
-	protected static boolean parseAgain = false;
+	protected static boolean parseAgain = true;
 	
 	@BeforeAll
 	static void setUpBeforeAll() throws Exception {
@@ -154,7 +155,7 @@ public class IndexTreeTest {
 		Log.info("OBJECT RESULT :");
 		
 		// Get the query result
-		Collection<IntegerArrayList> result;
+		Collection<LongArrayList> result;
 		MemUsage.printMemUsage();
 		
 		String stringDateFrom = "2015-04-04 00:00:00";//"2015-04-04 00:01:00";//
@@ -194,12 +195,12 @@ public class IndexTreeTest {
 		
 		// Iterates over all the results
 		int numberOfResults = 0, numberOfLines = 0;
-		for (IntegerArrayList list : result) {
+		for (LongArrayList list : result) {
 			//Log.info("list size = " + list.size());
 			numberOfResults += list.size();
 			numberOfLines++;
 			if (false)
-			for (Integer index : list) {
+			for (Long index : list) {
 				// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
 				//Log.info("  index = " + index);
 				List<Object> objList = table.getValuesOfLineById(index);
@@ -227,14 +228,14 @@ public class IndexTreeTest {
 		// Iterates over all the results
 		numberOfResults = 0;
 		numberOfLines = 0;
-		for (IntegerArrayList list : result) {
+		for (LongArrayList list : result) {
 			//Log.info("list size = " + list.size());
 			numberOfResults += list.size();
 			numberOfLines++;
 			//Log.info("Line("+numberOfLines+") : nb=" + list.size());
 			
 			if (showAllResults) {
-				for (Integer index : list) {
+				for (Long index : list) {
 					// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
 					List<Object> objList = table.getValuesOfLineById(index);
 					Object indexedValue = objList.get(indexingColumnIndex);

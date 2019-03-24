@@ -6,6 +6,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import db.data.IntegerArrayList;
+import db.data.LongArrayList;
 
 /** Retourner les valeurs correspondant aux filtres passés en argument
  * 

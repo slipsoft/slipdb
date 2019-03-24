@@ -16,11 +16,15 @@ import com.dant.utils.Timer;
 
 import db.structure.Column;
 import db.structure.Table;
+import db.structure.recherches.SRuntimeIndexingEntry;
+import db.structure.recherches.SRuntimeIndexingEntryList;
 
 public abstract class Parser {
 	protected Table schema;
 	protected int lineByteSize; // number of bytes used to store information
 	protected int totalEntryCount = 0;
+	
+	protected SRuntimeIndexingEntryList runtimeIndexingEntries = null;
 	
 	public Parser(Table schema) {
 		this.schema = schema;
@@ -83,35 +87,33 @@ public abstract class Parser {
 	
 	
 	protected final void writeEntry(String entryString, OutputStream output) throws IncorrectEntryException, IOException {
-		String[] valuesArray = processEntry(entryString);
+		String[] valuesAsStringArray = processEntry(entryString);
 
-		if (!isCorrectSize(valuesArray)) {
+		if (!isCorrectSize(valuesAsStringArray)) {
 			throw new IncorrectEntryException(totalEntryCount, "incorrect size");
 			// -> will be handled Nicolas' way ? yes
 		}
 		// the buffer used to store the line data as an array of bytes
 		ByteBuffer entryBuffer = ByteBuffer.allocate(lineByteSize);
-		Object[] entry = new Object[valuesArray.length];
+		Object[] entry = new Object[valuesAsStringArray.length];
 		try {
 		// for each column, parse and write data into entryBuffer
-			for (int i = 0; i < schema.getColumns().size(); i++) {
-				Column currentColumn = schema.getColumns().get(i);
-				
-				/*
-				DataType columnDataType = currentColumn.getDataType();
-				
-				if (columnDataType.getClass() == StringType.class) {
-					
-					//Log.error("currentValue = " + currentValue);
-				}
-				currentColumn.getDataSize();
-				*/
+			for (int columnIndex = 0; columnIndex < schema.getColumns().size(); columnIndex++) {
+				Column currentColumn = schema.getColumns().get(columnIndex);
 				
 				// Converts the string value into an array of bytes representing the same data
-				Object currentValue = currentColumn.writeToBuffer(valuesArray[i], entryBuffer);
+				Object currentValue = currentColumn.writeToBuffer(valuesAsStringArray[columnIndex], entryBuffer);
+				currentColumn.evaluateMinMax(currentValue); // <- Indispensable pour le IndexTreeCeption (non utile pour le IndexTreeDic)
+				// Indexer au moment de parser (pour de meilleures performances)
+				if (runtimeIndexingEntries != null) {
+					SRuntimeIndexingEntry indexingEntry = runtimeIndexingEntries.getEntryAssociatedWithColumnIndex(columnIndex);
+					if (indexingEntry != null) {
+						
+					}
+				}
 				
-				currentColumn.evaluateMinMax(currentValue);
-				entry[i] = currentValue;
+				
+				entry[columnIndex] = currentValue;
 			}
 		} catch (Exception e) {
 			throw new IncorrectEntryException(totalEntryCount, "incorrect data");

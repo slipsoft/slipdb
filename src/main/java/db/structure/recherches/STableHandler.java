@@ -104,9 +104,6 @@ public class STableHandler {
 	// indexColumnList est la liste des colonnes à indexer
 	public ArrayList<SRuntimeIndexingEntry> runtimeIndexingList = new ArrayList<SRuntimeIndexingEntry>();
 	
-	public void sortRuntimeIndexingList() { // très important lors de la lecture des colonnes (parsing)
-		Collections.sort(runtimeIndexingList); // (List<SInitialIndexingIndex>)
-	}
 	
 	public void createRuntimeIndexingColumn(int columnIndex) throws Exception { // addInitialColumnAndCreateAssociatedIndex
 		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");

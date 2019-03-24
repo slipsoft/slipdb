@@ -130,7 +130,7 @@ public class Table {
 	 * @return a list containing every entry associates with the line at position lineId
 	 * @throws IOException
 	 */
-	public List<Object> getValuesOfLineById(int lineId) throws IOException { // or getRowById
+	public List<Object> getValuesOfLineById(long lineId) throws IOException { // or getRowById
 		
 		// Get a new disposable FileInputStream with the file where all table rows are stored
 		FileInputStream fileAsStream = new FileInputStream(fileLinesOnDisk);
