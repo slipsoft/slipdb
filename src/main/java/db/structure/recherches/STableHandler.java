@@ -124,7 +124,13 @@ public class STableHandler {
 		indexEntry.associatedIndexTree.initialiseWithTableAndColumn(associatedTable, columnIndex); // Pour pouvoir indexer au runtime (lors du parsing)
 	}
 	
-	
+
+	public void createRuntimeIndexingColumn(String columnName) throws Exception {
+		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");
+		int colIndex = getColumnIndex(columnName);
+		if (colIndex == -1) throw new Exception("Colonne introuvable, impossible de l'indexer.");
+		createRuntimeIndexingColumn(colIndex);
+	}
 	
 	
 	
@@ -136,6 +142,9 @@ public class STableHandler {
 	public Collection<LongArrayList> findIndexedResultsOfColumn(String columnName, Object minValue, Object maxValue, boolean inclusive) throws Exception {
 		int columnIndex = getColumnIndex(columnName);
 		if (columnIndex == -1) throw new Exception("Colonne introuvable, impossible de faire une recherche sur ses index.");
+		if (IndexTreeDic.firstValueIsHigherThatSecondValue(minValue, maxValue) > 0) {
+			return new ArrayList<LongArrayList>(); // aucun résultat
+		}
 		//return findIndexedResultsOfColumn();
 		
 		IndexTreeDic makeRequestOnThisTree = null;
@@ -202,6 +211,8 @@ public class STableHandler {
 		}
 		return resultArrayList;
 	}
+	
+	
 	
 	
 }

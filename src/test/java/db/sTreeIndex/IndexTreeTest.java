@@ -71,7 +71,10 @@ public class IndexTreeTest {
 		
 		table = tableHandler.createTable();
 
-		tableHandler.createRuntimeIndexingColumn(1);
+		tableHandler.createRuntimeIndexingColumn("tpep_pickup_datetime");
+		tableHandler.createRuntimeIndexingColumn("trip_distance");
+		
+		//tableHandler.createRuntimeIndexingColumn(1);
 		/*tableHandler.createRuntimeIndexingColumn(2);
 		tableHandler.createRuntimeIndexingColumn(3);
 		tableHandler.createRuntimeIndexingColumn(4);
@@ -164,6 +167,19 @@ public class IndexTreeTest {
 			Timer searchQueryFullTimer = new Timer("Temps parcours des résultats");
 			int numberOfResults = tableHandler.evaluateNumberOfResults(result);
 			int numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
+			searchQueryFullTimer.log();
+			Log.info("Nombre de résultats = " + numberOfResults);
+			Log.info("Nombre de lignes = " + numberOfLines);
+			
+			
+			searchQueryTimer = new Timer("Temps total recherche");
+			result = tableHandler.findIndexedResultsOfColumn("trip_distance", 12.78f, 18f, true);
+			searchQueryTimer.log();
+			searchQueryFullTimer = new Timer("Temps parcours des résultats");
+			numberOfResults = tableHandler.evaluateNumberOfResults(result);
+			numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
+			tableHandler.getFullResultsFromBinIndexes(result);
+			
 			searchQueryFullTimer.log();
 			Log.info("Nombre de résultats = " + numberOfResults);
 			Log.info("Nombre de lignes = " + numberOfLines);

@@ -103,7 +103,6 @@ public abstract class Parser {
 		
 		if (!isCorrectSize(valuesAsStringArray)) {
 			throw new IncorrectEntryException(totalEntryCount, "incorrect size");
-			// -> will be handled Nicolas' way ? yes
 		}
 		// the buffer used to store the line data as an array of bytes
 		ByteBuffer entryBuffer = ByteBuffer.allocate(lineByteSize);

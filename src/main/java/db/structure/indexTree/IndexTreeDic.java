@@ -1,19 +1,15 @@
 package db.structure.indexTree;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInput;
-import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
@@ -25,7 +21,6 @@ import com.dant.utils.EasyFile;
 import com.dant.utils.Log;
 import com.dant.utils.MemUsage;
 import com.dant.utils.Timer;
-import com.dant.utils.Utils;
 
 import db.data.DataType;
 import db.data.LongArrayList;
@@ -207,11 +202,10 @@ public class IndexTreeDic extends Index {
 		long currentBinPosition = 0;
 		long fileSize = inTable.getFileLinesOnDisk().length();
 		
-		int inMemoryResults = 0;
+		//int inMemoryResults = 0;
 		
 		// ancien débug 12h-24H à garder au cas où re-bug  String stringDateFrom = "2015-04-04 00:01:00";
 		//String stringDateTo = "2015-04-04 00:18:57";
-		int resultCount = 0;
 		
 		//Timer benchTime = new Timer("Temps pris par l'indexation");
 		byte[] columnValueAsByteArray = new byte[storedValueSizeInBytes];
@@ -286,7 +280,7 @@ public class IndexTreeDic extends Index {
 				currentBinPosition += totalLineSize;
 			}
 			
-			inMemoryResults++;
+			//inMemoryResults++;
 			
 			
 			
@@ -345,12 +339,20 @@ public class IndexTreeDic extends Index {
 	 * @param maxValue
 	 * @param isInclusive
 	 * @return la collection contenant tous les binIndex correspondants
+	 * @throws Exception 
 	 */
-	public Collection<LongArrayList> findMatchingBinIndexesFromMemory(Object minValueExact, Object maxValueExact, boolean isInclusive) { // NavigableMap<Integer, IntegerArrayList> findSubTree
+	public Collection<LongArrayList> findMatchingBinIndexesFromMemory(Object minValueExact, Object maxValueExact, boolean isInclusive) throws Exception { // NavigableMap<Integer, IntegerArrayList> findSubTree
 		// arbre terminal : je retourne la liste des binIndex
 		// binIndexesFromValue est non null ici, donc; et finerSubTrees est null
 		//if (checkIfCompatibleObjectType(minValueExact) == false) return new ArrayList<IntegerArrayList>();
 		//if (checkIfCompatibleObjectType(maxValueExact) == false) return new ArrayList<IntegerArrayList>();
+		
+		if (maxValueExact == null) { // recherche d'une seule valeur (equals)
+			maxValueExact = minValueExact;
+			isInclusive = true;
+		}
+		if (minValueExact.getClass() != storedValuesClassType) throw new Exception("findMatchingBinIndexesFromMemory : Le type d'objet recherché ne correspond pas au type d'objet indexé.");
+		if (minValueExact.getClass() != maxValueExact.getClass()) throw new Exception("findMatchingBinIndexesFromMemory : Les types d'objets min et max ne correspondant pas.");
 		
 		NavigableMap<Object, LongArrayList> subTree = associatedBinIndexes.subMap(minValueExact, isInclusive, maxValueExact, isInclusive);
 		Collection<LongArrayList> collectionValues = subTree.values();
@@ -737,9 +739,9 @@ public class IndexTreeDic extends Index {
 	 *  @param isInclusive
 	 *  @param justEvaluateResultNumber
 	 *  @return
-	 *  @throws IOException
+	 *  @throws Exception 
 	 */
-	public Collection<LongArrayList> findMatchingBinIndexes(Object minValueExact, Object maxValueExact, boolean isInclusive, boolean justEvaluateResultNumber) throws IOException { // NavigableMap<Integer, IntegerArrayList> findSubTree
+	public Collection<LongArrayList> findMatchingBinIndexes(Object minValueExact, Object maxValueExact, boolean isInclusive, boolean justEvaluateResultNumber) throws Exception { // NavigableMap<Integer, IntegerArrayList> findSubTree
 		Collection<LongArrayList> fromDisk = findMatchingBinIndexesFromDisk(minValueExact, maxValueExact, isInclusive, justEvaluateResultNumber);
 		Collection<LongArrayList> fromMemory = findMatchingBinIndexesFromMemory(minValueExact, maxValueExact, isInclusive);
 		
@@ -754,11 +756,21 @@ public class IndexTreeDic extends Index {
 	 *  @param maxValue
 	 *  @param isInclusive
 	 *  @return la collection contenant tous les binIndex correspondants
-	 * @throws IOException 
+	 * @throws Exception 
 	 */
-	public Collection<LongArrayList> findMatchingBinIndexesFromDisk(Object minValueExact, Object maxValueExact, boolean isInclusive, boolean justEvaluateResultNumber) throws IOException { // NavigableMap<Integer, IntegerArrayList> findSubTree
+	public Collection<LongArrayList> findMatchingBinIndexesFromDisk(Object argMinValueExact, Object argMaxValueExact, boolean isInclusive, boolean justEvaluateResultNumber) throws Exception { // NavigableMap<Integer, IntegerArrayList> findSubTree
 		debugDiskNumberOfIntegerArrayList = 0;
 		debugDiskNumberOfExactValuesEvaluated = 0;
+		if (argMaxValueExact == null) { // recherche d'une seule valeur (equals)
+			argMaxValueExact = argMinValueExact;
+			isInclusive = true;
+		}
+		
+		if (argMinValueExact.getClass() != storedValuesClassType) throw new Exception("findMatchingBinIndexesFromDisk : Le type d'objet recherché ne correspond pas au type d'objet indexé.");
+		if (argMinValueExact.getClass() != argMaxValueExact.getClass()) throw new Exception("findMatchingBinIndexesFromDisk : Les types d'objets min et max ne correspondant pas.");
+		
+		final Object minValueExact = argMinValueExact;
+		final Object maxValueExact = argMinValueExact;
 		
 		// Lecture du dernier float écrit dans le disque, i.e. de la position de la table de routage de l'arbre principal
 		/**
@@ -1023,7 +1035,7 @@ public class IndexTreeDic extends Index {
 	 * 	pour me faciliter le débug ^^'
 	 *  @return   1 pour "true"   0 pour "égalité"   -1 pour "value1 < value2" (inférieur strict)
 	 */
-	public int firstValueIsHigherThatSecondValue(Object value1, Object value2) {
+	public static int firstValueIsHigherThatSecondValue(Object value1, Object value2) {
 		if (value1 == null || value2 == null) return 0;
 		if (value1.getClass() != value2.getClass()) return 0;
 		

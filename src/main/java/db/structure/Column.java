@@ -85,7 +85,7 @@ public class Column {
 		return maxValue;
 	}
 	
-	public int compareValues(Object value1, Object value2) {
+	public static int compareValues(Object value1, Object value2) {
 		if (value1 == null || value2 == null) return 0;
 		if (value1.getClass() != value2.getClass()) return 0;
 		
