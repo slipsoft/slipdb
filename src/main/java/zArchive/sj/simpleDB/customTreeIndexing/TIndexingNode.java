@@ -1,4 +1,4 @@
-package sj.simpleDB.customTreeIndexing;
+package zArchive.sj.simpleDB.customTreeIndexing;
 
 import java.util.ArrayList;
 

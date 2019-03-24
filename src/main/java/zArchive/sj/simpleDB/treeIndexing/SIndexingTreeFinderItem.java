@@ -1,4 +1,4 @@
-package sj.simpleDB.treeIndexing;
+package zArchive.sj.simpleDB.treeIndexing;
 
 
 public class SIndexingTreeFinderItem implements Comparable<SIndexingTreeFinderItem> {

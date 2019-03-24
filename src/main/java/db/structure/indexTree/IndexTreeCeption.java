@@ -22,7 +22,7 @@ import db.data.IntegerArrayList;
 import db.search.Operator;
 import db.structure.Column;
 import db.structure.Table;
-import sj.simpleDB.treeIndexing.SIndexingTreeType;
+import zArchive.sj.simpleDB.treeIndexing.SIndexingTreeType;
 
 /**
  * Point très IMPORTANT :
