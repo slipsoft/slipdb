@@ -71,7 +71,7 @@ public class IndexTreeTest {
 		
 		table = tableHandler.createTable();
 
-		tableHandler.createRuntimeIndexingColumn("tpep_pickup_datetime");
+		//tableHandler.createRuntimeIndexingColumn("tpep_pickup_datetime");
 		tableHandler.createRuntimeIndexingColumn("trip_distance");
 		
 		//tableHandler.createRuntimeIndexingColumn(1);
@@ -92,7 +92,7 @@ public class IndexTreeTest {
 			// tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); Fichiers identiques, donc 2 fois plus de résultats !
 			parseTimer.log();
 		}
-		
+		tableHandler.flushEveryIndexOnDisk();
 		// -> Go faire le parsing multi-thread maintenant !!
 		// Nécessaire d'avoir plusieurs fichiers, à voir plus tard.
 		
@@ -121,7 +121,7 @@ public class IndexTreeTest {
 		
 	}*/
 	
-	protected boolean doItWithTableHandler = true;
+	protected boolean doItWithTableHandler = false;
 	
 	@Test
 	void testIndexTreeDic() throws Exception {
@@ -140,6 +140,7 @@ public class IndexTreeTest {
 		
 		if (doItWithTableHandler) {
 			//tableHandler.indexColumnWithTreeFromDisk("tpep_pickup_datetime");
+			//tableHandler.indexColumnWithTreeFromDisk("trip_distance");
 			
 			
 			String stringDateFrom = "2015-04-04 00:00:00";//"2015-04-04 00:01:00";//

@@ -246,6 +246,7 @@ public class IndexTreeDic extends Index {
 				// Lire la donnée
 				Object readValue = columnDataType.readIndexValue(fileAsStream, columnValueAsByteArray);//fileAsStream, columnValueAsByteArray);
 				// Ajouter la donnée à l'arbre
+				//Log.info("readValue = " + readValue);
 				this.addValue(readValue, lineIndex * totalLineSize); // new Integer() creating a new Integer is quite slow ><" (but the bottle neck really is I/O on disk)
 				
 				/*débugs int valueAsInt = ((Integer) readValue).intValue();
@@ -379,7 +380,7 @@ public class IndexTreeDic extends Index {
 		associatedBinIndexes = new TreeMap<Object, LongArrayList>(); // réinitialisation
 		currentTotalEntrySizeInMemory = 0;
 		
-		if (showMemUsageAtEachFlush) MemUsage.printMemUsage();
+		if (showMemUsageAtEachFlush) MemUsage.printMemUsage("IndexTreeDic.flushOnDisk");//, baseSaveFilePath = " + baseSaveFilePath);
 	}
 	
 	/** Ecrire l'index sur le disque
@@ -742,6 +743,7 @@ public class IndexTreeDic extends Index {
 	 *  @throws Exception 
 	 */
 	public Collection<LongArrayList> findMatchingBinIndexes(Object minValueExact, Object maxValueExact, boolean isInclusive, boolean justEvaluateResultNumber) throws Exception { // NavigableMap<Integer, IntegerArrayList> findSubTree
+		this.flushOnDisk();
 		Collection<LongArrayList> fromDisk = findMatchingBinIndexesFromDisk(minValueExact, maxValueExact, isInclusive, justEvaluateResultNumber);
 		Collection<LongArrayList> fromMemory = findMatchingBinIndexesFromMemory(minValueExact, maxValueExact, isInclusive);
 		
@@ -770,7 +772,7 @@ public class IndexTreeDic extends Index {
 		if (argMinValueExact.getClass() != argMaxValueExact.getClass()) throw new Exception("findMatchingBinIndexesFromDisk : Les types d'objets min et max ne correspondant pas.");
 		
 		final Object minValueExact = argMinValueExact;
-		final Object maxValueExact = argMinValueExact;
+		final Object maxValueExact = argMaxValueExact;
 		
 		// Lecture du dernier float écrit dans le disque, i.e. de la position de la table de routage de l'arbre principal
 		/**

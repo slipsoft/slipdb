@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.dant.utils.Log;
+
 import db.data.DataType;
 import db.data.LongArrayList;
 import db.parsers.CsvParser;
@@ -93,9 +95,16 @@ public class STableHandler {
 		List<Column> columnList = associatedTable.getColumns();
 		if (columnIndex < 0 || columnIndex >= columnList.size()) throw new Exception("Index de la colonne invalide. (columnIndex=" + columnIndex + " non compris entre 0 et columnList.size()=" + columnList.size());
 		
-		IndexTreeDic indexingObject = new IndexTreeDic();
-		indexTreeList.add(indexingObject);
-		indexingObject.indexColumnFromDisk(associatedTable, columnIndex);
+		
+		IndexTreeDic alreadyExistingTree = findTreeAssociatedWithColumnIndex(columnIndex);
+		Log.info("Arbre existe = " + alreadyExistingTree);
+		if (alreadyExistingTree == null) {
+			alreadyExistingTree = new IndexTreeDic();
+			indexTreeList.add(alreadyExistingTree);
+		}
+		
+		//IndexTreeDic indexingObject = new IndexTreeDic();
+		alreadyExistingTree.indexColumnFromDisk(associatedTable, columnIndex);
 	}
 	
 	
@@ -114,13 +123,18 @@ public class STableHandler {
 		List<Column> columnList = associatedTable.getColumns();
 		if (columnIndex < 0 || columnIndex >= columnList.size()) throw new Exception("Index de la colonne invalide. (columnIndex=" + columnIndex + " non compris entre 0 et columnList.size()=" + columnList.size());
 		
+		IndexTreeDic alreadyExistingTree = findTreeAssociatedWithColumnIndex(columnIndex);
+		if (alreadyExistingTree == null) {
+			alreadyExistingTree = new IndexTreeDic();
+			indexTreeList.add(alreadyExistingTree);
+		}
+		
 		SRuntimeIndexingEntry indexEntry = new SRuntimeIndexingEntry();
-		indexEntry.associatedIndexTree = new IndexTreeDic();
+		indexEntry.associatedIndexTree = alreadyExistingTree;
 		indexEntry.associatedColumn = columnList.get(columnIndex);
 		indexEntry.associatedTable = associatedTable;
 		indexEntry.columnIndex = columnIndex;
 		runtimeIndexingList.add(indexEntry);
-		indexTreeList.add(indexEntry.associatedIndexTree);
 		indexEntry.associatedIndexTree.initialiseWithTableAndColumn(associatedTable, columnIndex); // Pour pouvoir indexer au runtime (lors du parsing)
 	}
 	
@@ -138,6 +152,15 @@ public class STableHandler {
 		
 	//}
 	
+	public IndexTreeDic findTreeAssociatedWithColumnIndex(int columnIndex) {
+		for (IndexTreeDic indexTree : indexTreeList) {
+			if (indexTree.getAssociatedTableColumnIndex() == columnIndex) {
+				return indexTree;
+			}
+		}
+		return null;
+	}
+	
 	
 	public Collection<LongArrayList> findIndexedResultsOfColumn(String columnName, Object minValue, Object maxValue, boolean inclusive) throws Exception {
 		int columnIndex = getColumnIndex(columnName);
@@ -147,13 +170,15 @@ public class STableHandler {
 		}
 		//return findIndexedResultsOfColumn();
 		
-		IndexTreeDic makeRequestOnThisTree = null;
-		for (IndexTreeDic indexTree : indexTreeList) {
+		IndexTreeDic makeRequestOnThisTree = findTreeAssociatedWithColumnIndex(columnIndex);
+		/*for (IndexTreeDic indexTree : indexTreeList) {
 			if (indexTree.getAssociatedTableColumnIndex() == columnIndex) {
 				makeRequestOnThisTree = indexTree;
 				break;
 			}
-		}
+		}*/
+		
+		
 		if (makeRequestOnThisTree == null) {
 			return new ArrayList<LongArrayList>();
 		}
@@ -212,7 +237,12 @@ public class STableHandler {
 		return resultArrayList;
 	}
 	
-	
+	public void flushEveryIndexOnDisk() throws IOException {
+		for (IndexTreeDic indexTree : indexTreeList) {
+			indexTree.flushOnDisk();
+		}
+		
+	}
 	
 	
 }
