@@ -27,6 +27,10 @@ public class STableHandler {
 	
 	protected ArrayList<IndexTreeDic> indexTreeList = new ArrayList<IndexTreeDic>(); // Liste des IndexTree associés à cette table
 	
+	public void forceAppendNotFirstParsing() {
+		firstTimeParsingData = false;
+	}
+	
 	public String getTableName() {
 		return tableName;
 	}

@@ -38,7 +38,7 @@ public class IndexTreeTest {
 	protected static Utils currentlyUsedUils = new Utils(); // For thread-safety ! (but, here, it's static so thread unsafe... ^^')
 	protected static STableHandler tableHandler;
 	
-	protected static boolean parseAgain = true;
+	protected static boolean parseAgain = false;
 	
 	@BeforeAll
 	static void setUpBeforeAll() throws Exception {
@@ -87,6 +87,8 @@ public class IndexTreeTest {
 		
 		if (parseAgain) {
 			Timer parseTimer = new Timer("Temps pris par le parsing");
+			tableHandler.forceAppendNotFirstParsing();
+			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-12.csv", true);
 			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			//tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv", true);
 			// tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); Fichiers identiques, donc 2 fois plus de résultats !
@@ -139,12 +141,19 @@ public class IndexTreeTest {
 		int indexingColumnIndex = 1; // date pickup
 		
 		if (doItWithTableHandler) {
+
+			Timer localTimer = new Timer("Temps pris pour indexer tpep_pickup_datetime");
 			tableHandler.indexColumnWithTreeFromDisk("tpep_pickup_datetime");
+			tableHandler.indexColumnWithTreeFromDisk("tpep_dropoff_datetime");
+			tableHandler.indexColumnWithTreeFromDisk("trip_distance");
+			tableHandler.indexColumnWithTreeFromDisk("pickup_longitude");
+			tableHandler.indexColumnWithTreeFromDisk("pickup_latitude");
+			localTimer.log();
 			//tableHandler.indexColumnWithTreeFromDisk("trip_distance");
 			
 			
-			String stringDateFrom = "2015-04-04 00:00:00";//"2015-04-04 00:01:00";//
-			String stringDateTo = "2015-04-04 03:20:00";//"2015-04-04 00:18:57";//
+			String stringDateFrom = "2015-11-04 00:00:00";//"2015-04-04 00:01:00";//
+			String stringDateTo = "2015-11-04 03:20:00";//"2015-04-04 00:18:57";//
 			
 			Date dateFrom = currentlyUsedUils.dateFromString(stringDateFrom);
 			Date dateTo = currentlyUsedUils.dateFromString(stringDateTo);
