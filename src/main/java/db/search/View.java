@@ -5,8 +5,8 @@ import java.util.List;
 
 public class View {
 
-	List<Filter> filtersList = new ArrayList<>();
-	List<Field>  fieldsList  = new ArrayList<>();
-	List<Sort>   sortsList   = new ArrayList<>();
+	FilterTerm filter;
+	List<Field>  fields  = new ArrayList<>();
+	List<Sort>   sorts   = new ArrayList<>();
 	Group groupBy;
 }

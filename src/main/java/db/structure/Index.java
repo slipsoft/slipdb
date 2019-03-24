@@ -5,8 +5,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import db.search.Filter;
 import db.search.Operable;
+import db.search.Predicate;
 
 /**
  * Classe Index, permettant d'indexer une ou plusieurs colonnes Exemple :
@@ -52,9 +52,9 @@ public abstract class Index implements Operable {
 		return indexedColumnsList;
 	}
 	
-	public boolean canBeUsedWithFilter(Filter filter) {
-		boolean containsColumn = ArrayUtils.contains(indexedColumnsList, filter.getColumn());
-		boolean isOperatorCompatible = this.isOperatorCompatible(filter.getOperator());
+	public boolean canBeUsedWithPredicate(Predicate predicate) {
+		boolean containsColumn = ArrayUtils.contains(indexedColumnsList, predicate.getColumn());
+		boolean isOperatorCompatible = this.isOperatorCompatible(predicate.getOperator());
 		return containsColumn && isOperatorCompatible;
 	}
 }
