@@ -1,5 +1,7 @@
 package db.structure.recherches;
 
+import java.io.IOException;
+
 import db.structure.Column;
 import db.structure.Table;
 import db.structure.indexTree.IndexTreeDic;
@@ -9,7 +11,7 @@ public class SRuntimeIndexingEntry implements Comparable<SRuntimeIndexingEntry> 
 	// Support des index mono-colonne uniquement, à ce jour
 	
 	public int columnIndex;
-	public IndexTreeDic associatedIndex;
+	public IndexTreeDic associatedIndexTree;
 	public Table associatedTable;
 	public Column associatedColumn;
 	
@@ -21,6 +23,8 @@ public class SRuntimeIndexingEntry implements Comparable<SRuntimeIndexingEntry> 
 		return -1;
 	}
 	
-	
+	public void addIndexValue(Object argAssociatedValue, Long binIndex) throws IOException {
+		associatedIndexTree.addValue(argAssociatedValue, binIndex);
+	}
 	
 }

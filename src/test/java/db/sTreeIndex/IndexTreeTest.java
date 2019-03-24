@@ -70,10 +70,22 @@ public class IndexTreeTest {
 		tableHandler.addColumn("total_amount", new FloatType());
 		
 		table = tableHandler.createTable();
+
+		tableHandler.createRuntimeIndexingColumn(1);
+		/*tableHandler.createRuntimeIndexingColumn(2);
+		tableHandler.createRuntimeIndexingColumn(3);
+		tableHandler.createRuntimeIndexingColumn(4);
+		tableHandler.createRuntimeIndexingColumn(5);
+		tableHandler.createRuntimeIndexingColumn(6);
+		tableHandler.createRuntimeIndexingColumn(7);
+		tableHandler.createRuntimeIndexingColumn(8);
+		tableHandler.createRuntimeIndexingColumn(9);
+		tableHandler.createRuntimeIndexingColumn(10);*/
 		
 		if (parseAgain) {
 			Timer parseTimer = new Timer("Temps pris par le parsing");
-			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
+			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			//tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv", true);
 			// tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); Fichiers identiques, donc 2 fois plus de résultats !
 			parseTimer.log();
 		}
@@ -106,6 +118,8 @@ public class IndexTreeTest {
 		
 	}*/
 	
+	protected boolean doItWithTableHandler = true;
+	
 	@Test
 	void testIndexTreeDic() throws Exception {
 		//if (true) return;
@@ -121,135 +135,171 @@ public class IndexTreeTest {
 		//int indexingColumnIndex = 5; // latitude
 		int indexingColumnIndex = 1; // date pickup
 		
-		//tableHandler.indexColumnWithTreeFromDisk("tpep_pickup_datetime");
-		
-		
-		
-		Column indexThisColumn = table.getColumns().get(indexingColumnIndex);
-		
-		//System.out.println("OUOUOUOU " + indexThisColumn.minValue + "  " +  indexThisColumn.maxValue);
-		
-		//IndexTreeCeption indexingObject = new IndexTreeCeption(0, null, indexThisColumn.minValue, indexThisColumn.maxValue);
-		IndexTreeDic indexingObject = new IndexTreeDic();//Integer.class);
-		
-		
-		//indexingObject.initializeMaxDistanceBetweenElementsArray(indexThisColumn.minValue, indexThisColumn.maxValue);
-		
-		// Index the column from the disk
-		// -> reading fron the disk is quite slow
-		// --> a very cool optimization will be to index a bunch of columns at the same time
-		Timer loadFromDiskTimer = new Timer("Time took to index this column, from disk");
-		MemUsage.printMemUsage();
-		indexingObject.indexColumnFromDisk(table, indexingColumnIndex);
-		MemUsage.printMemUsage();
-		loadFromDiskTimer.log();
-		
-		// Ecriture sur le disque
-		Timer writeIndexToDiskTimer = new Timer("Temps pris pour l'écriture sur disque");
-		//indexingObject.flushOnDisk();
-		//indexingObject.saveOnDisk(false); // première sauvegarde, écraser ce qui existe déjà
-		writeIndexToDiskTimer.log();
-		
-		
-		Log.info("Fini");
-		Log.info("OBJECT RESULT :");
-		
-		// Get the query result
-		Collection<LongArrayList> result;
-		MemUsage.printMemUsage();
-		
-		String stringDateFrom = "2015-04-04 00:00:00";//"2015-04-04 00:01:00";//
-		String stringDateTo = "2015-04-04 03:20:00";//"2015-04-04 00:18:57";//
-		
-		Date dateFrom = currentlyUsedUils.dateFromString(stringDateFrom);
-		Date dateTo = currentlyUsedUils.dateFromString(stringDateTo);
-		int intDateFrom = Utils.dateToSecInt(dateFrom);
-		int intDateTo = Utils.dateToSecInt(dateTo);
-		
-		/*Object searchFromValue = new Float(12.78641);
-		Object searchToValue = new Float(14.748621);*/
-
-		
-		Object searchFromValue = intDateFrom;//stringDateFrom;//
-		Object searchToValue = intDateTo;//stringDateTo;//
-		
-		
-		// à faire : supprimer la recherche en mémoire, il n'y a plus rien en mémoire.
-		result = indexingObject.findMatchingBinIndexesInMemory(searchFromValue, searchToValue, true); // new Float(20), new Float(21)
-		
-		//result = indexingObject.findMatchingBinIndexesInMemory(intDateFrom, intDateTo, true);
-		
-		//result = indexingObject.findMatchingBinIndexes(new Integer(-1000), new Integer(1000), true);
-
-		
-		Timer searchQueryTimer = new Timer("Time took to return the matching elements");
-		Timer searchQueryFullTimer = new Timer("Time took to return the matching elements + size evaluation");
-		
-		//result = indexingObject.findMatchingBinIndexes(new Byte((byte)0), new Byte((byte)100), true);
-		//result = indexingObject.findMatchingBinIndexes(new Double(0), new Double(0), true);
-		
-		
-		MemUsage.printMemUsage();
-		searchQueryTimer.log();
-		Column indexingColumn = table.getColumns().get(indexingColumnIndex);
-		
-		// Iterates over all the results
-		int numberOfResults = 0, numberOfLines = 0;
-		for (LongArrayList list : result) {
-			//Log.info("list size = " + list.size());
-			numberOfResults += list.size();
-			numberOfLines++;
-			if (false)
-			for (Long index : list) {
-				// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
-				//Log.info("  index = " + index);
-				List<Object> objList = table.getValuesOfLineById(index);
-				Object indexedValue = objList.get(indexingColumnIndex);
-				//indexingColumn.getDataType().
-				Log.info("  valeur indexée = " + indexedValue);
-				//Log.info("  objList = " + objList);
-				
-			}
-		}
-		searchQueryFullTimer.log();
-		Log.info("Number of results = " + numberOfResults);
-		Log.info("Number of lines = " + numberOfLines);
-		
-		
-		Log.info("Depuis le disque : ");
-		Timer searchFromDiskTimer = new Timer("Temps pris pour la recherche du disque");
-
-		result = indexingObject.findMatchingBinIndexesFromDisk(searchFromValue, searchToValue, true, false);
-		//result = indexingObject.findMatchingBinIndexesFromDisk(intDateFrom, intDateTo, true);
-		searchFromDiskTimer.log();
-		
-		boolean showAllResults = false;
-		
-		// Iterates over all the results
-		numberOfResults = 0;
-		numberOfLines = 0;
-		for (LongArrayList list : result) {
-			//Log.info("list size = " + list.size());
-			numberOfResults += list.size();
-			numberOfLines++;
-			//Log.info("Line("+numberOfLines+") : nb=" + list.size());
+		if (doItWithTableHandler) {
+			//tableHandler.indexColumnWithTreeFromDisk("tpep_pickup_datetime");
 			
-			if (showAllResults) {
+			
+			String stringDateFrom = "2015-04-04 00:00:00";//"2015-04-04 00:01:00";//
+			String stringDateTo = "2015-04-04 03:20:00";//"2015-04-04 00:18:57";//
+			
+			Date dateFrom = currentlyUsedUils.dateFromString(stringDateFrom);
+			Date dateTo = currentlyUsedUils.dateFromString(stringDateTo);
+			int intDateFrom = Utils.dateToSecInt(dateFrom);
+			int intDateTo = Utils.dateToSecInt(dateTo);
+			
+			/*Object searchFromValue = new Float(12.78641);
+			Object searchToValue = new Float(14.748621);*/
+	
+			
+			Object searchFromValue = intDateFrom;//stringDateFrom;//
+			Object searchToValue = intDateTo;//stringDateTo;//
+			
+
+			Timer searchQueryTimer = new Timer("Temps total recherche"); // "Time took to return the matching elements" : flemme d'écrire en anglais
+			
+			Collection<LongArrayList> result = tableHandler.findIndexedResultsOfColumn("tpep_pickup_datetime", searchFromValue, searchToValue, true);
+			searchQueryTimer.log();
+			//trip_distance
+
+			Timer searchQueryFullTimer = new Timer("Temps parcours des résultats");
+			int numberOfResults = tableHandler.evaluateNumberOfResults(result);
+			int numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
+			searchQueryFullTimer.log();
+			Log.info("Nombre de résultats = " + numberOfResults);
+			Log.info("Nombre de lignes = " + numberOfLines);
+			
+			
+			
+			
+			
+		} else {
+		
+			
+			Column indexThisColumn = table.getColumns().get(indexingColumnIndex);
+			
+			//System.out.println("OUOUOUOU " + indexThisColumn.minValue + "  " +  indexThisColumn.maxValue);
+			
+			//IndexTreeCeption indexingObject = new IndexTreeCeption(0, null, indexThisColumn.minValue, indexThisColumn.maxValue);
+			IndexTreeDic indexingObject = new IndexTreeDic();//Integer.class);
+			
+			
+			//indexingObject.initializeMaxDistanceBetweenElementsArray(indexThisColumn.minValue, indexThisColumn.maxValue);
+			
+			// Index the column from the disk
+			// -> reading fron the disk is quite slow
+			// --> a very cool optimization will be to index a bunch of columns at the same time
+			Timer loadFromDiskTimer = new Timer("Time took to index this column, from disk");
+			MemUsage.printMemUsage();
+			indexingObject.indexColumnFromDisk(table, indexingColumnIndex);
+			MemUsage.printMemUsage();
+			loadFromDiskTimer.log();
+			
+			// Ecriture sur le disque
+			Timer writeIndexToDiskTimer = new Timer("Temps pris pour l'écriture sur disque");
+			//indexingObject.flushOnDisk();
+			//indexingObject.saveOnDisk(false); // première sauvegarde, écraser ce qui existe déjà
+			writeIndexToDiskTimer.log();
+			
+			
+			Log.info("Fini");
+			Log.info("OBJECT RESULT :");
+			
+			// Get the query result
+			Collection<LongArrayList> result;
+			MemUsage.printMemUsage();
+			
+			String stringDateFrom = "2015-04-04 00:00:00";//"2015-04-04 00:01:00";//
+			String stringDateTo = "2015-04-04 03:20:00";//"2015-04-04 00:18:57";//
+			
+			Date dateFrom = currentlyUsedUils.dateFromString(stringDateFrom);
+			Date dateTo = currentlyUsedUils.dateFromString(stringDateTo);
+			int intDateFrom = Utils.dateToSecInt(dateFrom);
+			int intDateTo = Utils.dateToSecInt(dateTo);
+			
+			/*Object searchFromValue = new Float(12.78641);
+			Object searchToValue = new Float(14.748621);*/
+	
+			
+			Object searchFromValue = intDateFrom;//stringDateFrom;//
+			Object searchToValue = intDateTo;//stringDateTo;//
+			
+			
+			// à faire : supprimer la recherche en mémoire, il n'y a plus rien en mémoire.
+			result = indexingObject.findMatchingBinIndexesFromMemory(searchFromValue, searchToValue, true); // new Float(20), new Float(21)
+			
+			//result = indexingObject.findMatchingBinIndexesInMemory(intDateFrom, intDateTo, true);
+			
+			//result = indexingObject.findMatchingBinIndexes(new Integer(-1000), new Integer(1000), true);
+	
+			
+			Timer searchQueryTimer = new Timer("Time took to return the matching elements");
+			Timer searchQueryFullTimer = new Timer("Time took to return the matching elements + size evaluation");
+			
+			//result = indexingObject.findMatchingBinIndexes(new Byte((byte)0), new Byte((byte)100), true);
+			//result = indexingObject.findMatchingBinIndexes(new Double(0), new Double(0), true);
+			
+			
+			MemUsage.printMemUsage();
+			searchQueryTimer.log();
+			Column indexingColumn = table.getColumns().get(indexingColumnIndex);
+			
+			// Iterates over all the results
+			int numberOfResults = 0, numberOfLines = 0;
+			for (LongArrayList list : result) {
+				//Log.info("list size = " + list.size());
+				numberOfResults += list.size();
+				numberOfLines++;
+				if (false)
 				for (Long index : list) {
 					// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
+					//Log.info("  index = " + index);
 					List<Object> objList = table.getValuesOfLineById(index);
 					Object indexedValue = objList.get(indexingColumnIndex);
-					Log.info("  index = " + index + "   val = " + indexedValue);
-					
-					//Log.info("  valeur indexée = " + indexedValue);
+					//indexingColumn.getDataType().
+					Log.info("  valeur indexée = " + indexedValue);
 					//Log.info("  objList = " + objList);
 					
 				}
 			}
+			searchQueryFullTimer.log();
+			Log.info("Number of results = " + numberOfResults);
+			Log.info("Number of lines = " + numberOfLines);
+			
+			
+			Log.info("Depuis le disque : ");
+			Timer searchFromDiskTimer = new Timer("Temps pris pour la recherche du disque");
+	
+			result = indexingObject.findMatchingBinIndexesFromDisk(searchFromValue, searchToValue, true, false);
+			//result = indexingObject.findMatchingBinIndexesFromDisk(intDateFrom, intDateTo, true);
+			searchFromDiskTimer.log();
+			
+			boolean showAllResults = false;
+			
+			// Iterates over all the results
+			numberOfResults = 0;
+			numberOfLines = 0;
+			for (LongArrayList list : result) {
+				//Log.info("list size = " + list.size());
+				numberOfResults += list.size();
+				numberOfLines++;
+				//Log.info("Line("+numberOfLines+") : nb=" + list.size());
+				
+				if (showAllResults) {
+					for (Long index : list) {
+						// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
+						List<Object> objList = table.getValuesOfLineById(index);
+						Object indexedValue = objList.get(indexingColumnIndex);
+						Log.info("  index = " + index + "   val = " + indexedValue);
+						
+						//Log.info("  valeur indexée = " + indexedValue);
+						//Log.info("  objList = " + objList);
+						
+					}
+				}
+			}
+			Log.info("Number of results = " + numberOfResults);
+			Log.info("Number of lines = " + numberOfLines);
 		}
-		Log.info("Number of results = " + numberOfResults);
-		Log.info("Number of lines = " + numberOfLines);
-		
 	}
 	
 	//@Test

@@ -4,12 +4,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 
-import com.dant.utils.Log;
-
 import db.data.DataType;
+import db.data.LongArrayList;
 import db.parsers.CsvParser;
 import db.structure.Column;
 import db.structure.Table;
@@ -53,10 +52,15 @@ public class STableHandler {
 		return associatedTable;
 	}
 	
-	public void parseCsvData(String csvPath) throws Exception {
+	public void parseCsvData(String csvPath, boolean doRuntimeIndexing) throws Exception {
 		if (associatedTable == null) throw new Exception("La table associée est null, elle doit être crée via createTable avant tout parsing.");
 		if (csvParser == null)
 			csvParser = new CsvParser(associatedTable);
+		
+		if (doRuntimeIndexing)
+			csvParser.setRuntimeIndexing(runtimeIndexingList);
+		else
+			csvParser.setRuntimeIndexing(null);
 		
 		InputStream is = new FileInputStream(csvPath);
 		csvParser.parse(is, !firstTimeParsingData);
@@ -102,7 +106,7 @@ public class STableHandler {
 	
 	
 	// indexColumnList est la liste des colonnes à indexer
-	public ArrayList<SRuntimeIndexingEntry> runtimeIndexingList = new ArrayList<SRuntimeIndexingEntry>();
+	public SRuntimeIndexingEntryList runtimeIndexingList = new SRuntimeIndexingEntryList();//ArrayList<SRuntimeIndexingEntry>();
 	
 	
 	public void createRuntimeIndexingColumn(int columnIndex) throws Exception { // addInitialColumnAndCreateAssociatedIndex
@@ -111,12 +115,13 @@ public class STableHandler {
 		if (columnIndex < 0 || columnIndex >= columnList.size()) throw new Exception("Index de la colonne invalide. (columnIndex=" + columnIndex + " non compris entre 0 et columnList.size()=" + columnList.size());
 		
 		SRuntimeIndexingEntry indexEntry = new SRuntimeIndexingEntry();
-		indexEntry.associatedIndex = new IndexTreeDic();
+		indexEntry.associatedIndexTree = new IndexTreeDic();
 		indexEntry.associatedColumn = columnList.get(columnIndex);
 		indexEntry.associatedTable = associatedTable;
 		indexEntry.columnIndex = columnIndex;
 		runtimeIndexingList.add(indexEntry);
-		
+		indexTreeList.add(indexEntry.associatedIndexTree);
+		indexEntry.associatedIndexTree.initialiseWithTableAndColumn(associatedTable, columnIndex); // Pour pouvoir indexer au runtime (lors du parsing)
 	}
 	
 	
@@ -127,16 +132,76 @@ public class STableHandler {
 		
 	//}
 	
-	/*
-	public ArrayList<Integer> findIndexedResultsOfColumn(String comumnName, Object minValue, Object maxValue, boolean inclusive) {
-		int colIndex = getColumnIndex(comumnName);
-		if (colIndex == -1) throw new Exception("Colonne introuvable, impossible de faire une recherche sur ses index.");
+	
+	public Collection<LongArrayList> findIndexedResultsOfColumn(String columnName, Object minValue, Object maxValue, boolean inclusive) throws Exception {
+		int columnIndex = getColumnIndex(columnName);
+		if (columnIndex == -1) throw new Exception("Colonne introuvable, impossible de faire une recherche sur ses index.");
 		//return findIndexedResultsOfColumn();
 		
+		IndexTreeDic makeRequestOnThisTree = null;
+		for (IndexTreeDic indexTree : indexTreeList) {
+			if (indexTree.getAssociatedTableColumnIndex() == columnIndex) {
+				makeRequestOnThisTree = indexTree;
+				break;
+			}
+		}
+		if (makeRequestOnThisTree == null) {
+			return new ArrayList<LongArrayList>();
+		}
+		return makeRequestOnThisTree.findMatchingBinIndexes(minValue, maxValue, inclusive, false);
+	}
+
+	
+	public int evaluateNumberOfResults(Collection<LongArrayList> resultsCollection) {
+		// Iterates over all the results
+		int numberOfResults = 0;
+		for (LongArrayList longList : resultsCollection) {
+			//Log.info("list size = " + list.size());
+			numberOfResults += longList.size();
+			//numberOfLines++;
+			/*if (false)
+			for (Long index : longList) {
+				// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
+				//Log.info("  index = " + index);
+				List<Object> objList = table.getValuesOfLineById(index);
+				Object indexedValue = objList.get(indexingColumnIndex);
+				//indexingColumn.getDataType().
+				Log.info("  valeur indexée = " + indexedValue);
+				//Log.info("  objList = " + objList);
+			}*/
+		}
+		return numberOfResults;
+	}
+
+	//trip_distance
+	public int evaluateNumberOfArrayListLines(Collection<LongArrayList> resultsCollection) {
+		return resultsCollection.size();
+	}
+	
+	//trip_distance
+	public ArrayList<ArrayList<Object>> getFullResultsFromBinIndexes(Collection<LongArrayList> resultsCollection) throws Exception { // table connue ! , Table fromTable) {
+		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");
 		
-	}*/
-	
-	
+		ArrayList<ArrayList<Object>> resultArrayList = new ArrayList<ArrayList<Object>>();
+		
+		// Pour toutes les listes de valeurs identiques
+		// (il peut y avoir des listes distinctes associés à une même valeur indexée, du fait du multi-fichiers / multi-thread)
+		for (LongArrayList longList : resultsCollection) {
+			//Log.info("list size = " + list.size());
+			for (Long binIndex : longList) {
+				// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
+				//Log.info("  index = " + index);
+				ArrayList<Object> objList = associatedTable.getValuesOfLineById(binIndex);
+				resultArrayList.add(objList);
+				
+				//Object indexedValue = objList.get(indexingColumnIndex);
+				//indexingColumn.getDataType().
+				//Log.info("  valeur indexée = " + indexedValue);
+				//Log.info("  objList = " + objList);
+			}
+		}
+		return resultArrayList;
+	}
 	
 	
 }

@@ -4,6 +4,7 @@ import java.text.NumberFormat;
 
 public class MemUsage {
 	
+	
 	public static void printMemUsage() {
 		Runtime runtime = Runtime.getRuntime();
 

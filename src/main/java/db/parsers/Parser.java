@@ -2,6 +2,7 @@ package db.parsers;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -29,6 +30,11 @@ public abstract class Parser {
 	public Parser(Table schema) {
 		this.schema = schema;
 		this.lineByteSize = schema.getLineSize();
+	}
+	
+	// Pour indexer au moment du parsing
+	public void setRuntimeIndexing(SRuntimeIndexingEntryList argIndexingEntryList) {
+		runtimeIndexingEntries = argIndexingEntryList;
 	}
 	
 	public final void parse(InputStream input, boolean appendAtTheEndOfSave) {
@@ -86,9 +92,15 @@ public abstract class Parser {
 	
 	
 	
-	protected final void writeEntry(String entryString, OutputStream output) throws IncorrectEntryException, IOException {
+	/** Ecriture d'une entrée (ligne, donnée complète) sur un DataOutputStream (nécessaire pour avoir le fonction .size())
+	 *  @param entryString
+	 *  @param output
+	 *  @throws IncorrectEntryException
+	 *  @throws IOException
+	 */
+	protected final void writeEntry(String entryString, /*OutputStream*/DataOutputStream output) throws IncorrectEntryException, IOException {
 		String[] valuesAsStringArray = processEntry(entryString);
-
+		
 		if (!isCorrectSize(valuesAsStringArray)) {
 			throw new IncorrectEntryException(totalEntryCount, "incorrect size");
 			// -> will be handled Nicolas' way ? yes
@@ -96,6 +108,8 @@ public abstract class Parser {
 		// the buffer used to store the line data as an array of bytes
 		ByteBuffer entryBuffer = ByteBuffer.allocate(lineByteSize);
 		Object[] entry = new Object[valuesAsStringArray.length];
+		
+		long entryBinIndex = output.size();
 		try {
 		// for each column, parse and write data into entryBuffer
 			for (int columnIndex = 0; columnIndex < schema.getColumns().size(); columnIndex++) {
@@ -105,11 +119,15 @@ public abstract class Parser {
 				Object currentValue = currentColumn.writeToBuffer(valuesAsStringArray[columnIndex], entryBuffer);
 				currentColumn.evaluateMinMax(currentValue); // <- Indispensable pour le IndexTreeCeption (non utile pour le IndexTreeDic)
 				// Indexer au moment de parser (pour de meilleures performances)
+				
 				if (runtimeIndexingEntries != null) {
 					SRuntimeIndexingEntry indexingEntry = runtimeIndexingEntries.getEntryAssociatedWithColumnIndex(columnIndex);
 					if (indexingEntry != null) {
-						
+						// Indexer cette entrée
+						indexingEntry.addIndexValue(currentValue, entryBinIndex);
+						//Log.info("Indexer valeur = " + currentValue);
 					}
+					//Log.info("Indexer2 valeur = " + currentValue);
 				}
 				
 				
