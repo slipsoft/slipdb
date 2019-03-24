@@ -72,7 +72,7 @@ public class IndexTreeTest {
 		table = tableHandler.createTable();
 
 		//tableHandler.createRuntimeIndexingColumn("tpep_pickup_datetime");
-		tableHandler.createRuntimeIndexingColumn("trip_distance");
+		tableHandler.createRuntimeIndexingColumn("trip_distance"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
 		
 		//tableHandler.createRuntimeIndexingColumn(1);
 		/*tableHandler.createRuntimeIndexingColumn(2);
@@ -121,7 +121,7 @@ public class IndexTreeTest {
 		
 	}*/
 	
-	protected boolean doItWithTableHandler = false;
+	protected boolean doItWithTableHandler = true;
 	
 	@Test
 	void testIndexTreeDic() throws Exception {
@@ -139,7 +139,7 @@ public class IndexTreeTest {
 		int indexingColumnIndex = 1; // date pickup
 		
 		if (doItWithTableHandler) {
-			//tableHandler.indexColumnWithTreeFromDisk("tpep_pickup_datetime");
+			tableHandler.indexColumnWithTreeFromDisk("tpep_pickup_datetime");
 			//tableHandler.indexColumnWithTreeFromDisk("trip_distance");
 			
 			
@@ -174,11 +174,12 @@ public class IndexTreeTest {
 			
 			
 			searchQueryTimer = new Timer("Temps total recherche");
-			result = tableHandler.findIndexedResultsOfColumn("trip_distance", 12.78f, 18f, true);
+			result = tableHandler.findIndexedResultsOfColumn("trip_distance", 16.78f, 18f, true);
 			searchQueryTimer.log();
-			searchQueryFullTimer = new Timer("Temps parcours des résultats");
+			searchQueryFullTimer = new Timer("Temps d'acquisition des résultats (chargement du disque de tous les champs)");
 			numberOfResults = tableHandler.evaluateNumberOfResults(result);
 			numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
+			
 			tableHandler.getFullResultsFromBinIndexes(result);
 			
 			searchQueryFullTimer.log();

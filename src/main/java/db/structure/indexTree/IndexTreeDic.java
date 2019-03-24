@@ -69,7 +69,7 @@ public class IndexTreeDic extends Index {
 	 * 
 	 * 
 	 */
-	public int flushOnDiskOnceReachedThisTotalEntrySize = 20_000_000; // <- Globalement, la taille des fichiers mis sur le disque     ancien : EntryNumber
+	public int flushOnDiskOnceReachedThisTotalEntrySize = 10_000_000; // <- Globalement, la taille des fichiers mis sur le disque     ancien : EntryNumber
 	protected int currentTotalEntrySizeInMemory = 0; // nombre actuel de résultats en mémoire vive, multiplié par la taille de chaque résultat (en octets) (utile pour le flush sur le disque)
 	public boolean useMultithreadSearch = true;
 	public boolean showMemUsageAtEachFlush = true;

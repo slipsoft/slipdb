@@ -61,6 +61,17 @@
 	SELECT … WHERE … GROUP BY
 	
 	SELECT : sélectionner une colonne
+	
+	2019-03-24 - 23h
+		Les fichiers de sauvegarde semblent être limités à 4Go.
+		-> Faire un système de sauvegarde propre au moteur :
+			- Plusieurs fichiers sur le disque, un path (String) et un AtomicBoolean pour dire si le fichier est utilisé (en écriture ou non et un AtomicBoolean pour la lecture, plus tard)
+			- Parsing multi-thread : écriture dans un des fichiers libres (non utilisé) et dont la taille est valide (inférieure à une certaine taile, 1go par exemple)
+			- Les binIndex des données devront être stockées sous la forme (id fichier)(position dans fichier), (int)(int) ou (short)(int), je garde double au début, au moins
+			- Important : écriture de l'état d'un IndexTreeDic sur le disque, pour pouvoir le charger du disque et le réutiliser, sans avoir à le re-créer à chaque fois
+		
+		-> Serveur avec les 200Go de CSV chargés, requêtes simples à faire dessus, pour montrer qu'on peut parser beaucoup de donnée
+	
 */
 
 
