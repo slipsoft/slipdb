@@ -46,7 +46,7 @@ public class IndexTreeTest {
 		
 		tableHandler = SGlobalHandler.initializeTable("NYtest");
 		assertEquals(true, tableHandler != null);
-		
+
 		tableHandler.addColumn("VendorID", new ByteType());
 		// -> On a bien les mêmes résultats en castant la date et en la traîtant comme une string
 		tableHandler.addColumn("tpep_pickup_datetime", new DateType()); //new StringType(19));//
@@ -72,7 +72,7 @@ public class IndexTreeTest {
 		
 		if (parseAgain) {
 			Timer parseTimer = new Timer("Temps pris par le parsing");
-			tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv");
+			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
 			// tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); Fichiers identiques, donc 2 fois plus de résultats !
 			parseTimer.log();
 		}
@@ -120,7 +120,7 @@ public class IndexTreeTest {
 		//int indexingColumnIndex = 5; // latitude
 		int indexingColumnIndex = 1; // date pickup
 		
-		//tableHandler.indexColumnWithTree(1);//"tpep_pickup_datetime");
+		//tableHandler.indexColumnWithTreeFromDisk("tpep_pickup_datetime");
 		
 		
 		

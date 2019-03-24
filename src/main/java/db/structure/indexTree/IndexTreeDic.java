@@ -74,7 +74,8 @@ public class IndexTreeDic extends Index {
 	 * 
 	 * 
 	 */
-	public int flushOnDiskOnceReachedThisFileNumber = 2_000_000;
+	public int flushOnDiskOnceReachedThisTotalEntrySize = 3_000_000; // EntryNumber
+	protected int currentTotalEntrySizeInMemory = 0; // nombre actuel de résultats en mémoire vive, multiplié par la taille de chaque résultat (en octets) (utile pour le flush sur le disque)
 	public boolean useMultithreadSearch = true;
 	public boolean showMemUsageAtEachFlush = true;
 	public boolean forceGarbageCollectorAtEachFlush = false;
@@ -137,13 +138,15 @@ public class IndexTreeDic extends Index {
 	 *  @throws FileNotFoundException 
 	 */
 	
-
+	/* Débugs
 	String stringDateFrom = "2015-04-04 00:00:00";//"2015-04-04 00:01:00";//
 	String stringDateTo = "2015-04-04 03:20:00";//"2015-04-04 00:18:57";//
 	Date dateFrom = Utils.dateFromStringNoThreadSafe(stringDateFrom);
 	Date dateTo = Utils.dateFromStringNoThreadSafe(stringDateTo);
 	int intDateFrom = Utils.dateToSecInt(dateFrom);
-	int intDateTo = Utils.dateToSecInt(dateTo);
+	int intDateTo = Utils.dateToSecInt(dateTo);*/
+	
+	
 	
 	public void indexColumnFromDisk(Table inTable, int columnIndex) throws IOException {
 		//indexedColumnsList = new Column[0];
@@ -200,7 +203,7 @@ public class IndexTreeDic extends Index {
 		byte[] columnValueAsByteArray = new byte[dataSizeInBytes];
 		byte colListSize = (byte) columnsList.size();
 		
-		boolean benchFullRead = true;
+		boolean benchFullRead = false;
 		
 		while (currentBinPosition < fileSize) {
 		//while (true) {
@@ -222,59 +225,40 @@ public class IndexTreeDic extends Index {
 			fileAsStream.skip(skipBeforeData + dataSizeInBytes + skipAfterData);
 				-> Prend 70 ms
 			
+			
 			-> D'où la nécessité de faire des colonnes séparées ! (on réduit de BEAUCOUP le temps !)
 			*/
 			
 			if (benchFullRead == false) {
+				
 				// Seeks to the right position in the stream
-				
 				fileAsStream.skipForce(skipBeforeData);
-				/*long checkSkipBytesAmount = fileAsStream.skipBytes(skipBeforeData); //
-				if (checkSkipBytesAmount != skipBeforeData) {
-					Log.error("Fu Skip of .... 1");
-				}*/
 				
 				
-				//int bytesRead = 
-						fileAsStream.readFully(columnValueAsByteArray); // reads from the stream
-				//if (bytesRead == -1) // end of stream
-				//	break;
-				
-				//fileAsStream.readFully(columnValueAsByteArray);
-				Object readValue = columnDataType.readIndexValue(columnValueAsByteArray);//fileAsStream, columnValueAsByteArray);
+				// Lire la donnée
+				Object readValue = columnDataType.readIndexValue(fileAsStream, columnValueAsByteArray);//fileAsStream, columnValueAsByteArray);
+				// Ajouter la donnée à l'arbre
 				this.addValue(readValue, lineIndex); // new Integer() creating a new Integer is quite slow ><" (but the bottle neck really is I/O on disk)
 				
-				int valueAsInt = ((Integer) readValue).intValue();
+				/*débugs int valueAsInt = ((Integer) readValue).intValue();
 				if (intDateFrom <= valueAsInt && valueAsInt <= intDateTo) {
 					resultCount++;
 				}
-				
-				/*ancien débug 12h-24H à garder au cas où re-bug String valueAsString = (String) readValue;
+				ancien débug 12h-24H à garder au cas où re-bug String valueAsString = (String) readValue;
 				if ( (valueAsString.compareTo(stringDateFrom) >= 0) && (valueAsString.compareTo(stringDateTo) <= 0) ) {
 					Log.info("readValue = " + readValue);
 					resultCount++;
 				}*/
 				
+				//fileAsStream.skipForce(totalLineSize);
 				fileAsStream.skipForce(skipAfterData);
-				
-				/*
-				checkSkipBytesAmount = fileAsStream.skipBytes(skipAfterData);
-
-				if (checkSkipBytesAmount != skipAfterData) {
-					Log.error("Fu Skip of .... 2");
-				}*/
-				
 				currentBinPosition += totalLineSize; // = skipBeforeData + storedValueDataByteSize + skipAfterData;
+				
 			} else {
 				
 				// Bench : lecture de tous les champs de l'objet VS lecture d'un seul champ
 				for (byte iColumn = 0; iColumn < colListSize; iColumn++) {
 					Column col = columnsList.get(iColumn);
-					
-					/*byte[] bArr = new byte[col.getDataSize()];
-					int bytesRead = fileAsStream.read(bArr); // reads from the stream
-					if (bytesRead == -1) // end of stream
-						break;*/
 					
 					//byte[] dataAsByteArray = new byte[col.getDataSize()];
 					//fileAsStream.readFully(dataAsByteArray); // renvoie une exception si les données n'ont pas pu être lues
@@ -290,13 +274,7 @@ public class IndexTreeDic extends Index {
 			
 			inMemoryResults++;
 			
-			// S'il y a trop de valeurs mises en mémoire, j'écris l'index sur le disque et je retiens le nom du fichier écrit.
-			if (inMemoryResults > flushOnDiskOnceReachedThisFileNumber) {
-				flushOnDisk();
-				if (forceGarbageCollectorAtEachFlush) System.gc();
-				//Log.info("indexColumnFromDisk : SAVE ON DISK !!");
-				inMemoryResults = 0;
-			}
+			
 			
 			
 			// Display some contents, debuging :
@@ -307,7 +285,7 @@ public class IndexTreeDic extends Index {
 		//benchTime.printms();
 		
 		fileAsStream.close();
-		Log.info("MMMMMMMM resultCount = " + resultCount);
+		// débug Log.info("MMMMMMMM resultCount = " + resultCount);
 		
 		flushOnDisk();
 	}
@@ -317,8 +295,9 @@ public class IndexTreeDic extends Index {
 	/** Ajouter une valeur et un binIndex associé
 	 *  @param associatedValue valeur indexée, ATTENTION : doit être du type du IndexTree utilisé (Integer, Float, Byte, Double, ...)
 	 *  @param binIndex position (dans le fichier binaire global) de la donnée stockée dans la table
+	 * @throws IOException 
 	 */
-	public void addValue(Object argAssociatedValue, Integer binIndex) {
+	public void addValue(Object argAssociatedValue, Integer binIndex) throws IOException {
 		
 		// Je peux ajouter la donnée fine
 		IntegerArrayList binIndexList = associatedBinIndexes.get(argAssociatedValue);
@@ -327,6 +306,16 @@ public class IndexTreeDic extends Index {
 			associatedBinIndexes.put(argAssociatedValue, binIndexList);
 		}
 		binIndexList.add(binIndex);
+		currentTotalEntrySizeInMemory += storedValueDataByteSize;
+		//Log.info(" currentTotalEntrySizeInMemory = " + currentTotalEntrySizeInMemory + "  /  " + flushOnDiskOnceReachedThisTotalEntrySize + "  (storedValueDataByteSize = "+storedValueDataByteSize+")");
+		
+		// S'il y a trop de valeurs mises en mémoire, j'écris l'index sur le disque et je retiens le nom du fichier écrit.
+		if (currentTotalEntrySizeInMemory > flushOnDiskOnceReachedThisTotalEntrySize) {
+			flushOnDisk();
+			if (forceGarbageCollectorAtEachFlush) System.gc();
+			//Log.info("indexColumnFromDisk : SAVE ON DISK !!");
+		}
+		
 	}
 	
 	public boolean checkIfCompatibleObjectType(Object inputObject) {
@@ -370,6 +359,7 @@ public class IndexTreeDic extends Index {
 		saveOnDisk(fileInstance, false);
 		indexWrittenOnDiskFilePathsArray.add(saveFileName);
 		associatedBinIndexes = new TreeMap<Object, IntegerArrayList>(); // réinitialisation
+		currentTotalEntrySizeInMemory = 0;
 		
 		if (showMemUsageAtEachFlush) MemUsage.printMemUsage();
 	}
