@@ -72,6 +72,11 @@
 		
 		-> Serveur avec les 200Go de CSV chargés, requêtes simples à faire dessus, pour montrer qu'on peut parser beaucoup de donnée
 	
+	-> Pour cette version, je ne me soucie pas des problèmes de suppression de lignes, ni d'ajout de lignes.
+		- Il serait nécessaire d'avoir pus de fichiers, et cela complexifie les choses. Déjà, avoir quelque chose de vraiment bien qui marche, et ensuite l'améliorer.
+	
+	
+	
 */
 
 
