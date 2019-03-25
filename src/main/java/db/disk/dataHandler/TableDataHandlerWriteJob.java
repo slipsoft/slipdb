@@ -1,8 +1,9 @@
 package db.disk.dataHandler;
 
+import java.io.Closeable;
 import java.io.IOException;
 
-public class TableDataHandlerWriteJob {
+public class TableDataHandlerWriteJob implements Closeable {
 	
 	protected final TableDataHandler dataHandler;
 	protected TableDataHandlerFile currentWriteFile = null;
@@ -11,7 +12,7 @@ public class TableDataHandlerWriteJob {
 		dataHandler = argDataHandler;
 	}
 	
-	public TableDataPosition writeDataLine(byte[] dataAsByteArray) throws IOException, Exception {
+	public DiskDataPosition writeDataLine(byte[] dataAsByteArray) throws IOException, Exception {
 		if (currentWriteFile == null) {
 			currentWriteFile = dataHandler.findOrCreateWriteFile();
 		}
@@ -23,5 +24,21 @@ public class TableDataHandlerWriteJob {
 		return dataPositionResult.dataPosition;
 	}
 	
+	public void closeJob() throws IOException, Exception {
+		if (currentWriteFile != null) {
+			currentWriteFile.stopFileUse();
+		}
+	}
+
+	@Override
+	public void close() throws IOException {
+		try {
+			closeJob();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
 	
 }

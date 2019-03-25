@@ -21,7 +21,7 @@ import db.data.DateType;
 import db.data.DoubleType;
 import db.data.FloatType;
 import db.data.IntegerArrayList;
-import db.data.LongArrayList;
+import db.data.DataPositionArrayList;
 import db.data.StringType;
 import db.parsers.Parser;
 import db.structure.Column;
@@ -170,7 +170,7 @@ public class IndexTreeTest {
 
 			Timer searchQueryTimer = new Timer("Temps total recherche"); // "Time took to return the matching elements" : flemme d'écrire en anglais
 			
-			Collection<LongArrayList> result = tableHandler.findIndexedResultsOfColumn("tpep_pickup_datetime", searchFromValue, searchToValue, true);
+			Collection<DataPositionArrayList> result = tableHandler.findIndexedResultsOfColumn("tpep_pickup_datetime", searchFromValue, searchToValue, true);
 			searchQueryTimer.log();
 			//trip_distance
 
@@ -232,7 +232,7 @@ public class IndexTreeTest {
 			Log.info("OBJECT RESULT :");
 			
 			// Get the query result
-			Collection<LongArrayList> result;
+			Collection<DataPositionArrayList> result;
 			MemUsage.printMemUsage();
 			
 			String stringDateFrom = "2015-04-04 00:00:00";//"2015-04-04 00:01:00";//
@@ -272,7 +272,7 @@ public class IndexTreeTest {
 			
 			// Iterates over all the results
 			int numberOfResults = 0, numberOfLines = 0;
-			for (LongArrayList list : result) {
+			for (DataPositionArrayList list : result) {
 				//Log.info("list size = " + list.size());
 				numberOfResults += list.size();
 				numberOfLines++;
@@ -305,7 +305,7 @@ public class IndexTreeTest {
 			// Iterates over all the results
 			numberOfResults = 0;
 			numberOfLines = 0;
-			for (LongArrayList list : result) {
+			for (DataPositionArrayList list : result) {
 				//Log.info("list size = " + list.size());
 				numberOfResults += list.size();
 				numberOfLines++;

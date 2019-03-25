@@ -16,6 +16,7 @@ public class Column {
 	
 	protected Object minValue = null;
 	protected Object maxValue = null;
+	protected Object minMaxLock = new Object();
 
 	protected DataType dataType;
 	protected List<Index> relatedIndexesList = new ArrayList<>();
@@ -66,6 +67,9 @@ public class Column {
 		return this.getDataType().writeToBuffer(input, outputBuffer);
 	}
 	
+	/** NON thread-safe
+	 *  @param value
+	 */
 	public void evaluateMinMax(Object value) {
 		if (minValue == null) minValue = value;
 		if (maxValue == null) maxValue = value;
@@ -76,6 +80,20 @@ public class Column {
 			minValue = value;
 		}
 	}
+
+	public Object getMin() { synchronized(minMaxLock) {
+		return minValue;
+	} }
+	
+	public synchronized Object getMax() { synchronized(minMaxLock) {
+		return maxValue;
+	} }
+
+	// Thread-safe (une fois le min-mas trouvé)
+	public void pushMinMaxThreadSafe(Object argMinValue, Object argMaxValue) { synchronized(minMaxLock) {
+		minValue = argMinValue;
+		maxValue = argMaxValue;
+	} }
 
 	public Object getMinValue() {
 		return minValue;

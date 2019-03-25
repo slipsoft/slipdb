@@ -66,7 +66,7 @@ public class TableDataHandlerFile {
 	}
 
 	public void stopFileUse() throws IOException, Exception {
-		if (currentlyInUse.get() == false) throw new Exception("stopFileUse : le fichier n'étais pas utilisé.");
+		if (currentlyInUse.get() == false) throw new Exception("stopFileUse : le fichier n'était pas utilisé.");
 		
 		if (currentFileSize >= maxFileSizeOnDisk)
 			fileIsFull.set(true);
@@ -120,7 +120,7 @@ public class TableDataHandlerFile {
 			fileIsFull.set(true);
 			stopFileUse();
 		}
-		TableDataPositionResult dataPositionResult = new TableDataPositionResult(TableDataHandler.currentNodeID, fileID, currentFileEntriesNumber, canStillUseThisFile);
+		TableDataPositionResult dataPositionResult = new TableDataPositionResult(TableDataHandler.currentNodeID, fileID, currentFileEntriesNumber - 1, canStillUseThisFile);
 		return dataPositionResult;
 	}
 	

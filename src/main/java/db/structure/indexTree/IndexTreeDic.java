@@ -23,7 +23,8 @@ import com.dant.utils.MemUsage;
 import com.dant.utils.Timer;
 
 import db.data.DataType;
-import db.data.LongArrayList;
+import db.data.DataPositionArrayList;
+import db.disk.dataHandler.DiskDataPosition;
 import db.search.Operator;
 import db.structure.Column;
 import db.structure.Index;
@@ -76,7 +77,7 @@ public class IndexTreeDic extends Index {
 	public boolean forceGarbageCollectorAtEachFlush = true;
 	
 	// Contient tous les index des données indexées
-	protected TreeMap<Object/*clef, valeur indexée*/, LongArrayList/*valeur*/> associatedBinIndexes = new TreeMap<Object, LongArrayList>();
+	protected TreeMap<Object/*clef, valeur indexée*/, DataPositionArrayList/*valeur*/> associatedBinIndexes = new TreeMap<Object, DataPositionArrayList>();
 	//protected EasyFile fileStoringDataBlocks; // link between the disk and onDiskDataBlocks
 	//protected EasyFile fileSaveOnDisk = null;
 	//protected String currentSaveFilePath = null;
@@ -306,15 +307,15 @@ public class IndexTreeDic extends Index {
 	 *  @param binIndex position (dans le fichier binaire global) de la donnée stockée dans la table
 	 * @throws IOException 
 	 */
-	public void addValue(Object argAssociatedValue, Long binIndex) throws IOException {
+	public void addValue(Object argAssociatedValue, DiskDataPosition dataPosition) throws IOException {
 		
 		// Je peux ajouter la donnée fine
-		LongArrayList binIndexList = associatedBinIndexes.get(argAssociatedValue);
+		DataPositionArrayList binIndexList = associatedBinIndexes.get(argAssociatedValue);
 		if (binIndexList == null) {
-			binIndexList = new LongArrayList();
+			binIndexList = new DataPositionArrayList();
 			associatedBinIndexes.put(argAssociatedValue, binIndexList);
 		}
-		binIndexList.add(binIndex);
+		binIndexList.add(dataPosition);
 		currentTotalEntrySizeInMemory += storedValueSizeInBytes + binIndexStorageSize;
 		//Log.info(" currentTotalEntrySizeInMemory = " + currentTotalEntrySizeInMemory + "  /  " + flushOnDiskOnceReachedThisTotalEntrySize + "  (storedValueDataByteSize = "+storedValueDataByteSize+")");
 		
@@ -342,7 +343,7 @@ public class IndexTreeDic extends Index {
 	 * @return la collection contenant tous les binIndex correspondants
 	 * @throws Exception 
 	 */
-	public Collection<LongArrayList> findMatchingBinIndexesFromMemory(Object minValueExact, Object maxValueExact, boolean isInclusive) throws Exception { // NavigableMap<Integer, IntegerArrayList> findSubTree
+	public Collection<DataPositionArrayList> findMatchingBinIndexesFromMemory(Object minValueExact, Object maxValueExact, boolean isInclusive) throws Exception { // NavigableMap<Integer, IntegerArrayList> findSubTree
 		// arbre terminal : je retourne la liste des binIndex
 		// binIndexesFromValue est non null ici, donc; et finerSubTrees est null
 		//if (checkIfCompatibleObjectType(minValueExact) == false) return new ArrayList<IntegerArrayList>();
@@ -355,10 +356,10 @@ public class IndexTreeDic extends Index {
 		if (minValueExact.getClass() != storedValuesClassType) throw new Exception("findMatchingBinIndexesFromMemory : Le type d'objet recherché ne correspond pas au type d'objet indexé.");
 		if (minValueExact.getClass() != maxValueExact.getClass()) throw new Exception("findMatchingBinIndexesFromMemory : Les types d'objets min et max ne correspondant pas.");
 		
-		NavigableMap<Object, LongArrayList> subTree = associatedBinIndexes.subMap(minValueExact, isInclusive, maxValueExact, isInclusive);
-		Collection<LongArrayList> collectionValues = subTree.values();
+		NavigableMap<Object, DataPositionArrayList> subTree = associatedBinIndexes.subMap(minValueExact, isInclusive, maxValueExact, isInclusive);
+		Collection<DataPositionArrayList> collectionValues = subTree.values();
 		if (collectionValues == null) // pour ne pas renvoyer null
-			collectionValues = new ArrayList<LongArrayList>();
+			collectionValues = new ArrayList<DataPositionArrayList>();
 		return collectionValues;
 		
 	}
@@ -377,7 +378,7 @@ public class IndexTreeDic extends Index {
 		fileInstance.createFileIfNotExist();
 		saveOnDisk(fileInstance, false);
 		indexWrittenOnDiskFilePathsArray.add(saveFileName);
-		associatedBinIndexes = new TreeMap<Object, LongArrayList>(); // réinitialisation
+		associatedBinIndexes = new TreeMap<Object, DataPositionArrayList>(); // réinitialisation
 		currentTotalEntrySizeInMemory = 0;
 		
 		if (showMemUsageAtEachFlush) MemUsage.printMemUsage("IndexTreeDic.flushOnDisk");//, baseSaveFilePath = " + baseSaveFilePath);
@@ -414,13 +415,13 @@ public class IndexTreeDic extends Index {
 		int currentIntegerArrayListIndex = 0;
 		
 		// Ecriture de toutes les IntegerArrayList : nombre de binIndex, et pour chaque binIndex : binIndex (int)
-		for (Entry<Object, LongArrayList> currentEntry : associatedBinIndexes.entrySet()) {
+		for (Entry<Object, DataPositionArrayList> currentEntry : associatedBinIndexes.entrySet()) {
 			//Object ent.getKey()
 			debugNumberOfExactArrayListValuesWrittenOnDisk++;
 			// Position sur le disque (binIndex) de cette LongArrayList de binIndex
 			rememberedBinPosOfIntegerArrayLists[currentIntegerArrayListIndex] = writeInDataStream.size();
 			
-			LongArrayList binIndexesList = currentEntry.getValue(); // liste des binIndex associés à la clef (Object)
+			DataPositionArrayList binIndexesList = currentEntry.getValue(); // liste des binIndex associés à la clef (Object)
 			int binIndexTotalCount = binIndexesList.size();
 			writeInDataStream.writeInt(binIndexTotalCount); // nombre de binIndex associés à la valeur
 			
@@ -742,12 +743,12 @@ public class IndexTreeDic extends Index {
 	 *  @return
 	 *  @throws Exception 
 	 */
-	public Collection<LongArrayList> findMatchingBinIndexes(Object minValueExact, Object maxValueExact, boolean isInclusive, boolean justEvaluateResultNumber) throws Exception { // NavigableMap<Integer, IntegerArrayList> findSubTree
+	public Collection<DataPositionArrayList> findMatchingBinIndexes(Object minValueExact, Object maxValueExact, boolean isInclusive, boolean justEvaluateResultNumber) throws Exception { // NavigableMap<Integer, IntegerArrayList> findSubTree
 		this.flushOnDisk();
-		Collection<LongArrayList> fromDisk = findMatchingBinIndexesFromDisk(minValueExact, maxValueExact, isInclusive, justEvaluateResultNumber);
-		Collection<LongArrayList> fromMemory = findMatchingBinIndexesFromMemory(minValueExact, maxValueExact, isInclusive);
+		Collection<DataPositionArrayList> fromDisk = findMatchingBinIndexesFromDisk(minValueExact, maxValueExact, isInclusive, justEvaluateResultNumber);
+		Collection<DataPositionArrayList> fromMemory = findMatchingBinIndexesFromMemory(minValueExact, maxValueExact, isInclusive);
 		
-		Collection<LongArrayList> allResults = fromDisk;
+		Collection<DataPositionArrayList> allResults = fromDisk;
 		allResults.addAll(fromMemory);
 		return allResults;
 	}
@@ -760,7 +761,7 @@ public class IndexTreeDic extends Index {
 	 *  @return la collection contenant tous les binIndex correspondants
 	 * @throws Exception 
 	 */
-	public Collection<LongArrayList> findMatchingBinIndexesFromDisk(Object argMinValueExact, Object argMaxValueExact, boolean isInclusive, boolean justEvaluateResultNumber) throws Exception { // NavigableMap<Integer, IntegerArrayList> findSubTree
+	public Collection<DataPositionArrayList> findMatchingBinIndexesFromDisk(Object argMinValueExact, Object argMaxValueExact, boolean isInclusive, boolean justEvaluateResultNumber) throws Exception { // NavigableMap<Integer, IntegerArrayList> findSubTree
 		debugDiskNumberOfIntegerArrayList = 0;
 		debugDiskNumberOfExactValuesEvaluated = 0;
 		if (argMaxValueExact == null) { // recherche d'une seule valeur (equals)
@@ -783,7 +784,7 @@ public class IndexTreeDic extends Index {
 			
 			private final String filePath;
 			
-			public ArrayList<LongArrayList> listOfLocalMatchingArraysOfBinIndexes = new ArrayList<LongArrayList>();
+			public ArrayList<DataPositionArrayList> listOfLocalMatchingArraysOfBinIndexes = new ArrayList<DataPositionArrayList>();
 			
 			public SearchInFile(String argFilePath) throws IOException {
 				filePath = argFilePath;
@@ -868,7 +869,7 @@ public class IndexTreeDic extends Index {
 					for (int integerArrayListCount = 0; integerArrayListCount < integerArrayListTotalCount; integerArrayListCount++) {
 						int binIndexTotalCount = randFile.readInt(); // nombre de binIndex stockés
 						
-						LongArrayList binIndexesList = new LongArrayList();
+						DataPositionArrayList binIndexesList = new DataPositionArrayList();
 						binIndexesList.ensureCapacity(binIndexTotalCount);
 						for (long binIndexCout = 0; binIndexCout < binIndexTotalCount; binIndexCout++) {
 							long binIndex = randFile.readLong();
@@ -896,7 +897,7 @@ public class IndexTreeDic extends Index {
 		// Ouvre tous les fichiers où les index sont sauvegardés (threads séparés), 
 		
 		Timer tempsPrisPourRecherchesSurFichiers = new Timer("tempsPrisPourRecherchesSurFichiers");
-		ArrayList<LongArrayList> listOfMatchingArraysOfBinIndexes = new ArrayList<LongArrayList>();
+		ArrayList<DataPositionArrayList> listOfMatchingArraysOfBinIndexes = new ArrayList<DataPositionArrayList>();
 		
 		//Runnable searchInF
 		ArrayList<SearchInFile> runnableSearchesList = new ArrayList<SearchInFile>();

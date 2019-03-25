@@ -2,6 +2,7 @@ package db.structure.recherches;
 
 import java.io.IOException;
 
+import db.disk.dataHandler.DiskDataPosition;
 import db.structure.Column;
 import db.structure.Table;
 import db.structure.indexTree.IndexTreeDic;
@@ -23,8 +24,8 @@ public class SRuntimeIndexingEntry implements Comparable<SRuntimeIndexingEntry> 
 		return -1;
 	}
 	
-	public void addIndexValue(Object argAssociatedValue, Long binIndex) throws IOException {
-		associatedIndexTree.addValue(argAssociatedValue, binIndex);
+	public void addIndexValue(Object argAssociatedValue, DiskDataPosition dataPosition) throws IOException {
+		associatedIndexTree.addValue(argAssociatedValue, dataPosition);
 	}
 	
 }

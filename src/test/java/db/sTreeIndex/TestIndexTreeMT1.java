@@ -23,7 +23,7 @@ import db.data.DateType;
 import db.data.DoubleType;
 import db.data.FloatType;
 import db.data.IntegerArrayList;
-import db.data.LongArrayList;
+import db.data.DataPositionArrayList;
 import db.data.StringType;
 import db.parsers.CsvParser;
 import db.structure.Column;

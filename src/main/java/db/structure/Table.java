@@ -22,7 +22,8 @@ import db.search.Predicate;
  * A simple SQL-like table, consisting of 
  */
 public class Table {
-
+	
+	public final static short currentNodeID = 1;
 	protected static String oldSmellyBasePath = "target/tables/";
 	final public static String baseAllTablesDirPath = "data_save/tables/";
 	final public static String allTablesFileExtension = ".sbin";
@@ -55,6 +56,7 @@ public class Table {
 		this.name = argName;
 		this.columnsList.addAll(argColumnsList);
 		baseTablePath = baseAllTablesDirPath + name + "/";
+		TableDataHandler.setNodeID(currentNodeID); // <- NODE ID 
 		dataHandler = new TableDataHandler(this, baseTablePath);
 		tableID = nextTableID.addAndGet(1);
 		
@@ -180,6 +182,10 @@ public class Table {
 	
 	public EasyFile getFileLinesOnDisk() {
 		return fileLinesOnDisk;
+	}
+	
+	public TableDataHandler getDataHandler() {
+		return dataHandler;
 	}
 	
 	/**
