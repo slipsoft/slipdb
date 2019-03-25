@@ -1,4 +1,4 @@
-package sj.simpleDB.treeIndexing;
+package zArchive.sj.simpleDB.treeIndexing;
 
 public enum SIndexingTreeType {
 	// Unused, right now

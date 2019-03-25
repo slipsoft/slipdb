@@ -9,4 +9,4 @@
  * juste quelque chose de fonctionnel et un minimum optimisé.
  * 
  */
-package sj.simpleDB.treeIndexing;
+package zArchive.sj.simpleDB.treeIndexing;

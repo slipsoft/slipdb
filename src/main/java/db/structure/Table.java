@@ -14,7 +14,7 @@ import com.dant.entity.TableEntity;
 import com.dant.utils.EasyFile;
 
 import db.data.DataType;
-import db.search.Filter;
+import db.search.Predicate;
 
 /**
  * A simple SQL-like table, consisting of 
@@ -162,13 +162,13 @@ public class Table {
 	
 	/**
 	 * Returns the best index to use for a given filter
-	 * @param filter
+	 * @param predicate
 	 * @return
 	 * @throws Exception 
 	 */
-	public Index findBestIndex(Filter filter) throws Exception {
+	public Index findBestIndex(Predicate predicate) throws Exception {
 		for (Index index : indexesList) {
-			if (index.canBeUsedWithFilter(filter)) {
+			if (index.canBeUsedWithPredicate(predicate)) {
 				return index;
 			}
 		}
