@@ -68,12 +68,17 @@
 			- Plusieurs fichiers sur le disque, un path (String) et un AtomicBoolean pour dire si le fichier est utilisé (en écriture ou non et un AtomicBoolean pour la lecture, plus tard)
 			- Parsing multi-thread : écriture dans un des fichiers libres (non utilisé) et dont la taille est valide (inférieure à une certaine taile, 1go par exemple)
 			- Les binIndex des données devront être stockées sous la forme (id fichier)(position dans fichier), (int)(int) ou (short)(int), je garde double au début, au moins
+			  ça pourrait aussi être (short)(short)(int) : id du noeud, id du fichier, index (de la ligne) dans le fichier
 			- Important : écriture de l'état d'un IndexTreeDic sur le disque, pour pouvoir le charger du disque et le réutiliser, sans avoir à le re-créer à chaque fois
 		
 		-> Serveur avec les 200Go de CSV chargés, requêtes simples à faire dessus, pour montrer qu'on peut parser beaucoup de donnée
 	
 	-> Pour cette version, je ne me soucie pas des problèmes de suppression de lignes, ni d'ajout de lignes.
 		- Il serait nécessaire d'avoir pus de fichiers, et cela complexifie les choses. Déjà, avoir quelque chose de vraiment bien qui marche, et ensuite l'améliorer.
+	
+	-> Sauvegarde complet des index sur le disque, pour ne pas avoir à les re-charger à chaque fois (pour le parsing et indexation énorme, faire après le parsing multi-thread)
+	
+	Pour le parsing multi-thread : écrire de la donnée
 	
 	
 	

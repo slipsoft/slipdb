@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import com.dant.entity.ColumnEntity;
@@ -14,6 +15,7 @@ import com.dant.entity.TableEntity;
 import com.dant.utils.EasyFile;
 
 import db.data.DataType;
+import db.disk.dataHandler.TableDataHandler;
 import db.search.Predicate;
 
 /**
@@ -21,8 +23,20 @@ import db.search.Predicate;
  */
 public class Table {
 
-	protected static String basePath = "target/tables/";
-	protected String name; // table name
+	protected static String oldSmellyBasePath = "target/tables/";
+	final public static String baseAllTablesDirPath = "data_save/tables/";
+	final public static String allTablesFileExtension = ".sbin";
+	protected static AtomicInteger nextTableID = new AtomicInteger(1);
+	
+	protected final int tableID;
+	protected final String baseTablePath;
+	
+	
+	//protected final String dataFilesOnDiskBasePath; devenu baseTablePath
+	protected final TableDataHandler dataHandler;
+	
+	protected final String name; // table name
+	
 	protected EasyFile fileLinesOnDisk; // <- les fichiers de sauvegarde des colonnes sont désormais indépendants
 	protected List<Column> columnsList = new ArrayList<Column>(); // liste des colonnes de la table
 	protected List<Index> indexesList = new ArrayList<Index>();   // liste des index générés pour cette table
@@ -40,9 +54,17 @@ public class Table {
 	public Table(String argName, List<Column> argColumnsList) throws IOException {
 		this.name = argName;
 		this.columnsList.addAll(argColumnsList);
-		this.fileLinesOnDisk = new EasyFile(basePath + name + ".bin");
+		baseTablePath = baseAllTablesDirPath + name + "/";
+		dataHandler = new TableDataHandler(this, baseTablePath);
+		tableID = nextTableID.addAndGet(1);
+		
+		/* Désormais géré par TableDiskDataHandler*/
+		this.fileLinesOnDisk = new EasyFile(oldSmellyBasePath + name + ".bin");
 		this.fileLinesOnDisk.createFileIfNotExist();
+		
 	}
+	
+	// dataHandler
 	
 	public String getName() {
 		return name;

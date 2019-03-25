@@ -1,6 +1,7 @@
 ### Slipdb ###
 *.bin
-
+*.sbin
+*.idc_bin
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Java template

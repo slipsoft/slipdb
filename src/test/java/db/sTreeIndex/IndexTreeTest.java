@@ -38,7 +38,7 @@ public class IndexTreeTest {
 	protected static Utils currentlyUsedUils = new Utils(); // For thread-safety ! (but, here, it's static so thread unsafe... ^^')
 	protected static STableHandler tableHandler;
 	
-	protected static boolean parseAgain = false;
+	protected static boolean parseAgain = true;
 	
 	@BeforeAll
 	static void setUpBeforeAll() throws Exception {

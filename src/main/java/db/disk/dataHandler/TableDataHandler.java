@@ -1,0 +1,124 @@
+package db.disk.dataHandler;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import db.structure.Table;
+
+/**
+ *  Gestion de la donnée sauvegardée sur le disque,
+ *  pour rendre ça compatible multi-thread, multi-noeuds.
+ *  
+ *  -> Ne sert PAS à stocker la donnée des index (comme IndexTreeDic), ils gèrent leur donnée
+ *  
+ *  Pour l'instant, je considère qu'il n'y a qu'une seule table, je ne me soucie pas de la répartition de la donnée entre tables.
+ *  
+ *  
+ *  Serv à sauvegarder de la donnée
+ *  
+ *  
+ *  Thread-safe pour les parties qui le nécessitent
+ */
+public class TableDataHandler {
+	
+	static protected short currentNodeID = 1;
+	static protected String saveFileBaseName = "table_data_n1_";
+	static final public String fileExtension = ".bin";
+	
+	protected final Table myTable; // Table associée
+	protected final String baseTablePath;
+	// Liste de tous les fichiers (pleins, utilisés ou non utilisés) :
+	protected ArrayList<TableDataHandlerFile> allFilesList = new ArrayList<TableDataHandlerFile>();
+	// Liste des jobs en cours
+	protected ArrayList<TableDataHandlerWriteJob> allRunningJobsList = new ArrayList<TableDataHandlerWriteJob>();
+	
+	protected AtomicInteger nextFileID = new AtomicInteger(1);
+	
+	protected Object allFilesListLock = new Object();
+	
+	static public void setNodeID(short argCurrentNodeID) {
+		currentNodeID = argCurrentNodeID;
+		saveFileBaseName = "table_data_nid" + currentNodeID + "_fid"; // nodeID, fileID
+	}
+	
+	/*
+		Besoin :
+			- Ecrire une ligne sur le disque : peu importe où, on renvoie sa position (plus tard, éventuellement, optimisations sur la position)
+		
+		
+	 * Les Jobs doivent être thread-safe
+	 * 
+	 * */
+	
+	public TableDataHandler(Table argTable, String argBaseTablePath) {
+		myTable = argTable;
+		baseTablePath = argBaseTablePath;
+		// myTable ne doit pas être null (lever une exception, plus tard, sinon)
+		
+	}
+	
+	public String getFileNameFromDataPosition(short nodeID, short fileID) {
+		return "tdata_nid" + nodeID + "_fid" + fileID + "_" + fileExtension; // nodeID, fileID
+	}
+	
+	/*public TableDataHandlerJob newJob() {
+		
+	}*/
+	
+	// Thread-safe
+	// Pas besoin de fonction spéciale pour libérer le fichier, juste faire un .currentlyInUse.set(false);
+	public TableDataHandlerFile findOrCreateWriteFile() throws IOException { synchronized (allFilesListLock) {
+			TableDataHandlerFile foundDataFile = null;
+			for (TableDataHandlerFile dataFile : allFilesList) {
+				if (dataFile.fileIsFull.get() == false)
+				if (dataFile.currentlyInUse.get() == false) {
+					foundDataFile = dataFile;
+				}
+			}
+			// Création d'un nouveau fichier, dans l'état occupé
+			if (foundDataFile == null) {
+				short fileID = (short)nextFileID.getAndIncrement();
+				String fullFilePath = baseTablePath + saveFileBaseName + fileID + fileExtension;// getFileNameFromDataPosition(); //
+				foundDataFile = new TableDataHandlerFile(fileID, fullFilePath);
+			}
+			foundDataFile.currentlyInUse.set(true);
+			allFilesList.add(foundDataFile);
+			return foundDataFile;
+		}
+	}
+	
+	// NON thread-safe, le fichier doit déjà être ouvert et acquis.
+	/*public TableDataPositionResult writeDataLine(byte[] dataAsByteArray, TableDataHandlerFile inDataFile) throws Exception {
+		return inDataFile.writeDataLine(dataAsByteArray);
+	}*/
+	
+	/**
+		Pour écrire une donnée sur le disque :
+		-> Faire findOrCreateWriteFile(...) pour trouver un fichier dans lequel écrire
+		-> Ecrire dans le fichier
+		-> Vérifier que je peux toujours utiliser le fichier via TableDataPositionResult.canStillUseThisFile
+			- inutile de fermer le fichier si (canStillUseThisFile == false), il est déjà fermé
+		-> Fermer le fichier via TableDataHandlerFile.setInUse(false)
+	 */
+	
+	public TableDataHandlerWriteJob createNewWriteJob() {
+		return new TableDataHandlerWriteJob(this);
+	}
+	// TableDataHandlerWriteJob s'occupe d'écrire les données sur le disque, d'une manière thread-safe
+	
+	
+	/* Recherche : 
+	 * Ecrire une ligne sur disque :
+	 * Soit écrire les lignes unes par unes, dans un des fichiers dispo,
+	 * Soit allouer un fichier à un "job", écrire dans ce fichier jusqu'à ce qu'il soit plein.
+	 * -> Liste des jobs en cours, avec un JobHandler par job.
+	 *  - Chaque JobHandler 
+	 *  
+	 * */
+	
+	
+	
+	
+	
+}
