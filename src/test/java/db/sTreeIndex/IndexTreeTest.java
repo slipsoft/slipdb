@@ -50,6 +50,8 @@ public class IndexTreeTest {
 		
 		tableHandler = SGlobalHandler.initializeTable("NYtest");
 		assertEquals(true, tableHandler != null);
+		
+		//getValuesOfLineByIdForSignleQuery
 
 		tableHandler.addColumn("VendorID", new ByteType());
 		// -> On a bien les mêmes résultats en castant la date et en la traîtant comme une string
@@ -73,11 +75,13 @@ public class IndexTreeTest {
 		tableHandler.addColumn("total_amount", new FloatType());
 		
 		table = tableHandler.createTable();
+		
+		tableHandler.clearDataDirectory();
 
 		//tableHandler.createRuntimeIndexingColumn("tpep_pickup_datetime");
 		tableHandler.createRuntimeIndexingColumn("trip_distance"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
-		tableHandler.createRuntimeIndexingColumn("tpep_dropoff_datetime"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
-		tableHandler.createRuntimeIndexingColumn("dropoff_longitude"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
+		//tableHandler.createRuntimeIndexingColumn("tpep_dropoff_datetime"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
+		//tableHandler.createRuntimeIndexingColumn("dropoff_longitude"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
 		
 		//tableHandler.createRuntimeIndexingColumn(1);
 		/*tableHandler.createRuntimeIndexingColumn(2);
@@ -92,8 +96,12 @@ public class IndexTreeTest {
 		
 		if (parseAgain) {
 			Timer parseTimer = new Timer("TEMPS TOTAL pris par le parsing");
+			Log.info("Nombre de résultats/entrées parsés INIT : " + Parser.debugNumberOfEntriesWritten.get());
 			//tableHandler.forceAppendNotFirstParsing();
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-06.csv", true);
+			
+			//tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv", true);
+			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-07.csv", true);
 			
 			Thread tPars1 = new Thread(() -> {
 				try {
@@ -123,7 +131,7 @@ public class IndexTreeTest {
 			Thread tPars4 = new Thread(() -> {
 				try {
 					tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-					//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-09.csv", true);
+					//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-10.csv", true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -136,7 +144,22 @@ public class IndexTreeTest {
 			tPars1.join();
 			tPars2.join();
 			tPars3.join();
-			tPars4.join();/**/
+			tPars4.join();
+			
+			
+			/*tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);*/
+
+			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-07.csv", true);
+			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-08.csv", true);
+			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-09.csv", true);
+			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-10.csv", true);
+			Log.info("Nombre de résultats/entrées parsés FINAL : " + Parser.debugNumberOfEntriesWritten.get());
+			
+			
+			/**/
 			/*tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
@@ -272,7 +295,7 @@ public class IndexTreeTest {
 			//System.out.println("OUOUOUOU " + indexThisColumn.minValue + "  " +  indexThisColumn.maxValue);
 			
 			//IndexTreeCeption indexingObject = new IndexTreeCeption(0, null, indexThisColumn.minValue, indexThisColumn.maxValue);
-			IndexTreeDic indexingObject = new IndexTreeDic();//Integer.class);
+			IndexTreeDic indexingObject = new IndexTreeDic(table, indexingColumnIndex);//Integer.class);
 			
 			
 			//indexingObject.initializeMaxDistanceBetweenElementsArray(indexThisColumn.minValue, indexThisColumn.maxValue);

@@ -1,11 +1,14 @@
 package db.structure.recherches;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import org.apache.commons.io.FileUtils;
 
 import com.dant.utils.Log;
 
@@ -106,14 +109,14 @@ public class STableHandler {
 	
 	protected Object indexTreeListLock = new Object();
 	
-	protected IndexTreeDic findOrCreateAssociatedIndexTree(int columnIndex, boolean createTreeIfDoesNotExists) { synchronized(indexTreeListLock) {
+	protected IndexTreeDic findOrCreateAssociatedIndexTree(int columnIndex, boolean createTreeIfDoesNotExists) throws Exception { synchronized(indexTreeListLock) {
 		for (IndexTreeDic indexTree : indexTreeList) {
 			if (indexTree.getAssociatedTableColumnIndex() == columnIndex) {
 				return indexTree;
 			}
 		}
 		if (createTreeIfDoesNotExists == false) return null;
-		IndexTreeDic newTree = new IndexTreeDic();
+		IndexTreeDic newTree = new IndexTreeDic(associatedTable, columnIndex);
 		indexTreeList.add(newTree);
 		return newTree;
 	} }
@@ -287,6 +290,10 @@ public class STableHandler {
 	
 	public void multiThreadParsingAddFile() {
 		
+	}
+	
+	public void clearDataDirectory() throws IOException {
+		associatedTable.getDataHandler().clearDataDirectory();
 	}
 	
 	

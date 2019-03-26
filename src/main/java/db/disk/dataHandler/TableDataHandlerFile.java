@@ -64,7 +64,7 @@ public class TableDataHandlerFile {
 	 * @return
 	 * @throws IOException
 	 */
-	public boolean tryToUseThisFile(boolean readOnly) throws IOException {
+	public boolean tryToUseThisFile(boolean readOnly, boolean appendAtTheEndIfWrite) throws IOException {
 		if ((readOnly == false) && (fileIsFull.get())) return false; // accès en écriture et fichier plein
 		if (currentlyInUse.getAndSet(true)) return false; // je viens de passer de true -> true, déjà en cours d'utilisation
 		
@@ -78,7 +78,7 @@ public class TableDataHandlerFile {
 			streamReader.mark((int) maxFileSizeOnDisk + 100); // pour revenir à la position initiale du stream (pas sur que ça marche bien, ça...)
 			positionInReadOnlyFile = 0;
 		} else {
-			streamWriter = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(fileOnDisk)));
+			streamWriter = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(fileOnDisk, appendAtTheEndIfWrite)));
 		}
 		
 		return true;

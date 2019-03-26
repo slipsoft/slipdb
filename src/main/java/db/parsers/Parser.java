@@ -32,6 +32,8 @@ public abstract class Parser {
 	static public long updateTotalReadEntryNbEach = 100_000;
 	protected long addToTotalReadEntryCountBuffered = 0;
 	
+	public static AtomicLong debugNumberOfEntriesWritten = new AtomicLong(0);
+	
 	/** Thread-safe
 	protected void updateTotalResultCount(long addToTotal) {
 	}*/
@@ -113,6 +115,7 @@ public abstract class Parser {
 				
 				
 			}
+			debugNumberOfEntriesWritten.addAndGet(localReadEntryNb);
 		} catch (FileNotFoundException e) {
 			Log.error(e);
 			// TODO: handle exception

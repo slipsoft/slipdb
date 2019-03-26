@@ -83,12 +83,14 @@ public class IndexTreeDic extends Index {
 	public boolean showMemUsageAtEachFlush = true;
 	public boolean forceGarbageCollectorAtEachFlush = true;
 	
+	protected String baseAssociatedTablePath;
+	
 	// Contient tous les index des données indexées
 	protected TreeMap<Object/*clef, valeur indexée*/, DataPositionList/*valeur*/> associatedBinIndexes = new TreeMap<Object, DataPositionList>();
 	//protected EasyFile fileStoringDataBlocks; // link between the disk and onDiskDataBlocks
 	//protected EasyFile fileSaveOnDisk = null;
 	//protected String currentSaveFilePath = null;
-	protected static String basePath = "data_save/IndexTreeDic_DiskMemory/";//"target/IndexTreeDic_DiskMemory/";
+	protected String basePath; // initialisé via initialiseWithTableAndColumn    ancien : = "data_save/IndexTreeDic_DiskMemory/";//"target/IndexTreeDic_DiskMemory/";
 	protected static int rootIndexTreeCount = 0;
 	
 	/** Pour la sauvegarde sur disque de cet IndexTree
@@ -131,9 +133,12 @@ public class IndexTreeDic extends Index {
 	protected int associatedTableColumnIndex;
 	
 	/** Ce constructeur : Lors de la création d'un nouvel index uniquement
+	 * @throws Exception 
 	 */
-	public IndexTreeDic() {//(Class argStoredValuesClassType) {
+	public IndexTreeDic(Table inTable, int columnIndex) throws Exception {//(Class argStoredValuesClassType) {
 		
+		initialiseWithTableAndColumn(inTable, columnIndex);
+		basePath = baseAssociatedTablePath + "IndexTreeDic_DiskMemory/";
 		indexTreeDicUniqueId = nextIndexTreeDicUniqueId.addAndGet(1);
 		baseSaveFilePath = basePath + "IndexTreeDic_" + indexTreeDicUniqueId + "_"; // id arbre _ id(nombre) fichier
 		suffixSaveFilePath = ".idc_bin";
@@ -152,9 +157,12 @@ public class IndexTreeDic extends Index {
 	
 	/** Constructeur : Pour le chargement du disque (index sauvegardé)
 	 *  @param argUniqueID
+	 * @throws Exception 
 	 */
-	public IndexTreeDic(int argUniqueID) {//(Class argStoredValuesClassType) {
+	public IndexTreeDic(Table inTable, int columnIndex, int argUniqueID) throws Exception {//(Class argStoredValuesClassType) {
 		
+		initialiseWithTableAndColumn(inTable, columnIndex);
+		basePath = baseAssociatedTablePath + "IndexTreeDic_DiskMemory/";
 		indexTreeDicUniqueId = argUniqueID;
 		baseSaveFilePath = basePath + "IndexTreeDic_" + indexTreeDicUniqueId + "_"; // id arbre _ id(nombre) fichier
 		suffixSaveFilePath = ".idc_bin";
@@ -206,6 +214,9 @@ public class IndexTreeDic extends Index {
 		List<Column> columnsList = inTable.getColumns();
 		int columnsNumber = columnsList.size();
 		if (columnsNumber <= columnIndex) throw new Exception("Impossible d'initialiser cet index avec un index invalide de colonne."); // invalid columnIndex
+		
+		baseAssociatedTablePath = inTable.getBaseTablePath();
+		
 		
 		associatedTableColumnIndex = columnIndex;
 		Column indexThisColumn = columnsList.get(associatedTableColumnIndex);
@@ -375,7 +386,7 @@ public class IndexTreeDic extends Index {
 	 * @throws IOException 
 	 */
 	public void addValue(Object argAssociatedValue, DiskDataPosition dataPosition) throws IOException { synchronized (indexingAddValueLock) {
-		/*
+		
 		// Je peux ajouter la donnée fine
 		DataPositionList binIndexList = associatedBinIndexes.get(argAssociatedValue);
 		if (binIndexList == null) {
@@ -392,7 +403,7 @@ public class IndexTreeDic extends Index {
 			if (forceGarbageCollectorAtEachFlush) System.gc();
 			//Log.info("indexColumnFromDisk : SAVE ON DISK !!");
 		}
-		*/
+		
 	} }
 	
 	public boolean checkIfCompatibleObjectType(Object inputObject) {

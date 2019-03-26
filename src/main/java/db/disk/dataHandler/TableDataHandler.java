@@ -1,9 +1,12 @@
 package db.disk.dataHandler;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.commons.io.FileUtils;
 
 import com.dant.utils.Log;
 
@@ -68,6 +71,10 @@ public class TableDataHandler {
 		
 	}*/
 	
+	public void clearDataDirectory() throws IOException {
+		FileUtils.deleteDirectory(new File(myTable.getBaseTablePath()));
+	}
+	
 	
 	public static int debugLastFileID = -1;
 	
@@ -89,7 +96,7 @@ public class TableDataHandler {
 		synchronized (allFilesListLock) {
 			for (TableDataHandlerFile dataFile : allFilesList) {
 				if (dataFile.getFileID() == dataPosition.fileID) {
-					if (dataFile.tryToUseThisFile(true)) {
+					if (dataFile.tryToUseThisFile(true, true)) {
 						ArrayList<Object> resultArray = dataFile.getValuesOfLineById(dataPosition, myTable);
 						dataFile.stopFileUse();
 						return resultArray;
@@ -114,8 +121,9 @@ public class TableDataHandler {
 			for (TableDataHandlerFile dataFile : allFilesList) {
 				//if (dataFile.fileIsFull.get() == false)
 				//if (dataFile.currentlyInUse.get() == false) {
-				if (dataFile.tryToUseThisFile(false)) {
+				if (dataFile.tryToUseThisFile(false, true)) {
 					foundDataFile = dataFile;
+					//Log.info("TableDataHandler.findOrCreateWriteFile : trouvé   dataFile == " + dataFile);
 				}
 			}
 			// Création d'un nouveau fichier, dans l'état occupé
@@ -123,7 +131,8 @@ public class TableDataHandler {
 				short fileID = (short)nextFileID.getAndIncrement();
 				String fullFilePath = baseTablePath + saveFileBaseName + fileID + fileExtension;// getFileNameFromDataPosition(); //
 				foundDataFile = new TableDataHandlerFile(fileID, fullFilePath);
-				boolean canUseFile = foundDataFile.tryToUseThisFile(false);
+				boolean canUseFile = foundDataFile.tryToUseThisFile(false, true);
+				//Log.info("TableDataHandler.findOrCreateWriteFile : créé   foundDataFile == " + foundDataFile);
 				if (canUseFile == false) {
 					Log.error("TableDataHandler.findOrCreateWriteFile : canUseFile == false alors que je viens de créer le fichier.");
 				}

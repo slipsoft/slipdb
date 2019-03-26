@@ -67,6 +67,10 @@ public class Table {
 		computeLineDataSize();
 	}
 	
+	public String getBaseTablePath() {
+		return baseTablePath;
+	}
+	
 	protected void computeLineDataSize() {
 		lineDataSize =  columnsList
 	    				.stream()
