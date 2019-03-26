@@ -83,8 +83,16 @@
 	2019-03-26 - 20h15
 	-> OK Sauvegarde multi-fichiers
 	-> OK Chargement de la donnée depuis le disque pour affichage
-	-> à faire : chargement de liste de donnée depuis le disque (doit être rapide, classer par fichier et position croissante dans le fichier)
+	-> OK parsing multi-thread
+	
+	-> à faire : chargement de liste de donnée depuis le disque (doit être rapide, classer par fichier et position croissante dans le fichier puis charger en multi-thread)
 	-> à faire : indexer depuis la sauvegarde sur disque
+	-> à faire : sauvegarder le noeud sur le disque : Table, STableHandler, IndexTreeDic ...
+	-> à faire : charger le noeud du disque (sans re-parser ni re-indexer), pouvoir indexer et parser à la suite sans problème
+	-> à faire : multi-noeud très simple, requêtes en ligne de commande depuis le client
+	-> à faire : mettre tout ça en place et que ça fonctionne bien pour le vendredi 29 matin !
+	-> à faire : 
+	-> ATTENTION : attention aux exceptions qui pourraient arriver lors d'une requête et tout casser, à distance...
 	-> à faire : 
 	
 	

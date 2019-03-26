@@ -7,6 +7,7 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,6 +30,7 @@ import db.search.Operator;
 import db.structure.Column;
 import db.structure.Index;
 import db.structure.Table;
+import sj.network.tcpAndBuffers.NetBuffer;
 
 /**
  * Exploite une extraordinaire propritété des TreeMap (arbre rouge-noir) :
@@ -89,6 +91,29 @@ public class IndexTreeDic extends Index {
 	protected static String basePath = "data_save/IndexTreeDic_DiskMemory/";//"target/IndexTreeDic_DiskMemory/";
 	protected static int rootIndexTreeCount = 0;
 	
+	/** Pour la sauvegarde sur disque de cet IndexTree
+	 *  -> Les données de l'arbre (pour dichotomie etc.) sont sauvegardées autrement (via saveOnDisk())
+	 *  La mémoire vive est supposée avoir été tptalement écrite sur le disque
+	 * @throws IOException 
+	 */
+	public void saveVariablesOnStream(DataOutputStream outStream) throws IOException {
+		flushOnDisk(); // écriture des données en mémoire vive, s'il y en a
+		NetBuffer writeBuff = new NetBuffer(); // <- fait maison ! :3 (mais pas super ouf ouf parce que fait en rush, en début d'année)
+		writeBuff.writeInt(indexTreeDicUniqueId);
+		// baseSaveFilePath, suffixSaveFilePath : pas la peine
+		writeBuff.writeInt(uniqueFileIdForThisTree);
+		
+		
+		// de nombreuses variables sont initialisées via : initialiseWithTableAndColumn
+		// Ecrire :
+		/*
+		
+		
+		
+		*/
+		
+	}
+	
 	// Thread-safe
 	protected static AtomicInteger nextIndexTreeDicUniqueId = new AtomicInteger(1);
 	protected int indexTreeDicUniqueId; // id unique de cet index
@@ -105,6 +130,8 @@ public class IndexTreeDic extends Index {
 	protected long diskEntryTotalSize; // = storedValueSizeInBytes + binIndexStorageSize; // nombre d'octets pris par chaque entrée (valeur + binIndex)
 	protected int associatedTableColumnIndex;
 	
+	/** Ce constructeur : Lors de la création d'un nouvel index uniquement
+	 */
 	public IndexTreeDic() {//(Class argStoredValuesClassType) {
 		
 		indexTreeDicUniqueId = nextIndexTreeDicUniqueId.addAndGet(1);
@@ -121,6 +148,27 @@ public class IndexTreeDic extends Index {
 		}*/
 		//storedValuesClassType = argStoredValuesClassType;
 		rootIndexTreeCount++;
+	}
+	
+	/** Constructeur : Pour le chargement du disque (index sauvegardé)
+	 *  @param argUniqueID
+	 */
+	public IndexTreeDic(int argUniqueID) {//(Class argStoredValuesClassType) {
+		
+		indexTreeDicUniqueId = argUniqueID;
+		baseSaveFilePath = basePath + "IndexTreeDic_" + indexTreeDicUniqueId + "_"; // id arbre _ id(nombre) fichier
+		suffixSaveFilePath = ".idc_bin";
+		
+		/*currentSaveFilePath = basePath + "IndexTreeDic_indexSave_" + indexTreeDicUniqueId + ".bin_tree";
+		fileSaveOnDisk = new EasyFile(currentSaveFilePath);
+		try {
+			fileSaveOnDisk.createFileIfNotExist();
+		} catch (IOException e) {
+			fileSaveOnDisk = null;
+			e.printStackTrace();
+		}*/
+		//storedValuesClassType = argStoredValuesClassType;
+		// n'incrémte pas : rootIndexTreeCount++;
 	}
 	
 	/*
