@@ -1,8 +1,6 @@
 package db.disk.dataHandler;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -43,7 +41,7 @@ public class TableDataHandlerFile {
 	private boolean isReadOnlyMode;
 	private int positionInReadOnlyFile = 0;
 	
-	static public final int maxFileSizeOnDisk = 500_000;//_000; // Max 500 mo sur disque (grosse marge de sécurité)
+	static public final int maxFileSizeOnDisk = 150_000_000; // 500_000_000 Max 500 mo sur disque (grosse marge de sécurité)
 	
 	public TableDataHandlerFile(short argFileID, String argFilePath) throws IOException {
 		fileID = argFileID;

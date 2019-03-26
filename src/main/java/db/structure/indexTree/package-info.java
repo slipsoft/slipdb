@@ -80,6 +80,13 @@
 	
 	Pour le parsing multi-thread : écrire de la donnée
 	
+	2019-03-26 - 20h15
+	-> OK Sauvegarde multi-fichiers
+	-> OK Chargement de la donnée depuis le disque pour affichage
+	-> à faire : chargement de liste de donnée depuis le disque (doit être rapide, classer par fichier et position croissante dans le fichier)
+	-> à faire : indexer depuis la sauvegarde sur disque
+	-> à faire : 
+	
 	
 	
 */

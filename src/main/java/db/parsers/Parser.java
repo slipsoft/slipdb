@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.dant.utils.Log;
 import com.dant.utils.MemUsage;
@@ -14,6 +15,7 @@ import com.dant.utils.Timer;
 
 import db.disk.dataHandler.TableDataHandler;
 import db.disk.dataHandler.TableDataHandlerWriteJob;
+import db.data.DateType;
 import db.disk.dataHandler.DiskDataPosition;
 import db.structure.Column;
 import db.structure.Table;
@@ -25,6 +27,15 @@ public abstract class Parser {
 	protected Table currentTable;
 	protected int lineByteSize; // number of bytes used to store information
 	protected int totalEntryCount = 0;
+	
+	static public AtomicLong totalReadEntryNb = new AtomicLong(0);
+	static public long updateTotalReadEntryNbEach = 100_000;
+	protected long addToTotalReadEntryCountBuffered = 0;
+	
+	/** Thread-safe
+	protected void updateTotalResultCount(long addToTotal) {
+	}*/
+	
 	
 	/** Avant le parsing, définir runtimeIndexingEntries.
 	 *  Au moment du parsing, runtimeIndexingEntries doit être en lecture seule, donc thread-safe.
@@ -57,6 +68,7 @@ public abstract class Parser {
 	 */
 	public final void parse(InputStream input, int limit, boolean appendAtTheEndOfSave) {
 		int localReadEntryNb = 0;
+		int localReadEntryNbToAddToTotalCount = 0;
 		TableDataHandler dataHandler = currentTable.getDataHandler();
 		try (
 				BufferedReader bRead = new BufferedReader(new InputStreamReader(input));
@@ -81,6 +93,7 @@ public abstract class Parser {
 					totalEntryCount++;
 				} catch (IncorrectEntryException e) {
 					Log.error(e);
+					//e.printStackTrace();
 					// TODO: handle exception
 				} catch (IOException e) {
 					Log.error(e);
@@ -92,6 +105,12 @@ public abstract class Parser {
 					Log.info("Parser : nombre de résultats (local) parsés = " + localReadEntryNb + "   temps écoulé = " + timeTookTimer.pretty());
 					MemUsage.printMemUsage();
 				}
+				
+				if (localReadEntryNbToAddToTotalCount >= updateTotalReadEntryNbEach) {
+					totalReadEntryNb.addAndGet(localReadEntryNbToAddToTotalCount);
+					localReadEntryNbToAddToTotalCount = 0;
+				}
+				
 				
 			}
 		} catch (FileNotFoundException e) {
@@ -118,6 +137,8 @@ public abstract class Parser {
 		String[] valuesAsStringArray = processEntry(entryString);
 		List<Column> columnsList = currentTable.getColumns();
 		
+		DateType localDateTypeThreadSafe = new DateType();
+		
 		if (!isCorrectSize(valuesAsStringArray)) {
 			throw new IncorrectEntryException(totalEntryCount, "incorrect size");
 		}
@@ -129,13 +150,20 @@ public abstract class Parser {
 			// for each column, parse and write data into entryBuffer
 			for (int columnIndex = 0; columnIndex < columnsList.size(); columnIndex++) {
 				Column currentColumn = columnsList.get(columnIndex);
+				Object currentValue;
 				
+				//Log.info("parseAndWriteEntry : valuesAsStringArray["+columnIndex+"] = " + valuesAsStringArray[columnIndex]);
 				// Converts the string value into an array of bytes representing the same data
-				Object currentValue = currentColumn.parseAndWriteToBuffer(valuesAsStringArray[columnIndex], entryBuffer);
+				if (currentColumn.getDataType().getClass() == DateType.class) {
+					currentValue = localDateTypeThreadSafe.parseAndWriteToBuffer(valuesAsStringArray[columnIndex], entryBuffer);
+				} else {
+					currentValue = currentColumn.parseAndWriteToBuffer(valuesAsStringArray[columnIndex], entryBuffer);
+				}
 				// TEMPORAIREMENT désactivé (rush) currentColumn.evaluateMinMax(currentValue); // <- Indispensable pour le IndexTreeCeption (non utile pour le IndexTreeDic)
 				entriesArray[columnIndex] = currentValue;
 			}
 		} catch (IllegalArgumentException e) {
+			//e.printStackTrace();
 			throw new IncorrectEntryException(totalEntryCount, "incorrect data");
 		}
 		

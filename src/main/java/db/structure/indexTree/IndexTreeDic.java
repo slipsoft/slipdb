@@ -70,6 +70,11 @@ public class IndexTreeDic extends Index {
 	 * 
 	 * 
 	 */
+	
+	// Pour la recherche multi-thread, ce nombre est multiplié autant de fois qu'il y a d'arbre !
+	static public int maxResultCountPerIndexInstance = 20_000_000_00;
+	static public int maxResultCountInTotal = 20_000_000_00; // new AtomicInteger(lent, mais pour peu de résultats, ça passera !
+	
 	public int flushOnDiskOnceReachedThisTotalEntrySize = 10_000_000; // <- Globalement, la taille des fichiers mis sur le disque     ancien : EntryNumber
 	protected int currentTotalEntrySizeInMemory = 0; // nombre actuel de résultats en mémoire vive, multiplié par la taille de chaque résultat (en octets) (utile pour le flush sur le disque)
 	public boolean useMultithreadSearch = true;
@@ -81,7 +86,7 @@ public class IndexTreeDic extends Index {
 	//protected EasyFile fileStoringDataBlocks; // link between the disk and onDiskDataBlocks
 	//protected EasyFile fileSaveOnDisk = null;
 	//protected String currentSaveFilePath = null;
-	protected static String basePath = "target/IndexTreeDic_DiskMemory/";
+	protected static String basePath = "data_save/IndexTreeDic_DiskMemory/";//"target/IndexTreeDic_DiskMemory/";
 	protected static int rootIndexTreeCount = 0;
 	
 	// Thread-safe
@@ -246,9 +251,15 @@ public class IndexTreeDic extends Index {
 				
 				// Lire la donnée
 				Object readValue = columnDataType.readIndexValue(fileAsStream, columnValueAsByteArray);//fileAsStream, columnValueAsByteArray);
+				
+				
 				// Ajouter la donnée à l'arbre
 				//Log.info("readValue = " + readValue);
 				// TODO this.addValue(readValue, lineIndex * totalLineSize); // new Integer() creating a new Integer is quite slow ><" (but the bottle neck really is I/O on disk)
+				// TODO
+				// TODO
+				// TODO
+				// TODO
 				
 				/*débugs int valueAsInt = ((Integer) readValue).intValue();
 				if (intDateFrom <= valueAsInt && valueAsInt <= intDateTo) {
@@ -274,8 +285,16 @@ public class IndexTreeDic extends Index {
 					//fileAsStream.readFully(dataAsByteArray); // renvoie une exception si les données n'ont pas pu être lues
 					
 					Object readValue = col.getDataType().readIndexValue(fileAsStream);
+					
+					
+					
+					
+					
 					if (iColumn == columnIndex) {
-						// TODO this.addValue(readValue, lineIndex);
+						// TODO this.addValue(readValue, lineIndex);// TODO
+						// TODO
+						// TODO
+						// TODO
 					}
 				}
 	
@@ -308,7 +327,7 @@ public class IndexTreeDic extends Index {
 	 * @throws IOException 
 	 */
 	public void addValue(Object argAssociatedValue, DiskDataPosition dataPosition) throws IOException { synchronized (indexingAddValueLock) {
-		
+		/*
 		// Je peux ajouter la donnée fine
 		DataPositionList binIndexList = associatedBinIndexes.get(argAssociatedValue);
 		if (binIndexList == null) {
@@ -325,7 +344,7 @@ public class IndexTreeDic extends Index {
 			if (forceGarbageCollectorAtEachFlush) System.gc();
 			//Log.info("indexColumnFromDisk : SAVE ON DISK !!");
 		}
-		
+		*/
 	} }
 	
 	public boolean checkIfCompatibleObjectType(Object inputObject) {
@@ -747,7 +766,7 @@ public class IndexTreeDic extends Index {
 	public Collection<DataPositionList> findMatchingBinIndexes(Object minValueExact, Object maxValueExact, boolean isInclusive, boolean justEvaluateResultNumber) throws Exception { // NavigableMap<Integer, IntegerArrayList> findSubTree
 		this.flushOnDisk();
 		Collection<DataPositionList> fromDisk = findMatchingBinIndexesFromDisk(minValueExact, maxValueExact, isInclusive, justEvaluateResultNumber);
-		Collection<DataPositionList> fromMemory = findMatchingBinIndexesFromMemory(minValueExact, maxValueExact, isInclusive);
+		Collection<DataPositionList> fromMemory = findMatchingBinIndexesFromMemory(minValueExact, maxValueExact, isInclusive); // new ArrayList<DataPositionList>();//
 		
 		Collection<DataPositionList> allResults = fromDisk;
 		allResults.addAll(fromMemory);
@@ -775,6 +794,8 @@ public class IndexTreeDic extends Index {
 		
 		final Object minValueExact = argMinValueExact;
 		final Object maxValueExact = argMaxValueExact;
+		
+		final AtomicInteger totalResultCount = new AtomicInteger(0); // <- lent, mais pour peu de résultats, ça passera !
 		
 		// Lecture du dernier float écrit dans le disque, i.e. de la position de la table de routage de l'arbre principal
 		/**
@@ -863,9 +884,12 @@ public class IndexTreeDic extends Index {
 				long integerArrayListTotalCount = keyIndexOfMax - keyIndexOfMin + 1;
 				//Log.info("IndexTreeDic.findMatchingBinIndexesFromDisk : integerArrayListTotalCount = " + integerArrayListTotalCount);
 				
+				boolean resultCountExcedeedStop = false;
+				
 				if (minBinIndex != -1) {
 					randFile.seek(minBinIndex); // premier seek
 					listOfLocalMatchingArraysOfBinIndexes.ensureCapacity((int) integerArrayListTotalCount);
+					int totalResultCountForThisTree = 0;
 					// Lecture de tous les IntegerArrayList de binIndex
 					for (int integerArrayListCount = 0; integerArrayListCount < integerArrayListTotalCount; integerArrayListCount++) {
 						int binIndexTotalCount = randFile.readInt(); // nombre de binIndex stockés
@@ -875,9 +899,25 @@ public class IndexTreeDic extends Index {
 						for (long binIndexCout = 0; binIndexCout < binIndexTotalCount; binIndexCout++) {
 							DiskDataPosition dataPos = DiskDataPosition.readFromRandFile(randFile);
 							//long binIndex = randFile.readLong();
+							
+							if (totalResultCountForThisTree >= IndexTreeDic.maxResultCountPerIndexInstance) {
+								resultCountExcedeedStop = true;
+								break;
+							}
+							
+							int localTotalResCount = totalResultCount.addAndGet(1);
+							if (localTotalResCount > maxResultCountInTotal) {
+								resultCountExcedeedStop = true;
+								break;
+							}
+							
 							binIndexesList.add(dataPos);
+							totalResultCountForThisTree++;
+							
 						}
 						listOfLocalMatchingArraysOfBinIndexes.add(binIndexesList);
+						if (resultCountExcedeedStop)
+							break;
 					}
 				}
 				

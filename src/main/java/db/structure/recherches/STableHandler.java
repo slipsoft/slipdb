@@ -23,7 +23,7 @@ public class STableHandler {
 	protected String tableName;
 	protected ArrayList<Column> columnsList = new ArrayList<Column>();
 	protected Table associatedTable;
-	protected CsvParser csvParser = null;
+	//protected CsvParser csvParser = null;
 	// Possibilité de parser de plusieurs manières différentes (un jour...)
 	protected boolean firstTimeParsingData = true;
 	
@@ -60,10 +60,16 @@ public class STableHandler {
 		return associatedTable;
 	}
 	
+	/** Thread-safe, la table est en lecture seule
+	 * @param csvPath
+	 * @param doRuntimeIndexing
+	 * @throws Exception
+	 */
 	public void parseCsvData(String csvPath, boolean doRuntimeIndexing) throws Exception {
 		if (associatedTable == null) throw new Exception("La table associée est null, elle doit être crée via createTable avant tout parsing.");
-		if (csvParser == null)
-			csvParser = new CsvParser(associatedTable);
+		//if (csvParser == null)
+		// Thread-safe
+		CsvParser csvParser = new CsvParser(associatedTable);
 		
 		if (doRuntimeIndexing)
 			csvParser.setRuntimeIndexing(runtimeIndexingList);
@@ -95,19 +101,39 @@ public class STableHandler {
 		if (colIndex == -1) throw new Exception("Colonne introuvable, impossible de l'indexer.");
 		indexColumnWithTreeFromDisk(colIndex);
 	}
-
+	
+	
+	
+	protected Object indexTreeListLock = new Object();
+	
+	protected IndexTreeDic findOrCreateAssociatedIndexTree(int columnIndex, boolean createTreeIfDoesNotExists) { synchronized(indexTreeListLock) {
+		for (IndexTreeDic indexTree : indexTreeList) {
+			if (indexTree.getAssociatedTableColumnIndex() == columnIndex) {
+				return indexTree;
+			}
+		}
+		if (createTreeIfDoesNotExists == false) return null;
+		IndexTreeDic newTree = new IndexTreeDic();
+		indexTreeList.add(newTree);
+		return newTree;
+	} }
+	
+	/** Pas
+	 *  @param columnIndex
+	 *  @throws Exception
+	 */
 	public void indexColumnWithTreeFromDisk(int columnIndex) throws Exception {
 		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");
 		List<Column> columnList = associatedTable.getColumns();
 		if (columnIndex < 0 || columnIndex >= columnList.size()) throw new Exception("Index de la colonne invalide. (columnIndex=" + columnIndex + " non compris entre 0 et columnList.size()=" + columnList.size());
 		
 		
-		IndexTreeDic alreadyExistingTree = findTreeAssociatedWithColumnIndex(columnIndex);
+		IndexTreeDic alreadyExistingTree = findOrCreateAssociatedIndexTree(columnIndex, true); /*findTreeAssociatedWithColumnIndex(columnIndex);
 		Log.info("Arbre existe = " + alreadyExistingTree);
 		if (alreadyExistingTree == null) {
 			alreadyExistingTree = new IndexTreeDic();
 			indexTreeList.add(alreadyExistingTree);
-		}
+		}*/
 		
 		//IndexTreeDic indexingObject = new IndexTreeDic();
 		alreadyExistingTree.indexColumnFromDisk(associatedTable, columnIndex);
@@ -129,11 +155,7 @@ public class STableHandler {
 		List<Column> columnList = associatedTable.getColumns();
 		if (columnIndex < 0 || columnIndex >= columnList.size()) throw new Exception("Index de la colonne invalide. (columnIndex=" + columnIndex + " non compris entre 0 et columnList.size()=" + columnList.size());
 		
-		IndexTreeDic alreadyExistingTree = findTreeAssociatedWithColumnIndex(columnIndex);
-		if (alreadyExistingTree == null) {
-			alreadyExistingTree = new IndexTreeDic();
-			indexTreeList.add(alreadyExistingTree);
-		}
+		IndexTreeDic alreadyExistingTree = findOrCreateAssociatedIndexTree(columnIndex, true); //findTreeAssociatedWithColumnIndex(columnIndex);
 		
 		SRuntimeIndexingEntry indexEntry = new SRuntimeIndexingEntry();
 		indexEntry.associatedIndexTree = alreadyExistingTree;
@@ -158,14 +180,14 @@ public class STableHandler {
 		
 	//}
 	
-	public IndexTreeDic findTreeAssociatedWithColumnIndex(int columnIndex) {
+	/*public IndexTreeDic findTreeAssociatedWithColumnIndex(int columnIndex) {
 		for (IndexTreeDic indexTree : indexTreeList) {
 			if (indexTree.getAssociatedTableColumnIndex() == columnIndex) {
 				return indexTree;
 			}
 		}
 		return null;
-	}
+	}*/
 	
 	
 	public Collection<DataPositionList> findIndexedResultsOfColumn(String columnName, Object minValue, Object maxValue, boolean inclusive) throws Exception {
@@ -176,21 +198,19 @@ public class STableHandler {
 		}
 		//return findIndexedResultsOfColumn();
 		
-		IndexTreeDic makeRequestOnThisTree = findTreeAssociatedWithColumnIndex(columnIndex);
+		IndexTreeDic makeRequestOnThisTree = findOrCreateAssociatedIndexTree(columnIndex, false); //findTreeAssociatedWithColumnIndex(columnIndex);
 		/*for (IndexTreeDic indexTree : indexTreeList) {
 			if (indexTree.getAssociatedTableColumnIndex() == columnIndex) {
 				makeRequestOnThisTree = indexTree;
 				break;
 			}
 		}*/
-		
-		
 		if (makeRequestOnThisTree == null) {
 			return new ArrayList<DataPositionList>();
 		}
 		return makeRequestOnThisTree.findMatchingBinIndexes(minValue, maxValue, inclusive, false);
 	}
-
+	
 	
 	public int evaluateNumberOfResults(Collection<DataPositionList> resultsCollection) {
 		// Iterates over all the results

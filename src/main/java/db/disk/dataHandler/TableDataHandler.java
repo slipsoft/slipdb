@@ -79,7 +79,7 @@ public class TableDataHandler {
 	 */
 	public ArrayList<Object> getValuesOfLineByIdForSignleQuery(DiskDataPosition dataPosition) throws IOException { // or getRowById
 		
-		if (debugLastFileID != dataPosition.fileID) {
+		if (debugLastFileID != dataPosition.fileID) { // Afficher un message à chaque changement de fichier
 			Log.info("getValuesOfLineByIdForSignleQuery depuis fileID = " + dataPosition.fileID);
 			debugLastFileID = dataPosition.fileID;
 		}
@@ -94,7 +94,7 @@ public class TableDataHandler {
 						dataFile.stopFileUse();
 						return resultArray;
 					} else {
-						throw new IOException("Impossible de libre du fichier : il est occupé.");
+						throw new IOException("Impossible de lire du fichier : il est occupé.");
 					}
 				}
 			}

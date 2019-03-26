@@ -32,7 +32,10 @@ import db.structure.recherches.SGlobalHandler;
 import db.structure.recherches.STableHandler;
 
 public class IndexTreeTest {
-
+	
+	// Voir constante dans IndexTreeDic : static public int maxResultCountPerIndexInstance = 10;
+	// -> limitation du nombre de résultats affichés par arbre
+	
 	//protected static Parser parser;
 	protected static Table table;
 	protected static Utils currentlyUsedUils = new Utils(); // For thread-safety ! (but, here, it's static so thread unsafe... ^^')
@@ -73,6 +76,8 @@ public class IndexTreeTest {
 
 		//tableHandler.createRuntimeIndexingColumn("tpep_pickup_datetime");
 		tableHandler.createRuntimeIndexingColumn("trip_distance"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
+		tableHandler.createRuntimeIndexingColumn("tpep_dropoff_datetime"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
+		tableHandler.createRuntimeIndexingColumn("dropoff_longitude"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
 		
 		//tableHandler.createRuntimeIndexingColumn(1);
 		/*tableHandler.createRuntimeIndexingColumn(2);
@@ -86,10 +91,70 @@ public class IndexTreeTest {
 		tableHandler.createRuntimeIndexingColumn(10);*/
 		
 		if (parseAgain) {
-			Timer parseTimer = new Timer("Temps pris par le parsing");
+			Timer parseTimer = new Timer("TEMPS TOTAL pris par le parsing");
 			//tableHandler.forceAppendNotFirstParsing();
-			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-12.csv", true);
+			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-06.csv", true);
+			
+			Thread tPars1 = new Thread(() -> {
+				try {
+					tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+					//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-07.csv", true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			});
+			Thread tPars2 = new Thread(() -> {
+				try {
+					tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+					//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-08.csv", true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			});
+			Thread tPars3 = new Thread(() -> {
+				try {
+					tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+					//tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv", true);
+					//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-09.csv", true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			});
+			Thread tPars4 = new Thread(() -> {
+				try {
+					tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+					//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-09.csv", true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			});
+			tPars1.start();
+			tPars2.start();
+			tPars3.start();
+			tPars4.start();
+			
+			tPars1.join();
+			tPars2.join();
+			tPars3.join();
+			tPars4.join();/**/
+			/*tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);*/
+			
+			//tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv", true);
+			/*tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv", true);
+			tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv", true);
+			tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv", true);*/
+			
+			
+			/*tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-07.csv", true);
+			tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-08.csv", true);
+			tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-09.csv", true);
+			tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-10.csv", true);
+			tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-11.csv", true);
+			tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-12.csv", true);*/
+			//tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			//tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv", true);
 			// tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); Fichiers identiques, donc 2 fois plus de résultats !
 			parseTimer.log();
@@ -189,7 +254,7 @@ public class IndexTreeTest {
 			numberOfResults = tableHandler.evaluateNumberOfResults(result);
 			numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
 			
-			tableHandler.getFullResultsFromBinIndexes(result);
+			//tableHandler.getFullResultsFromBinIndexes(result);
 			
 			searchQueryFullTimer.log();
 			Log.info("Nombre de résultats = " + numberOfResults);
