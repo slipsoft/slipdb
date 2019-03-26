@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.dant.utils.Log;
+
 import db.structure.Table;
 
 /**
@@ -71,8 +73,9 @@ public class TableDataHandler {
 	public TableDataHandlerFile findOrCreateWriteFile() throws IOException { synchronized (allFilesListLock) {
 			TableDataHandlerFile foundDataFile = null;
 			for (TableDataHandlerFile dataFile : allFilesList) {
-				if (dataFile.fileIsFull.get() == false)
-				if (dataFile.currentlyInUse.get() == false) {
+				//if (dataFile.fileIsFull.get() == false)
+				//if (dataFile.currentlyInUse.get() == false) {
+				if (dataFile.tryToUseThisFile(false)) {
 					foundDataFile = dataFile;
 				}
 			}
@@ -81,8 +84,12 @@ public class TableDataHandler {
 				short fileID = (short)nextFileID.getAndIncrement();
 				String fullFilePath = baseTablePath + saveFileBaseName + fileID + fileExtension;// getFileNameFromDataPosition(); //
 				foundDataFile = new TableDataHandlerFile(fileID, fullFilePath);
+				boolean canUseFile = foundDataFile.tryToUseThisFile(false);
+				if (canUseFile == false) {
+					Log.error("TableDataHandler.findOrCreateWriteFile : canUseFile == false alors que je viens de créer le fichier.");
+				}
 			}
-			foundDataFile.currentlyInUse.set(true);
+			// tryToUseThisFile a bien été fait sur le fichier, il est ajouté dans la liste comme étant occupé
 			allFilesList.add(foundDataFile);
 			return foundDataFile;
 		}

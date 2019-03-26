@@ -23,7 +23,7 @@ public class LongType extends DataType {
 	}
 	
 	@Override
-	public Long writeToBuffer(String input, ByteBuffer outputBuffer) {
+	public Object parseAndWriteToBuffer(String input, ByteBuffer outputBuffer) throws IllegalArgumentException { // throws NumberFormatException {
 		Long asLong = Long.parseLong(input);
 		outputBuffer.putLong(asLong);
 		return asLong;

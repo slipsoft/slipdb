@@ -32,7 +32,7 @@ public class DateType extends DataType {
 	}
 	
 	@Override
-	public Integer writeToBuffer(String input, ByteBuffer outputBuffer) {
+	public Object parseAndWriteToBuffer(String input, ByteBuffer outputBuffer) throws IllegalArgumentException { // throws NumberFormatException {
 		Integer dateAsInt = Utils.dateToSecInt(utilsInstance.dateFromString(input));
 		outputBuffer.putInt(dateAsInt);
 		/*

@@ -10,7 +10,8 @@ import java.util.List;
 import com.dant.utils.Log;
 
 import db.data.DataType;
-import db.data.DataPositionArrayList;
+import db.disk.dataHandler.DiskDataPosition;
+import db.data.DataPositionList;
 import db.parsers.CsvParser;
 import db.structure.Column;
 import db.structure.Table;
@@ -28,7 +29,7 @@ public class STableHandler {
 	protected ArrayList<IndexTreeDic> indexTreeList = new ArrayList<IndexTreeDic>(); // Liste des IndexTree associés à cette table
 	
 	public void forceAppendNotFirstParsing() {
-		firstTimeParsingData = false;
+		firstTimeParsingData = false; // si à vrai, supprimer tous les fichiers connus
 	}
 	
 	public String getTableName() {
@@ -166,11 +167,11 @@ public class STableHandler {
 	}
 	
 	
-	public Collection<DataPositionArrayList> findIndexedResultsOfColumn(String columnName, Object minValue, Object maxValue, boolean inclusive) throws Exception {
+	public Collection<DataPositionList> findIndexedResultsOfColumn(String columnName, Object minValue, Object maxValue, boolean inclusive) throws Exception {
 		int columnIndex = getColumnIndex(columnName);
 		if (columnIndex == -1) throw new Exception("Colonne introuvable, impossible de faire une recherche sur ses index.");
 		if (IndexTreeDic.firstValueIsHigherThatSecondValue(minValue, maxValue) > 0) {
-			return new ArrayList<DataPositionArrayList>(); // aucun résultat
+			return new ArrayList<DataPositionList>(); // aucun résultat
 		}
 		//return findIndexedResultsOfColumn();
 		
@@ -184,16 +185,16 @@ public class STableHandler {
 		
 		
 		if (makeRequestOnThisTree == null) {
-			return new ArrayList<DataPositionArrayList>();
+			return new ArrayList<DataPositionList>();
 		}
 		return makeRequestOnThisTree.findMatchingBinIndexes(minValue, maxValue, inclusive, false);
 	}
 
 	
-	public int evaluateNumberOfResults(Collection<DataPositionArrayList> resultsCollection) {
+	public int evaluateNumberOfResults(Collection<DataPositionList> resultsCollection) {
 		// Iterates over all the results
 		int numberOfResults = 0;
-		for (DataPositionArrayList longList : resultsCollection) {
+		for (DataPositionList longList : resultsCollection) {
 			//Log.info("list size = " + list.size());
 			numberOfResults += longList.size();
 			//numberOfLines++;
@@ -212,25 +213,30 @@ public class STableHandler {
 	}
 
 	//trip_distance
-	public int evaluateNumberOfArrayListLines(Collection<DataPositionArrayList> resultsCollection) {
+	public int evaluateNumberOfArrayListLines(Collection<DataPositionList> resultsCollection) {
 		return resultsCollection.size();
 	}
 	
 	//trip_distance
-	public ArrayList<ArrayList<Object>> getFullResultsFromBinIndexes(Collection<DataPositionArrayList> resultsCollection) throws Exception { // table connue ! , Table fromTable) {
+	public ArrayList<ArrayList<Object>> getFullResultsFromBinIndexes(Collection<DataPositionList> resultsCollection) throws Exception { // table connue ! , Table fromTable) {
 		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");
 		
 		ArrayList<ArrayList<Object>> resultArrayList = new ArrayList<ArrayList<Object>>();
 		
 		// Pour toutes les listes de valeurs identiques
 		// (il peut y avoir des listes distinctes associés à une même valeur indexée, du fait du multi-fichiers / multi-thread)
-		for (DataPositionArrayList longList : resultsCollection) {
+		for (DataPositionList dataPosList : resultsCollection) {
 			//Log.info("list size = " + list.size());
-			for (Long binIndex : longList) {
+			for (DiskDataPosition dataPos : dataPosList) {
 				// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
 				//Log.info("  index = " + index);
-				ArrayList<Object> objList = associatedTable.getValuesOfLineById(binIndex);
-				resultArrayList.add(objList);
+				// TODO
+				// TODO
+				// TODO Résultats à lire depuis les fichiers binaires
+				// TODO
+				// TODO
+				//ArrayList<Object> objList = associatedTable.getValuesOfLineById(binIndex);
+				//resultArrayList.add(objList);
 				
 				//Object indexedValue = objList.get(indexingColumnIndex);
 				//indexingColumn.getDataType().

@@ -19,7 +19,8 @@ public class StringType extends DataType {
 	
 	// -> Je laisse comme ça si ça te vas, Nicolas, pour qu'on puisse vérifier s'il n'y a bien pas de caractère 0 dans les string ?
 	// /!\ stringPaddingChar ne DOIT PAS se trouver dans les String des données lues en entrée, sous peine de corrompre les données
-	public Object writeToBuffer(String input, ByteBuffer outputBuffer) {		
+	@Override
+	public Object parseAndWriteToBuffer(String input, ByteBuffer outputBuffer) throws IllegalArgumentException { // throws NumberFormatException {		
 		
 		/* inutile si (stringPaddingChar == "\0")
 		if (input.length() < sizeInBytes) {

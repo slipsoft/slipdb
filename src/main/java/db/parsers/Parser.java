@@ -88,9 +88,6 @@ public abstract class Parser {
 				} catch (IOException e) {
 					Log.error(e);
 					// TODO: handle exception
-				} catch (Exception e) {
-					Log.error(e);
-					// TODO: handle exception
 				}
 			}
 		} catch (FileNotFoundException e) {
@@ -109,9 +106,10 @@ public abstract class Parser {
 	/** Ecriture d'une entrée (ligne, donnée complète) sur un DataOutputStream (nécessaire pour avoir le fonction .size())
 	 * @param entryString
 	 * @param writeJob
-	 * @throws Exception
+	 * @throws IncorrectEntryException
+	 * @throws IOException 
 	 */
-	protected final void writeEntry(String entryString, TableDataHandlerWriteJob writeJob) throws IncorrectEntryException, Exception {
+	protected final void writeEntry(String entryString, TableDataHandlerWriteJob writeJob) throws IncorrectEntryException, IOException {
 		
 		String[] valuesAsStringArray = processEntry(entryString);
 		List<Column> columnsList = currentTable.getColumns();
@@ -129,11 +127,11 @@ public abstract class Parser {
 				Column currentColumn = columnsList.get(columnIndex);
 				
 				// Converts the string value into an array of bytes representing the same data
-				Object currentValue = currentColumn.writeToBuffer(valuesAsStringArray[columnIndex], entryBuffer);
+				Object currentValue = currentColumn.parseAndWriteToBuffer(valuesAsStringArray[columnIndex], entryBuffer);
 				// TEMPORAIREMENT désactivé (rush) currentColumn.evaluateMinMax(currentValue); // <- Indispensable pour le IndexTreeCeption (non utile pour le IndexTreeDic)
 				entriesArray[columnIndex] = currentValue;
 			}
-		} catch (Exception e) {
+		} catch (IllegalArgumentException e) {
 			throw new IncorrectEntryException(totalEntryCount, "incorrect data");
 		}
 		

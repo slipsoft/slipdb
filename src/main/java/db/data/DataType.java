@@ -36,7 +36,7 @@ public abstract class DataType implements Operable {
 	 * @return converted data
 	 * @throws IllegalArgumentException
 	 */
-	abstract public Object writeToBuffer(String input, ByteBuffer outputBuffer) throws IllegalArgumentException;
+	abstract public Object parseAndWriteToBuffer(String input, ByteBuffer outputBuffer) throws IllegalArgumentException;
 	
 	/**
 	 * Convert bytes input into typed data

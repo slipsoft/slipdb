@@ -21,7 +21,7 @@ import db.data.DateType;
 import db.data.DoubleType;
 import db.data.FloatType;
 import db.data.IntegerArrayList;
-import db.data.DataPositionArrayList;
+import db.data.DataPositionList;
 import db.data.StringType;
 import db.parsers.Parser;
 import db.structure.Column;
@@ -72,7 +72,7 @@ public class IndexTreeTest {
 		table = tableHandler.createTable();
 
 		//tableHandler.createRuntimeIndexingColumn("tpep_pickup_datetime");
-		tableHandler.createRuntimeIndexingColumn("trip_distance"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
+		//tableHandler.createRuntimeIndexingColumn("trip_distance"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
 		
 		//tableHandler.createRuntimeIndexingColumn(1);
 		/*tableHandler.createRuntimeIndexingColumn(2);
@@ -87,9 +87,9 @@ public class IndexTreeTest {
 		
 		if (parseAgain) {
 			Timer parseTimer = new Timer("Temps pris par le parsing");
-			tableHandler.forceAppendNotFirstParsing();
+			//tableHandler.forceAppendNotFirstParsing();
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-12.csv", true);
-			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", false);
 			//tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv", true);
 			// tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); Fichiers identiques, donc 2 fois plus de résultats !
 			parseTimer.log();
@@ -170,7 +170,7 @@ public class IndexTreeTest {
 
 			Timer searchQueryTimer = new Timer("Temps total recherche"); // "Time took to return the matching elements" : flemme d'écrire en anglais
 			
-			Collection<DataPositionArrayList> result = tableHandler.findIndexedResultsOfColumn("tpep_pickup_datetime", searchFromValue, searchToValue, true);
+			Collection<DataPositionList> result = tableHandler.findIndexedResultsOfColumn("tpep_pickup_datetime", searchFromValue, searchToValue, true);
 			searchQueryTimer.log();
 			//trip_distance
 
@@ -232,7 +232,7 @@ public class IndexTreeTest {
 			Log.info("OBJECT RESULT :");
 			
 			// Get the query result
-			Collection<DataPositionArrayList> result;
+			Collection<DataPositionList> result;
 			MemUsage.printMemUsage();
 			
 			String stringDateFrom = "2015-04-04 00:00:00";//"2015-04-04 00:01:00";//
@@ -272,11 +272,11 @@ public class IndexTreeTest {
 			
 			// Iterates over all the results
 			int numberOfResults = 0, numberOfLines = 0;
-			for (DataPositionArrayList list : result) {
+			for (DataPositionList list : result) {
 				//Log.info("list size = " + list.size());
 				numberOfResults += list.size();
 				numberOfLines++;
-				if (false)
+				/*if (false)
 				for (Long index : list) {
 					// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
 					//Log.info("  index = " + index);
@@ -286,7 +286,7 @@ public class IndexTreeTest {
 					Log.info("  valeur indexée = " + indexedValue);
 					//Log.info("  objList = " + objList);
 					
-				}
+				}*/
 			}
 			searchQueryFullTimer.log();
 			Log.info("Number of results = " + numberOfResults);
@@ -305,13 +305,13 @@ public class IndexTreeTest {
 			// Iterates over all the results
 			numberOfResults = 0;
 			numberOfLines = 0;
-			for (DataPositionArrayList list : result) {
+			for (DataPositionList list : result) {
 				//Log.info("list size = " + list.size());
 				numberOfResults += list.size();
 				numberOfLines++;
 				//Log.info("Line("+numberOfLines+") : nb=" + list.size());
 				
-				if (showAllResults) {
+				/*if (showAllResults) {
 					for (Long index : list) {
 						// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
 						List<Object> objList = table.getValuesOfLineById(index);
@@ -322,7 +322,7 @@ public class IndexTreeTest {
 						//Log.info("  objList = " + objList);
 						
 					}
-				}
+				}*/
 			}
 			Log.info("Number of results = " + numberOfResults);
 			Log.info("Number of lines = " + numberOfLines);

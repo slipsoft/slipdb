@@ -155,7 +155,7 @@ public class Table {
 	 * @throws IOException
 	 */
 	public ArrayList<Object> getValuesOfLineById(long lineId) throws IOException { // or getRowById
-		
+		// TODO fonction à refaire avec des DiskDataPosition
 		// Get a new disposable FileInputStream with the file where all table rows are stored
 		FileInputStream fileAsStream = new FileInputStream(fileLinesOnDisk);
 		

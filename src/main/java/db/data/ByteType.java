@@ -26,7 +26,7 @@ public class ByteType extends DataType {
 	}
 
 	@Override
-	public Byte writeToBuffer(String input, ByteBuffer outputBuffer) {
+	public Object parseAndWriteToBuffer(String input, ByteBuffer outputBuffer) throws IllegalArgumentException { // throws NumberFormatException {
 		Byte asByte = Byte.parseByte(input);
 		outputBuffer.put(asByte);
 		return asByte;

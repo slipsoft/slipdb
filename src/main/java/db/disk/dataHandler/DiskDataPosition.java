@@ -11,6 +11,7 @@ import java.io.RandomAccessFile;
  */
 public class DiskDataPosition {
 	
+	static public final int diskDataPositionSizeOnDisk = 2 + 2 + 4; // 8
 
 	public final short nodeID;
 	public final short fileID;

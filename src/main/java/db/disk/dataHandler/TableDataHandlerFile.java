@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.dant.utils.EasyFile;
+import com.dant.utils.Log;
 
 public class TableDataHandlerFile {
 	
@@ -17,22 +18,22 @@ public class TableDataHandlerFile {
 	// Thread-safe (c'est d'ailleurs le but !)
 
 	// Utilisé de l'extérieur (thread différent)
-		protected AtomicBoolean currentlyInUse = new AtomicBoolean(true); // si le fichier est actuellement utilisé (lecture ou écriture)
-		protected AtomicBoolean fileIsFull = new AtomicBoolean(false); // impossible de rajouter de la donnée si fileIsFull
+		private AtomicBoolean currentlyInUse = new AtomicBoolean(true); // si le fichier est actuellement utilisé (lecture ou écriture)
+		private AtomicBoolean fileIsFull = new AtomicBoolean(false); // impossible de rajouter de la donnée si fileIsFull
 	
 	
 	// Utilisé de l'intérieur (même thread)
-	protected EasyFile fileOnDisk;
-	protected String filePath;
-	protected int currentFileSize = 0;
-	protected int currentFileEntriesNumber = 0;
-	protected final short fileID;
+	private EasyFile fileOnDisk;
+	private String filePath;
+	private int currentFileSize = 0;
+	private int currentFileEntriesNumber = 0;
+	private final short fileID;
 	
 	// Nonthread-safe, seulement utilisé par quelques fonctions spécifiques, et dans des cas bien précis
-	protected DataOutputStream streamWriter = null;
+	private DataOutputStream streamWriter = null;
 	// RandomAccessFile pour la lecture   OU :
-	protected DataInputStream streamReader = null;
-	protected boolean isReadOnlyMode;
+	private DataInputStream streamReader = null;
+	private boolean isReadOnlyMode;
 	
 	static public final long maxFileSizeOnDisk = 500_000_000; // Max 500 mo sur disque (grosse marge de sécurité)
 	
@@ -51,7 +52,10 @@ public class TableDataHandlerFile {
 	 * @throws IOException
 	 */
 	public boolean tryToUseThisFile(boolean readOnly) throws IOException {
+		if ((readOnly == false) && (fileIsFull.get())) return false; // accès en écriture et fichier plein
 		if (currentlyInUse.getAndSet(true)) return false; // je viens de passer de true -> true, déjà en cours d'utilisation
+		
+		
 		// si je viens de passer de false -> true, c'est bon !
 		// Ouverture du bon stream
 		isReadOnlyMode = readOnly;
@@ -65,8 +69,10 @@ public class TableDataHandlerFile {
 		return true;
 	}
 
-	public void stopFileUse() throws IOException, Exception {
-		if (currentlyInUse.get() == false) throw new Exception("stopFileUse : le fichier n'était pas utilisé.");
+	public void stopFileUse() throws IOException {
+		if (currentlyInUse.get() == false) { //throw new Exception("stopFileUse : le fichier n'était pas utilisé.");
+			Log.error("TableDataHandlerFile.stopFileUse : currentlyInUse.get() = false alors que devrait être à true.");
+		}
 		
 		if (currentFileSize >= maxFileSizeOnDisk)
 			fileIsFull.set(true);
@@ -109,9 +115,9 @@ public class TableDataHandlerFile {
 	 *  
 	 *  @param dataAsByteArray
 	 *  @return
-	 * @throws Exception 
+	 * @throws IOException 
 	 */
-	public TableDataPositionResult writeDataLine(byte[] dataAsByteArray) throws Exception {
+	public TableDataPositionResult writeDataLine(byte[] dataAsByteArray) throws IOException {
 		currentFileEntriesNumber++;
 		currentFileSize += dataAsByteArray.length;
 		streamWriter.write(dataAsByteArray);

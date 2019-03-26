@@ -63,8 +63,14 @@ public class Column {
 		return dataType.getSize();
 	}
 	
-	public Object writeToBuffer(String input, ByteBuffer outputBuffer) {
-		return this.getDataType().writeToBuffer(input, outputBuffer);
+	/** Au passage, @Nicolas, le parseAndWriteToBuffer est spécifique au format string -> objet parsé et n'est pas si générique que ça... (cas de l'hexa par exemple)
+	 * @param input
+	 * @param outputBuffer
+	 * @return
+	 * @throws IllegalArgumentException
+	 */
+	public Object parseAndWriteToBuffer(String input, ByteBuffer outputBuffer) throws IllegalArgumentException {
+		return this.getDataType().parseAndWriteToBuffer(input, outputBuffer);
 	}
 	
 	/** NON thread-safe
