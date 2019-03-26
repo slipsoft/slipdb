@@ -1,14 +1,10 @@
 package db.parsers;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -30,6 +26,9 @@ public abstract class Parser {
 	protected int lineByteSize; // number of bytes used to store information
 	protected int totalEntryCount = 0;
 	
+	/** Avant le parsing, définir runtimeIndexingEntries.
+	 *  Au moment du parsing, runtimeIndexingEntries doit être en lecture seule, donc thread-safe.
+	 */
 	protected SRuntimeIndexingEntryList runtimeIndexingEntries = null;
 	
 	public Parser(Table schema) {
@@ -66,20 +65,18 @@ public abstract class Parser {
 		) {
 			
 			
-			String entryString;
 			Timer timeTookTimer = new Timer("Temps écoulé");
 			
-			while ((entryString = processReader(bRead)) != null && totalEntryCount != limit) {
+			//while ((entryString = processReader(bRead)) != null && totalEntryCount != limit) {
+			while (localReadEntryNb != limit) {
 				
-				// entryString : "entrée", ligne lue (d'un fichier CSV par exemple pour CSVParser)
+				// Lecture d'une nouvelle ligne / entrée
+				String entryAsString = processReader(bRead); // "entrée", ligne lue (d'un fichier CSV par exemple pour CSVParser)
+				if (entryAsString == null) break; // fin de la lecture
 				
-				if (showInfoEveryParsedLines != -1 && localReadEntryNb % showInfoEveryParsedLines == 0) {
-					Log.info("Parser : nombre de résultats (local) parsés = " + localReadEntryNb + "   temps écoulé = " + timeTookTimer.pretty());
-					MemUsage.printMemUsage();
-				}
-				
+				// Ecriture de l'entrée
 				try {
-					this.writeEntry(entryString, writeJob);
+					parseAndWriteEntry(entryAsString, writeJob);
 					localReadEntryNb++;
 					totalEntryCount++;
 				} catch (IncorrectEntryException e) {
@@ -89,6 +86,13 @@ public abstract class Parser {
 					Log.error(e);
 					// TODO: handle exception
 				}
+				
+				// Affichage d'une entrée toutes les showInfoEveryParsedLines entrées lues
+				if (showInfoEveryParsedLines != -1 && localReadEntryNb % showInfoEveryParsedLines == 0) {
+					Log.info("Parser : nombre de résultats (local) parsés = " + localReadEntryNb + "   temps écoulé = " + timeTookTimer.pretty());
+					MemUsage.printMemUsage();
+				}
+				
 			}
 		} catch (FileNotFoundException e) {
 			Log.error(e);
@@ -109,7 +113,7 @@ public abstract class Parser {
 	 * @throws IncorrectEntryException
 	 * @throws IOException 
 	 */
-	protected final void writeEntry(String entryString, TableDataHandlerWriteJob writeJob) throws IncorrectEntryException, IOException {
+	protected final void parseAndWriteEntry(String entryString, TableDataHandlerWriteJob writeJob) throws IncorrectEntryException, IOException {
 		
 		String[] valuesAsStringArray = processEntry(entryString);
 		List<Column> columnsList = currentTable.getColumns();

@@ -17,9 +17,6 @@ import db.structure.Table;
  *  Pour l'instant, je considère qu'il n'y a qu'une seule table, je ne me soucie pas de la répartition de la donnée entre tables.
  *  
  *  
- *  Serv à sauvegarder de la donnée
- *  
- *  
  *  Thread-safe pour les parties qui le nécessitent
  */
 public class TableDataHandler {
@@ -68,8 +65,12 @@ public class TableDataHandler {
 		
 	}*/
 	
-	// Thread-safe
-	// Pas besoin de fonction spéciale pour libérer le fichier, juste faire un .currentlyInUse.set(false);
+	/** 
+	    Thread-safe
+	    Pas besoin de fonction spéciale pour libérer le fichier, juste faire
+	    un .stopFileUse(); -> géré automatiquement par TableDataHandlerWriteJob s'il est utilisé
+	    
+	 */
 	public TableDataHandlerFile findOrCreateWriteFile() throws IOException { synchronized (allFilesListLock) {
 			TableDataHandlerFile foundDataFile = null;
 			for (TableDataHandlerFile dataFile : allFilesList) {

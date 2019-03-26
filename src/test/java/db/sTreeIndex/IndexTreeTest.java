@@ -72,7 +72,7 @@ public class IndexTreeTest {
 		table = tableHandler.createTable();
 
 		//tableHandler.createRuntimeIndexingColumn("tpep_pickup_datetime");
-		//tableHandler.createRuntimeIndexingColumn("trip_distance"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
+		tableHandler.createRuntimeIndexingColumn("trip_distance"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
 		
 		//tableHandler.createRuntimeIndexingColumn(1);
 		/*tableHandler.createRuntimeIndexingColumn(2);
@@ -89,7 +89,7 @@ public class IndexTreeTest {
 			Timer parseTimer = new Timer("Temps pris par le parsing");
 			//tableHandler.forceAppendNotFirstParsing();
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-12.csv", true);
-			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", false);
+			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			//tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv", true);
 			// tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); Fichiers identiques, donc 2 fois plus de résultats !
 			parseTimer.log();

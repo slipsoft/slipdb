@@ -299,15 +299,15 @@ public class IndexTreeDic extends Index {
 		
 		flushOnDisk();
 	}
-	
-	
+
+	private Object indexingAddValueLock = new Object();
 	
 	/** Ajouter une valeur et un binIndex associé
 	 *  @param associatedValue valeur indexée, ATTENTION : doit être du type du IndexTree utilisé (Integer, Float, Byte, Double, ...)
 	 *  @param binIndex position (dans le fichier binaire global) de la donnée stockée dans la table
 	 * @throws IOException 
 	 */
-	public void addValue(Object argAssociatedValue, DiskDataPosition dataPosition) throws IOException {
+	public void addValue(Object argAssociatedValue, DiskDataPosition dataPosition) throws IOException { synchronized (indexingAddValueLock) {
 		
 		// Je peux ajouter la donnée fine
 		DataPositionList binIndexList = associatedBinIndexes.get(argAssociatedValue);
@@ -326,7 +326,7 @@ public class IndexTreeDic extends Index {
 			//Log.info("indexColumnFromDisk : SAVE ON DISK !!");
 		}
 		
-	}
+	} }
 	
 	public boolean checkIfCompatibleObjectType(Object inputObject) {
 		if (inputObject == null) return false;
@@ -368,7 +368,7 @@ public class IndexTreeDic extends Index {
 	int debugNumberOfExactValuesWrittenOnDisk = 0;
 	
 	
-	public void flushOnDisk() throws IOException {
+	public void flushOnDisk() throws IOException { synchronized (indexingAddValueLock) {
 		if (associatedBinIndexes.size() == 0) return;
 		
 		String saveFileName = baseSaveFilePath + uniqueFileIdForThisTree + suffixSaveFilePath;
@@ -382,7 +382,7 @@ public class IndexTreeDic extends Index {
 		currentTotalEntrySizeInMemory = 0;
 		
 		if (showMemUsageAtEachFlush) MemUsage.printMemUsage("IndexTreeDic.flushOnDisk");//, baseSaveFilePath = " + baseSaveFilePath);
-	}
+	}  }
 	
 	/** Ecrire l'index sur le disque
 	 *  @param appendAtTheEnd   mettre à true pour écrire les données sur le disque

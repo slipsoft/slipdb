@@ -24,6 +24,11 @@ public class SRuntimeIndexingEntry implements Comparable<SRuntimeIndexingEntry> 
 		return -1;
 	}
 	
+	/** Thread-safe si associatedIndexTree.addValue est thread-safe.
+	 *  @param argAssociatedValue
+	 *  @param dataPosition
+	 *  @throws IOException
+	 */
 	public void addIndexValue(Object argAssociatedValue, DiskDataPosition dataPosition) throws IOException {
 		associatedIndexTree.addValue(argAssociatedValue, dataPosition);
 	}
