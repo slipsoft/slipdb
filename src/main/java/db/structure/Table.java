@@ -168,6 +168,7 @@ public class Table {
 	 *  @return a list containing every entry associates with the line at position lineId
 	 *  @throws IOException
 	 */
+	@Deprecated
 	public ArrayList<Object> getValuesOfLineById(long lineId) throws IOException { // or getRowById
 		// TODO fonction à refaire avec des DiskDataPosition
 		// Get a new disposable FileInputStream with the file where all table rows are stored

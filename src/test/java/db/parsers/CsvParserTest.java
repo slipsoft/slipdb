@@ -22,6 +22,8 @@ import db.data.DateType;
 import db.data.DoubleType;
 import db.data.FloatType;
 import db.data.StringType;
+import db.disk.dataHandler.DiskDataPosition;
+import db.disk.dataHandler.TableDataHandler;
 import db.structure.Column;
 import db.structure.Table;
 
@@ -83,6 +85,15 @@ class CsvParserTest {
 			}
 		};
 		assertDoesNotThrow(exec);
+		
+		/*
+		DiskDataPosition dataPos = new DiskDataPosition(1, );
+		TableDataHandler dataHandler = table.getDataHandler();
+		ArrayList<Object> objList = dataHandler.getValuesOfLineByIdForSignleQuery(dataPos);
+		TODO
+		TODO Faire avec la nouvelle version
+		TODO
+		TODO
 		Log.debug(table.getValuesOfLineById(0), "entry/0");
 		Log.debug(table.getValuesOfLineById(69), "entry/69");
 		List<Object> expected = new ArrayList<Object>();
@@ -106,6 +117,6 @@ class CsvParserTest {
 		expected.add((float) 0.3);
 		expected.add((float) 9.96);
 
-		assertEquals(expected, table.getValuesOfLineById(70));
+		assertEquals(expected, table.getValuesOfLineById(70));*/
 	}
 }

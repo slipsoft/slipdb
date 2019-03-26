@@ -277,7 +277,7 @@ public class IndexTreeTest {
 			numberOfResults = tableHandler.evaluateNumberOfResults(result);
 			numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
 			
-			//tableHandler.getFullResultsFromBinIndexes(result);
+			tableHandler.getFullResultsFromBinIndexes(result);
 			
 			searchQueryFullTimer.log();
 			Log.info("Nombre de résultats = " + numberOfResults);
