@@ -1,11 +1,13 @@
 package db.disk.dataHandler;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.dant.utils.Log;
 
+import db.structure.Column;
 import db.structure.Table;
 
 /**
@@ -17,7 +19,8 @@ import db.structure.Table;
  *  Pour l'instant, je considère qu'il n'y a qu'une seule table, je ne me soucie pas de la répartition de la donnée entre tables.
  *  
  *  
- *  Thread-safe pour les parties qui le nécessitent
+ *  Thread-safe pour les parties qui le nécessitent,
+ *  mais globalement non-thread-safe : doit être utilisé par le thread qui gère la table myTable.
  */
 public class TableDataHandler {
 	
@@ -64,6 +67,41 @@ public class TableDataHandler {
 	/*public TableDataHandlerJob newJob() {
 		
 	}*/
+	
+	
+	public static int debugLastFileID = -1;
+	
+	/** Marche pour une seule demande isolée, mais TRES LENT pour plusieurs résultats.
+	 *  Utiliser 
+	 *  @param dataPosition
+	 *  @return
+	 *  @throws IOException
+	 */
+	public ArrayList<Object> getValuesOfLineByIdForSignleQuery(DiskDataPosition dataPosition) throws IOException { // or getRowById
+		
+		if (debugLastFileID != dataPosition.fileID) {
+			Log.info("getValuesOfLineByIdForSignleQuery depuis fileID = " + dataPosition.fileID);
+			debugLastFileID = dataPosition.fileID;
+		}
+		
+		//String fileName = getFileNameFromDataPosition(dataPosition.nodeID, dataPosition.fileID);
+		// accès au fichier
+		synchronized (allFilesListLock) {
+			for (TableDataHandlerFile dataFile : allFilesList) {
+				if (dataFile.getFileID() == dataPosition.fileID) {
+					if (dataFile.tryToUseThisFile(true)) {
+						ArrayList<Object> resultArray = dataFile.getValuesOfLineById(dataPosition, myTable);
+						dataFile.stopFileUse();
+						return resultArray;
+					} else {
+						throw new IOException("Impossible de libre du fichier : il est occupé.");
+					}
+				}
+			}
+		}
+		return new ArrayList<Object>();
+	}
+	
 	
 	/** 
 	    Thread-safe

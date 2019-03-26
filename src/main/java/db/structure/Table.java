@@ -31,6 +31,7 @@ public class Table {
 	
 	protected final int tableID;
 	protected final String baseTablePath;
+	protected int lineDataSize;
 	
 	
 	//protected final String dataFilesOnDiskBasePath; devenu baseTablePath
@@ -63,7 +64,14 @@ public class Table {
 		/* Désormais géré par TableDiskDataHandler*/
 		this.fileLinesOnDisk = new EasyFile(oldSmellyBasePath + name + ".bin");
 		this.fileLinesOnDisk.createFileIfNotExist();
-		
+		computeLineDataSize();
+	}
+	
+	protected void computeLineDataSize() {
+		lineDataSize =  columnsList
+	    				.stream()
+	    				.mapToInt(Column::getSize)
+	    				.sum();
 	}
 	
 	// dataHandler
@@ -88,10 +96,11 @@ public class Table {
 	}
 	
 	public int getLineSize() {
-		return columnsList
+		return lineDataSize;
+		/*return columnsList
 		    .stream()
 		    .mapToInt(Column::getSize)
-		    .sum();
+		    .sum();*/
 		// -> do a performance benchmark with this function (seems very fast)
 		/*
 		Same as :
@@ -121,6 +130,7 @@ public class Table {
 		// Ajout de la colonne
 		Column newColumn = new Column(colName, dataType).setNumber(columnsList.size());
 		columnsList.add(newColumn);
+		computeLineDataSize();
 		return true;
 	}
 	
@@ -138,7 +148,7 @@ public class Table {
 		}
 		return -1;
 	}
-
+	
 	/**
 	 * Give each column a number
 	 */
@@ -147,12 +157,12 @@ public class Table {
 			columnsList.get(colIndex).setNumber(colIndex);
 		}
 	}
-
+	
 	/**
-	 * 
-	 * @param lineId is the position of the line, 0 being the first loaded line from the file (CSV for New York taxis)
-	 * @return a list containing every entry associates with the line at position lineId
-	 * @throws IOException
+	 *  
+	 *  @param lineId is the position of the line, 0 being the first loaded line from the file (CSV for New York taxis)
+	 *  @return a list containing every entry associates with the line at position lineId
+	 *  @throws IOException
 	 */
 	public ArrayList<Object> getValuesOfLineById(long lineId) throws IOException { // or getRowById
 		// TODO fonction à refaire avec des DiskDataPosition
@@ -175,7 +185,7 @@ public class Table {
 		fileAsStream.close();
 		return lineValues;
 	}
-
+	
 	public OutputStream tableToOutputStream(boolean appendAtTheEnd) throws FileNotFoundException {
 		return new FileOutputStream(fileLinesOnDisk, appendAtTheEnd);
 	}

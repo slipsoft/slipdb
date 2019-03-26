@@ -11,6 +11,7 @@ import com.dant.utils.Log;
 
 import db.data.DataType;
 import db.disk.dataHandler.DiskDataPosition;
+import db.disk.dataHandler.TableDataHandler;
 import db.data.DataPositionList;
 import db.parsers.CsvParser;
 import db.structure.Column;
@@ -223,12 +224,18 @@ public class STableHandler {
 		
 		ArrayList<ArrayList<Object>> resultArrayList = new ArrayList<ArrayList<Object>>();
 		
+		TableDataHandler dataHandler = associatedTable.getDataHandler();
+		
 		// Pour toutes les listes de valeurs identiques
 		// (il peut y avoir des listes distinctes associés à une même valeur indexée, du fait du multi-fichiers / multi-thread)
 		for (DataPositionList dataPosList : resultsCollection) {
 			//Log.info("list size = " + list.size());
 			for (DiskDataPosition dataPos : dataPosList) {
 				// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
+				ArrayList<Object> objList = dataHandler.getValuesOfLineByIdForSignleQuery(dataPos);
+				resultArrayList.add(objList);
+				Log.info("  objList = " + objList);
+				
 				//Log.info("  index = " + index);
 				// TODO
 				// TODO
@@ -251,6 +258,14 @@ public class STableHandler {
 		for (IndexTreeDic indexTree : indexTreeList) {
 			indexTree.flushOnDisk();
 		}
+		
+	}
+	
+	public void multiThreadParsingInit() {
+		
+	}
+	
+	public void multiThreadParsingAddFile() {
 		
 	}
 	

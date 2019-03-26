@@ -7,15 +7,22 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.dant.utils.BufferedDataInputStreamCustom;
 import com.dant.utils.EasyFile;
 import com.dant.utils.Log;
+
+import db.structure.Column;
+import db.structure.Table;
 
 public class TableDataHandlerFile {
 	
 	// Champs mis en public pour gagner du temps
 	// Thread-safe (c'est d'ailleurs le but !)
+	
+	//private Object forceWaitToUseThisFileLock = new Object();
 
 	// Utilisé de l'extérieur (thread différent)
 		private AtomicBoolean currentlyInUse = new AtomicBoolean(true); // si le fichier est actuellement utilisé (lecture ou écriture)
@@ -32,10 +39,11 @@ public class TableDataHandlerFile {
 	// Nonthread-safe, seulement utilisé par quelques fonctions spécifiques, et dans des cas bien précis
 	private DataOutputStream streamWriter = null;
 	// RandomAccessFile pour la lecture   OU :
-	private DataInputStream streamReader = null;
+	private BufferedDataInputStreamCustom streamReader = null;
 	private boolean isReadOnlyMode;
+	private int positionInReadOnlyFile = 0;
 	
-	static public final long maxFileSizeOnDisk = 500_000_000; // Max 500 mo sur disque (grosse marge de sécurité)
+	static public final int maxFileSizeOnDisk = 500_000;//_000; // Max 500 mo sur disque (grosse marge de sécurité)
 	
 	public TableDataHandlerFile(short argFileID, String argFilePath) throws IOException {
 		fileID = argFileID;
@@ -43,6 +51,13 @@ public class TableDataHandlerFile {
 		fileOnDisk = new EasyFile(filePath);
 		fileOnDisk.createFileIfNotExist();
 		currentlyInUse.set(false);
+	}
+	
+	/** Thread-safe, car lecture seule (et la ressource ne change pas de position mémoire)
+	 *  @return
+	 */
+	public short getFileID() {
+		return fileID;
 	}
 	
 	/**
@@ -61,14 +76,24 @@ public class TableDataHandlerFile {
 		isReadOnlyMode = readOnly;
 		
 		if (readOnly) {
-			streamReader = new DataInputStream(new BufferedInputStream(new FileInputStream(fileOnDisk)));
+			streamReader = new BufferedDataInputStreamCustom(new FileInputStream(fileOnDisk));//new DataInputStream(new BufferedInputStream(
+			streamReader.mark((int) maxFileSizeOnDisk + 100); // pour revenir à la position initiale du stream (pas sur que ça marche bien, ça...)
+			positionInReadOnlyFile = 0;
 		} else {
 			streamWriter = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(fileOnDisk)));
 		}
 		
 		return true;
 	}
-
+	
+	
+	/*public boolean waitToUseThisFile(boolean readOnly) throws IOException { synchronized(forceWaitToUseThisFileLock) {
+		
+		
+		
+	} }*/
+	
+	
 	public void stopFileUse() throws IOException {
 		if (currentlyInUse.get() == false) { //throw new Exception("stopFileUse : le fichier n'était pas utilisé.");
 			Log.error("TableDataHandlerFile.stopFileUse : currentlyInUse.get() = false alors que devrait être à true.");
@@ -128,6 +153,34 @@ public class TableDataHandlerFile {
 		}
 		TableDataPositionResult dataPositionResult = new TableDataPositionResult(TableDataHandler.currentNodeID, fileID, currentFileEntriesNumber - 1, canStillUseThisFile);
 		return dataPositionResult;
+	}
+	
+	/** Suppose que 
+	 *  @param dataPosition
+	 *  @param inTable
+	 *  @return
+	 * @throws IOException 
+	 */
+	public ArrayList<Object> getValuesOfLineById(DiskDataPosition dataPosition, Table inTable) throws IOException {
+		if (isReadOnlyMode == false) throw new IOException("Le fichier doit être ouvert en lecture."); // erreur, le fichier DOIT être ouvert en lecture
+		int binPosInFile = dataPosition.lineIndex * inTable.getLineSize();
+		// manifestement incompatible avec les streams, le skip négatif ><"  int hasToSkipBytes = binPosInFile - positionInReadOnlyFile; // positif ou négatif
+		// Alternative : utiliser RandomAccessFile
+		streamReader.reset(); // <- ça fera peut-être exploser la mémoire...
+		// Seek to the right position in the stream
+		streamReader.skipForce(binPosInFile);
+		positionInReadOnlyFile = binPosInFile;
+
+		ArrayList<Object> lineValues = new ArrayList<>(); // rowValues
+		// For each column, reads the associated value
+		for (Column column : inTable.getColumns()) {
+			byte[] columnValueAsByteArray = new byte[column.getSize()];
+			streamReader.read(columnValueAsByteArray); // reads from the stream
+			//Log.debug(b); for debug purposes only
+			lineValues.add(column.getDataType().readTrueValue(columnValueAsByteArray));
+		}
+		return lineValues;
+		
 	}
 	
 }

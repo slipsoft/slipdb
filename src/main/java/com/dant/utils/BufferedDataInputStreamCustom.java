@@ -22,5 +22,15 @@ public class BufferedDataInputStreamCustom extends DataInputStream {
 		
 	}
 	
+	/*
+	public void negativeSkipForce(int skipBytesNumber) throws IOException {
+		int bytesRemaining = skipBytesNumber;
+		
+		while (bytesRemaining != 0) {
+			bytesRemaining = bytesRemaining - skip(bytesRemaining); //skip(bytesRemaining);
+		}
+		
+	}*/
+	
 	
 }

@@ -183,7 +183,7 @@ public class IndexTreeTest {
 			
 			
 			searchQueryTimer = new Timer("Temps total recherche");
-			result = tableHandler.findIndexedResultsOfColumn("trip_distance", 16.78f, 18f, true);
+			result = tableHandler.findIndexedResultsOfColumn("trip_distance", 17.78f, 18f, true);
 			searchQueryTimer.log();
 			searchQueryFullTimer = new Timer("Temps d'acquisition des résultats (chargement du disque de tous les champs)");
 			numberOfResults = tableHandler.evaluateNumberOfResults(result);
