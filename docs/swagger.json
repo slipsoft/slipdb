@@ -17,9 +17,16 @@
         }
       },
       "put" : {
-        "operationId" : "createTable",
+        "operationId" : "createTables",
         "consumes" : [ "application/json" ],
         "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "InternalToken",
+          "in" : "header",
+          "required" : false,
+          "type" : "string",
+          "default" : "null"
+        } ],
         "responses" : {
           "default" : {
             "description" : "successful operation"
@@ -54,6 +61,17 @@
           "required" : true,
           "type" : "string"
         } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/table/{tableName}/load/csv" : {
+      "post" : {
+        "operationId" : "loadCSV",
+        "consumes" : [ "text/plain" ],
         "responses" : {
           "default" : {
             "description" : "successful operation"

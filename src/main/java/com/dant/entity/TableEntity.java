@@ -6,11 +6,12 @@ import db.structure.Column;
 import db.structure.Database;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import db.structure.Table;
 
-public class TableEntity extends Entity {
+public class TableEntity extends Entity implements Serializable {
     public ArrayList<ColumnEntity> allColumns;
     public ArrayList<IndexEntity> allIndexes;
 

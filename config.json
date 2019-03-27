@@ -12,5 +12,6 @@
     "Long": "LongType",
     "String": "StringType"
   },
-  "NTPHostName": "fr.pool.ntp.org"
+  "NTPHostName": "fr.pool.ntp.org",
+  "SuperSecretPassphrase": "laTarentule"
 }

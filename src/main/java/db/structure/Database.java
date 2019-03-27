@@ -12,14 +12,19 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
 import com.dant.utils.Utils;
+import db.network.Node;
 
 public final class Database {
 
     private ArrayList<Table> allTables;
     public Config config;
+    public ArrayList<Node> allNodes;
 
     private Database() {
         allTables = new ArrayList<>();
+    }
+
+    public void getConfigFromFile() {
         try {
             FileReader configReader = new FileReader("config.json");
             Gson gson = new Gson();
@@ -37,42 +42,49 @@ public final class Database {
         public static final Database INSTANCE = new Database();
     }
 
-    public Response addTables(ArrayList<TableEntity> allTableEntities) throws BadRequestException {
-        ArrayList<ResponseError> errors = new ArrayList<>();
+    public ArrayList<ResponseError> addTables(ArrayList<TableEntity> allTableEntities, boolean addImmediately) throws BadRequestException {
 
+        ArrayList<ResponseError> errors = new ArrayList<>();
         ArrayList<String> names = new ArrayList<>();
 
-        //a really dirty way of checking for duplicate, but it can always be improved later
-        for (TableEntity table : allTableEntities) {
-            if (table.name == null)
-                continue;
-
-            if (names.stream().anyMatch(n -> table.name.equals(n))) {
-                errors.add(new ResponseError(Location.createTable, Type.invalidData, "table name is duplicate"));
-            }
-
-            if (this.allTables.stream().anyMatch(n -> table.name.equals(n.name))) {
-                errors.add(new ResponseError(Location.createTable, Type.invalidData, "table name is duplicate"));
-            }
-            names.add(table.name);
+        if (allTables.size() == 0) {
+            errors.add(new ResponseError(Location.createTable, Type.invalidData, "table array is empty"));
         }
 
-        allTableEntities.stream().forEach(t -> t.validate(errors));
+        if (!addImmediately) {
+            //a really dirty way of checking for duplicate, but it can always be improved later
+            for (TableEntity table : allTableEntities) {
+                if (table.name == null)
+                    continue;
 
-        if(errors.size() > 0) {
-            return com.dant.utils.Utils.generateResponse(400, "error", "application/json", errors);
-        } else {
-            ArrayList<Table> tablesToAdd = allTableEntities.stream().map(t -> {
-                try {
-                    return t.convertToTable();
-                } catch (IOException exp) {
-                    throw new RuntimeException("unable to create tables");
+                if (names.stream().anyMatch(n -> table.name.equals(n))) {
+                    errors.add(new ResponseError(Location.createTable, Type.invalidData, "table name is duplicate"));
                 }
-            }).collect(Collectors.toCollection(ArrayList::new));
-            tablesToAdd.stream().forEach(t -> allTables.add(t));
+
+                if (this.allTables.stream().anyMatch(n -> table.name.equals(n.name))) {
+                    errors.add(new ResponseError(Location.createTable, Type.invalidData, "table name is duplicate"));
+                }
+                names.add(table.name);
+            }
+
+            allTableEntities.stream().forEach(t -> t.validate(errors));
+
+            if(errors.size() > 0) {
+                return errors;
+            }
         }
 
-        return com.dant.utils.Utils.generateResponse(200, "ok", "application/json", "table successfully inserted");
+        ArrayList<Table> tablesToAdd = allTableEntities.stream().map(t -> {
+            try {
+                return t.convertToTable();
+            } catch (IOException exp) {
+                throw new RuntimeException("unable to create tables");
+            }
+        }).collect(Collectors.toCollection(ArrayList::new));
+
+        tablesToAdd.stream().forEach(t -> allTables.add(t));
+
+        return null;
     }
 
     public Response getTable(String tableName) {
