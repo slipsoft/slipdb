@@ -74,8 +74,8 @@ public class IndexTreeDic extends Index {
 	 */
 	
 	// Pour la recherche multi-thread, ce nombre est multiplié autant de fois qu'il y a d'arbre !
-	static public int maxResultCountPerIndexInstance = 20_000_000_00;
-	static public int maxResultCountInTotal = 20_000_000_00; // new AtomicInteger(lent, mais pour peu de résultats, ça passera !
+	static public int maxResultCountPerIndexInstance = 15;//20_000_000_00;
+	static public int maxResultCountInTotal = 20;//20_000_000_00; // new AtomicInteger(lent, mais pour peu de résultats, ça passera !
 	
 	public int flushOnDiskOnceReachedThisTotalEntrySize = 10_000_000; // <- Globalement, la taille des fichiers mis sur le disque     ancien : EntryNumber
 	protected int currentTotalEntrySizeInMemory = 0; // nombre actuel de résultats en mémoire vive, multiplié par la taille de chaque résultat (en octets) (utile pour le flush sur le disque)

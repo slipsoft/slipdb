@@ -1,14 +1,12 @@
 package db.structure.recherches;
 
-import java.io.File;
+import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import org.apache.commons.io.FileUtils;
 
 import com.dant.utils.Log;
 
@@ -20,6 +18,7 @@ import db.parsers.CsvParser;
 import db.structure.Column;
 import db.structure.Table;
 import db.structure.indexTree.IndexTreeDic;
+import sj.network.tcpAndBuffers.NetBuffer;
 
 public class STableHandler {
 	
@@ -31,6 +30,21 @@ public class STableHandler {
 	protected boolean firstTimeParsingData = true;
 	
 	protected ArrayList<IndexTreeDic> indexTreeList = new ArrayList<IndexTreeDic>(); // Liste des IndexTree associés à cette table
+	
+	
+	/** @Nicolas : ne pas supprimer ce code, mettre ton code en plus dans une autre fonction.
+	 *  Sera fait avec la serialisation plus rapide et fidèle 
+	 *  Ecrire l'état actuel de la table :
+	 *  Nom, liste de colonnes, arbres
+	 * @param writeInStream
+	 */
+	public void writeTableFull(DataOutputStream writeInStream) {
+		NetBuffer tableData = new NetBuffer();
+		
+		
+		
+	}
+	
 	
 	public void forceAppendNotFirstParsing() {
 		firstTimeParsingData = false; // si à vrai, supprimer tous les fichiers connus
@@ -62,13 +76,30 @@ public class STableHandler {
 		associatedTable = new Table(tableName, columnsList);
 		return associatedTable;
 	}
-	
+
 	/** Thread-safe, la table est en lecture seule
 	 * @param csvPath
 	 * @param doRuntimeIndexing
 	 * @throws Exception
 	 */
 	public void parseCsvData(String csvPath, boolean doRuntimeIndexing) throws Exception {
+		InputStream is = new FileInputStream(csvPath);
+		try {
+			parseCsvData(is, doRuntimeIndexing, false);
+			is.close();
+		} catch (Exception e) {
+			is.close();
+			throw e;
+		}
+	}
+
+	/** Thread-safe, la table est en lecture seule
+	 * @param csvStream stream contenant les données en CSV à parser
+	 * @param doRuntimeIndexing
+	 * @param closeStreamAfterUsage Fermer le stream après usage (true ou false)
+	 * @throws Exception
+	 */
+	public void parseCsvData(InputStream csvStream, boolean doRuntimeIndexing, boolean closeStreamAfterUsage) throws Exception {
 		if (associatedTable == null) throw new Exception("La table associée est null, elle doit être crée via createTable avant tout parsing.");
 		//if (csvParser == null)
 		// Thread-safe
@@ -79,9 +110,9 @@ public class STableHandler {
 		else
 			csvParser.setRuntimeIndexing(null);
 		
-		InputStream is = new FileInputStream(csvPath);
-		csvParser.parse(is, !firstTimeParsingData);
-		is.close();
+		csvParser.parse(csvStream, !firstTimeParsingData);
+		if (closeStreamAfterUsage)
+			csvStream.close();
 		
 		firstTimeParsingData = false;
 		

@@ -1,7 +1,6 @@
 package db.disk.dataHandler;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -10,7 +9,6 @@ import org.apache.commons.io.FileUtils;
 
 import com.dant.utils.Log;
 
-import db.structure.Column;
 import db.structure.Table;
 
 /**
@@ -20,7 +18,6 @@ import db.structure.Table;
  *  -> Ne sert PAS à stocker la donnée des index (comme IndexTreeDic), ils gèrent leur donnée
  *  
  *  Pour l'instant, je considère qu'il n'y a qu'une seule table, je ne me soucie pas de la répartition de la donnée entre tables.
- *  
  *  
  *  Thread-safe pour les parties qui le nécessitent,
  *  mais globalement non-thread-safe : doit être utilisé par le thread qui gère la table myTable.
@@ -50,7 +47,6 @@ public class TableDataHandler {
 	/*
 		Besoin :
 			- Ecrire une ligne sur le disque : peu importe où, on renvoie sa position (plus tard, éventuellement, optimisations sur la position)
-		
 		
 	 * Les Jobs doivent être thread-safe
 	 * 

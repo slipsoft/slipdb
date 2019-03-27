@@ -261,7 +261,7 @@ public class IndexTreeTest {
 			Collection<DataPositionList> result = tableHandler.findIndexedResultsOfColumn("tpep_pickup_datetime", searchFromValue, searchToValue, true);
 			searchQueryTimer.log();
 			//trip_distance
-
+			
 			Timer searchQueryFullTimer = new Timer("Temps parcours des résultats");
 			int numberOfResults = tableHandler.evaluateNumberOfResults(result);
 			int numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
