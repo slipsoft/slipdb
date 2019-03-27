@@ -3,6 +3,7 @@ package db.sTreeIndex;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -29,7 +30,7 @@ import db.structure.Table;
 import db.structure.indexTree.IndexTreeCeption;
 import db.structure.indexTree.IndexTreeDic;
 import db.structure.recherches.SGlobalHandler;
-import db.structure.recherches.STableHandler;
+import db.structure.recherches.TableHandler;
 
 public class IndexTreeTest {
 	
@@ -39,7 +40,7 @@ public class IndexTreeTest {
 	//protected static Parser parser;
 	protected static Table table;
 	protected static Utils currentlyUsedUils = new Utils(); // For thread-safety ! (but, here, it's static so thread unsafe... ^^')
-	protected static STableHandler tableHandler;
+	protected static TableHandler tableHandler;
 	
 	protected static boolean parseAgain = true;
 	
@@ -103,6 +104,7 @@ public class IndexTreeTest {
 			//tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv", true);
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-07.csv", true);
 			
+			/*
 			Thread tPars1 = new Thread(() -> {
 				try {
 					tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
@@ -144,7 +146,15 @@ public class IndexTreeTest {
 			tPars1.join();
 			tPars2.join();
 			tPars3.join();
-			tPars4.join();
+			tPars4.join();*/
+			// Parser de la donnée en multi-thread
+			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			// Attendre que toute la donnée soit parsée
+			tableHandler.multiThreadParsingJoinAllThreads();
+			
 			
 			
 			/*tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
@@ -258,30 +268,42 @@ public class IndexTreeTest {
 
 			Timer searchQueryTimer = new Timer("Temps total recherche"); // "Time took to return the matching elements" : flemme d'écrire en anglais
 			
-			Collection<DataPositionList> result = tableHandler.findIndexedResultsOfColumn("tpep_pickup_datetime", searchFromValue, searchToValue, true);
+			DataPositionList result = tableHandler.findIndexedResultsOfColumn("tpep_pickup_datetime", searchFromValue, searchToValue, true);
+			
+			
 			searchQueryTimer.log();
 			//trip_distance
-
+			
 			Timer searchQueryFullTimer = new Timer("Temps parcours des résultats");
-			int numberOfResults = tableHandler.evaluateNumberOfResults(result);
-			int numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
+			int numberOfResults = result.size();
+			//int numberOfResults = tableHandler.evaluateNumberOfResults(result);
+			//int numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
 			searchQueryFullTimer.log();
 			Log.info("Nombre de résultats = " + numberOfResults);
-			Log.info("Nombre de lignes = " + numberOfLines);
+			//Log.info("Nombre de lignes = " + numberOfLines);
 			
 			
 			searchQueryTimer = new Timer("Temps total recherche");
 			result = tableHandler.findIndexedResultsOfColumn("trip_distance", 17.78f, 18f, true);
 			searchQueryTimer.log();
 			searchQueryFullTimer = new Timer("Temps d'acquisition des résultats (chargement du disque de tous les champs)");
-			numberOfResults = tableHandler.evaluateNumberOfResults(result);
-			numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
+			numberOfResults = result.size();// tableHandler.evaluateNumberOfResults(result);
+			//numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
 			
-			tableHandler.getFullResultsFromBinIndexes(result);
+			ArrayList<ArrayList<Object>> fullResulsVariables = tableHandler.getFullResultsFromBinIndexes(result);
+			
+			tableHandler.displayOnLogResults(fullResulsVariables);
 			
 			searchQueryFullTimer.log();
 			Log.info("Nombre de résultats = " + numberOfResults);
-			Log.info("Nombre de lignes = " + numberOfLines);
+			
+
+			result = tableHandler.findIndexedResultsOfColumn("trip_distance", 18f);
+			numberOfResults = result.size();
+			Log.info("Nombre de résultats (pour 18 exact) = " + numberOfResults);
+			
+			
+			//Log.info("Nombre de lignes = " + numberOfLines);
 			
 			
 			

@@ -1,14 +1,12 @@
 package db.structure.recherches;
 
-import java.io.File;
+import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import org.apache.commons.io.FileUtils;
 
 import com.dant.utils.Log;
 
@@ -20,8 +18,9 @@ import db.parsers.CsvParser;
 import db.structure.Column;
 import db.structure.Table;
 import db.structure.indexTree.IndexTreeDic;
+import sj.network.tcpAndBuffers.NetBuffer;
 
-public class STableHandler {
+public class TableHandler {
 	
 	protected String tableName;
 	protected ArrayList<Column> columnsList = new ArrayList<Column>();
@@ -30,7 +29,26 @@ public class STableHandler {
 	// Possibilité de parser de plusieurs manières différentes (un jour...)
 	protected boolean firstTimeParsingData = true;
 	
+	// Liste des threads faisant actuellement du parsing
+	
+	protected ArrayList<Thread> parsingThreadList = new ArrayList<Thread>();
+	
 	protected ArrayList<IndexTreeDic> indexTreeList = new ArrayList<IndexTreeDic>(); // Liste des IndexTree associés à cette table
+	
+	
+	/** @Nicolas : ne pas supprimer ce code, mettre ton code en plus dans une autre fonction.
+	 *  Sera fait avec la serialisation plus rapide et fidèle 
+	 *  Ecrire l'état actuel de la table :
+	 *  Nom, liste de colonnes, arbres
+	 * @param writeInStream
+	 */
+	public void writeTableFull(DataOutputStream writeInStream) {
+		NetBuffer tableData = new NetBuffer();
+		
+		
+		
+	}
+	
 	
 	public void forceAppendNotFirstParsing() {
 		firstTimeParsingData = false; // si à vrai, supprimer tous les fichiers connus
@@ -40,7 +58,7 @@ public class STableHandler {
 		return tableName;
 	}
 	
-	public STableHandler(String argTableName) {
+	public TableHandler(String argTableName) {
 		tableName = argTableName;
 	}
 	
@@ -62,13 +80,30 @@ public class STableHandler {
 		associatedTable = new Table(tableName, columnsList);
 		return associatedTable;
 	}
-	
+
 	/** Thread-safe, la table est en lecture seule
 	 * @param csvPath
 	 * @param doRuntimeIndexing
 	 * @throws Exception
 	 */
 	public void parseCsvData(String csvPath, boolean doRuntimeIndexing) throws Exception {
+		InputStream is = new FileInputStream(csvPath);
+		try {
+			parseCsvData(is, doRuntimeIndexing, false);
+			is.close();
+		} catch (Exception e) {
+			is.close();
+			throw e;
+		}
+	}
+
+	/** Thread-safe, la table est en lecture seule
+	 * @param csvStream stream contenant les données en CSV à parser
+	 * @param doRuntimeIndexing
+	 * @param closeStreamAfterUsage Fermer le stream après usage (true ou false)
+	 * @throws Exception
+	 */
+	public void parseCsvData(InputStream csvStream, boolean doRuntimeIndexing, boolean closeStreamAfterUsage) throws Exception {
 		if (associatedTable == null) throw new Exception("La table associée est null, elle doit être crée via createTable avant tout parsing.");
 		//if (csvParser == null)
 		// Thread-safe
@@ -79,9 +114,9 @@ public class STableHandler {
 		else
 			csvParser.setRuntimeIndexing(null);
 		
-		InputStream is = new FileInputStream(csvPath);
-		csvParser.parse(is, !firstTimeParsingData);
-		is.close();
+		csvParser.parse(csvStream, !firstTimeParsingData);
+		if (closeStreamAfterUsage)
+			csvStream.close();
 		
 		firstTimeParsingData = false;
 		
@@ -150,7 +185,7 @@ public class STableHandler {
 	
 	
 	// indexColumnList est la liste des colonnes à indexer
-	public SRuntimeIndexingEntryList runtimeIndexingList = new SRuntimeIndexingEntryList();//ArrayList<SRuntimeIndexingEntry>();
+	public RuntimeIndexingEntryList runtimeIndexingList = new RuntimeIndexingEntryList();//ArrayList<SRuntimeIndexingEntry>();
 	
 	
 	public void createRuntimeIndexingColumn(int columnIndex) throws Exception { // addInitialColumnAndCreateAssociatedIndex
@@ -160,7 +195,7 @@ public class STableHandler {
 		
 		IndexTreeDic alreadyExistingTree = findOrCreateAssociatedIndexTree(columnIndex, true); //findTreeAssociatedWithColumnIndex(columnIndex);
 		
-		SRuntimeIndexingEntry indexEntry = new SRuntimeIndexingEntry();
+		RuntimeIndexingEntry indexEntry = new RuntimeIndexingEntry();
 		indexEntry.associatedIndexTree = alreadyExistingTree;
 		indexEntry.associatedColumn = columnList.get(columnIndex);
 		indexEntry.associatedTable = associatedTable;
@@ -193,11 +228,30 @@ public class STableHandler {
 	}*/
 	
 	
-	public Collection<DataPositionList> findIndexedResultsOfColumn(String columnName, Object minValue, Object maxValue, boolean inclusive) throws Exception {
+	/** Pour une valeur exacte
+	 *  @param columnName
+	 *  @param equalsExactValue
+	 *  @return
+	 *  @throws Exception
+	 */
+	public DataPositionList findIndexedResultsOfColumn(String columnName, Object equalsExactValue) throws Exception {
+		return findIndexedResultsOfColumn(columnName, equalsExactValue, null, true);
+	}
+	
+	/**
+	 * 
+	 * @param columnName
+	 * @param minValue
+	 * @param maxValue
+	 * @param inclusive
+	 * @return
+	 * @throws Exception
+	 */
+	public DataPositionList findIndexedResultsOfColumn(String columnName, Object minValue, Object maxValue, boolean inclusive) throws Exception {
 		int columnIndex = getColumnIndex(columnName);
 		if (columnIndex == -1) throw new Exception("Colonne introuvable, impossible de faire une recherche sur ses index.");
 		if (IndexTreeDic.firstValueIsHigherThatSecondValue(minValue, maxValue) > 0) {
-			return new ArrayList<DataPositionList>(); // aucun résultat
+			return new DataPositionList(); // aucun résultat
 		}
 		//return findIndexedResultsOfColumn();
 		
@@ -209,7 +263,7 @@ public class STableHandler {
 			}
 		}*/
 		if (makeRequestOnThisTree == null) {
-			return new ArrayList<DataPositionList>();
+			return new DataPositionList();
 		}
 		return makeRequestOnThisTree.findMatchingBinIndexes(minValue, maxValue, inclusive, false);
 	}
@@ -242,7 +296,7 @@ public class STableHandler {
 	}
 	
 	//trip_distance
-	public ArrayList<ArrayList<Object>> getFullResultsFromBinIndexes(Collection<DataPositionList> resultsCollection) throws Exception { // table connue ! , Table fromTable) {
+	public ArrayList<ArrayList<Object>> getFullResultsFromBinIndexes(DataPositionList resultsCollection) throws Exception { // table connue ! , Table fromTable) {
 		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");
 		
 		ArrayList<ArrayList<Object>> resultArrayList = new ArrayList<ArrayList<Object>>();
@@ -251,13 +305,13 @@ public class STableHandler {
 		
 		// Pour toutes les listes de valeurs identiques
 		// (il peut y avoir des listes distinctes associés à une même valeur indexée, du fait du multi-fichiers / multi-thread)
-		for (DataPositionList dataPosList : resultsCollection) {
+		for (DiskDataPosition dataPos : resultsCollection) {
 			//Log.info("list size = " + list.size());
-			for (DiskDataPosition dataPos : dataPosList) {
+			//for (DiskDataPosition dataPos : dataPosList) {
 				// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
 				ArrayList<Object> objList = dataHandler.getValuesOfLineByIdForSignleQuery(dataPos);
 				resultArrayList.add(objList);
-				Log.info("  objList = " + objList);
+				//Log.info("  objList = " + objList);
 				
 				//Log.info("  index = " + index);
 				// TODO
@@ -272,9 +326,15 @@ public class STableHandler {
 				//indexingColumn.getDataType().
 				//Log.info("  valeur indexée = " + indexedValue);
 				//Log.info("  objList = " + objList);
-			}
+			//}
 		}
 		return resultArrayList;
+	}
+	
+	public void displayOnLogResults(ArrayList<ArrayList<Object>> resultArrayList) {
+		for (ArrayList<Object> objList : resultArrayList) {
+			Log.info("  objList = " + objList);
+		}
 	}
 	
 	public void flushEveryIndexOnDisk() throws IOException {
@@ -283,6 +343,60 @@ public class STableHandler {
 		}
 		
 	}
+	
+	private Object multiThreadParsingListLock = new Object();
+	
+	public void multiThreadParsingAddAndStartCsv(String csvPath, boolean doRuntimeIndexing) { synchronized(multiThreadParsingListLock) {
+		Thread newParsingThread = new Thread(() -> {
+			try {
+				this.parseCsvData(csvPath, doRuntimeIndexing);
+			} catch (Exception e) {
+				Log.error(e);
+				e.printStackTrace();
+			}
+		});
+		parsingThreadList.add(newParsingThread);
+		newParsingThread.start();
+	} }
+	
+	
+	public void multiThreadParsingAddAndStartCsv(InputStream csvStream, boolean doRuntimeIndexing, boolean closeStreamAfterUsage) { synchronized(multiThreadParsingListLock) {
+		Thread newParsingThread = new Thread(() -> {
+			try {
+				this.parseCsvData(csvStream, doRuntimeIndexing, closeStreamAfterUsage);
+			} catch (Exception e) {
+				Log.error(e);
+				e.printStackTrace();
+			}
+		});
+		parsingThreadList.add(newParsingThread);
+		newParsingThread.start();
+	} }
+	
+	public void multiThreadParsingWaitForAllThreads() {
+		multiThreadParsingJoinAllThreads();
+	}
+	
+	/** Attendre que tous les threads soient finis.
+	 *  Si un thread a rencontré une erreur et ne peut pas être arrêté, il est gardé dans la liste et je passe au suivant.
+	 */
+	public void multiThreadParsingJoinAllThreads() { synchronized(multiThreadParsingListLock) {
+		
+		int invalidThreadNumber = 0;
+		while (invalidThreadNumber < parsingThreadList.size()) {
+			Thread parsingThread = parsingThreadList.get(invalidThreadNumber);
+			try {
+				parsingThread.join();
+				parsingThreadList.remove(invalidThreadNumber);
+				// Je resue au même index, donc
+			} catch (InterruptedException e) {
+				Log.error(e);
+				e.printStackTrace();
+				invalidThreadNumber++; // je passe au thread suivant, celi-là est invalide
+			}
+		}
+		
+	} }
 	
 	public void multiThreadParsingInit() {
 		

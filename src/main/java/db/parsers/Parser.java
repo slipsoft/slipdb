@@ -19,8 +19,8 @@ import db.data.DateType;
 import db.disk.dataHandler.DiskDataPosition;
 import db.structure.Column;
 import db.structure.Table;
-import db.structure.recherches.SRuntimeIndexingEntry;
-import db.structure.recherches.SRuntimeIndexingEntryList;
+import db.structure.recherches.RuntimeIndexingEntry;
+import db.structure.recherches.RuntimeIndexingEntryList;
 
 public abstract class Parser {
 	protected Table schema;
@@ -42,7 +42,7 @@ public abstract class Parser {
 	/** Avant le parsing, définir runtimeIndexingEntries.
 	 *  Au moment du parsing, runtimeIndexingEntries doit être en lecture seule, donc thread-safe.
 	 */
-	protected SRuntimeIndexingEntryList runtimeIndexingEntries = null;
+	protected RuntimeIndexingEntryList runtimeIndexingEntries = null;
 	
 	public Parser(Table schema) {
 		this.schema = schema; // <- C'est Nicolas qui a voulu appeler ça comme ça, pas moi :p
@@ -51,7 +51,7 @@ public abstract class Parser {
 	}
 	
 	// Pour indexer au moment du parsing
-	public void setRuntimeIndexing(SRuntimeIndexingEntryList argIndexingEntryList) {
+	public void setRuntimeIndexing(RuntimeIndexingEntryList argIndexingEntryList) {
 		runtimeIndexingEntries = argIndexingEntryList;
 	}
 	
@@ -175,7 +175,7 @@ public abstract class Parser {
 		// Indexer au moment de parser (pour de meilleures performances)
 		if (runtimeIndexingEntries != null) {
 			for (int columnIndex = 0; columnIndex < columnsList.size(); columnIndex++) {
-				SRuntimeIndexingEntry indexingEntry = runtimeIndexingEntries.getEntryAssociatedWithColumnIndex(columnIndex);
+				RuntimeIndexingEntry indexingEntry = runtimeIndexingEntries.getEntryAssociatedWithColumnIndex(columnIndex);
 				if (indexingEntry != null) {
 					Object currentValue = entriesArray[columnIndex];
 					// Indexer cette entrée

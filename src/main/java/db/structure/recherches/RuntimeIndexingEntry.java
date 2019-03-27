@@ -7,7 +7,7 @@ import db.structure.Column;
 import db.structure.Table;
 import db.structure.indexTree.IndexTreeDic;
 
-public class SRuntimeIndexingEntry implements Comparable<SRuntimeIndexingEntry> {
+public class RuntimeIndexingEntry implements Comparable<RuntimeIndexingEntry> {
 	
 	// Support des index mono-colonne uniquement, à ce jour
 	
@@ -18,7 +18,7 @@ public class SRuntimeIndexingEntry implements Comparable<SRuntimeIndexingEntry> 
 	
 	
 	@Override
-	public int compareTo(SRuntimeIndexingEntry o) {
+	public int compareTo(RuntimeIndexingEntry o) {
 		if (columnIndex > o.columnIndex) return 1;
 		if (columnIndex == o.columnIndex) return 0;
 		return -1;
