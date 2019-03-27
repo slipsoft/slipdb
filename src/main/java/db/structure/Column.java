@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.dant.entity.ColumnEntity;
+
 import db.data.DataType;
 
 public class Column {
@@ -16,6 +17,7 @@ public class Column {
 	
 	protected Object minValue = null;
 	protected Object maxValue = null;
+	protected Object minMaxLock = new Object();
 
 	protected DataType dataType;
 	protected List<Index> relatedIndexesList = new ArrayList<>();
@@ -62,10 +64,19 @@ public class Column {
 		return dataType.getSize();
 	}
 	
-	public Object writeToBuffer(String input, ByteBuffer outputBuffer) {
-		return this.getDataType().writeToBuffer(input, outputBuffer);
+	/** Au passage, @Nicolas, le parseAndWriteToBuffer est spécifique au format string -> objet parsé et n'est pas si générique que ça... (cas de l'hexa par exemple)
+	 * @param input
+	 * @param outputBuffer
+	 * @return
+	 * @throws IllegalArgumentException
+	 */
+	public Object parseAndWriteToBuffer(String input, ByteBuffer outputBuffer) throws IllegalArgumentException {
+		return this.getDataType().parseAndWriteToBuffer(input, outputBuffer);
 	}
 	
+	/** NON thread-safe
+	 *  @param value
+	 */
 	public void evaluateMinMax(Object value) {
 		if (minValue == null) minValue = value;
 		if (maxValue == null) maxValue = value;
@@ -77,6 +88,20 @@ public class Column {
 		}
 	}
 
+	public Object getMin() { synchronized(minMaxLock) {
+		return minValue;
+	} }
+	
+	public synchronized Object getMax() { synchronized(minMaxLock) {
+		return maxValue;
+	} }
+
+	// Thread-safe (une fois le min-mas trouvé)
+	public void pushMinMaxThreadSafe(Object argMinValue, Object argMaxValue) { synchronized(minMaxLock) {
+		minValue = argMinValue;
+		maxValue = argMaxValue;
+	} }
+
 	public Object getMinValue() {
 		return minValue;
 	}
@@ -85,7 +110,7 @@ public class Column {
 		return maxValue;
 	}
 	
-	public int compareValues(Object value1, Object value2) {
+	public static int compareValues(Object value1, Object value2) {
 		if (value1 == null || value2 == null) return 0;
 		if (value1.getClass() != value2.getClass()) return 0;
 		

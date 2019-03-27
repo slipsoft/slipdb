@@ -22,7 +22,7 @@ public class FloatType extends DataType {
 	}
 
 	@Override
-	public Float writeToBuffer(String input, ByteBuffer outputBuffer) {
+	public Object parseAndWriteToBuffer(String input, ByteBuffer outputBuffer) throws IllegalArgumentException { // throws NumberFormatException {
 		Float asFloat = Float.parseFloat(input);
 		outputBuffer.putFloat(asFloat);
 		return asFloat;

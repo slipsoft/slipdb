@@ -23,7 +23,7 @@ public class IntegerType extends DataType {
 	}
 	
 	@Override
-	public Integer writeToBuffer(String input, ByteBuffer outputBuffer) {
+	public Object parseAndWriteToBuffer(String input, ByteBuffer outputBuffer) throws IllegalArgumentException { // throws NumberFormatException {
 		Integer asInteger = Integer.parseInt(input);
 		outputBuffer.putInt(asInteger);
 		return asInteger;

@@ -23,7 +23,7 @@ public class DoubleType extends DataType {
 	}
 	
 	@Override
-	public Object writeToBuffer(String input, ByteBuffer outputBuffer) {
+	public Object parseAndWriteToBuffer(String input, ByteBuffer outputBuffer) throws IllegalArgumentException { // throws NumberFormatException {
 		Double valueAsDouble = Double.parseDouble(input);
 		outputBuffer.putDouble(valueAsDouble);
 		return valueAsDouble;

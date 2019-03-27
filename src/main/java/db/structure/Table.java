@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import com.dant.entity.ColumnEntity;
@@ -14,15 +15,30 @@ import com.dant.entity.TableEntity;
 import com.dant.utils.EasyFile;
 
 import db.data.DataType;
+import db.disk.dataHandler.TableDataHandler;
 import db.search.Predicate;
 
 /**
  * A simple SQL-like table, consisting of 
  */
 public class Table {
-
-	protected static String basePath = "target/tables/";
-	protected String name; // table name
+	
+	public final static short currentNodeID = 1;
+	protected static String oldSmellyBasePath = "target/tables/";
+	final public static String baseAllTablesDirPath = "data_save/tables/";
+	final public static String allTablesFileExtension = ".sbin";
+	protected static AtomicInteger nextTableID = new AtomicInteger(1);
+	
+	protected final int tableID;
+	protected final String baseTablePath;
+	protected int lineDataSize;
+	
+	
+	//protected final String dataFilesOnDiskBasePath; devenu baseTablePath
+	protected final TableDataHandler dataHandler;
+	
+	protected final String name; // table name
+	
 	protected EasyFile fileLinesOnDisk; // <- les fichiers de sauvegarde des colonnes sont désormais indépendants
 	protected List<Column> columnsList = new ArrayList<Column>(); // liste des colonnes de la table
 	protected List<Index> indexesList = new ArrayList<Index>();   // liste des index générés pour cette table
@@ -40,9 +56,29 @@ public class Table {
 	public Table(String argName, List<Column> argColumnsList) throws IOException {
 		this.name = argName;
 		this.columnsList.addAll(argColumnsList);
-		this.fileLinesOnDisk = new EasyFile(basePath + name + ".bin");
+		baseTablePath = baseAllTablesDirPath + name + "/";
+		TableDataHandler.setNodeID(currentNodeID); // <- NODE ID 
+		dataHandler = new TableDataHandler(this, baseTablePath);
+		tableID = nextTableID.addAndGet(1);
+		
+		/* Désormais géré par TableDiskDataHandler*/
+		this.fileLinesOnDisk = new EasyFile(oldSmellyBasePath + name + ".bin");
 		this.fileLinesOnDisk.createFileIfNotExist();
+		computeLineDataSize();
 	}
+	
+	public String getBaseTablePath() {
+		return baseTablePath;
+	}
+	
+	protected void computeLineDataSize() {
+		lineDataSize =  columnsList
+	    				.stream()
+	    				.mapToInt(Column::getSize)
+	    				.sum();
+	}
+	
+	// dataHandler
 	
 	public String getName() {
 		return name;
@@ -51,7 +87,7 @@ public class Table {
 	public List<Column> getColumns() {
 		return columnsList;
 	}
-
+	
 	public List<Index> getIndexes() {
 		return indexesList;
 	}
@@ -64,10 +100,11 @@ public class Table {
 	}
 	
 	public int getLineSize() {
-		return columnsList
+		return lineDataSize;
+		/*return columnsList
 		    .stream()
 		    .mapToInt(Column::getSize)
-		    .sum();
+		    .sum();*/
 		// -> do a performance benchmark with this function (seems very fast)
 		/*
 		Same as :
@@ -97,9 +134,10 @@ public class Table {
 		// Ajout de la colonne
 		Column newColumn = new Column(colName, dataType).setNumber(columnsList.size());
 		columnsList.add(newColumn);
+		computeLineDataSize();
 		return true;
 	}
-
+	
 	/**
 	 * Trouver l'index d'une colonne à partir de son nom, dans la liste columns
 	 * @param colName  nom de la colonne à rechercher
@@ -114,7 +152,7 @@ public class Table {
 		}
 		return -1;
 	}
-
+	
 	/**
 	 * Give each column a number
 	 */
@@ -123,20 +161,21 @@ public class Table {
 			columnsList.get(colIndex).setNumber(colIndex);
 		}
 	}
-
+	
 	/**
-	 * 
-	 * @param lineId is the position of the line, 0 being the first loaded line from the file (CSV for New York taxis)
-	 * @return a list containing every entry associates with the line at position lineId
-	 * @throws IOException
+	 *  
+	 *  @param lineId is the position of the line, 0 being the first loaded line from the file (CSV for New York taxis)
+	 *  @return a list containing every entry associates with the line at position lineId
+	 *  @throws IOException
 	 */
-	public List<Object> getValuesOfLineById(int lineId) throws IOException { // or getRowById
-		
+	@Deprecated
+	public ArrayList<Object> getValuesOfLineById(long lineId) throws IOException { // or getRowById
+		// TODO fonction à refaire avec des DiskDataPosition
 		// Get a new disposable FileInputStream with the file where all table rows are stored
 		FileInputStream fileAsStream = new FileInputStream(fileLinesOnDisk);
 		
 		// List of values stored in the line of id lineId
-		List<Object> lineValues = new ArrayList<>(); // rowValues
+		ArrayList<Object> lineValues = new ArrayList<>(); // rowValues
 		
 		// Seek to the right position in the stream
 		fileAsStream.skip(lineId * getLineSize());
@@ -151,13 +190,17 @@ public class Table {
 		fileAsStream.close();
 		return lineValues;
 	}
-
+	
 	public OutputStream tableToOutputStream(boolean appendAtTheEnd) throws FileNotFoundException {
 		return new FileOutputStream(fileLinesOnDisk, appendAtTheEnd);
 	}
 	
 	public EasyFile getFileLinesOnDisk() {
 		return fileLinesOnDisk;
+	}
+	
+	public TableDataHandler getDataHandler() {
+		return dataHandler;
 	}
 	
 	/**
