@@ -18,18 +18,18 @@ import db.structure.Table;
 public class SGlobalHandler {
 	
 	
-	protected static ArrayList<STableHandler> tableHandlersList = new ArrayList<STableHandler>();
+	protected static ArrayList<TableHandler> tableHandlersList = new ArrayList<TableHandler>();
 	
-	public static STableHandler initializeTable(String tableName) {
+	public static TableHandler initializeTable(String tableName) {
 		if (tableName == null) return null;
 		
-		for (STableHandler table : tableHandlersList) {
+		for (TableHandler table : tableHandlersList) {
 			if (table.getTableName().equals(tableName)) {
 				return null;
 			}
 		}
 		
-		STableHandler newTableHandler = new STableHandler(tableName);
+		TableHandler newTableHandler = new TableHandler(tableName);
 		
 		return newTableHandler;
 	}

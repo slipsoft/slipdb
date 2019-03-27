@@ -20,7 +20,7 @@ import db.structure.Table;
 import db.structure.indexTree.IndexTreeDic;
 import sj.network.tcpAndBuffers.NetBuffer;
 
-public class STableHandler {
+public class TableHandler {
 	
 	protected String tableName;
 	protected ArrayList<Column> columnsList = new ArrayList<Column>();
@@ -54,7 +54,7 @@ public class STableHandler {
 		return tableName;
 	}
 	
-	public STableHandler(String argTableName) {
+	public TableHandler(String argTableName) {
 		tableName = argTableName;
 	}
 	
@@ -181,7 +181,7 @@ public class STableHandler {
 	
 	
 	// indexColumnList est la liste des colonnes à indexer
-	public SRuntimeIndexingEntryList runtimeIndexingList = new SRuntimeIndexingEntryList();//ArrayList<SRuntimeIndexingEntry>();
+	public RuntimeIndexingEntryList runtimeIndexingList = new RuntimeIndexingEntryList();//ArrayList<SRuntimeIndexingEntry>();
 	
 	
 	public void createRuntimeIndexingColumn(int columnIndex) throws Exception { // addInitialColumnAndCreateAssociatedIndex
@@ -191,7 +191,7 @@ public class STableHandler {
 		
 		IndexTreeDic alreadyExistingTree = findOrCreateAssociatedIndexTree(columnIndex, true); //findTreeAssociatedWithColumnIndex(columnIndex);
 		
-		SRuntimeIndexingEntry indexEntry = new SRuntimeIndexingEntry();
+		RuntimeIndexingEntry indexEntry = new RuntimeIndexingEntry();
 		indexEntry.associatedIndexTree = alreadyExistingTree;
 		indexEntry.associatedColumn = columnList.get(columnIndex);
 		indexEntry.associatedTable = associatedTable;

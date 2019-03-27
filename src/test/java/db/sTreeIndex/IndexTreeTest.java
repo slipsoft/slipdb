@@ -29,7 +29,7 @@ import db.structure.Table;
 import db.structure.indexTree.IndexTreeCeption;
 import db.structure.indexTree.IndexTreeDic;
 import db.structure.recherches.SGlobalHandler;
-import db.structure.recherches.STableHandler;
+import db.structure.recherches.TableHandler;
 
 public class IndexTreeTest {
 	
@@ -39,7 +39,7 @@ public class IndexTreeTest {
 	//protected static Parser parser;
 	protected static Table table;
 	protected static Utils currentlyUsedUils = new Utils(); // For thread-safety ! (but, here, it's static so thread unsafe... ^^')
-	protected static STableHandler tableHandler;
+	protected static TableHandler tableHandler;
 	
 	protected static boolean parseAgain = true;
 	
