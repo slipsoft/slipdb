@@ -6,19 +6,19 @@ import java.util.List;
 import java.util.Map;
 
 import com.dant.entity.ColumnEntity;
-import com.dant.utils.Log;
 import db.data.DataType;
 
 public class Column {
 
 	protected String name = "Nom inconnu";
 	protected DataType storedDataType;
+	protected int number;
 	
-	public Object minValue = null;
-	public Object maxValue = null;
+	protected Object minValue = null;
+	protected Object maxValue = null;
 
 	protected DataType dataType;
-	protected List<Index> relatedIndicesList = new ArrayList<>();
+	protected List<Index> relatedIndexesList = new ArrayList<>();
 
 	/**
 	 * Columns contructor
@@ -35,30 +35,55 @@ public class Column {
 		return name;
 	}
 
-	public void setName(String name) {
+	public Column setName(String name) {
 		this.name = name;
+		return this;
+	}
+
+	public Column setNumber(int number) {
+		this.number = number;
+		return this;
 	}
 
 	public DataType getDataType() {
 		return dataType;
 	}
 
-	public void setDataType(DataType dataType) {
+	public Column setDataType(DataType dataType) {
 		this.dataType = dataType;
+		return this;
 	}
 
 	public int getSize() {
 		return dataType.getSize();
 	}
+	
+	public int getDataSize() {
+		return dataType.getSize();
+	}
+	
+	public Object writeToBuffer(String input, ByteBuffer outputBuffer) {
+		return this.getDataType().writeToBuffer(input, outputBuffer);
+	}
+	
+	public void evaluateMinMax(Object value) {
+		if (minValue == null) minValue = value;
+		if (maxValue == null) maxValue = value;
+		if (compareValues(value, maxValue) == 1) {
+			maxValue = value;
+		}
+		if (compareValues(value, minValue) == -1) {
+			minValue = value;
+		}
+	}
 
-	public void parse(String input, ByteBuffer outputBuffer) {
-		this.getDataType()/*storedDataType*/.writeToBuffer(input, outputBuffer);
+	public Object getMinValue() {
+		return minValue;
 	}
 	
-	public Object parseAndReturnValue(String input, ByteBuffer outputBuffer) {
-		return this.getDataType().writeToBufferAndReturnValue(input, outputBuffer);
+	public Object getMaxValue() {
+		return maxValue;
 	}
-	
 	
 	public int compareValues(Object value1, Object value2) {
 		if (value1 == null || value2 == null) return 0;
@@ -71,6 +96,15 @@ public class Column {
 			if (asDouble1 == asDouble2) return 0;
 			if (asDouble1 > asDouble2) return 1;
 			return -1;
+		}
+		
+		if (value1 instanceof String) {
+			String string1 = (String) value1;
+			String string2 = (String) value2;
+			int comparedValues = string1.compareTo(string2);
+			if (comparedValues > 0) return 1;
+			if (comparedValues < 0) return -1;
+			return 0;
 		}
 		
 		return 0;
@@ -98,7 +132,7 @@ public class Column {
 	
 	
 	public void addIndex(Index index) {
-		this.relatedIndicesList.add(index);
+		this.relatedIndexesList.add(index);
 	}
 
 	public ColumnEntity convertToEntity() {

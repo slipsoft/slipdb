@@ -3,6 +3,7 @@ package db.parsers;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -10,6 +11,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 import com.dant.utils.Log;
+import com.dant.utils.MemUsage;
 import com.dant.utils.Timer;
 
 import db.structure.Column;
@@ -45,34 +47,42 @@ public abstract class Parser {
 				
 				DataOutputStream bWrite = new DataOutputStream(new BufferedOutputStream(schema.tableToOutputStream(appendAtTheEndOfSave)));
 		) {
+			String entryString;
 			Timer timeTookTimer = new Timer("Temps écoulé");
-			while (totalEntryCount != limit) {
-				if (localReadEntryNb % showInfoEveryParsedLines == 0 && showInfoEveryParsedLines != -1) {
+			
+			while ((entryString = processReader(bRead)) != null && totalEntryCount != limit) {
+				
+				// entryString : "entrée", ligne lue (d'un fichier CSV par exemple pour CSVParser)
+				
+				if (showInfoEveryParsedLines != -1 && localReadEntryNb % showInfoEveryParsedLines == 0) {
 					Log.info("Parser : nombre de résultats (local) parsés = " + localReadEntryNb + "   temps écoulé = " + timeTookTimer.pretty());
+					MemUsage.printMemUsage();
 				}
 				
-				String entryString = this.processReader(bRead);
-	
-				if (entryString == null) // no more data
-					break;
-				
-				if (localReadEntryNb != 0) { // we don't want to process the first line (informations on fields and columns)
-					try {
-						this.writeEntry(entryString, bWrite);
-					} catch (IncorrectEntryException e) {
-						Log.error(e);
-					}
+				try {
+					this.writeEntry(entryString, bWrite);
+					localReadEntryNb++;
+					totalEntryCount++;
+				} catch (IncorrectEntryException e) {
+					Log.error(e);
+					// TODO: handle exception
+				} catch (IOException e) {
+					Log.error(e);
+					// TODO: handle exception
 				}
-				localReadEntryNb++;
-				totalEntryCount++;
 			}
-			bWrite.close();
-		} catch (Exception e) {
+		} catch (FileNotFoundException e) {
 			Log.error(e);
+			// TODO: handle exception
+		}catch (IOException e) {
+			Log.error(e);
+			// TODO: handle exception
 		}
 	}
 	
-	protected final void writeEntry(String entryString, OutputStream output) throws IncorrectEntryException {
+	
+	
+	protected final void writeEntry(String entryString, OutputStream output) throws IncorrectEntryException, IOException {
 		String[] valuesArray = processEntry(entryString);
 
 		if (!isCorrectSize(valuesArray)) {
@@ -81,29 +91,33 @@ public abstract class Parser {
 		}
 		// the buffer used to store the line data as an array of bytes
 		ByteBuffer entryBuffer = ByteBuffer.allocate(lineByteSize);
-		
-		// for each column, parse and write data into entryBuffer
-		for (int columnIndex = 0; columnIndex < schema.getColumns().size(); columnIndex++) {
-			String valueString = valuesArray[columnIndex];
-			Column currentColumn = schema.getColumns().get(columnIndex);
-			// Converts the string value into an array of bytes representing the same data
-			Object currentValue = currentColumn.parseAndReturnValue(valueString, entryBuffer);
-			if (currentColumn.minValue == null) currentColumn.minValue = currentValue;
-			if (currentColumn.maxValue == null) currentColumn.maxValue = currentValue;
-			if (currentColumn.compareValues(currentValue, currentColumn.maxValue) == 1) {
-				currentColumn.maxValue = currentValue;
-			}
-			if (currentColumn.compareValues(currentValue, currentColumn.minValue) == -1) {
-				currentColumn.minValue = currentValue;
-			}
-		}
-		// returns the CSV line as an array of rightly typed data, as bytes
-		// return entryBuffer.array(); deso je vois pas à quoi ça sert
+		Object[] entry = new Object[valuesArray.length];
 		try {
-			output.write(entryBuffer.array()); // writes the line in the output stream associated with the current file
-		} catch (IOException e) {
-			Log.error(e);
+		// for each column, parse and write data into entryBuffer
+			for (int i = 0; i < schema.getColumns().size(); i++) {
+				Column currentColumn = schema.getColumns().get(i);
+				
+				/*
+				DataType columnDataType = currentColumn.getDataType();
+				
+				if (columnDataType.getClass() == StringType.class) {
+					
+					//Log.error("currentValue = " + currentValue);
+				}
+				currentColumn.getDataSize();
+				*/
+				
+				// Converts the string value into an array of bytes representing the same data
+				Object currentValue = currentColumn.writeToBuffer(valuesArray[i], entryBuffer);
+				
+				currentColumn.evaluateMinMax(currentValue);
+				entry[i] = currentValue;
+			}
+		} catch (Exception e) {
+			throw new IncorrectEntryException(totalEntryCount, "incorrect data");
 		}
+		// writes the line in the output stream associated with the current file
+		output.write(entryBuffer.array());
 	}
 	
 	/**

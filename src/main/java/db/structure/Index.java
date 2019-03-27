@@ -3,7 +3,10 @@ package db.structure;
 import java.util.ArrayList;
 import java.util.Map;
 
-import db.data.Operable;
+import org.apache.commons.lang3.ArrayUtils;
+
+import db.search.Operable;
+import db.search.Predicate;
 
 /**
  * Classe Index, permettant d'indexer une ou plusieurs colonnes Exemple :
@@ -47,5 +50,11 @@ public abstract class Index implements Operable {
 	 */
 	public Column[] getColumnList() {
 		return indexedColumnsList;
+	}
+	
+	public boolean canBeUsedWithPredicate(Predicate predicate) {
+		boolean containsColumn = ArrayUtils.contains(indexedColumnsList, predicate.getColumn());
+		boolean isOperatorCompatible = this.isOperatorCompatible(predicate.getOperator());
+		return containsColumn && isOperatorCompatible;
 	}
 }

@@ -1,6 +1,7 @@
 package db.structure;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -9,12 +10,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.dant.entity.ColumnEntity;
-import com.dant.entity.IndexEntity;
 import com.dant.entity.TableEntity;
 import com.dant.utils.EasyFile;
 
-import com.dant.utils.Log;
 import db.data.DataType;
+import db.search.Predicate;
 
 /**
  * A simple SQL-like table, consisting of 
@@ -25,7 +25,7 @@ public class Table {
 	protected String name; // table name
 	protected EasyFile fileLinesOnDisk; // <- les fichiers de sauvegarde des colonnes sont désormais indépendants
 	protected List<Column> columnsList = new ArrayList<Column>(); // liste des colonnes de la table
-	protected List<Index> indicesList = new ArrayList<Index>();   // liste des index générés pour cette table
+	protected List<Index> indexesList = new ArrayList<Index>();   // liste des index générés pour cette table
 	
 	/**
 	 * Plus tard : Evolution, pour permettre le multi-thread, sauvegarder et indexer plus vite, avoir plusieurs fichiers par colonne, sauvegarde des données en entrée par colonne.
@@ -52,12 +52,12 @@ public class Table {
 		return columnsList;
 	}
 
-	public List<Index> getIndices() {
-		return indicesList;
+	public List<Index> getIndexes() {
+		return indexesList;
 	}
 	
 	public void addIndex(Index index) {
-		this.indicesList.add(index);
+		this.indexesList.add(index);
 		for (Column column : index.getColumnList()) {
 			column.addIndex(index);
 		}
@@ -85,25 +85,27 @@ public class Table {
 		return this.columnsList.stream().anyMatch(col -> col.getName() == name);
 	}
 	
-	/** Ajout d'une colonne
-	 *  @param colName
-	 *  @param defaultFillValue
-	 *  @return
-	 * @throws Exception 
+	/**
+	 * Ajout d'une colonne
+	 * @param colName
+	 * @param defaultFillValue
+	 * @return
+	 * @throws Exception
 	 */
 	public boolean addColumn(String colName, DataType dataType) throws Exception {
 		if (columnExist(colName)) throw new Exception("Column already exists, colName = " + colName);
 		// Ajout de la colonne
-		Column newColumn = new Column(colName, dataType);
+		Column newColumn = new Column(colName, dataType).setNumber(columnsList.size());
 		columnsList.add(newColumn);
 		return true;
 	}
 
-	/** Trouver l'index d'une colonne à partir de son nom, dans la liste columns
-	 *  @param colName  nom de la colonne à rechercher
-	 *  @return -1 si introuvable, un entier >= 0 si existe
+	/**
+	 * Trouver l'index d'une colonne à partir de son nom, dans la liste columns
+	 * @param colName  nom de la colonne à rechercher
+	 * @return -1 si introuvable, un entier >= 0 si existe
 	 */
-	public int findColumnIndex(String colName) {
+	public int findColumnNumber(String colName) {
 		for (int colIndex = 0; colIndex < columnsList.size(); colIndex++) {
 			Column columnAtIndex = columnsList.get(colIndex);
 			if (columnAtIndex.name.equals(colName)) {
@@ -111,6 +113,15 @@ public class Table {
 			}
 		}
 		return -1;
+	}
+
+	/**
+	 * Give each column a number
+	 */
+	public void setColumnsNumber(String colName) {
+		for (int colIndex = 0; colIndex < columnsList.size(); colIndex++) {
+			columnsList.get(colIndex).setNumber(colIndex);
+		}
 	}
 
 	/**
@@ -141,18 +152,33 @@ public class Table {
 		return lineValues;
 	}
 
-	public OutputStream tableToOutputStream(boolean appendAtTheEnd) throws IOException {
+	public OutputStream tableToOutputStream(boolean appendAtTheEnd) throws FileNotFoundException {
 		return new FileOutputStream(fileLinesOnDisk, appendAtTheEnd);
 	}
 	
 	public EasyFile getFileLinesOnDisk() {
 		return fileLinesOnDisk;
 	}
+	
+	/**
+	 * Returns the best index to use for a given filter
+	 * @param predicate
+	 * @return
+	 * @throws Exception 
+	 */
+	public Index findBestIndex(Predicate predicate) throws Exception {
+		for (Index index : indexesList) {
+			if (index.canBeUsedWithPredicate(predicate)) {
+				return index;
+			}
+		}
+		throw new Exception("no index can be used with this filter");
+	}
 
 	public TableEntity convertToEntity () {
 		String name = this.name;
 		ArrayList<ColumnEntity> allColumns = this.columnsList.stream().map(Column::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
-        // ArrayList<IndexEntity> allIndexes = this.indicesList.stream().map(Index::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
+		// ArrayList<IndexEntity> allIndexes = this.indexesList.stream().map(Index::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
 		return new TableEntity(name, allColumns);
-    }
+	}
 }

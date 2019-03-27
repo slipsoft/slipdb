@@ -2,14 +2,13 @@ package db.data;
 
 import java.nio.ByteBuffer;
 
+import org.apache.commons.lang3.ArrayUtils;
+
+import db.search.Operator;
+
 
 public class ByteType extends DataType {
-
 	public static boolean sizeIsRequired = false;
-
-	protected final static Operator[] compatibleOperatorsList = {
-		Operator.equals
-	};
 	
 	public ByteType() {
 		super();
@@ -24,12 +23,7 @@ public class ByteType extends DataType {
 	}
 
 	@Override
-	public void writeToBuffer(String input, ByteBuffer outputBuffer) {
-		outputBuffer.put(Byte.parseByte(input));
-	}
-
-	@Override
-	public Byte writeToBufferAndReturnValue(String input, ByteBuffer outputBuffer) {
+	public Byte writeToBuffer(String input, ByteBuffer outputBuffer) {
 		Byte asByte = Byte.parseByte(input);
 		outputBuffer.put(asByte);
 		return asByte;
@@ -45,4 +39,10 @@ public class ByteType extends DataType {
 		return new Byte(bytes[0]); // get the associates byte
 	}
 
+	@Override
+	public boolean isOperatorCompatible(Operator op) {
+		return ArrayUtils.contains(new Operator[] {
+			Operator.equals
+		}, op);
+	}
 }

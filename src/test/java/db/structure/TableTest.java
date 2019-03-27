@@ -45,7 +45,7 @@ class TableTest {
 
 	@Test
 	final void testGetIndexes() {
-		assertEquals(indexes, table.getIndices());
+		assertEquals(indexes, table.getIndexes());
 	}
 
 	@Test
@@ -53,7 +53,7 @@ class TableTest {
 		Column[] cols = {columns.get(1)};
 		Index index = new IndexHash(cols);
 		table.addIndex(index);
-		assertEquals(index, table.getIndices().get(1));
+		assertEquals(index, table.getIndexes().get(1));
 	}
 
 	@Test

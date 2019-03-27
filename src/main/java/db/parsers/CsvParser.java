@@ -32,7 +32,7 @@ public class CsvParser extends Parser {
 	/** Lecture du CSV depuis un InputStream (peu importe la provenance)
 	 *  Exécution mono-thread, en l'état, faire du multi-thread serait super super compliqué
 	 *
-	 *  Chaque ligne a son propre fichier binaire.
+	 *  Chaque colonne aura son propre fichier binaire.
 	 */
 	@Override
 	public String processReader(BufferedReader input) throws IOException {
