@@ -29,7 +29,7 @@ public class MemUsage {
 		if (message == null) message = "";
 		if (message.equals("") == false) message += " ";
 		
-		Log.logInfoMessage(message + format.format(usedMemory / 1024), "MEMORY", logLevel);
+		Log.logInfoMessage(message + format.format(usedMemory / 1024), "MEMORY", 3);
 		
 		/*
 		Log.info("free memory: " + format.format(freeMemory / 1024));
