@@ -3,6 +3,7 @@ package db.sTreeIndex;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -103,6 +104,7 @@ public class IndexTreeTest {
 			//tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv", true);
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-07.csv", true);
 			
+			/*
 			Thread tPars1 = new Thread(() -> {
 				try {
 					tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
@@ -144,7 +146,15 @@ public class IndexTreeTest {
 			tPars1.join();
 			tPars2.join();
 			tPars3.join();
-			tPars4.join();
+			tPars4.join();*/
+			// Parser de la donnée en multi-thread
+			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			// Attendre que toute la donnée soit parsée
+			tableHandler.multiThreadParsingJoinAllThreads();
+			
 			
 			
 			/*tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
@@ -280,7 +290,9 @@ public class IndexTreeTest {
 			numberOfResults = result.size();// tableHandler.evaluateNumberOfResults(result);
 			//numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
 			
-			tableHandler.getFullResultsFromBinIndexes(result);
+			ArrayList<ArrayList<Object>> fullResulsVariables = tableHandler.getFullResultsFromBinIndexes(result);
+			
+			tableHandler.displayOnLogResults(fullResulsVariables);
 			
 			searchQueryFullTimer.log();
 			Log.info("Nombre de résultats = " + numberOfResults);

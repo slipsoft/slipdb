@@ -378,14 +378,15 @@ public class IndexTreeDic extends Index {
 		flushOnDisk();
 	}
 
-	private Object indexingAddValueLock = new Object();
+	private Object indexingValueLock = new Object();
+	private Object indexingValueLockOnlyForDiskAndMemory = new Object(); // pas d'interblocage possible car les fonctions ne s'utilisent pas l'une l'autre
 	
 	/** Ajouter une valeur et un binIndex associé
 	 *  @param associatedValue valeur indexée, ATTENTION : doit être du type du IndexTree utilisé (Integer, Float, Byte, Double, ...)
 	 *  @param binIndex position (dans le fichier binaire global) de la donnée stockée dans la table
 	 * @throws IOException 
 	 */
-	public void addValue(Object argAssociatedValue, DiskDataPosition dataPosition) throws IOException { synchronized (indexingAddValueLock) {
+	public void addValue(Object argAssociatedValue, DiskDataPosition dataPosition) throws IOException { synchronized (indexingValueLock) {
 		
 		// Je peux ajouter la donnée fine
 		DataPositionList binIndexList = associatedBinIndexes.get(argAssociatedValue);
@@ -421,7 +422,7 @@ public class IndexTreeDic extends Index {
 	 * @return la collection contenant tous les binIndex correspondants
 	 * @throws Exception 
 	 */
-	public Collection<DataPositionList> findMatchingBinIndexesFromMemory(Object minValueExact, Object maxValueExact, boolean isInclusive) throws Exception { // NavigableMap<Integer, IntegerArrayList> findSubTree
+	public Collection<DataPositionList> findMatchingBinIndexesFromMemory(Object minValueExact, Object maxValueExact, boolean isInclusive) throws Exception { synchronized (indexingValueLockOnlyForDiskAndMemory) { // NavigableMap<Integer, IntegerArrayList> findSubTree
 		// arbre terminal : je retourne la liste des binIndex
 		// binIndexesFromValue est non null ici, donc; et finerSubTrees est null
 		//if (checkIfCompatibleObjectType(minValueExact) == false) return new ArrayList<IntegerArrayList>();
@@ -440,13 +441,13 @@ public class IndexTreeDic extends Index {
 			collectionValues = new ArrayList<DataPositionList>();
 		return collectionValues;
 		
-	}
+	} }
 	
 	int debugNumberOfExactArrayListValuesWrittenOnDisk = 0;
 	int debugNumberOfExactValuesWrittenOnDisk = 0;
 	
 	
-	public void flushOnDisk() throws IOException { synchronized (indexingAddValueLock) {
+	public void flushOnDisk() throws IOException { synchronized (indexingValueLock) {
 		if (associatedBinIndexes.size() == 0) return;
 		
 		String saveFileName = baseSaveFilePath + uniqueFileIdForThisTree + suffixSaveFilePath;
@@ -832,7 +833,7 @@ public class IndexTreeDic extends Index {
 	 *  @return
 	 *  @throws Exception 
 	 */
-	public DataPositionList findMatchingBinIndexes(Object minValueExact, Object maxValueExact, boolean isInclusive, boolean justEvaluateResultNumber) throws Exception { // NavigableMap<Integer, IntegerArrayList> findSubTree
+	public DataPositionList findMatchingBinIndexes(Object minValueExact, Object maxValueExact, boolean isInclusive, boolean justEvaluateResultNumber) throws Exception { synchronized (indexingValueLock) { // NavigableMap<Integer, IntegerArrayList> findSubTree
 		this.flushOnDisk();
 		Collection<DataPositionList> fromDisk = findMatchingBinIndexesFromDisk(minValueExact, maxValueExact, isInclusive, justEvaluateResultNumber);
 		Collection<DataPositionList> fromMemory = findMatchingBinIndexesFromMemory(minValueExact, maxValueExact, isInclusive); // new ArrayList<DataPositionList>();//
@@ -846,7 +847,7 @@ public class IndexTreeDic extends Index {
 		}
 		
 		return simpleResultList;
-	}
+	} }
 	
 	/** Gets the matching results from disk !
 	 *  
@@ -856,7 +857,7 @@ public class IndexTreeDic extends Index {
 	 *  @return la collection contenant tous les binIndex correspondants
 	 * @throws Exception 
 	 */
-	public Collection<DataPositionList> findMatchingBinIndexesFromDisk(Object argMinValueExact, Object argMaxValueExact, boolean isInclusive, boolean justEvaluateResultNumber) throws Exception { // NavigableMap<Integer, IntegerArrayList> findSubTree
+	public Collection<DataPositionList> findMatchingBinIndexesFromDisk(Object argMinValueExact, Object argMaxValueExact, boolean isInclusive, boolean justEvaluateResultNumber) throws Exception { synchronized (indexingValueLockOnlyForDiskAndMemory) { // NavigableMap<Integer, IntegerArrayList> findSubTree
 		debugDiskNumberOfIntegerArrayList = 0;
 		debugDiskNumberOfExactValuesEvaluated = 0;
 		if (argMaxValueExact == null) { // recherche d'une seule valeur (equals)
@@ -1087,7 +1088,7 @@ public class IndexTreeDic extends Index {
 		//System.out.println("IndexTreeDic.loadFromDisk : debugDiskNumberOfExactValuesEvaluated=" + debugDiskNumberOfExactValuesEvaluated);
 		
 		return listOfMatchingArraysOfBinIndexes; // <- jamais null
-	}
+	} }
 	
 	
 	//public static boolean debugWriteOnce = true;

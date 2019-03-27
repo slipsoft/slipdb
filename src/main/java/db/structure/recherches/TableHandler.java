@@ -29,6 +29,10 @@ public class TableHandler {
 	// Possibilité de parser de plusieurs manières différentes (un jour...)
 	protected boolean firstTimeParsingData = true;
 	
+	// Liste des threads faisant actuellement du parsing
+	
+	protected ArrayList<Thread> parsingThreadList = new ArrayList<Thread>();
+	
 	protected ArrayList<IndexTreeDic> indexTreeList = new ArrayList<IndexTreeDic>(); // Liste des IndexTree associés à cette table
 	
 	
@@ -307,7 +311,7 @@ public class TableHandler {
 				// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
 				ArrayList<Object> objList = dataHandler.getValuesOfLineByIdForSignleQuery(dataPos);
 				resultArrayList.add(objList);
-				Log.info("  objList = " + objList);
+				//Log.info("  objList = " + objList);
 				
 				//Log.info("  index = " + index);
 				// TODO
@@ -327,12 +331,72 @@ public class TableHandler {
 		return resultArrayList;
 	}
 	
+	public void displayOnLogResults(ArrayList<ArrayList<Object>> resultArrayList) {
+		for (ArrayList<Object> objList : resultArrayList) {
+			Log.info("  objList = " + objList);
+		}
+	}
+	
 	public void flushEveryIndexOnDisk() throws IOException {
 		for (IndexTreeDic indexTree : indexTreeList) {
 			indexTree.flushOnDisk();
 		}
 		
 	}
+	
+	private Object multiThreadParsingListLock = new Object();
+	
+	public void multiThreadParsingAddAndStartCsv(String csvPath, boolean doRuntimeIndexing) { synchronized(multiThreadParsingListLock) {
+		Thread newParsingThread = new Thread(() -> {
+			try {
+				this.parseCsvData(csvPath, doRuntimeIndexing);
+			} catch (Exception e) {
+				Log.error(e);
+				e.printStackTrace();
+			}
+		});
+		parsingThreadList.add(newParsingThread);
+		newParsingThread.start();
+	} }
+	
+	
+	public void multiThreadParsingAddAndStartCsv(InputStream csvStream, boolean doRuntimeIndexing, boolean closeStreamAfterUsage) { synchronized(multiThreadParsingListLock) {
+		Thread newParsingThread = new Thread(() -> {
+			try {
+				this.parseCsvData(csvStream, doRuntimeIndexing, closeStreamAfterUsage);
+			} catch (Exception e) {
+				Log.error(e);
+				e.printStackTrace();
+			}
+		});
+		parsingThreadList.add(newParsingThread);
+		newParsingThread.start();
+	} }
+	
+	public void multiThreadParsingWaitForAllThreads() {
+		multiThreadParsingJoinAllThreads();
+	}
+	
+	/** Attendre que tous les threads soient finis.
+	 *  Si un thread a rencontré une erreur et ne peut pas être arrêté, il est gardé dans la liste et je passe au suivant.
+	 */
+	public void multiThreadParsingJoinAllThreads() { synchronized(multiThreadParsingListLock) {
+		
+		int invalidThreadNumber = 0;
+		while (invalidThreadNumber < parsingThreadList.size()) {
+			Thread parsingThread = parsingThreadList.get(invalidThreadNumber);
+			try {
+				parsingThread.join();
+				parsingThreadList.remove(invalidThreadNumber);
+				// Je resue au même index, donc
+			} catch (InterruptedException e) {
+				Log.error(e);
+				e.printStackTrace();
+				invalidThreadNumber++; // je passe au thread suivant, celi-là est invalide
+			}
+		}
+		
+	} }
 	
 	public void multiThreadParsingInit() {
 		
