@@ -71,7 +71,13 @@
     "/table/{tableName}/load/csv" : {
       "post" : {
         "operationId" : "loadCSV",
-        "consumes" : [ "text/plain" ],
+        "consumes" : [ "text/csv" ],
+        "parameters" : [ {
+          "name" : "tableName",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "default" : {
             "description" : "successful operation"

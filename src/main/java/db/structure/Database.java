@@ -45,7 +45,7 @@ public final class Database {
         ArrayList<ResponseError> errors = new ArrayList<>();
         ArrayList<String> names = new ArrayList<>();
 
-        if (allTables.size() == 0) {
+        if (allTableEntities.size() == 0) {
             errors.add(new ResponseError(Location.createTable, Type.invalidData, "table array is empty"));
         }
 
