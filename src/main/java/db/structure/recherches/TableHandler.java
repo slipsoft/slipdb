@@ -295,40 +295,43 @@ public class TableHandler {
 		return resultsCollection.size();
 	}
 	
+	private static boolean debugUseOldDeprecatedSearch = false; // bench : la nouvelle manière va environ 80x plus vite ^^
+	
 	//trip_distance
-	public ArrayList<ArrayList<Object>> getFullResultsFromBinIndexes(DataPositionList resultsCollection) throws Exception { // table connue ! , Table fromTable) {
+	public ArrayList<ArrayList<Object>> getFullResultsFromBinIndexes(DataPositionList resultsCollection, boolean waitForAllResults, int waitTimeLimitMs) throws Exception { // table connue ! , Table fromTable) {
 		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");
 		
 		ArrayList<ArrayList<Object>> resultArrayList = new ArrayList<ArrayList<Object>>();
 		
 		TableDataHandler dataHandler = associatedTable.getDataHandler();
 		
-		// Pour toutes les listes de valeurs identiques
-		// (il peut y avoir des listes distinctes associés à une même valeur indexée, du fait du multi-fichiers / multi-thread)
-		for (DiskDataPosition dataPos : resultsCollection) {
-			//Log.info("list size = " + list.size());
-			//for (DiskDataPosition dataPos : dataPosList) {
-				// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
-				ArrayList<Object> objList = dataHandler.getValuesOfLineByIdForSignleQuery(dataPos);
-				resultArrayList.add(objList);
-				//Log.info("  objList = " + objList);
-				
-				//Log.info("  index = " + index);
-				// TODO
-				// TODO
-				// TODO Résultats à lire depuis les fichiers binaires
-				// TODO
-				// TODO
-				//ArrayList<Object> objList = associatedTable.getValuesOfLineById(binIndex);
-				//resultArrayList.add(objList);
-				
-				//Object indexedValue = objList.get(indexingColumnIndex);
-				//indexingColumn.getDataType().
-				//Log.info("  valeur indexée = " + indexedValue);
-				//Log.info("  objList = " + objList);
-			//}
+		if (debugUseOldDeprecatedSearch == false) {
+			return dataHandler.getValuesOfLinesListById(resultsCollection, waitForAllResults, waitTimeLimitMs);
+		} else {
+			
+			// Pour toutes les listes de valeurs identiques
+			// (il peut y avoir des listes distinctes associés à une même valeur indexée, du fait du multi-fichiers / multi-thread)
+			for (DiskDataPosition dataPos : resultsCollection) {
+				//Log.info("list size = " + list.size());
+				//for (DiskDataPosition dataPos : dataPosList) {
+					// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
+					ArrayList<Object> objList = dataHandler.getValuesOfLineByIdForSignleQuery(dataPos);
+					resultArrayList.add(objList);
+					//Log.info("  objList = " + objList);
+					
+					//Log.info("  index = " + index);
+					// TODO Résultats à lire depuis les fichiers binaires
+					//ArrayList<Object> objList = associatedTable.getValuesOfLineById(binIndex);
+					//resultArrayList.add(objList);
+					
+					//Object indexedValue = objList.get(indexingColumnIndex);
+					//indexingColumn.getDataType().
+					//Log.info("  valeur indexée = " + indexedValue);
+					//Log.info("  objList = " + objList);
+				//}
+			}
+			return resultArrayList;
 		}
-		return resultArrayList;
 	}
 	
 	public void displayOnLogResults(ArrayList<ArrayList<Object>> resultArrayList) {

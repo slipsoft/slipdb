@@ -155,6 +155,10 @@ public class IndexTreeTest {
 			// Attendre que toute la donnée soit parsée
 			tableHandler.multiThreadParsingJoinAllThreads();
 			
+			/**
+			 * Ne supporte pour l'instant pas recherches + indexing en même temps. (Problèmes de concurrence)
+			 * -> BIEN penser à faire tableHandler.multiThreadParsingJoinAllThreads();
+			 */
 			
 			
 			/*tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
@@ -286,13 +290,15 @@ public class IndexTreeTest {
 			searchQueryTimer = new Timer("Temps total recherche");
 			result = tableHandler.findIndexedResultsOfColumn("trip_distance", 17.78f, 18f, true);
 			searchQueryTimer.log();
+			
+			
 			searchQueryFullTimer = new Timer("Temps d'acquisition des résultats (chargement du disque de tous les champs)");
 			numberOfResults = result.size();// tableHandler.evaluateNumberOfResults(result);
 			//numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
 			
-			ArrayList<ArrayList<Object>> fullResulsVariables = tableHandler.getFullResultsFromBinIndexes(result);
+			ArrayList<ArrayList<Object>> fullResulsVariables = tableHandler.getFullResultsFromBinIndexes(result, true, -1);
 			
-			tableHandler.displayOnLogResults(fullResulsVariables);
+			//tableHandler.displayOnLogResults(fullResulsVariables);
 			
 			searchQueryFullTimer.log();
 			Log.info("Nombre de résultats = " + numberOfResults);

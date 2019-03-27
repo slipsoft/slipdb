@@ -1,14 +1,18 @@
 package db.disk.dataHandler;
 
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.FileUtils;
 
 import com.dant.utils.Log;
 
+import db.data.DataPositionList;
 import db.structure.Table;
 
 /**
@@ -80,10 +84,11 @@ public class TableDataHandler {
 	 *  @return
 	 *  @throws IOException
 	 */
+	@Deprecated
 	public ArrayList<Object> getValuesOfLineByIdForSignleQuery(DiskDataPosition dataPosition) throws IOException { // or getRowById
 		
 		if (debugLastFileID != dataPosition.fileID) { // Afficher un message à chaque changement de fichier
-			Log.info("getValuesOfLineByIdForSignleQuery depuis fileID = " + dataPosition.fileID);
+			//Log.info("getValuesOfLineByIdForSignleQuery depuis fileID = " + dataPosition.fileID);
 			debugLastFileID = dataPosition.fileID;
 		}
 		
@@ -104,6 +109,132 @@ public class TableDataHandler {
 		}
 		return new ArrayList<Object>();
 	}
+	
+	/** Rechercher de la donnée sur le disque.
+	 *  Cette fonction est optimisée pour faire le moins d'appels disques possibles,
+	 *  et garantit que tous les résultats seront bien lus, si waitForAllResults == true
+	 * @param dataPosition
+	 * @return
+	 * @throws IOException
+	 */
+	public ArrayList<ArrayList<Object>> getValuesOfLinesListById(DataPositionList argDataPositionList, boolean waitForAllResults, int waitTimeLimitMs) { // or getRowById
+		
+		ArrayList<ArrayList<Object>> resultsArray = new ArrayList<ArrayList<Object>>();
+		
+		DataPositionList dataPositionList = (DataPositionList) argDataPositionList.clone(); // copie de la liste
+		Collections.sort(dataPositionList); // pas super opti pour un très grand nombre de résultats (100 000+)
+		// Regrouper par fichier
+		short oldNodeID = -1;
+		short oldFileID = -1;
+		//int oldSingleID = (oldNodeID << 16) + (oldFileID << 0);
+		
+		// Je mets toutes les demandes portant sur le même fichier dans la même liste
+		ArrayList<ArrayList<DiskDataPosition>> a2OrderedByFileList = new ArrayList<ArrayList<DiskDataPosition>>();
+		ArrayList<DiskDataPosition> a1CurrentDataPosArray = null;
+		
+		
+		for (DiskDataPosition dataPosition : dataPositionList) {
+			if (dataPosition.nodeID != oldNodeID || dataPosition.fileID != oldFileID) {
+				a1CurrentDataPosArray = new ArrayList<DiskDataPosition>();
+				a2OrderedByFileList.add(a1CurrentDataPosArray);
+				oldNodeID = dataPosition.nodeID;
+				oldFileID = dataPosition.fileID;
+			}
+			a1CurrentDataPosArray.add(dataPosition); // pas opti de les ajouter un par un mais bon... C'est déjà opti de faire fichier par fichier !
+		}
+		
+		synchronized (allFilesListLock) {
+			int checkIndex = 0;
+			while (a2OrderedByFileList.size() > 0) {
+				if (checkIndex >= a1CurrentDataPosArray.size()) {
+					checkIndex = 0; // boucle, revenir au premier fichier
+				}
+				a1CurrentDataPosArray = a2OrderedByFileList.get(checkIndex);
+				if (a1CurrentDataPosArray.size() == 0) { // (improbable) liste vide, je passe à la suivante et je la supprime
+					a2OrderedByFileList.remove(checkIndex);
+					continue;
+				}
+				
+				DiskDataPosition firstDataPos = a1CurrentDataPosArray.get(0); // existe bien
+				//short nodeID = firstDataPos.nodeID;
+				short fileID = firstDataPos.fileID;
+				
+				TableDataHandlerFile fondUsableDataFile = null;
+				boolean foundFileInList = false;
+				// Je trouve le fichier associé
+				for (TableDataHandlerFile dataFile : allFilesList) {
+					if (dataFile.getFileID() == fileID) {
+						foundFileInList = true; // trouvé, mais pas forcément libre
+						try {
+							if (dataFile.tryToUseThisFile(true, true)) {
+								fondUsableDataFile = dataFile;
+							} else {
+								break; // puis checkIndex++ si waitForAllResults
+								//throw new IOException("Impossible de lire du fichier : il est occupé.");
+							}
+						} catch (IOException e) {
+							Log.error(e);
+							e.printStackTrace(); // ne devrait jamais arriver
+						}
+					}
+				}
+				
+				if (foundFileInList == false) { // fichier introuvable donc, je l'ignore
+					a2OrderedByFileList.remove(checkIndex);
+					continue; // sans checkIndex++
+				}
+				
+				// Fichier trouvé et donc à lire
+				if (fondUsableDataFile != null) {
+					// Pour chaque donnée à lire, je la lis
+					for (DiskDataPosition dataPos : a1CurrentDataPosArray) {
+						ArrayList<Object> entryAsArray;
+						try {
+							entryAsArray = fondUsableDataFile.orderedReadGetValuesOfLineById(dataPos, myTable);
+							resultsArray.add(entryAsArray);
+						} catch (IOException e) {
+							Log.error(e);
+							e.printStackTrace();
+						}
+					}
+					try {
+						fondUsableDataFile.stopFileUse();
+					} catch (IOException e) {
+						Log.error(e);
+						e.printStackTrace();
+					}
+					a2OrderedByFileList.remove(checkIndex);
+					continue; // sans checkIndex++
+				} else { // si fondUsableDataFile == null
+					if (waitForAllResults == false) {
+						a2OrderedByFileList.remove(checkIndex);
+						continue;
+					}
+					
+				}
+				checkIndex++;
+			}
+		}
+		
+		//argDataPositionList.toArray()
+		//dataPositionList.set(index, element)
+		
+		
+		
+		// Je classe par fichiers
+		// Je classe par position dans le fichier
+		/*TODO
+		 * Collections.sort(Database.arrayList, new Comparator<MyObject>() {
+		    @Override
+		    public int compare(MyObject o1, MyObject o2) {
+		        return o1.getStartDate().compareTo(o2.getStartDate());
+		    }
+		});*/
+		return resultsArray;
+		
+		
+	}
+	
 	
 	
 	/** 

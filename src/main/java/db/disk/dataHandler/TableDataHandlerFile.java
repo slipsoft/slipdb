@@ -159,6 +159,7 @@ public class TableDataHandlerFile {
 	 *  @return
 	 * @throws IOException 
 	 */
+	@Deprecated
 	public ArrayList<Object> getValuesOfLineById(DiskDataPosition dataPosition, Table inTable) throws IOException {
 		if (isReadOnlyMode == false) throw new IOException("Le fichier doit être ouvert en lecture."); // erreur, le fichier DOIT être ouvert en lecture
 		int binPosInFile = dataPosition.lineIndex * inTable.getLineSize();
@@ -169,6 +170,35 @@ public class TableDataHandlerFile {
 		streamReader.skipForce(binPosInFile);
 		positionInReadOnlyFile = binPosInFile;
 
+		ArrayList<Object> lineValues = new ArrayList<>(); // rowValues
+		// For each column, reads the associated value
+		for (Column column : inTable.getColumns()) {
+			byte[] columnValueAsByteArray = new byte[column.getSize()];
+			streamReader.read(columnValueAsByteArray); // reads from the stream
+			//Log.debug(b); for debug purposes only
+			lineValues.add(column.getDataType().readTrueValue(columnValueAsByteArray));
+		}
+		return lineValues;
+		
+	}
+	
+	
+	/** Adapté à plusieurs lectures à la fois
+	 *  @param dataPosition
+	 *  @param inTable
+	 *  @return
+	 *  @throws IOException
+	 */
+	public ArrayList<Object> orderedReadGetValuesOfLineById(DiskDataPosition dataPosition, Table inTable) throws IOException {
+		if (isReadOnlyMode == false) throw new IOException("Le fichier doit être ouvert en lecture."); // erreur, le fichier DOIT être ouvert en lecture
+		int binPosInFile = dataPosition.lineIndex * inTable.getLineSize();
+		int skipSize = binPosInFile - positionInReadOnlyFile; // skip de la bonne valeur, forcément positif car orderedReadSeekFirst
+		if (skipSize < 0) {
+			 throw new IOException("orderedReadSeekFirst DOIT être utilisé pour lire dans l'ordre, il DOIT y avoir skipSize > 0 alors que skipSize = " + skipSize); // erreur,
+		}
+		streamReader.skipForce(skipSize);
+		positionInReadOnlyFile = binPosInFile;
+		
 		ArrayList<Object> lineValues = new ArrayList<>(); // rowValues
 		// For each column, reads the associated value
 		for (Column column : inTable.getColumns()) {
