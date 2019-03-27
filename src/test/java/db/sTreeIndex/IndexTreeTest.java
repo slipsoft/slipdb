@@ -284,6 +284,13 @@ public class IndexTreeTest {
 			
 			searchQueryFullTimer.log();
 			Log.info("Nombre de résultats = " + numberOfResults);
+			
+
+			result = tableHandler.findIndexedResultsOfColumn("trip_distance", 18f);
+			numberOfResults = result.size();
+			Log.info("Nombre de résultats (pour 18 exact) = " + numberOfResults);
+			
+			
 			//Log.info("Nombre de lignes = " + numberOfLines);
 			
 			

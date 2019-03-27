@@ -814,6 +814,16 @@ public class IndexTreeDic extends Index {
 		return 0;
 	}
 	
+	/** Pour faire un Equals (demandé par Nicolas)
+	 *  @param equalsExactValue
+	 *  @param justEvaluateResultNumber
+	 *  @return
+	 *  @throws Exception
+	 */
+	public DataPositionList findMatchingBinIndexes(Object equalsExactValue, boolean justEvaluateResultNumber) throws Exception { // NavigableMap<Integer, IntegerArrayList> findSubTree
+		return findMatchingBinIndexes(equalsExactValue, null, true, justEvaluateResultNumber);
+	}
+	
 	/** Trouve les résultats dans la mémoire et sur le disque
 	 *  @param minValueExact
 	 *  @param maxValueExact

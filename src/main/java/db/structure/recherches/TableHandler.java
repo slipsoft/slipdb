@@ -224,6 +224,25 @@ public class TableHandler {
 	}*/
 	
 	
+	/** Pour une valeur exacte
+	 *  @param columnName
+	 *  @param equalsExactValue
+	 *  @return
+	 *  @throws Exception
+	 */
+	public DataPositionList findIndexedResultsOfColumn(String columnName, Object equalsExactValue) throws Exception {
+		return findIndexedResultsOfColumn(columnName, equalsExactValue, null, true);
+	}
+	
+	/**
+	 * 
+	 * @param columnName
+	 * @param minValue
+	 * @param maxValue
+	 * @param inclusive
+	 * @return
+	 * @throws Exception
+	 */
 	public DataPositionList findIndexedResultsOfColumn(String columnName, Object minValue, Object maxValue, boolean inclusive) throws Exception {
 		int columnIndex = getColumnIndex(columnName);
 		if (columnIndex == -1) throw new Exception("Colonne introuvable, impossible de faire une recherche sur ses index.");
