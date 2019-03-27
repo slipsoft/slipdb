@@ -258,30 +258,33 @@ public class IndexTreeTest {
 
 			Timer searchQueryTimer = new Timer("Temps total recherche"); // "Time took to return the matching elements" : flemme d'écrire en anglais
 			
-			Collection<DataPositionList> result = tableHandler.findIndexedResultsOfColumn("tpep_pickup_datetime", searchFromValue, searchToValue, true);
+			DataPositionList result = tableHandler.findIndexedResultsOfColumn("tpep_pickup_datetime", searchFromValue, searchToValue, true);
+			
+			
 			searchQueryTimer.log();
 			//trip_distance
 			
 			Timer searchQueryFullTimer = new Timer("Temps parcours des résultats");
-			int numberOfResults = tableHandler.evaluateNumberOfResults(result);
-			int numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
+			int numberOfResults = result.size();
+			//int numberOfResults = tableHandler.evaluateNumberOfResults(result);
+			//int numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
 			searchQueryFullTimer.log();
 			Log.info("Nombre de résultats = " + numberOfResults);
-			Log.info("Nombre de lignes = " + numberOfLines);
+			//Log.info("Nombre de lignes = " + numberOfLines);
 			
 			
 			searchQueryTimer = new Timer("Temps total recherche");
 			result = tableHandler.findIndexedResultsOfColumn("trip_distance", 17.78f, 18f, true);
 			searchQueryTimer.log();
 			searchQueryFullTimer = new Timer("Temps d'acquisition des résultats (chargement du disque de tous les champs)");
-			numberOfResults = tableHandler.evaluateNumberOfResults(result);
-			numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
+			numberOfResults = result.size();// tableHandler.evaluateNumberOfResults(result);
+			//numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
 			
 			tableHandler.getFullResultsFromBinIndexes(result);
 			
 			searchQueryFullTimer.log();
 			Log.info("Nombre de résultats = " + numberOfResults);
-			Log.info("Nombre de lignes = " + numberOfLines);
+			//Log.info("Nombre de lignes = " + numberOfLines);
 			
 			
 			

@@ -822,14 +822,20 @@ public class IndexTreeDic extends Index {
 	 *  @return
 	 *  @throws Exception 
 	 */
-	public Collection<DataPositionList> findMatchingBinIndexes(Object minValueExact, Object maxValueExact, boolean isInclusive, boolean justEvaluateResultNumber) throws Exception { // NavigableMap<Integer, IntegerArrayList> findSubTree
+	public DataPositionList findMatchingBinIndexes(Object minValueExact, Object maxValueExact, boolean isInclusive, boolean justEvaluateResultNumber) throws Exception { // NavigableMap<Integer, IntegerArrayList> findSubTree
 		this.flushOnDisk();
 		Collection<DataPositionList> fromDisk = findMatchingBinIndexesFromDisk(minValueExact, maxValueExact, isInclusive, justEvaluateResultNumber);
 		Collection<DataPositionList> fromMemory = findMatchingBinIndexesFromMemory(minValueExact, maxValueExact, isInclusive); // new ArrayList<DataPositionList>();//
 		
 		Collection<DataPositionList> allResults = fromDisk;
 		allResults.addAll(fromMemory);
-		return allResults;
+		
+		DataPositionList simpleResultList = new DataPositionList();
+		for (DataPositionList subList : allResults) {
+			simpleResultList.addAll(subList);
+		}
+		
+		return simpleResultList;
 	}
 	
 	/** Gets the matching results from disk !

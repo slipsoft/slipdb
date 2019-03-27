@@ -224,11 +224,11 @@ public class STableHandler {
 	}*/
 	
 	
-	public Collection<DataPositionList> findIndexedResultsOfColumn(String columnName, Object minValue, Object maxValue, boolean inclusive) throws Exception {
+	public DataPositionList findIndexedResultsOfColumn(String columnName, Object minValue, Object maxValue, boolean inclusive) throws Exception {
 		int columnIndex = getColumnIndex(columnName);
 		if (columnIndex == -1) throw new Exception("Colonne introuvable, impossible de faire une recherche sur ses index.");
 		if (IndexTreeDic.firstValueIsHigherThatSecondValue(minValue, maxValue) > 0) {
-			return new ArrayList<DataPositionList>(); // aucun résultat
+			return new DataPositionList(); // aucun résultat
 		}
 		//return findIndexedResultsOfColumn();
 		
@@ -240,7 +240,7 @@ public class STableHandler {
 			}
 		}*/
 		if (makeRequestOnThisTree == null) {
-			return new ArrayList<DataPositionList>();
+			return new DataPositionList();
 		}
 		return makeRequestOnThisTree.findMatchingBinIndexes(minValue, maxValue, inclusive, false);
 	}
@@ -273,7 +273,7 @@ public class STableHandler {
 	}
 	
 	//trip_distance
-	public ArrayList<ArrayList<Object>> getFullResultsFromBinIndexes(Collection<DataPositionList> resultsCollection) throws Exception { // table connue ! , Table fromTable) {
+	public ArrayList<ArrayList<Object>> getFullResultsFromBinIndexes(DataPositionList resultsCollection) throws Exception { // table connue ! , Table fromTable) {
 		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");
 		
 		ArrayList<ArrayList<Object>> resultArrayList = new ArrayList<ArrayList<Object>>();
@@ -282,9 +282,9 @@ public class STableHandler {
 		
 		// Pour toutes les listes de valeurs identiques
 		// (il peut y avoir des listes distinctes associés à une même valeur indexée, du fait du multi-fichiers / multi-thread)
-		for (DataPositionList dataPosList : resultsCollection) {
+		for (DiskDataPosition dataPos : resultsCollection) {
 			//Log.info("list size = " + list.size());
-			for (DiskDataPosition dataPos : dataPosList) {
+			//for (DiskDataPosition dataPos : dataPosList) {
 				// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
 				ArrayList<Object> objList = dataHandler.getValuesOfLineByIdForSignleQuery(dataPos);
 				resultArrayList.add(objList);
@@ -303,7 +303,7 @@ public class STableHandler {
 				//indexingColumn.getDataType().
 				//Log.info("  valeur indexée = " + indexedValue);
 				//Log.info("  objList = " + objList);
-			}
+			//}
 		}
 		return resultArrayList;
 	}
