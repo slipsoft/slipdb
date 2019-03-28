@@ -17,6 +17,7 @@ import com.dant.utils.EasyFile;
 import db.data.DataType;
 import db.disk.dataHandler.TableDataHandler;
 import db.search.Predicate;
+import db.structure.recherches.TableHandler;
 
 /**
  * A simple SQL-like table, consisting of 
@@ -36,6 +37,7 @@ public class Table {
 	
 	//protected final String dataFilesOnDiskBasePath; devenu baseTablePath
 	protected final TableDataHandler dataHandler;
+	protected final TableHandler tableHandler;
 	
 	protected final String name; // table name
 	
@@ -49,18 +51,35 @@ public class Table {
 	 */
 	
 	/** Create a table with a name and a columns list
-	 * @param name
-	 * @param columnsList
+	 * @param argName
+	 * @param argColumnsList
+	 * @param argTableHandler
 	 * @throws IOException
 	 */
-	public Table(String argName, List<Column> argColumnsList) throws IOException {
-		this.name = argName;
-		this.columnsList.addAll(argColumnsList);
+	public Table(String argName, List<Column> argColumnsList, TableHandler argTableHandler) throws IOException {
+		name = argName;
+		columnsList.addAll(argColumnsList);
+		tableHandler = argTableHandler;
 		baseTablePath = baseAllTablesDirPath + name + "/";
 		TableDataHandler.setNodeID(currentNodeID); // <- NODE ID 
 		dataHandler = new TableDataHandler(this, baseTablePath);
 		tableID = nextTableID.addAndGet(1);
 		
+		/* Désormais géré par TableDiskDataHandler*/
+		this.fileLinesOnDisk = new EasyFile(oldSmellyBasePath + name + ".bin");
+		this.fileLinesOnDisk.createFileIfNotExist();
+		computeLineDataSize();
+	}
+
+	public Table(String argName, List<Column> argColumnsList) throws IOException {
+		name = argName;
+		columnsList.addAll(argColumnsList);
+		tableHandler = new TableHandler(argName);
+		baseTablePath = baseAllTablesDirPath + name + "/";
+		TableDataHandler.setNodeID(currentNodeID); // <- NODE ID
+		dataHandler = new TableDataHandler(this, baseTablePath);
+		tableID = nextTableID.addAndGet(1);
+
 		/* Désormais géré par TableDiskDataHandler*/
 		this.fileLinesOnDisk = new EasyFile(oldSmellyBasePath + name + ".bin");
 		this.fileLinesOnDisk.createFileIfNotExist();
@@ -125,7 +144,6 @@ public class Table {
 	/**
 	 * Ajout d'une colonne
 	 * @param colName
-	 * @param defaultFillValue
 	 * @return
 	 * @throws Exception
 	 */
@@ -223,5 +241,9 @@ public class Table {
 		ArrayList<ColumnEntity> allColumns = this.columnsList.stream().map(Column::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
 		// ArrayList<IndexEntity> allIndexes = this.indexesList.stream().map(Index::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
 		return new TableEntity(name, allColumns);
+	}
+
+	public TableHandler getTableHandler() {
+		return tableHandler;
 	}
 }

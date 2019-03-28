@@ -51,7 +51,6 @@ public class ColumnEntity extends Entity implements Serializable {
                 boolean sizeIsRequired = dataTypeClass.getField("sizeIsRequired").getBoolean(null);
 
                 if(sizeIsRequired) {
-                    Log.debug(this.type);
                     if (this.size == 0) {
                         errors.add(new ResponseError(Location.createTable, Type.invalidData, "size is missing"));
                     } else if (this.size < 0) {
@@ -77,7 +76,6 @@ public class ColumnEntity extends Entity implements Serializable {
             Class dataTypeClass = Class.forName(DataTypesClassPathPrefix+className);
             DataType dataType;
             if (dataTypeClass.getField("sizeIsRequired").getBoolean(null)) {
-                Log.debug("ICIOLOLOLOLOLOLOLOLOL");
                 dataType = (DataType)dataTypeClass.getDeclaredConstructor(int.class).newInstance(this.size);
             } else {
                 dataType = (DataType)dataTypeClass.getDeclaredConstructor().newInstance();

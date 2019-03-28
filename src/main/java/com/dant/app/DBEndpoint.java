@@ -19,16 +19,16 @@ public class DBEndpoint {
     @PUT
     @Path("/tables")
     public Response createTables(ArrayList<TableEntity> allTables, @DefaultValue("null") @HeaderParam("InternalToken") String InternalToken) {
+        // si la requète vient d'un endpoint, pas besoin de valider
         boolean addImmediatly = InternalToken.equals(Database.getInstance().config.SuperSecretPassphrase);
+
         try {
-            ArrayList<ResponseError> allErrors = Database.getInstance().addTables(allTables, addImmediatly);
+            ArrayList<ResponseError> allErrors = Controller.addTables(allTables, addImmediatly);
             if (allErrors != null)
                 return com.dant.utils.Utils.generateResponse(400, "error", "application/json", allErrors);
 
-            if (!addImmediatly)
-               db.network.Network.broadcast("zbeb", allTables);
-
             return com.dant.utils.Utils.generateResponse(200, "ok", "application/json", "table successfully inserted");
+
         } catch (Exception exp) { //Todo improve on error handling by catching only specific exception types
             Log.error(exp);
             throw new BadRequestException("invalid table body, check your args");
@@ -38,18 +38,18 @@ public class DBEndpoint {
     @GET
     @Path("/tables")
     public Response getTables() {
-        return Database.getInstance().getTables();
+        return Controller.getTables();
     }
 
     @GET
     @Path("/tables/{tableName}")
     public Response getTable(@PathParam("tableName") String tableName) {
-        return Database.getInstance().getTable(tableName);
+        return Controller.getTable(tableName);
     }
 
     @DELETE
     @Path("/tables/{tableName}")
     public Response deleteTable(@PathParam("tableName") String tableName) {
-        return Database.getInstance().deleteTable(tableName);
+        return Controller.deleteTable(tableName);
     }
 }

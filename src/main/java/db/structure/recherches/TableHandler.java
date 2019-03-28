@@ -75,9 +75,13 @@ public class TableHandler {
 		Column newColumn = new Column(argColumnName, argColumnDataType);
 		columnsList.add(newColumn);
 	}
+
+	public void addColumn(Column column) {
+		columnsList.add(column);
+	}
 	
 	public Table createTable() throws IOException {
-		associatedTable = new Table(tableName, columnsList);
+		associatedTable = new Table(tableName, columnsList, this);
 		return associatedTable;
 	}
 
@@ -93,6 +97,17 @@ public class TableHandler {
 			is.close();
 		} catch (Exception e) {
 			is.close();
+			throw e;
+		}
+	}
+
+	public void parseCsvData (InputStream is, boolean doRuntimeIndexing) throws Exception {
+		try {
+            parseCsvData(is, doRuntimeIndexing, false);
+			is.close();
+		} catch (Exception e) {
+			is.close();
+			Log.error(e);
 			throw e;
 		}
 	}

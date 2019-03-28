@@ -1,7 +1,6 @@
 package com.dant.utils;
 
-import com.dant.entity.Entity;
-import com.dant.entity.HttpResponse;
+import com.dant.entity.*;
 
 import javax.ws.rs.core.Response;
 import java.text.DateFormat;
@@ -62,7 +61,7 @@ public class Utils {
 	public static Date dateFromStringNoThreadSafe(String dateAsString) {
 		try {
 			return staticDateFormat.parse(dateAsString);
-			// Ne pas faire :  new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(...)  est BEAUCOUP plus lent
+			// Ne pas faire :  new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(...) est BEAUCOUP plus lent
 		} catch (ParseException e) {
 			return null; //new Date();
 		}
@@ -90,6 +89,6 @@ public class Utils {
 
 	public static boolean isNameDuplicate(ArrayList<Entity> entities, String toCheck) {
 		ArrayList<Entity> duplicates = entities.stream().filter(e -> e.name.equals(toCheck)).collect(Collectors.toCollection(ArrayList::new));
-		return duplicates.size() <= 0;
+		return duplicates.size() <= 1;
 	}
 }
