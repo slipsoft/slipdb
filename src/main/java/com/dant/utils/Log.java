@@ -30,9 +30,9 @@ public class Log {
 	 * Start a log session by setting its file and level.
 	 * The level determines how much messages are displayed in the console.
 	 * 
-	 * @param file
+	 * @param file - name of the file to use for this log
 	 * @param level - 0: quiet, 1: info, 2: debug, 3: stacktrace
-	 * @throws IOException 
+	 * @throws IOException if can't create file
 	 */
 	public static void start(String file, int level) throws IOException {
 		Log.level = level;
@@ -44,7 +44,7 @@ public class Log {
 	 * Log an info message.
 	 * Print in the standard output if log level >= 1.
 	 * 
-	 * @param msg
+	 * @param msg - the message to log
 	 */
 	public static void info(String msg) {
 		logInfoMessage(msg, "", 3);
@@ -54,8 +54,8 @@ public class Log {
 	 * Log an info message.
 	 * Print in the standard output if log level >= 1.
 	 * 
-	 * @param msg
-	 * @param prefix
+	 * @param msg - the message to log
+	 * @param prefix - prefix of the message
 	 */
 	public static void info(String msg, String prefix) {
 		logInfoMessage(msg, prefix, 3);
@@ -72,7 +72,7 @@ public class Log {
 	/**
 	 * Log & Print a debug message if log level >= 2.
 	 * 
-	 * @param obj
+	 * @param obj - the object to debug
 	 */
 	public static void debug(Object obj) {
 		logDebugMessage(obj, "", 3);
@@ -81,8 +81,8 @@ public class Log {
 	/**
 	 * Log & Print a debug message if log level >= 2.
 	 * 
-	 * @param obj
-	 * @param prefix
+	 * @param obj - the object to debug
+	 * @param prefix - prefix of the debug
 	 */
 	public static void debug(Object obj, String prefix) {
 		logDebugMessage(obj, prefix, 3);
@@ -90,9 +90,13 @@ public class Log {
 	
 	protected static void logDebugMessage(Object obj, String prefix, int depth) {
 		if (Log.level >= 2) {
-			String msg = obj.toString();
-			if (obj.getClass().isArray()) {
+			String msg;
+			if (obj == null) {
+				msg = "null";
+			} else if (obj.getClass().isArray()) {
 				msg = ArrayUtils.toString(obj);
+			} else {
+				msg = obj.toString();
 			}
 			msg = prefixString("DEBUG/" + prefix) + msg + getCaller(depth);
 			System.out.println(msg);
@@ -104,7 +108,7 @@ public class Log {
 	 * Log & Print an error message.
 	 * Print StackTrace in the standard output if log level >= 3.
 	 * 
-	 * @param msg
+	 * @param e - the error to log
 	 */
 	public static void error(Exception e) {
 		logErrorMessage(e.getMessage(), "", 3);
@@ -117,8 +121,8 @@ public class Log {
 	 * Log & Print an error message.
 	 * Print StackTrace in the standard output if log level >= 3.
 	 * 
-	 * @param msg
-	 * @param prefix
+	 * @param e - the error to log
+	 * @param prefix - prefix of the error
 	 */
 	public static void error(Exception e, String prefix) {
 		logErrorMessage(e.getMessage(), prefix, 3);
@@ -131,7 +135,7 @@ public class Log {
 	 * Log & Print an error message.
 	 * Print StackTrace in the standard output if log level >= 3.
 	 * 
-	 * @param msg
+	 * @param msg - the message to log as an error
 	 */
 	public static void error(String msg) {
 		logErrorMessage(msg, "", 3);
@@ -141,8 +145,8 @@ public class Log {
 	 * Log & Print an error message.
 	 * Print StackTrace in the standard output if log level >= 3.
 	 * 
-	 * @param msg
-	 * @param prefix
+	 * @param msg - the message to log as an error
+	 * @param prefix - prefix of the error
 	 */
 	public static void error(String msg, String prefix) {
 		logErrorMessage(msg, prefix, 3);
@@ -154,7 +158,7 @@ public class Log {
 		append(msg);
 	}
 	
-	public static String getCaller(int depth) {
+	private static String getCaller(int depth) {
 		if (level >= 2) {
 			StackTraceElement elem =  new Throwable().getStackTrace()[depth];
 			return " (" + elem.getFileName() + ":" + elem.getLineNumber() + ")";
