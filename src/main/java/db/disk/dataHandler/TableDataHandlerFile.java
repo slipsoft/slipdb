@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -16,24 +17,27 @@ import com.dant.utils.Log;
 import db.structure.Column;
 import db.structure.Table;
 
-public class TableDataHandlerFile {
+public class TableDataHandlerFile implements Serializable {
 	
 	// Champs mis en public pour gagner du temps
 	// Thread-safe (c'est d'ailleurs le but !)
 	
 	//private Object forceWaitToUseThisFileLock = new Object();
 
-	// Utilisé de l'extérieur (thread différent)
+	private static final long serialVersionUID = 2906608573394264418L;
+	
+		// Utilisé de l'extérieur (thread différent)
 		private AtomicBoolean currentlyInUse = new AtomicBoolean(true); // si le fichier est actuellement utilisé (lecture ou écriture)
 		private AtomicBoolean fileIsFull = new AtomicBoolean(false); // impossible de rajouter de la donnée si fileIsFull
 	
 	
 	// Utilisé de l'intérieur (même thread)
-	private EasyFile fileOnDisk;
+	transient private EasyFile fileOnDisk; // re-créé lors de la lecture serial
 	private String filePath;
 	private int currentFileSize = 0;
 	private int currentFileEntriesNumber = 0;
 	private final short fileID;
+	private final short nodeID;
 	
 	// Nonthread-safe, seulement utilisé par quelques fonctions spécifiques, et dans des cas bien précis
 	private DataOutputStream streamWriter = null;
@@ -44,12 +48,35 @@ public class TableDataHandlerFile {
 	
 	static public final int maxFileSizeOnDisk = 150_000_000; // 500_000_000 Max 500 mo sur disque (grosse marge de sécurité)
 	
-	public TableDataHandlerFile(short argFileID, String argFilePath) throws IOException {
-		fileID = argFileID;
-		filePath = argFilePath;
+	public void debugSerialShowVariables() {
+		Log.info("filePath = " + filePath);
+		Log.info("currentFileSize = " + currentFileSize);
+		Log.info("fileID = " + fileID);
+		Log.info("nodeID = " + nodeID);
+	}
+	
+	private void initOrLoadCommon() throws IOException {
 		fileOnDisk = new EasyFile(filePath);
 		fileOnDisk.createFileIfNotExist();
 		currentlyInUse.set(false);
+	}
+	
+	/** Pour la déserialisation
+	 * @param in
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		in.defaultReadObject();
+		initOrLoadCommon();
+	}
+	
+	
+	public TableDataHandlerFile(short argNodeID, short argFileID, String argFilePath) throws IOException {
+		nodeID = argNodeID;
+		fileID = argFileID;
+		filePath = argFilePath;
+		initOrLoadCommon();
 	}
 	
 	/** Thread-safe, car lecture seule (et la ressource ne change pas de position mémoire)
@@ -150,7 +177,7 @@ public class TableDataHandlerFile {
 			fileIsFull.set(true);
 			stopFileUse();
 		}
-		TableDataPositionResult dataPositionResult = new TableDataPositionResult(TableDataHandler.currentNodeID, fileID, currentFileEntriesNumber - 1, canStillUseThisFile);
+		TableDataPositionResult dataPositionResult = new TableDataPositionResult(nodeID, fileID, currentFileEntriesNumber - 1, canStillUseThisFile);
 		return dataPositionResult;
 	}
 	

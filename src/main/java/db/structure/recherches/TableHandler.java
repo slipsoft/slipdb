@@ -1,6 +1,5 @@
 package db.structure.recherches;
 
-import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +21,6 @@ import db.structure.StructureException;
 import db.structure.Table;
 import db.structure.indexTree.IndexException;
 import db.structure.indexTree.IndexTreeDic;
-import sj.network.tcpAndBuffers.NetBuffer;
 
 public class TableHandler implements Serializable {
 	/* Ordre de serialization :
@@ -31,34 +29,57 @@ public class TableHandler implements Serializable {
 						  -> TableDataHandler
 				 -> IndexTree
 				 
-	
 	*/
 	private static final long serialVersionUID = -4180065130691064979L;
 	protected String tableName;
-	protected ArrayList<Column> columnsListForCreatingTableOnly = new ArrayList<Column>();
-	protected Table associatedTable;
+	protected ArrayList<Column> columnsListForCreatingTableOnly;
+	public Table associatedTable;
 	//protected CsvParser csvParser = null;
 	// Possibilité de parser de plusieurs manières différentes (un jour...)
 	protected boolean firstTimeParsingData = true;
 	
 	// Liste des threads faisant actuellement du parsing
 	
-	protected transient ArrayList<Thread> parsingThreadList = new ArrayList<Thread>();
+	// obj non serial
+	transient private Object multiThreadParsingListLock;
+	transient protected Object indexTreeListLock;
+	transient protected ArrayList<Thread> parsingThreadList;
 	
+	// indexColumnList est la liste des colonnes à indexer
+	transient public RuntimeIndexingEntryList runtimeIndexingList = new RuntimeIndexingEntryList();//ArrayList<SRuntimeIndexingEntry>();
+	// TODO
 	protected ArrayList<IndexTreeDic> indexTreeList = new ArrayList<IndexTreeDic>(); // Liste des IndexTree associés à cette table
 	
+	public void flushAllIndexTreesOnDisk() {
+		Log.error("TableHandler.flushAllIndexTreesOnDisk : size = " + indexTreeList.size());
+		for (IndexTreeDic indexTree : indexTreeList) {
+			try {
+				indexTree.flushOnDisk();
+				Log.error("TableHandler.flushAllIndexTreesOnDisk : flush de l'arbre !" + indexTree);
+			} catch (IOException e) {
+				Log.error("TableHandler.flushAllIndexTreesOnDisk : l'arbre n'a pas pu être écrit sur le disque, IOException.");
+				Log.error(e);
+				e.printStackTrace();
+			}
+		}
+	}
 	
-	/** @Nicolas : ne pas supprimer ce code, mettre ton code en plus dans une autre fonction.
-	 *  Sera fait avec la serialisation plus rapide et fidèle 
-	 *  Ecrire l'état actuel de la table :
-	 *  Nom, liste de colonnes, arbres
-	 * @param writeInStream
-	 */
-	public void writeTableFull(DataOutputStream writeInStream) {
-		NetBuffer tableData = new NetBuffer();
-		
-		
-		
+	private void loadSerialAndCreateCommon() {
+		columnsListForCreatingTableOnly = new ArrayList<Column>(); // juste au cas où
+		indexTreeListLock = new Object();
+		parsingThreadList = new ArrayList<Thread>();
+		multiThreadParsingListLock = new Object();
+	}
+	
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		in.defaultReadObject();
+		loadSerialAndCreateCommon();
+	}
+	
+	
+	
+	public TableHandler() {
+		loadSerialAndCreateCommon();
 	}
 	
 	
@@ -75,6 +96,7 @@ public class TableHandler implements Serializable {
 	}
 	
 	public TableHandler(String argTableName) {
+		this();
 		tableName = argTableName;
 	}
 	
@@ -97,7 +119,7 @@ public class TableHandler implements Serializable {
 	}
 	
 	public Table createTable() throws IOException {
-		associatedTable = new Table(tableName, columnsListForCreatingTableOnly);
+		associatedTable = new Table(tableName, columnsListForCreatingTableOnly, this);
 		return associatedTable;
 	}
 
@@ -172,12 +194,14 @@ public class TableHandler implements Serializable {
 	
 	
 	
-	protected Object indexTreeListLock = new Object();
 	
 	protected IndexTreeDic findOrCreateAssociatedIndexTree(int columnIndex, boolean createTreeIfDoesNotExists) throws IndexException {
 		synchronized(indexTreeListLock) {
+		
+			//Log.info("findOrCreateAssociatedIndexTree : size = " + indexTreeList.size());
 			for (IndexTreeDic indexTree : indexTreeList) {
 				if (indexTree.getAssociatedTableColumnIndex() == columnIndex) {
+					//Log.info("findOrCreateAssociatedIndexTree : TROUVE TROUVE TROUVE TROUVE");
 					return indexTree;
 				}
 			}
@@ -185,6 +209,7 @@ public class TableHandler implements Serializable {
 			IndexTreeDic newTree = new IndexTreeDic(associatedTable, columnIndex);
 			indexTreeList.add(newTree);
 			associatedTable.addIndex(newTree);
+			//Log.info("findOrCreateAssociatedIndexTree : CREE CREE CREE CREE CREE");
 			return newTree;
 		}
 	}
@@ -219,10 +244,6 @@ public class TableHandler implements Serializable {
 	
 	// Pour l'instant, il n'y a que le spport des index mono-colonne.
 	// Faire une recherche sur une colonne équivaut à trouver l'index qui traîte de la colonne, et à faire la recherche dessus.
-	
-	
-	// indexColumnList est la liste des colonnes à indexer
-	public RuntimeIndexingEntryList runtimeIndexingList = new RuntimeIndexingEntryList();//ArrayList<SRuntimeIndexingEntry>();
 	
 	
 	public void createRuntimeIndexingColumn(int columnIndex) throws Exception { // addInitialColumnAndCreateAssociatedIndex
@@ -402,8 +423,6 @@ public class TableHandler implements Serializable {
 		}
 		
 	}
-	
-	private Object multiThreadParsingListLock = new Object();
 	
 	public void multiThreadParsingAddAndStartCsv(String csvPath, boolean doRuntimeIndexing) { synchronized(multiThreadParsingListLock) {
 		Thread newParsingThread = new Thread(() -> {

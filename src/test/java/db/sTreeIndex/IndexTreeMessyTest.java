@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 import db.search.*;
+import db.serial.SerialStructure;
 import db.structure.StructureException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -26,6 +27,7 @@ import db.data.DataPositionList;
 import db.data.StringType;
 import db.parsers.Parser;
 import db.structure.Column;
+import db.structure.Database;
 import db.structure.Table;
 import db.structure.indexTree.IndexTreeCeption;
 import db.structure.indexTree.IndexTreeDic;
@@ -34,7 +36,7 @@ import db.structure.recherches.TableHandler;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class IndexTreeTest {
+class IndexTreeMessyTest {
 	
 	// Voir constante dans IndexTreeDic : static public int maxResultCountPerIndexInstance = 10;
 	// -> limitation du nombre de résultats affichés par arbre
@@ -47,8 +49,30 @@ class IndexTreeTest {
 	private static boolean parseAgain = true;
 	private boolean doItWithTableHandler = true;
 	
-	@BeforeAll
+	/** Pour la déserialisation
+	 * @param in
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
+	
+	private static String serializeFromPath = "data_save/serialStructureEverything.bin";
+	
+	//@BeforeAll
 	static void setUpBeforeAll() throws Exception {
+		SerialStructure.loadStructureFrom(serializeFromPath);
+		table = Database.getInstance().getAllTables().get(0);
+		tableHandler = table.getTableHandler();
+		/*Log.info(table.getName());
+		//table.debugSerialShowVariables();
+		
+		//tableHandler.associatedTable = table;
+		if (tableHandler.associatedTable == null) {
+			Log.error("tableHandler.associatedTable == null");
+		}*/
+	}
+	
+	@BeforeAll
+	static void setUpBeforeAllDe() throws Exception {
 		Log.info("setUpBeforeAll");
 		Log.start("indexingTreeTest", 3);
 		
@@ -204,6 +228,17 @@ class IndexTreeTest {
 		// Nécessaire d'avoir plusieurs fichiers, à voir plus tard.
 		
 		Log.info("setUpBeforeAll OK");
+		Database.getInstance().getAllTables().add(table);
+		SerialStructure.writeStructureTo(serializeFromPath);
+		
+		/*if (tableHandler.associatedTable == null) {
+			Log.error("tableHandler.associatedTable == null");
+		} else {
+			Log.error("tableHandler.associatedTable != null");
+			
+		}*/
+		
+		//setUpBeforeAll();
 	}
 	
 	/*
@@ -245,13 +280,13 @@ class IndexTreeTest {
 		
 		if (doItWithTableHandler) {
 
-			Timer localTimer = new Timer("Temps pris pour indexer tpep_pickup_datetime");
+			/*Timer localTimer = new Timer("Temps pris pour indexer tpep_pickup_datetime");
 			tableHandler.indexColumnWithTreeFromDisk("tpep_pickup_datetime");
 			tableHandler.indexColumnWithTreeFromDisk("tpep_dropoff_datetime");
 			tableHandler.indexColumnWithTreeFromDisk("trip_distance");
 			tableHandler.indexColumnWithTreeFromDisk("pickup_longitude");
 			tableHandler.indexColumnWithTreeFromDisk("pickup_latitude");
-			localTimer.log();
+			localTimer.log();*/
 			//tableHandler.indexColumnWithTreeFromDisk("trip_distance");
 			
 			

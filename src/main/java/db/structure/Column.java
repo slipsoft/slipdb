@@ -32,6 +32,7 @@ public class Column implements Serializable {
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		in.defaultReadObject();
 		minMaxLock = new Object();
+		relatedIndexesList = new ArrayList<>();
 	}
 	
 	/*public NetBuffer columnAsNetBuffer() {
