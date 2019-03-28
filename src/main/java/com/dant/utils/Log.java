@@ -103,6 +103,31 @@ public class Log {
 			append(msg);
 		}
 	}
+
+	/**
+	 * Log & Print a warning message from an exception.
+	 *
+	 * @param e - the error to log
+	 */
+	public static void warning(Exception e) {
+		logWarningMessage(e.getMessage(), "", 3);
+	}
+
+	/**
+	 * Log & Print a warning message from an exception.
+	 *
+	 * @param e - the error to log
+	 * @param prefix - prefix of the error
+	 */
+	public static void warning(Exception e, String prefix) {
+		logWarningMessage(e.getMessage(), prefix, 3);
+	}
+
+	protected static void logWarningMessage(String msg, String prefix, int depth) {
+		msg = prefixString("WARNING/" + prefix) + msg + getCaller(depth);
+		System.err.println(msg);
+		append(msg);
+	}
 	
 	/**
 	 * Log & Print an error message.

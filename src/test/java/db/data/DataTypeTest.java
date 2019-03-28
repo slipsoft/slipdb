@@ -31,7 +31,7 @@ class DataTypeTest {
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
 		//Log.info("setUpBeforeAll");
-		Log.start("dataTypesTest", 2);
+		Log.start("dataTypesTest", 3);
 		
 	}
 

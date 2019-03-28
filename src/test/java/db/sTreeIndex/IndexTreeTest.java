@@ -48,7 +48,7 @@ public class IndexTreeTest {
 	@BeforeAll
 	static void setUpBeforeAll() throws Exception {
 		Log.info("setUpBeforeAll");
-		Log.start("indexingTreeTest", 2);
+		Log.start("indexingTreeTest", 3);
 		
 		tableHandler = SGlobalHandler.initializeTable("NYtest");
 		assertEquals(true, tableHandler != null);

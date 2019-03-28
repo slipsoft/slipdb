@@ -94,8 +94,7 @@ public abstract class Parser {
 					localReadEntryNb++;
 					totalEntryCount++;
 				} catch (IncorrectEntryException e) {
-					Log.error(e);
-					//e.printStackTrace();
+					Log.warning(e);
 					// TODO: handle exception
 				} catch (IOException e) {
 					Log.error(e);

@@ -100,7 +100,7 @@ public class TestIndexTreeMT1 {
 	@BeforeAll
 	static void setUpBeforeAll() throws Exception {
 		Log.info("setUpBeforeAll");
-		Log.start("indexingTreeTest", 2);
+		Log.start("indexingTreeTest", 3);
 
 		
 		//createFileCopies(10);

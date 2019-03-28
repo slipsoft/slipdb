@@ -13,7 +13,7 @@ class LogTest {
 
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
-		Log.start("logTest", 2);
+		Log.start("logTest", 3);
 	}
 
 	@BeforeEach
@@ -26,7 +26,7 @@ class LogTest {
 
 	@Test
 	void testGetLevel() {
-		assertEquals(2, Log.getLevel());
+		assertEquals(3, Log.getLevel());
     }
 
 	@Test
@@ -41,7 +41,7 @@ class LogTest {
 			
 			@Override
 			public void execute() throws Throwable {
-				Log.start("logTest", 2);
+				Log.start("logTest", 3);
 			}
 		};
 		assertDoesNotThrow(exec);

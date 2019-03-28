@@ -20,7 +20,7 @@ class PredicateTest {
 
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
-		Log.start("predicateTest", 2);
+		Log.start("predicateTest", 3);
 	}
 
 	@BeforeEach
