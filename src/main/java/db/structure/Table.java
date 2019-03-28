@@ -17,6 +17,7 @@ import com.dant.utils.EasyFile;
 import db.data.DataType;
 import db.disk.dataHandler.TableDataHandler;
 import db.search.Predicate;
+import sj.network.tcpAndBuffers.NetBuffer;
 
 /**
  * A simple SQL-like table, consisting of 
@@ -28,8 +29,9 @@ public class Table {
 	final public static String baseAllTablesDirPath = "data_save/tables/";
 	final public static String allTablesFileExtension = ".sbin";
 	protected static AtomicInteger nextTableID = new AtomicInteger(1);
-	
+
 	protected final int tableID;
+	protected final short nodeID; // TODO à faire plus tard : importation d'une table depuis un autre noeud
 	protected final String baseTablePath;
 	protected int lineDataSize;
 	
@@ -39,9 +41,38 @@ public class Table {
 	
 	protected final String name; // table name
 	
-	protected EasyFile fileLinesOnDisk; // <- les fichiers de sauvegarde des colonnes sont désormais indépendants
+	@Deprecated protected EasyFile fileLinesOnDisk; // <- le système de fichiers à changé (il est mieux maintenant)
 	protected List<Column> columnsList = new ArrayList<Column>(); // liste des colonnes de la table
-	protected List<Index> indexesList = new ArrayList<Index>();   // liste des index générés pour cette table
+	/* @CurrentlyUseless */ @Deprecated protected List<Index> indexesList = new ArrayList<Index>();   // liste des index générés pour cette table
+	// -> Dans TableHandler.indexTreeList pour l'instant
+	
+	
+	/*public NetBuffer tableAsNetBuffer() {
+		NetBuffer tableBuff = new NetBuffer();
+		tableBuff.writeInt(tableID);
+		tableBuff.writeInt(nodeID);
+		tableBuff.writeString(name);
+		tableBuff.writeInt(columnsList.size());
+		for (Column col : columnsList) {
+			NetBuffer colAsBuffer = columnsList.columnAsNetBuffer();
+			tableBuff.writeByteArray(colAsBuffer.convertToByteArray());
+		}
+		return tableBuff;
+	}
+	
+	public static Table readTableFromNetBuffer(NetBuffer tableBuff) {
+		int aTableID = tableBuff.readInt();
+		int aNodeID = tableBuff.readInt();
+		String aTableName = tableBuff.readString();
+		int columnsCount = tableBuff.readInt();
+		ArrayList<Column> addColumns = new ArrayList<Column>();
+		addColumns.ensureCapacity(columnsCount);
+		for (int colIndex = 0; colIndex < columnsCount; colIndex++) {
+			NetBuffer colAsBuffer = new NetBuffer(tableBuff.readByteArray());
+			addColumns.add(Column.readFromNetBuffer(colAsBuffer));
+		}
+	}*/
+	
 	
 	/**
 	 * Plus tard : Evolution, pour permettre le multi-thread, sauvegarder et indexer plus vite, avoir plusieurs fichiers par colonne, sauvegarde des données en entrée par colonne.
@@ -54,18 +85,24 @@ public class Table {
 	 * @throws IOException
 	 */
 	public Table(String argName, List<Column> argColumnsList) throws IOException {
+		this(argName, argColumnsList, currentNodeID, nextTableID.addAndGet(1));
+	}
+
+	public Table(String argName, List<Column> argColumnsList, short argNodeID, int argTableID) throws IOException {
 		this.name = argName;
 		this.columnsList.addAll(argColumnsList);
 		baseTablePath = baseAllTablesDirPath + name + "/";
-		TableDataHandler.setNodeID(currentNodeID); // <- NODE ID 
 		dataHandler = new TableDataHandler(this, baseTablePath);
-		tableID = nextTableID.addAndGet(1);
+		tableID = argTableID;
+		nodeID = argNodeID;
 		
 		/* Désormais géré par TableDiskDataHandler*/
 		this.fileLinesOnDisk = new EasyFile(oldSmellyBasePath + name + ".bin");
 		this.fileLinesOnDisk.createFileIfNotExist();
 		computeLineDataSize();
 	}
+	
+	
 	
 	public String getBaseTablePath() {
 		return baseTablePath;

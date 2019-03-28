@@ -320,7 +320,7 @@ public class TableHandler {
 					//Log.info("  objList = " + objList);
 					
 					//Log.info("  index = " + index);
-					// TODO Résultats à lire depuis les fichiers binaires
+					// TO DO Résultats à lire depuis les fichiers binaires -> OK !!!
 					//ArrayList<Object> objList = associatedTable.getValuesOfLineById(binIndex);
 					//resultArrayList.add(objList);
 					

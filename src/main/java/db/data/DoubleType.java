@@ -8,7 +8,7 @@ import db.search.Operator;
 
 
 public class DoubleType extends DataType {
-
+	private static final long serialVersionUID = 205941428943957057L;
 	public static boolean sizeIsRequired = false;
 	
 	public DoubleType() {

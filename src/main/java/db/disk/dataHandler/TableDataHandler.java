@@ -1,11 +1,9 @@
 package db.disk.dataHandler;
 
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.FileUtils;
@@ -27,6 +25,10 @@ import db.structure.Table;
  *  mais globalement non-thread-safe : doit être utilisé par le thread qui gère la table myTable.
  */
 public class TableDataHandler {
+	
+	static {
+		setNodeID((short) 1); // TODO parametrer le VRAI NodeID
+	}
 	
 	static protected short currentNodeID = 1;
 	static protected String saveFileBaseName = "table_data_n1_";
@@ -113,6 +115,8 @@ public class TableDataHandler {
 	/** Rechercher de la donnée sur le disque.
 	 *  Cette fonction est optimisée pour faire le moins d'appels disques possibles,
 	 *  et garantit que tous les résultats seront bien lus, si waitForAllResults == true
+	 *  
+	 *  Une optimisation de plus serait de rendre la lecture sur fichiers multi-thread (à faire, plus tard)
 	 * @param dataPosition
 	 * @return
 	 * @throws IOException

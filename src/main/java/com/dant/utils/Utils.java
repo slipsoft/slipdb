@@ -4,6 +4,8 @@ import com.dant.entity.Entity;
 import com.dant.entity.HttpResponse;
 
 import javax.ws.rs.core.Response;
+
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -13,8 +15,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class Utils {
-	
+public class Utils implements Serializable {
+	private static final long serialVersionUID = -8896010424044154271L;
+
 	protected final static String dateFormatString = "yyyy-MM-dd HH:mm:ss";
 	// bien mettre MM pour "month" et HH pour le format 24H et non 12H. (cause des bugs lors du parsing sinon !!)
 	
