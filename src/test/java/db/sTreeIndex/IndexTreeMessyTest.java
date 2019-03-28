@@ -54,11 +54,11 @@ public class IndexTreeMessyTest {
 	 * @throws ClassNotFoundException
 	 */
 	
+	private static String serializeFromPath = "data_save/serialStructureEverything.bin";
 	
-	
-	@BeforeAll
+	//@BeforeAll
 	static void setUpBeforeAll() throws Exception {
-		SerialStructure.loadStructure();
+		SerialStructure.loadStructureFrom(serializeFromPath);
 		table = Database.getInstance().getAllTables().get(0);
 		tableHandler = table.getTableHandler();
 		/*Log.info(table.getName());
@@ -70,7 +70,7 @@ public class IndexTreeMessyTest {
 		}*/
 	}
 	
-	//@BeforeAll
+	@BeforeAll
 	static void setUpBeforeAllDe() throws Exception {
 		Log.info("setUpBeforeAll");
 		Log.start("indexingTreeTest", 2);
@@ -228,7 +228,7 @@ public class IndexTreeMessyTest {
 		
 		Log.info("setUpBeforeAll OK");
 		Database.getInstance().getAllTables().add(table);
-		SerialStructure.writeStructure();
+		SerialStructure.writeStructureTo(serializeFromPath);
 		
 		/*if (tableHandler.associatedTable == null) {
 			Log.error("tableHandler.associatedTable == null");

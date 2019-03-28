@@ -92,22 +92,6 @@ class DataTypeTest {
 			if (a == b) c = 1;
 			if (a == b) c = 1;
 			if (a == b) c = 1;
-			if (a == b) c = 1;
-			if (a == b) c = 1;
-			if (a == b) c = 1;
-			if (a == b) c = 1;
-			if (a == b) c = 1;
-			if (a == b) c = 1;
-			if (a == b) c = 1;
-			if (a == b) c = 1;
-			if (a == b) c = 1;
-			if (a == b) c = 1;
-			if (a == b) c = 1;
-			if (a == b) c = 1;
-			if (a == b) c = 1;
-			if (a == b) c = 1;
-			if (a == b) c = 1;
-			if (a == b) c = 1;
 			//if (a == b) c = 2;
 		}
 		localTimer.log();

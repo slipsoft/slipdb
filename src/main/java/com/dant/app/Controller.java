@@ -61,13 +61,8 @@ public class Controller {
         }).collect(Collectors.toCollection(ArrayList::new));
 
         tablesToAdd.stream().forEach(t -> Database.getInstance().getAllTables().add(t));
-        try {
-			SerialStructure.saveStructure();
-			
-		} catch (IOException e) {
-			Log.error(e);
-			e.printStackTrace();
-		}
+        
+		SerialStructure.saveStructure();
         return null;
     }
 

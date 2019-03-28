@@ -38,12 +38,8 @@ public class App extends Application {
 	public static void initialize() {
 		// -> déséraliser la DB ici
 		Database.getInstance().getConfigFromFile();
-		try {
-			SerialStructure.loadStructure();
-		} catch (ClassNotFoundException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
+		SerialStructure.loadStructure();
 		// -> Je ne serialise que la liste des tables
 		// -> Faire SerialStructure.writeStructure(); pour sauvegarder !
 	}
