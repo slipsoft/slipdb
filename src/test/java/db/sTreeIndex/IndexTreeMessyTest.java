@@ -626,6 +626,28 @@ class IndexTreeMessyTest {
 		Log.info("Number of lines = " + numberOfLines);
 		
 	}
+
+	@Test
+	void executeView() {
+		Column column = table.getColumns().get(12);
+		Field field = new Field(column.getName());
+		Predicate predicate = new Predicate(table, column, Operator.equals, new Float("17.78"));
+		ArrayList<Field> listFields = new ArrayList<>();
+		listFields.add(field);
+		View view = new View(tableHandler, predicate, listFields, new ArrayList<>(), new Group());
+		ResultSet result = null;
+
+		try {
+			tableHandler.indexColumnWithTreeFromDisk("fare_amount");
+			result = view.execute();
+		} catch (SearchException e) {
+			Log.error(e);
+		} catch (StructureException e) {
+			Log.error(e);
+		}
+		Log.debug(result);
+
+	}
 	
 	@AfterAll
 	static void tearDown() {
