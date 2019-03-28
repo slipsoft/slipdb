@@ -19,7 +19,7 @@ import com.dant.utils.EasyFile;
 import db.data.DataType;
 import db.disk.dataHandler.TableDataHandler;
 import db.search.Predicate;
-import sj.network.tcpAndBuffers.NetBuffer;
+import db.structure.recherches.TableHandler;
 
 /**
  * A simple SQL-like table, consisting of
@@ -40,7 +40,8 @@ public class Table implements Serializable {
 
 	//protected final String dataFilesOnDiskBasePath; devenu baseTablePath
 	protected final TableDataHandler dataHandler;
-
+	protected TableHandler tableHandler;
+	
 	protected final String name; // table name
 	
 	@Deprecated protected EasyFile fileLinesOnDisk; // <- le système de fichiers à changé (il est mieux maintenant)
@@ -52,21 +53,26 @@ public class Table implements Serializable {
 	 * Plus tard : Evolution, pour permettre le multi-thread, sauvegarder et indexer plus vite, avoir plusieurs fichiers par colonne, sauvegarde des données en entrée par colonne.
 	 * Pour l'instant, je laisse comme ça (Sylvain), et je fais l'index par dichotomie
 	 */
-
-	/**
+	
+	/** 
 	 * Create a table with a name and a columns list
-	 *
-	 * @param name
-	 * @param columnsList
+	 * @param argName
+	 * @param argColumnsList
+	 * @param argTableHandler
 	 * @throws IOException
 	 */
-	public Table(String argName, List<Column> argColumnsList) throws IOException {
-		this(argName, argColumnsList, currentNodeID, nextTableID.addAndGet(1));
+	public Table(String argName, List<Column> argColumnsList, TableHandler argTableHandler) throws IOException {
+		this(argName, argColumnsList, currentNodeID, nextTableID.addAndGet(1), argTableHandler);
 	}
-
-	public Table(String argName, List<Column> argColumnsList, short argNodeID, int argTableID) throws IOException {
-		this.name = argName;
-		this.columnsList.addAll(argColumnsList);
+	
+	public Table(String argName, List<Column> argColumnsList, short argNodeID, int argTableID, TableHandler argTableHandler) throws IOException {
+		name = argName;
+		columnsList.addAll(argColumnsList);
+		tableHandler = argTableHandler;
+		if (tableHandler == null) {
+			tableHandler = new TableHandler(argName);
+		}
+		
 		baseTablePath = baseAllTablesDirPath + name + "/";
 		dataHandler = new TableDataHandler(this, baseTablePath);
 		tableID = argTableID;
@@ -75,6 +81,10 @@ public class Table implements Serializable {
 		this.fileLinesOnDisk = new EasyFile(oldSmellyBasePath + name + ".bin");
 		this.fileLinesOnDisk.createFileIfNotExist();
 		computeLineDataSize();
+	}
+
+	public Table(String argName, List<Column> argColumnsList) throws IOException {
+		this(argName, argColumnsList, currentNodeID, nextTableID.addAndGet(1), null);
 	}
 	
 	public String getBaseTablePath() {
@@ -140,7 +150,6 @@ public class Table implements Serializable {
 	 * Ajout d'une colonne
 	 *
 	 * @param colName
-	 * @param defaultFillValue
 	 * @return
 	 * @throws Exception
 	 */
@@ -239,6 +248,10 @@ public class Table implements Serializable {
 		ArrayList<ColumnEntity> allColumns = this.columnsList.stream().map(Column::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
 		// ArrayList<IndexEntity> allIndexes = this.indexesList.stream().map(Index::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
 		return new TableEntity(name, allColumns);
+	}
+
+	public TableHandler getTableHandler() {
+		return tableHandler;
 	}
 }
 

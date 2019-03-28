@@ -89,6 +89,10 @@ public class TableHandler implements Serializable {
 		Column newColumn = new Column(argColumnName, argColumnDataType);
 		columnsListForCreatingTableOnly.add(newColumn);
 	}
+
+	public void addColumn(Column column) {
+		columnsListForCreatingTableOnly.add(column);
+	}
 	
 	public Table createTable() throws IOException {
 		associatedTable = new Table(tableName, columnsListForCreatingTableOnly);
@@ -107,6 +111,17 @@ public class TableHandler implements Serializable {
 			is.close();
 		} catch (Exception e) {
 			is.close();
+			throw e;
+		}
+	}
+
+	public void parseCsvData (InputStream is, boolean doRuntimeIndexing) throws Exception {
+		try {
+            parseCsvData(is, doRuntimeIndexing, false);
+			is.close();
+		} catch (Exception e) {
+			is.close();
+			Log.error(e);
 			throw e;
 		}
 	}

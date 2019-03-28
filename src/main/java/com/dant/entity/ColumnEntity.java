@@ -6,12 +6,14 @@ import db.data.DataType;
 import db.data.DateType;
 import db.structure.Column;
 import db.structure.Database;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import static com.dant.utils.Utils.*;
 
-public class ColumnEntity extends Entity{
+public class ColumnEntity extends Entity implements Serializable {
     public String type;
     public int size;
 
@@ -49,7 +51,6 @@ public class ColumnEntity extends Entity{
                 boolean sizeIsRequired = dataTypeClass.getField("sizeIsRequired").getBoolean(null);
 
                 if(sizeIsRequired) {
-                    Log.debug(this.type);
                     if (this.size == 0) {
                         errors.add(new ResponseError(Location.createTable, Type.invalidData, "size is missing"));
                     } else if (this.size < 0) {
@@ -75,7 +76,6 @@ public class ColumnEntity extends Entity{
             Class dataTypeClass = Class.forName(DataTypesClassPathPrefix+className);
             DataType dataType;
             if (dataTypeClass.getField("sizeIsRequired").getBoolean(null)) {
-                Log.debug("ICIOLOLOLOLOLOLOLOLOL");
                 dataType = (DataType)dataTypeClass.getDeclaredConstructor(int.class).newInstance(this.size);
             } else {
                 dataType = (DataType)dataTypeClass.getDeclaredConstructor().newInstance();
