@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.ArrayUtils;
 
 import com.dant.utils.Log;
 
@@ -34,24 +33,42 @@ public class TableDataHandler implements Serializable {
 		setNodeID((short) 1); // TODO parametrer le VRAI NodeID
 	}*/
 	
-	protected static short currentNodeID = 1;
+	protected short currentNodeID = 1; // TODO faire une vraie gestion de cette variable
 	protected String saveFileBaseName = "table_data_n1_";
 	static final public String fileExtension = ".bin";
 	
-	protected final transient Table myTable; // Table associée  (à retrouver lors de la déserialization)
+	protected final Table myTable; // TODO -> transient ??  Table associée  (à retrouver lors de la déserialization)
 	protected final String baseTablePath;
 	// Liste de tous les fichiers (pleins, utilisés ou non utilisés) :
 	protected ArrayList<TableDataHandlerFile> allFilesList = new ArrayList<TableDataHandlerFile>();
 	// Liste des jobs en cours
-	protected ArrayList<TableDataHandlerWriteJob> allRunningJobsList = new ArrayList<TableDataHandlerWriteJob>();
+	transient protected ArrayList<TableDataHandlerWriteJob> allRunningJobsList = new ArrayList<TableDataHandlerWriteJob>();
 	
 	protected AtomicInteger nextFileID = new AtomicInteger(1);
 	
-	protected Object allFilesListLock = new Object();
+	transient protected Object allFilesListLock = new Object();
+	
+	/** Pour la déserialisation
+	 * @param in
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		in.defaultReadObject();
+		allFilesListLock = new Object();
+		allRunningJobsList = new ArrayList<TableDataHandlerWriteJob>();
+	}
 	
 	public void setNodeID(short argCurrentNodeID) {
 		currentNodeID = argCurrentNodeID;
 		saveFileBaseName = "table_data_nid" + currentNodeID + "_fid"; // nodeID, fileID
+	}
+	
+	public void debugSerialShowVariables() {
+		Log.info("Nombre de fichiers connus : " + allFilesList.size());
+		for (TableDataHandlerFile hfile : allFilesList) {
+			hfile.debugSerialShowVariables();
+		}
 	}
 	
 	/*
@@ -158,7 +175,23 @@ public class TableDataHandler implements Serializable {
 			}
 			a1CurrentDataPosArray.add(dataPosition); // pas opti de les ajouter un par un mais bon... C'est déjà opti de faire fichier par fichier !
 		}
-		
+
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
 		synchronized (allFilesListLock) {
 			int checkIndex = 0;
 			while (a2OrderedByFileList.size() > 0) {
@@ -286,7 +319,7 @@ public class TableDataHandler implements Serializable {
 			if (foundDataFile == null) {
 				short fileID = (short)nextFileID.getAndIncrement();
 				String fullFilePath = baseTablePath + saveFileBaseName + fileID + fileExtension;// getFileNameFromDataPosition(); //
-				foundDataFile = new TableDataHandlerFile(fileID, fullFilePath);
+				foundDataFile = new TableDataHandlerFile(currentNodeID, fileID, fullFilePath);
 				boolean canUseFile = foundDataFile.tryToUseThisFile(false, true);
 				//Log.info("TableDataHandler.findOrCreateWriteFile : créé   foundDataFile == " + foundDataFile);
 				if (canUseFile == false) {

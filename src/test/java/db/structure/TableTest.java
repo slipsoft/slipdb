@@ -25,7 +25,7 @@ class TableTest {
 		Column[] cols = {columns.get(0)};
 		Index index = new IndexHash(cols);
 		indexes.add(index);
-		table = new Table("test", columns);
+		table = new Table("test", columns, null);
 		table.addIndex(index);
 	}
 

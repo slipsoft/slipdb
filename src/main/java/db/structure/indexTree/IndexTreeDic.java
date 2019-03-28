@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,6 +30,7 @@ import db.disk.dataHandler.DiskDataPosition;
 import db.search.Operator;
 import db.search.Predicate;
 import db.structure.Column;
+import db.structure.Database;
 import db.structure.Index;
 import db.structure.Table;
 import sj.network.tcpAndBuffers.NetBuffer;
@@ -66,8 +68,9 @@ import sj.network.tcpAndBuffers.NetBuffer;
  *
  */
 
-public class IndexTreeDic extends Index {
-
+public class IndexTreeDic extends Index implements Serializable {
+	private static final long serialVersionUID = 7766967903992652785L;
+	
 	/**
 	 * Il y a donc une seule TreeMap pour ce type d'index (contrairement à IndexTreeCeption)
 	 *
@@ -78,7 +81,7 @@ public class IndexTreeDic extends Index {
 	static public int maxResultCountPerIndexInstance = 20_000_000_00;
 	static public int maxResultCountInTotal = 20_000_000_00; // new AtomicInteger(lent, mais pour peu de résultats, ça passera !
 	
-	public int flushOnDiskOnceReachedThisTotalEntrySize = 10_000_000; // <- Globalement, la taille des fichiers mis sur le disque     ancien : EntryNumber
+	public int flushOnDiskOnceReachedThisTotalEntrySize = 40_000_000; // <- Globalement, la taille des fichiers mis sur le disque     ancien : EntryNumber
 	protected int currentTotalEntrySizeInMemory = 0; // nombre actuel de résultats en mémoire vive, multiplié par la taille de chaque résultat (en octets) (utile pour le flush sur le disque)
 	public boolean useMultithreadSearch = true;
 	public boolean showMemUsageAtEachFlush = true;
@@ -87,13 +90,28 @@ public class IndexTreeDic extends Index {
 	protected String baseAssociatedTablePath;
 
 	// Contient tous les index des données indexées
-	protected TreeMap<Object/*clef, valeur indexée*/, DataPositionList/*valeur*/> associatedBinIndexes = new TreeMap<Object, DataPositionList>();
+	transient protected TreeMap<Object/*clef, valeur indexée*/, DataPositionList/*valeur*/> associatedBinIndexes;// = new TreeMap<Object, DataPositionList>();
 	//protected EasyFile fileStoringDataBlocks; // link between the disk and onDiskDataBlocks
 	//protected EasyFile fileSaveOnDisk = null;
 	//protected String currentSaveFilePath = null;
 	protected String basePath; // initialisé via initialiseWithTableAndColumn    ancien : = "data_save/IndexTreeDic_DiskMemory/";//"target/IndexTreeDic_DiskMemory/";
-	protected static int rootIndexTreeCount = 0;
+	//protected static int rootIndexTreeCount = 0;
 
+	
+	private void loadSerialAndCreateCommon() {
+		associatedBinIndexes = new TreeMap<Object, DataPositionList>();
+	}
+	
+	transient private Object indexingValueLock = new Object();
+	
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		in.defaultReadObject();
+		loadSerialAndCreateCommon();
+		indexingValueLock = new Object();
+		Log.info("READ READ READ readObject IndexTreeDic");
+	}
+	
+	
 	/** Pour la sauvegarde sur disque de cet IndexTree
 	 *  -> Les données de l'arbre (pour dichotomie etc.) sont sauvegardées autrement (via saveOnDisk())
 	 *  La mémoire vive est supposée avoir été tptalement écrite sur le disque
@@ -118,7 +136,6 @@ public class IndexTreeDic extends Index {
 	}
 
 	// Thread-safe
-	protected static AtomicInteger nextIndexTreeDicUniqueId = new AtomicInteger(1);
 	protected int indexTreeDicUniqueId; // id unique de cet index
 	protected final String baseSaveFilePath, suffixSaveFilePath;
 	protected int uniqueFileIdForThisTree = 1;
@@ -140,7 +157,7 @@ public class IndexTreeDic extends Index {
 
 		initialiseWithTableAndColumn(inTable, columnIndex);
 		basePath = baseAssociatedTablePath + "IndexTreeDic_DiskMemory/";
-		indexTreeDicUniqueId = nextIndexTreeDicUniqueId.addAndGet(1);
+		indexTreeDicUniqueId = Database.getInstance().getAndIncrementNextIndexTreeDicID();
 		baseSaveFilePath = basePath + "IndexTreeDic_" + indexTreeDicUniqueId + "_"; // id arbre _ id(nombre) fichier
 		suffixSaveFilePath = ".idc_bin";
 		
@@ -153,7 +170,7 @@ public class IndexTreeDic extends Index {
 			e.printStackTrace();
 		}*/
 		//storedValuesClassType = argStoredValuesClassType;
-		rootIndexTreeCount++;
+		//rootIndexTreeCount++;
 	}
 
 	/** Constructeur : Pour le chargement du disque (index sauvegardé)
@@ -211,6 +228,7 @@ public class IndexTreeDic extends Index {
 	 * @throws Exception
 	 */
 	public void initialiseWithTableAndColumn(Table inTable, int columnIndex) throws Exception {
+		loadSerialAndCreateCommon();
 		if (inTable == null) throw new Exception("Impossible d'initialiser cet index avec une Table null.");
 		List<Column> columnsList = inTable.getColumns();
 		int columnsNumber = columnsList.size();
@@ -386,7 +404,7 @@ public class IndexTreeDic extends Index {
 		flushOnDisk();
 	}
 
-	private Object indexingValueLock = new Object();
+	
 	//private Object indexingValueLockOnlyForAddAndDiskAndMemory = new Object(); // pas d'interblocage possible car les fonctions ne s'utilisent pas l'une l'autre
 	/** Ajouter une valeur et un binIndex associé
 	 *  @param associatedValue valeur indexée, ATTENTION : doit être du type du IndexTree utilisé (Integer, Float, Byte, Double, ...)
@@ -452,8 +470,8 @@ public class IndexTreeDic extends Index {
 	
 	int debugNumberOfExactArrayListValuesWrittenOnDisk = 0;
 	int debugNumberOfExactValuesWrittenOnDisk = 0;
-
-
+	
+	
 	public void flushOnDisk() throws IOException { synchronized (indexingValueLock) {
 		if (associatedBinIndexes.size() == 0) return;
 

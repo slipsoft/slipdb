@@ -15,9 +15,11 @@ import java.util.stream.Collectors;
 import com.dant.entity.ColumnEntity;
 import com.dant.entity.TableEntity;
 import com.dant.utils.EasyFile;
+import com.dant.utils.Log;
 
 import db.data.DataType;
 import db.disk.dataHandler.TableDataHandler;
+import db.disk.dataHandler.TableDataHandlerFile;
 import db.search.Predicate;
 import db.structure.recherches.TableHandler;
 
@@ -27,17 +29,17 @@ import db.structure.recherches.TableHandler;
 public class Table implements Serializable {
 	private static final long serialVersionUID = 2266328195200925214L;
 	public final static short currentNodeID = 1;
+	
 	protected static String oldSmellyBasePath = "target/tables/";
 	final public static String baseAllTablesDirPath = "data_save/tables/";
 	final public static String allTablesFileExtension = ".sbin";
-	protected static AtomicInteger nextTableID = new AtomicInteger(1);
-
+	
 	protected final int tableID;
 	protected final short nodeID; // TODO à faire plus tard : importation d'une table depuis un autre noeud
 	protected final String baseTablePath;
 	protected int lineDataSize;
-
-
+	
+	
 	//protected final String dataFilesOnDiskBasePath; devenu baseTablePath
 	protected final TableDataHandler dataHandler;
 	protected TableHandler tableHandler;
@@ -54,6 +56,17 @@ public class Table implements Serializable {
 	 * Pour l'instant, je laisse comme ça (Sylvain), et je fais l'index par dichotomie
 	 */
 	
+	public void doBeforeSerialWrite() {
+		if (tableHandler != null) {
+			tableHandler.flushAllIndexTreesOnDisk();
+		}
+	}
+	
+	public void debugSerialShowVariables() {
+		Log.info("TableDataHandler : ");
+		dataHandler.debugSerialShowVariables();
+	}
+	
 	/** 
 	 * Create a table with a name and a columns list
 	 * @param argName
@@ -62,7 +75,7 @@ public class Table implements Serializable {
 	 * @throws IOException
 	 */
 	public Table(String argName, List<Column> argColumnsList, TableHandler argTableHandler) throws IOException {
-		this(argName, argColumnsList, currentNodeID, nextTableID.addAndGet(1), argTableHandler);
+		this(argName, argColumnsList, currentNodeID, Database.getInstance().getAndIncrementNextTableID(), argTableHandler);
 	}
 	
 	public Table(String argName, List<Column> argColumnsList, short argNodeID, int argTableID, TableHandler argTableHandler) throws IOException {
@@ -82,9 +95,17 @@ public class Table implements Serializable {
 		this.fileLinesOnDisk.createFileIfNotExist();
 		computeLineDataSize();
 	}
-
+	
+	/**
+	 *  NE PAS UTILISER CE CONSTRUCTEUR CAR MANQUE TABLE HANDLER EN PARAMETRE !
+	 *  UN NOUVEAU TABLE HANDLER SERA DONC GENERE LORS DE LA CREATION DE LA TABLE.
+	 * @param argName
+	 * @param argColumnsList
+	 * @throws IOException
+	 */
+	@Deprecated
 	public Table(String argName, List<Column> argColumnsList) throws IOException {
-		this(argName, argColumnsList, currentNodeID, nextTableID.addAndGet(1), null);
+		this(argName, argColumnsList, null);
 	}
 	
 	public String getBaseTablePath() {
