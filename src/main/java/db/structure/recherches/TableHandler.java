@@ -16,6 +16,7 @@ import db.disk.dataHandler.DiskDataPosition;
 import db.disk.dataHandler.TableDataHandler;
 import db.data.DataPositionList;
 import db.parsers.CsvParser;
+import db.search.ResultSet;
 import db.structure.Column;
 import db.structure.Table;
 import db.structure.indexTree.IndexTreeDic;
@@ -65,6 +66,10 @@ public class TableHandler implements Serializable {
 	
 	public String getTableName() {
 		return tableName;
+	}
+
+	public Table getAssociatedTable() {
+		return this.associatedTable;
 	}
 	
 	public TableHandler(String argTableName) {
@@ -237,14 +242,8 @@ public class TableHandler implements Serializable {
 	}*/
 	
 	
-	/** Pour une valeur exacte
-	 *  @param columnName
-	 *  @param equalsExactValue
-	 *  @return
-	 *  @throws Exception
-	 */
-	public DataPositionList findIndexedResultsOfColumn(String columnName, Object equalsExactValue) throws Exception {
-		return findIndexedResultsOfColumn(columnName, equalsExactValue, null, true);
+	public DataPositionList findIndexedResultsOfColumn(String columnName, Object exactValue) throws Exception {
+		return findIndexedResultsOfColumn(columnName, exactValue, null, true);
 	}
 	
 	/**
@@ -256,6 +255,7 @@ public class TableHandler implements Serializable {
 	 * @return
 	 * @throws Exception
 	 */
+	// TODO @Deprecated // in favor to Index.getPositionsFromPredicate
 	public DataPositionList findIndexedResultsOfColumn(String columnName, Object minValue, Object maxValue, boolean inclusive) throws Exception {
 		int columnIndex = getColumnIndex(columnName);
 		if (columnIndex == -1) throw new Exception("Colonne introuvable, impossible de faire une recherche sur ses index.");
@@ -307,6 +307,9 @@ public class TableHandler implements Serializable {
 	private static boolean debugUseOldDeprecatedSearch = false; // bench : la nouvelle manière va environ 80x plus vite ^^
 	
 	
+	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection) throws Exception { // table connue ! , Table fromTable) {
+		return getFullResultsFromBinIndexes(resultsCollection, true, -1);
+	}
 	/**
 	 *  @param resultsCollection
 	 *  @param waitForAllResults
@@ -314,10 +317,11 @@ public class TableHandler implements Serializable {
 	 *  @return
 	 *  @throws Exception
 	 */
-	public ArrayList<ArrayList<Object>> getFullResultsFromBinIndexes(DataPositionList resultsCollection, boolean waitForAllResults, int waitTimeLimitMs) throws Exception { // table connue ! , Table fromTable) {
+	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection, boolean waitForAllResults, int waitTimeLimitMs) throws Exception { // table connue ! , Table fromTable) {
 		return getFullResultsFromBinIndexes(resultsCollection, waitForAllResults, waitTimeLimitMs, null);
 	}
 	//trip_distance
+	
 	/** 
 	 *  @param resultsCollection
 	 *  @param waitForAllResults
@@ -326,10 +330,11 @@ public class TableHandler implements Serializable {
 	 *  @return
 	 *  @throws Exception
 	 */
-	public ArrayList<ArrayList<Object>> getFullResultsFromBinIndexes(DataPositionList resultsCollection, boolean waitForAllResults, int waitTimeLimitMs, ArrayList<Integer> onlyGetThoseColumnsIndex) throws Exception { // table connue ! , Table fromTable) {
+	//public ArrayList<ArrayList<Object>> getFullResultsFromBinIndexes(DataPositionList resultsCollection) throws Exception { // table connue ! , Table fromTable) {
+	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection, boolean waitForAllResults, int waitTimeLimitMs, ArrayList<Integer> onlyGetThoseColumnsIndex) throws Exception { // table connue ! , Table fromTable) {
 		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");
 		
-		ArrayList<ArrayList<Object>> resultArrayList = new ArrayList<ArrayList<Object>>();
+		ResultSet resultArrayList = new ResultSet();
 		
 		TableDataHandler dataHandler = associatedTable.getDataHandler();
 		
@@ -362,8 +367,8 @@ public class TableHandler implements Serializable {
 		}
 	}
 	
-	public void displayOnLogResults(ArrayList<ArrayList<Object>> resultArrayList) {
-		for (ArrayList<Object> objList : resultArrayList) {
+	public void displayOnLogResults(ResultSet resultArrayList) {
+		for (List<Object> objList : resultArrayList) {
 			Log.info("  objList = " + objList);
 		}
 	}

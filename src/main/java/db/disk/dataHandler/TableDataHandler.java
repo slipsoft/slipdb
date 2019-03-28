@@ -13,6 +13,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import com.dant.utils.Log;
 
 import db.data.DataPositionList;
+import db.search.ResultSet;
 import db.structure.Table;
 
 /**
@@ -125,9 +126,9 @@ public class TableDataHandler implements Serializable {
 	 * @throws IOException
 	 */
 	@SuppressWarnings("unchecked")
-	public ArrayList<ArrayList<Object>> getValuesOfLinesListById(DataPositionList argDataPositionList, boolean waitForAllResults, int waitTimeLimitMs, ArrayList<Integer> neededColumnsIndexList) { // or getRowById
+	public ResultSet getValuesOfLinesListById(DataPositionList argDataPositionList, boolean waitForAllResults, int waitTimeLimitMs, ArrayList<Integer> neededColumnsIndexList) { // or getRowById
 		
-		ArrayList<ArrayList<Object>> resultsArraySortedByColumns = new ArrayList<ArrayList<Object>>();
+		ResultSet resultsArraySortedByColumns = new ResultSet(); // ArrayList<ArrayList<Object>>
 		ArrayList<Integer> neededColumnsIndexListSorted = null;
 		if (neededColumnsIndexList != null) {
 			neededColumnsIndexListSorted = (ArrayList<Integer>) neededColumnsIndexList.clone();

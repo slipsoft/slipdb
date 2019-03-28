@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import db.search.ResultSet;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -296,7 +297,8 @@ public class IndexTreeTest {
 			numberOfResults = result.size();// tableHandler.evaluateNumberOfResults(result);
 			//numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
 			
-			ArrayList<ArrayList<Object>> fullResulsVariables = tableHandler.getFullResultsFromBinIndexes(result, true, -1, null);
+			//ArrayList<ArrayList<Object>>
+			ResultSet fullResulsVariables = tableHandler.getFullResultsFromBinIndexes(result, true, -1, null);
 			
 			//tableHandler.displayOnLogResults(fullResulsVariables);
 			
@@ -313,7 +315,6 @@ public class IndexTreeTest {
 			
 			searchQueryFullTimer.log();
 			Log.info("Nombre de résultats = " + numberOfResults);
-			
 			
 			result = tableHandler.findIndexedResultsOfColumn("trip_distance", 18f);
 			numberOfResults = result.size();
