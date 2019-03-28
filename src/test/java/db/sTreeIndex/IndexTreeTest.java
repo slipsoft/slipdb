@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.List;
 
 import db.search.ResultSet;
+import db.serial.SerialStructure;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -27,6 +29,7 @@ import db.data.DataPositionList;
 import db.data.StringType;
 import db.parsers.Parser;
 import db.structure.Column;
+import db.structure.Database;
 import db.structure.Table;
 import db.structure.indexTree.IndexTreeCeption;
 import db.structure.indexTree.IndexTreeDic;
@@ -44,6 +47,13 @@ public class IndexTreeTest {
 	protected static TableHandler tableHandler;
 	
 	protected static boolean parseAgain = true;
+	
+	/** Pour la déserialisation
+	 * @param in
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
+	
 	
 	@BeforeAll
 	static void setUpBeforeAll() throws Exception {
@@ -202,6 +212,8 @@ public class IndexTreeTest {
 		// Nécessaire d'avoir plusieurs fichiers, à voir plus tard.
 		
 		Log.info("setUpBeforeAll OK");
+		/*Database.getInstance().getAllTables().add(table);
+		SerialStructure.writeStructure();*/
 	}
 	
 	/*

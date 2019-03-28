@@ -2,6 +2,8 @@ package com.dant.app;
 
 import com.dant.exception.RuntimeExceptionMapper;
 import com.dant.filter.GsonProvider;
+
+import db.serial.SerialStructure;
 import db.structure.Database;
 
 import javax.ws.rs.ApplicationPath;
@@ -32,6 +34,9 @@ public class App extends Application {
 	}
 
 	public static void initialize() {
+		// -> déséraliser la DB ici
 		Database.getInstance().getConfigFromFile();
+		SerialStructure.loadStructure();
+		// -> Je ne serialise que la liste des tables
 	}
 }
