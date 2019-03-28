@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 import com.dant.utils.Log;
 
@@ -27,12 +28,12 @@ import db.structure.Table;
  */
 public class TableDataHandler implements Serializable {
 	private static final long serialVersionUID = 5501412889994005013L;
-
+	
 	/*static {
 		setNodeID((short) 1); // TODO parametrer le VRAI NodeID
 	}*/
 	
-	protected short currentNodeID = 1;
+	protected static short currentNodeID = 1;
 	protected String saveFileBaseName = "table_data_n1_";
 	static final public String fileExtension = ".bin";
 	
@@ -123,11 +124,19 @@ public class TableDataHandler implements Serializable {
 	 * @return
 	 * @throws IOException
 	 */
-	public ArrayList<ArrayList<Object>> getValuesOfLinesListById(DataPositionList argDataPositionList, boolean waitForAllResults, int waitTimeLimitMs) { // or getRowById
+	@SuppressWarnings("unchecked")
+	public ArrayList<ArrayList<Object>> getValuesOfLinesListById(DataPositionList argDataPositionList, boolean waitForAllResults, int waitTimeLimitMs, ArrayList<Integer> neededColumnsIndexList) { // or getRowById
 		
-		ArrayList<ArrayList<Object>> resultsArray = new ArrayList<ArrayList<Object>>();
+		ArrayList<ArrayList<Object>> resultsArraySortedByColumns = new ArrayList<ArrayList<Object>>();
+		ArrayList<Integer> neededColumnsIndexListSorted = null;
+		if (neededColumnsIndexList != null) {
+			neededColumnsIndexListSorted = (ArrayList<Integer>) neededColumnsIndexList.clone();
+			Collections.sort(neededColumnsIndexListSorted);
+		}
 		
 		DataPositionList dataPositionList = (DataPositionList) argDataPositionList.clone(); // copie de la liste
+		// Je classe par fichiers
+		// Je classe par position dans le fichier
 		Collections.sort(dataPositionList); // pas super opti pour un très grand nombre de résultats (100 000+)
 		// Regrouper par fichier
 		short oldNodeID = -1;
@@ -192,12 +201,13 @@ public class TableDataHandler implements Serializable {
 				
 				// Fichier trouvé et donc à lire
 				if (fondUsableDataFile != null) {
+					//Log.info("Fichier trouvé " + fileID);
 					// Pour chaque donnée à lire, je la lis
 					for (DiskDataPosition dataPos : a1CurrentDataPosArray) {
 						ArrayList<Object> entryAsArray;
 						try {
-							entryAsArray = fondUsableDataFile.orderedReadGetValuesOfLineById(dataPos, myTable);
-							resultsArray.add(entryAsArray);
+							entryAsArray = fondUsableDataFile.orderedReadGetValuesOfLineById(dataPos, myTable, neededColumnsIndexListSorted, neededColumnsIndexList);
+							resultsArraySortedByColumns.add(entryAsArray);
 						} catch (IOException e) {
 							Log.error(e);
 							e.printStackTrace();
@@ -225,18 +235,30 @@ public class TableDataHandler implements Serializable {
 		//argDataPositionList.toArray()
 		//dataPositionList.set(index, element)
 		
+		/*
+		// puis réordoner les résultats dans l'ordre demandé : neededColumnsIndexList
+		ArrayList<ArrayList<Object>> resultsArrayInAskedOrder = new ArrayList<ArrayList<Object>>();
+		
+		// Il s'agit de réordonner les champs de chaque objet pour les faire correpondre à l'ordre demandé
+		
+		if (neededColumnsIndexListSorted != null) {
+			for (int askedColIndexLocalPos = 0; askedColIndexLocalPos < neededColumnsIndexList.size(); askedColIndexLocalPos++) { // les colonnes dans l'ordre demandé
+				Integer askedColumnIndex = neededColumnsIndexList.get(askedColIndexLocalPos);
+				int neededResultColumnIndex = neededColumnsIndexListSorted.indexOf(askedColumnIndex); // la position dans mon résultat local
+				Log.info("askedColumnIndex = " + askedColumnIndex + "   neededResultColumnIndex = " + neededResultColumnIndex);
+				//ArrayList<Object> 
+				//resultsArrayInAskedOrder.add();
+			}
+			
+		} else {
+			resultsArrayInAskedOrder = resultsArraySortedByColumns;
+		}*/
+		/*
+		neededColumnsIndexList
+		neededColumnsIndexListSorted*/
 		
 		
-		// Je classe par fichiers
-		// Je classe par position dans le fichier
-		/*TODO
-		 * Collections.sort(Database.arrayList, new Comparator<MyObject>() {
-		    @Override
-		    public int compare(MyObject o1, MyObject o2) {
-		        return o1.getStartDate().compareTo(o2.getStartDate());
-		    }
-		});*/
-		return resultsArray;
+		return resultsArraySortedByColumns;
 		
 		
 	}

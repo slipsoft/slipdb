@@ -292,18 +292,29 @@ public class IndexTreeTest {
 			searchQueryTimer.log();
 			
 			
-			searchQueryFullTimer = new Timer("Temps d'acquisition des résultats (chargement du disque de tous les champs)");
+			searchQueryFullTimer = new Timer("1Temps d'acquisition des résultats (chargement du disque de tous les champs)");
 			numberOfResults = result.size();// tableHandler.evaluateNumberOfResults(result);
 			//numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
 			
-			ArrayList<ArrayList<Object>> fullResulsVariables = tableHandler.getFullResultsFromBinIndexes(result, true, -1);
+			ArrayList<ArrayList<Object>> fullResulsVariables = tableHandler.getFullResultsFromBinIndexes(result, true, -1, null);
+			
+			//tableHandler.displayOnLogResults(fullResulsVariables);
+			
+			
+			searchQueryFullTimer.log();
+
+			searchQueryFullTimer = new Timer("2Temps d'acquisition des résultats certains champs seulement");
+			ArrayList<Integer> onlyThoseColumns = new ArrayList<Integer>();
+			onlyThoseColumns.add(6);
+			onlyThoseColumns.add(4);
+			fullResulsVariables = tableHandler.getFullResultsFromBinIndexes(result, true, -1, onlyThoseColumns);
 			
 			//tableHandler.displayOnLogResults(fullResulsVariables);
 			
 			searchQueryFullTimer.log();
 			Log.info("Nombre de résultats = " + numberOfResults);
 			
-
+			
 			result = tableHandler.findIndexedResultsOfColumn("trip_distance", 18f);
 			numberOfResults = result.size();
 			Log.info("Nombre de résultats (pour 18 exact) = " + numberOfResults);

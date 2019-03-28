@@ -306,8 +306,27 @@ public class TableHandler implements Serializable {
 	
 	private static boolean debugUseOldDeprecatedSearch = false; // bench : la nouvelle manière va environ 80x plus vite ^^
 	
-	//trip_distance
+	
+	/**
+	 *  @param resultsCollection
+	 *  @param waitForAllResults
+	 *  @param waitTimeLimitMs
+	 *  @return
+	 *  @throws Exception
+	 */
 	public ArrayList<ArrayList<Object>> getFullResultsFromBinIndexes(DataPositionList resultsCollection, boolean waitForAllResults, int waitTimeLimitMs) throws Exception { // table connue ! , Table fromTable) {
+		return getFullResultsFromBinIndexes(resultsCollection, waitForAllResults, waitTimeLimitMs, null);
+	}
+	//trip_distance
+	/** 
+	 *  @param resultsCollection
+	 *  @param waitForAllResults
+	 *  @param waitTimeLimitMs
+	 *  @param onlyGetThoseColumnsIndex null si renvoyer tout les champs
+	 *  @return
+	 *  @throws Exception
+	 */
+	public ArrayList<ArrayList<Object>> getFullResultsFromBinIndexes(DataPositionList resultsCollection, boolean waitForAllResults, int waitTimeLimitMs, ArrayList<Integer> onlyGetThoseColumnsIndex) throws Exception { // table connue ! , Table fromTable) {
 		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");
 		
 		ArrayList<ArrayList<Object>> resultArrayList = new ArrayList<ArrayList<Object>>();
@@ -315,7 +334,7 @@ public class TableHandler implements Serializable {
 		TableDataHandler dataHandler = associatedTable.getDataHandler();
 		
 		if (debugUseOldDeprecatedSearch == false) {
-			return dataHandler.getValuesOfLinesListById(resultsCollection, waitForAllResults, waitTimeLimitMs);
+			return dataHandler.getValuesOfLinesListById(resultsCollection, waitForAllResults, waitTimeLimitMs, onlyGetThoseColumnsIndex);
 		} else {
 			
 			// Pour toutes les listes de valeurs identiques
