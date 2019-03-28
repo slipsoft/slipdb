@@ -1,17 +1,17 @@
-package db.data;
+package db.search;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 
+import com.dant.utils.Log;
+import db.data.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
-import db.search.Operator;
-import db.search.Predicate;
 import db.structure.Column;
 import db.structure.Index;
 import db.structure.IndexHash;
@@ -25,6 +25,7 @@ class PredicateTest {
 
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
+		Log.start("predicateTest", 2);
 	}
 
 	@BeforeEach
