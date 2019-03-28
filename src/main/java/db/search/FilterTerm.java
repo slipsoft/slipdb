@@ -1,5 +1,7 @@
 package db.search;
 
-public interface FilterTerm {
+import db.data.DataPositionList;
 
+public interface FilterTerm {
+    DataPositionList execute() throws SearchException;
 }
