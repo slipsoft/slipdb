@@ -4,6 +4,7 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -20,10 +21,18 @@ import db.structure.Table;
 import db.structure.indexTree.IndexTreeDic;
 import sj.network.tcpAndBuffers.NetBuffer;
 
-public class TableHandler {
+public class TableHandler implements Serializable {
+	/* Ordre de serialization :
 	
+	TableHandler -> Table -> Colonnes
+						  -> TableDataHandler
+				 -> IndexTree
+				 
+	
+	*/
+	private static final long serialVersionUID = -4180065130691064979L;
 	protected String tableName;
-	protected ArrayList<Column> columnsList = new ArrayList<Column>();
+	protected ArrayList<Column> columnsListForCreatingTableOnly = new ArrayList<Column>();
 	protected Table associatedTable;
 	//protected CsvParser csvParser = null;
 	// Possibilité de parser de plusieurs manières différentes (un jour...)
@@ -31,7 +40,7 @@ public class TableHandler {
 	
 	// Liste des threads faisant actuellement du parsing
 	
-	protected ArrayList<Thread> parsingThreadList = new ArrayList<Thread>();
+	protected transient ArrayList<Thread> parsingThreadList = new ArrayList<Thread>();
 	
 	protected ArrayList<IndexTreeDic> indexTreeList = new ArrayList<IndexTreeDic>(); // Liste des IndexTree associés à cette table
 	
@@ -69,15 +78,15 @@ public class TableHandler {
 	 * @throws Exception 
 	 */
 	public void addColumn(String argColumnName, DataType argColumnDataType) throws Exception {
-		for (Column col : columnsList) {
+		for (Column col : columnsListForCreatingTableOnly) {
 			if (col.getName().equals(argColumnName)) throw new Exception("Ajout de la colonne impossibe, il en exie déjà une du même nom : " + argColumnName);
 		}
 		Column newColumn = new Column(argColumnName, argColumnDataType);
-		columnsList.add(newColumn);
+		columnsListForCreatingTableOnly.add(newColumn);
 	}
 	
 	public Table createTable() throws IOException {
-		associatedTable = new Table(tableName, columnsList);
+		associatedTable = new Table(tableName, columnsListForCreatingTableOnly);
 		return associatedTable;
 	}
 
@@ -204,7 +213,7 @@ public class TableHandler {
 		indexEntry.associatedIndexTree.initialiseWithTableAndColumn(associatedTable, columnIndex); // Pour pouvoir indexer au runtime (lors du parsing)
 	}
 	
-
+	
 	public void createRuntimeIndexingColumn(String columnName) throws Exception {
 		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");
 		int colIndex = getColumnIndex(columnName);

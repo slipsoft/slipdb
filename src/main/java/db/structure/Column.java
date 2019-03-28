@@ -21,7 +21,6 @@ public class Column implements Serializable {
 	protected Object minValue = null;
 	protected Object maxValue = null;
 	protected transient Object minMaxLock = new Object();
-
 	protected DataType dataType;
 	@Deprecated /* @CurrentlyUnused */ transient protected List<Index> relatedIndexesList = new ArrayList<>();
 	

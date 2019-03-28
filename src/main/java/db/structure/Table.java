@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -22,8 +23,9 @@ import sj.network.tcpAndBuffers.NetBuffer;
 /**
  * A simple SQL-like table, consisting of 
  */
-public class Table {
+public class Table implements Serializable {
 	
+	private static final long serialVersionUID = 2266328195200925214L;
 	public final static short currentNodeID = 1;
 	protected static String oldSmellyBasePath = "target/tables/";
 	final public static String baseAllTablesDirPath = "data_save/tables/";

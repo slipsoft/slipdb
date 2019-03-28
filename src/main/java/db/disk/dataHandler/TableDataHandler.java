@@ -2,6 +2,7 @@ package db.disk.dataHandler;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,17 +25,18 @@ import db.structure.Table;
  *  Thread-safe pour les parties qui le nécessitent,
  *  mais globalement non-thread-safe : doit être utilisé par le thread qui gère la table myTable.
  */
-public class TableDataHandler {
-	
-	static {
+public class TableDataHandler implements Serializable {
+	private static final long serialVersionUID = 5501412889994005013L;
+
+	/*static {
 		setNodeID((short) 1); // TODO parametrer le VRAI NodeID
-	}
+	}*/
 	
-	static protected short currentNodeID = 1;
-	static protected String saveFileBaseName = "table_data_n1_";
+	protected short currentNodeID = 1;
+	protected String saveFileBaseName = "table_data_n1_";
 	static final public String fileExtension = ".bin";
 	
-	protected final Table myTable; // Table associée
+	protected final transient Table myTable; // Table associée  (à retrouver lors de la déserialization)
 	protected final String baseTablePath;
 	// Liste de tous les fichiers (pleins, utilisés ou non utilisés) :
 	protected ArrayList<TableDataHandlerFile> allFilesList = new ArrayList<TableDataHandlerFile>();
@@ -45,7 +47,7 @@ public class TableDataHandler {
 	
 	protected Object allFilesListLock = new Object();
 	
-	static public void setNodeID(short argCurrentNodeID) {
+	public void setNodeID(short argCurrentNodeID) {
 		currentNodeID = argCurrentNodeID;
 		saveFileBaseName = "table_data_nid" + currentNodeID + "_fid"; // nodeID, fileID
 	}
