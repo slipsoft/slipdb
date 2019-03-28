@@ -44,7 +44,7 @@ public class View {
 		try {
 		return tableHandler.getFullResultsFromBinIndexes(positions);
 		} catch (Exception e) {
-			throw new SearchException(e.getMessage());
+			throw new SearchException(e);
 		}
 	}
 }

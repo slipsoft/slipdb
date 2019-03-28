@@ -1,14 +1,13 @@
 package db.sTreeIndex;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import db.search.ResultSet;
+import db.search.*;
+import db.structure.StructureException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -33,17 +32,20 @@ import db.structure.indexTree.IndexTreeDic;
 import db.structure.recherches.SGlobalHandler;
 import db.structure.recherches.TableHandler;
 
-public class IndexTreeTest {
+import static org.junit.jupiter.api.Assertions.*;
+
+class IndexTreeTest {
 	
 	// Voir constante dans IndexTreeDic : static public int maxResultCountPerIndexInstance = 10;
 	// -> limitation du nombre de résultats affichés par arbre
 	
 	//protected static Parser parser;
-	protected static Table table;
-	protected static Utils currentlyUsedUils = new Utils(); // For thread-safety ! (but, here, it's static so thread unsafe... ^^')
-	protected static TableHandler tableHandler;
+	private static Table table;
+	private static Utils currentlyUsedUils = new Utils(); // For thread-safety ! (but, here, it's static so thread unsafe... ^^')
+	private static TableHandler tableHandler;
 	
-	protected static boolean parseAgain = true;
+	private static boolean parseAgain = true;
+	private boolean doItWithTableHandler = true;
 	
 	@BeforeAll
 	static void setUpBeforeAll() throws Exception {
@@ -51,7 +53,7 @@ public class IndexTreeTest {
 		Log.start("indexingTreeTest", 3);
 		
 		tableHandler = SGlobalHandler.initializeTable("NYtest");
-		assertEquals(true, tableHandler != null);
+		assertNotNull(tableHandler);
 		
 		//getValuesOfLineByIdForSignleQuery
 
@@ -225,8 +227,6 @@ public class IndexTreeTest {
 		MemUsage.printMemUsage();
 		
 	}*/
-	
-	protected boolean doItWithTableHandler = true;
 	
 	@Test
 	void testIndexTreeDic() throws Exception {

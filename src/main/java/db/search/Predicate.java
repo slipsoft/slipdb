@@ -50,7 +50,7 @@ public class Predicate implements FilterTerm {
 		try {
 			return getIndex().getPositionsFromPredicate(this);
 		} catch (StructureException e) {
-			throw new SearchException(e.getMessage());
+			throw new SearchException(e);
 		}
 	}
 }

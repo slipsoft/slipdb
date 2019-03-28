@@ -20,6 +20,7 @@ import db.search.ResultSet;
 import db.structure.Column;
 import db.structure.StructureException;
 import db.structure.Table;
+import db.structure.indexTree.IndexException;
 import db.structure.indexTree.IndexTreeDic;
 import sj.network.tcpAndBuffers.NetBuffer;
 
@@ -152,8 +153,8 @@ public class TableHandler implements Serializable {
 		
 	}
 	
-	protected int getColumnIndex(String columnName) throws Exception {
-		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");
+	protected int getColumnIndex(String columnName) throws StructureException {
+		if (associatedTable == null) throw new StructureException("Aucune table crée, indexation impossible.");
 		List<Column> columnList = associatedTable.getColumns();
 		for (int colIndex = 0; colIndex < columnList.size(); colIndex++) {
 			Column currentColumn = columnList.get(colIndex);
@@ -161,12 +162,11 @@ public class TableHandler implements Serializable {
 				return colIndex;
 			}
 		}
-		return -1;
+		throw new StructureException("Colonne introuvable, impossible de l'indexer.");
 	}
 	
-	public void indexColumnWithTreeFromDisk(String columnName) throws Exception {
+	public void indexColumnWithTreeFromDisk(String columnName) throws StructureException {
 		int colIndex = getColumnIndex(columnName);
-		if (colIndex == -1) throw new Exception("Colonne introuvable, impossible de l'indexer.");
 		indexColumnWithTreeFromDisk(colIndex);
 	}
 	
@@ -174,26 +174,29 @@ public class TableHandler implements Serializable {
 	
 	protected Object indexTreeListLock = new Object();
 	
-	protected IndexTreeDic findOrCreateAssociatedIndexTree(int columnIndex, boolean createTreeIfDoesNotExists) throws Exception { synchronized(indexTreeListLock) {
-		for (IndexTreeDic indexTree : indexTreeList) {
-			if (indexTree.getAssociatedTableColumnIndex() == columnIndex) {
-				return indexTree;
+	protected IndexTreeDic findOrCreateAssociatedIndexTree(int columnIndex, boolean createTreeIfDoesNotExists) throws IndexException {
+		synchronized(indexTreeListLock) {
+			for (IndexTreeDic indexTree : indexTreeList) {
+				if (indexTree.getAssociatedTableColumnIndex() == columnIndex) {
+					return indexTree;
+				}
 			}
+			if (createTreeIfDoesNotExists == false) return null;
+			IndexTreeDic newTree = new IndexTreeDic(associatedTable, columnIndex);
+			indexTreeList.add(newTree);
+			associatedTable.addIndex(newTree);
+			return newTree;
 		}
-		if (createTreeIfDoesNotExists == false) return null;
-		IndexTreeDic newTree = new IndexTreeDic(associatedTable, columnIndex);
-		indexTreeList.add(newTree);
-		return newTree;
-	} }
+	}
 	
 	/** Pas
 	 *  @param columnIndex
-	 *  @throws Exception
+	 *  @throws StructureException
 	 */
-	public void indexColumnWithTreeFromDisk(int columnIndex) throws Exception {
-		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");
+	public void indexColumnWithTreeFromDisk(int columnIndex) throws StructureException {
+		if (associatedTable == null) throw new StructureException("Aucune table crée, indexation impossible.");
 		List<Column> columnList = associatedTable.getColumns();
-		if (columnIndex < 0 || columnIndex >= columnList.size()) throw new Exception("Index de la colonne invalide. (columnIndex=" + columnIndex + " non compris entre 0 et columnList.size()=" + columnList.size());
+		if (columnIndex < 0 || columnIndex >= columnList.size()) throw new IndexException("Index de la colonne invalide. (columnIndex=" + columnIndex + " non compris entre 0 et columnList.size()=" + columnList.size());
 		
 		
 		IndexTreeDic alreadyExistingTree = findOrCreateAssociatedIndexTree(columnIndex, true); /*findTreeAssociatedWithColumnIndex(columnIndex);
@@ -204,7 +207,11 @@ public class TableHandler implements Serializable {
 		}*/
 		
 		//IndexTreeDic indexingObject = new IndexTreeDic();
-		alreadyExistingTree.indexColumnFromDisk(associatedTable, columnIndex);
+		try {
+			alreadyExistingTree.indexColumnFromDisk(associatedTable, columnIndex);
+		} catch (Exception e) {
+			throw new StructureException(e);
+		}
 	}
 	
 	
