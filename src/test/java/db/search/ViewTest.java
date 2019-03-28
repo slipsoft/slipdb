@@ -37,7 +37,7 @@ class ViewTest {
 		table.addColumn("testcolumn", new StringType(12));
 		column = table.getColumns().get(0);
 		field = new Field("testcolumn");
-		predicate = new Predicate(column, Operator.equals, "test");
+		predicate = new Predicate(table, column, Operator.equals, "test");
 		listFields.add(field);
 		view = new View(tableHandler, predicate, listFields, new ArrayList<>(), new Group());
 	}
@@ -55,9 +55,5 @@ class ViewTest {
 			Log.error(e);
 		}
 		assertEquals(expected, actual);
-	}
-
-	@Test
-	void execute() {
 	}
 }

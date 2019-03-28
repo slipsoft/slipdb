@@ -17,6 +17,7 @@ import db.data.DataPositionList;
 import db.parsers.CsvParser;
 import db.search.ResultSet;
 import db.structure.Column;
+import db.structure.StructureException;
 import db.structure.Table;
 import db.structure.indexTree.IndexTreeDic;
 import sj.network.tcpAndBuffers.NetBuffer;
@@ -293,8 +294,8 @@ public class TableHandler {
 	}
 	
 	//trip_distance
-	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection) throws Exception { // table connue ! , Table fromTable) {
-		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");
+	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection) throws StructureException, IOException { // table connue ! , Table fromTable) {
+		if (associatedTable == null) throw new StructureException("Aucune table crée, indexation impossible.");
 		
 		ResultSet resultArrayList = new ResultSet();
 		

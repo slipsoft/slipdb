@@ -4,11 +4,11 @@ public class Field {
 	protected String name;
 	protected String alias;
 
-	Field(String name) {
+	public Field(String name) {
 		this.name = name;
 	}
 
-	Field(String name, String alias) {
+	public Field(String name, String alias) {
 		this(name);
 		this.alias = alias;
 	}

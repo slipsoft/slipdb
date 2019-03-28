@@ -6,22 +6,17 @@ import java.util.ArrayList;
 
 import com.dant.utils.Log;
 import db.data.StringType;
-import org.junit.jupiter.api.AfterEach;
+import db.structure.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
-import db.structure.Column;
-import db.structure.Index;
-import db.structure.IndexHash;
-import db.structure.Table;
-
 class PredicateTest {
-	Column column;
-	Predicate predicate;
-	Table table;
-	ArrayList<Column> columns = new ArrayList<Column>();
+	private Column column;
+	private Predicate predicate;
+	private Table table;
+	private ArrayList<Column> columns = new ArrayList<>();
 
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
@@ -31,28 +26,18 @@ class PredicateTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		column = new Column("testcolumn", new StringType(12));
-		predicate = new Predicate(column, Operator.equals, "test");
 		columns.add(column);
 		table = new Table("testtable", columns);
-	}
-
-	@AfterEach
-	void tearDown() throws Exception {
+		predicate = new Predicate(table, column, Operator.equals, "test");
 	}
 
 	@Test
-	void testFindBestIndex() {
-		Executable exec = new Executable() {
-			@Override
-			public void execute() throws Throwable {
-				predicate.findBestIndex(table);
-			}
-		};
-		assertThrows(Exception.class, exec);
+	void testGetIndex() {
+		Executable exec = () -> predicate.getIndex();
+		assertThrows(StructureException.class, exec);
 		Index index = new IndexHash(new Column[] {column});
 		table.addIndex(index);
-		assertDoesNotThrow(exec);
-		assertEquals(index, predicate.getIndex());
+		assertDoesNotThrow(() -> assertEquals(index, predicate.getIndex()));
 	}
 
 	@Test
@@ -63,11 +48,6 @@ class PredicateTest {
 	@Test
 	void testGetOperator() {
 		assertEquals(Operator.equals, predicate.getOperator());
-	}
-
-	@Test
-	void testGetIndex() {
-		assertEquals(null, predicate.getIndex());
 	}
 
 }
