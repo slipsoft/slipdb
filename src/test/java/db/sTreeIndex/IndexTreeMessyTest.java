@@ -56,7 +56,7 @@ public class IndexTreeMessyTest {
 	
 	
 	
-	//@BeforeAll
+	@BeforeAll
 	static void setUpBeforeAll() throws Exception {
 		SerialStructure.loadStructure();
 		table = Database.getInstance().getAllTables().get(0);
@@ -70,7 +70,7 @@ public class IndexTreeMessyTest {
 		}*/
 	}
 	
-	@BeforeAll
+	//@BeforeAll
 	static void setUpBeforeAllDe() throws Exception {
 		Log.info("setUpBeforeAll");
 		Log.start("indexingTreeTest", 2);

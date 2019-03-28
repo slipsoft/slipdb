@@ -5,6 +5,9 @@ import com.dant.entity.ResponseError;
 import com.dant.entity.TableEntity;
 import com.dant.entity.Type;
 import com.dant.exception.BadRequestException;
+import com.dant.utils.Log;
+
+import db.serial.SerialStructure;
 import db.structure.Database;
 import db.structure.Table;
 
@@ -58,7 +61,13 @@ public class Controller {
         }).collect(Collectors.toCollection(ArrayList::new));
 
         tablesToAdd.stream().forEach(t -> Database.getInstance().getAllTables().add(t));
-
+        try {
+			SerialStructure.saveStructure();
+			
+		} catch (IOException e) {
+			Log.error(e);
+			e.printStackTrace();
+		}
         return null;
     }
 

@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import com.dant.utils.Log;
+
 import db.structure.Database;
 
 /**
@@ -36,6 +38,8 @@ public class SerialStructure {
 		
 		objectOutputStream.close();
 		
+		Log.info("SerialStructure.writeStructure : OK !");
+		
 	}
 	
 	public static void loadStructure() throws IOException, ClassNotFoundException {
@@ -43,6 +47,8 @@ public class SerialStructure {
 		ObjectInputStream objectInputStream = new ObjectInputStream(new BufferedInputStream(fileInputStream));
 		Database.getInstance().readSerialData(objectInputStream);
 		objectInputStream.close();
+
+		Log.info("SerialStructure.loadStructure : OK !");
 		
 	}
 	
