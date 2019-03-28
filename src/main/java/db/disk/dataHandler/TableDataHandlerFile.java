@@ -48,6 +48,12 @@ public class TableDataHandlerFile implements Serializable {
 	
 	static public final int maxFileSizeOnDisk = 150_000_000; // 500_000_000 Max 500 mo sur disque (grosse marge de sécurité)
 	
+	public void debugSerialShowVariables() {
+		Log.info("filePath = " + filePath);
+		Log.info("currentFileSize = " + currentFileSize);
+		Log.info("fileID = " + fileID);
+		Log.info("nodeID = " + nodeID);
+	}
 	
 	private void initOrLoadCommon() throws IOException {
 		fileOnDisk = new EasyFile(filePath);

@@ -36,7 +36,7 @@ import db.structure.indexTree.IndexTreeDic;
 import db.structure.recherches.SGlobalHandler;
 import db.structure.recherches.TableHandler;
 
-public class IndexTreeTest {
+public class IndexTreeMessyTest {
 	
 	// Voir constante dans IndexTreeDic : static public int maxResultCountPerIndexInstance = 10;
 	// -> limitation du nombre de résultats affichés par arbre
@@ -55,8 +55,23 @@ public class IndexTreeTest {
 	 */
 	
 	
-	@BeforeAll
+	
+	//@BeforeAll
 	static void setUpBeforeAll() throws Exception {
+		SerialStructure.loadStructure();
+		table = Database.getInstance().getAllTables().get(0);
+		tableHandler = table.getTableHandler();
+		/*Log.info(table.getName());
+		//table.debugSerialShowVariables();
+		
+		//tableHandler.associatedTable = table;
+		if (tableHandler.associatedTable == null) {
+			Log.error("tableHandler.associatedTable == null");
+		}*/
+	}
+	
+	@BeforeAll
+	static void setUpBeforeAllDe() throws Exception {
 		Log.info("setUpBeforeAll");
 		Log.start("indexingTreeTest", 2);
 		
@@ -212,8 +227,17 @@ public class IndexTreeTest {
 		// Nécessaire d'avoir plusieurs fichiers, à voir plus tard.
 		
 		Log.info("setUpBeforeAll OK");
-		/*Database.getInstance().getAllTables().add(table);
-		SerialStructure.writeStructure();*/
+		Database.getInstance().getAllTables().add(table);
+		SerialStructure.writeStructure();
+		
+		/*if (tableHandler.associatedTable == null) {
+			Log.error("tableHandler.associatedTable == null");
+		} else {
+			Log.error("tableHandler.associatedTable != null");
+			
+		}*/
+		
+		//setUpBeforeAll();
 	}
 	
 	/*
@@ -257,13 +281,13 @@ public class IndexTreeTest {
 		
 		if (doItWithTableHandler) {
 
-			Timer localTimer = new Timer("Temps pris pour indexer tpep_pickup_datetime");
+			/*Timer localTimer = new Timer("Temps pris pour indexer tpep_pickup_datetime");
 			tableHandler.indexColumnWithTreeFromDisk("tpep_pickup_datetime");
 			tableHandler.indexColumnWithTreeFromDisk("tpep_dropoff_datetime");
 			tableHandler.indexColumnWithTreeFromDisk("trip_distance");
 			tableHandler.indexColumnWithTreeFromDisk("pickup_longitude");
 			tableHandler.indexColumnWithTreeFromDisk("pickup_latitude");
-			localTimer.log();
+			localTimer.log();*/
 			//tableHandler.indexColumnWithTreeFromDisk("trip_distance");
 			
 			

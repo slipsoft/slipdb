@@ -31,7 +31,7 @@ public class TableHandler implements Serializable {
 	private static final long serialVersionUID = -4180065130691064979L;
 	protected String tableName;
 	protected ArrayList<Column> columnsListForCreatingTableOnly;
-	protected Table associatedTable;
+	public Table associatedTable;
 	//protected CsvParser csvParser = null;
 	// Possibilité de parser de plusieurs manières différentes (un jour...)
 	protected boolean firstTimeParsingData = true;
@@ -44,14 +44,16 @@ public class TableHandler implements Serializable {
 	transient protected ArrayList<Thread> parsingThreadList;
 	
 	// indexColumnList est la liste des colonnes à indexer
-	public RuntimeIndexingEntryList runtimeIndexingList = new RuntimeIndexingEntryList();//ArrayList<SRuntimeIndexingEntry>();
-	
+	transient public RuntimeIndexingEntryList runtimeIndexingList = new RuntimeIndexingEntryList();//ArrayList<SRuntimeIndexingEntry>();
+	// TODO
 	protected ArrayList<IndexTreeDic> indexTreeList = new ArrayList<IndexTreeDic>(); // Liste des IndexTree associés à cette table
 	
 	public void flushAllIndexTreesOnDisk() {
+		Log.error("TableHandler.flushAllIndexTreesOnDisk : size = " + indexTreeList.size());
 		for (IndexTreeDic indexTree : indexTreeList) {
 			try {
 				indexTree.flushOnDisk();
+				Log.error("TableHandler.flushAllIndexTreesOnDisk : flush de l'arbre !" + indexTree);
 			} catch (IOException e) {
 				Log.error("TableHandler.flushAllIndexTreesOnDisk : l'arbre n'a pas pu être écrit sur le disque, IOException.");
 				Log.error(e);
@@ -115,7 +117,7 @@ public class TableHandler implements Serializable {
 	}
 	
 	public Table createTable() throws IOException {
-		associatedTable = new Table(tableName, columnsListForCreatingTableOnly);
+		associatedTable = new Table(tableName, columnsListForCreatingTableOnly, this);
 		return associatedTable;
 	}
 
@@ -193,14 +195,18 @@ public class TableHandler implements Serializable {
 	
 	
 	protected IndexTreeDic findOrCreateAssociatedIndexTree(int columnIndex, boolean createTreeIfDoesNotExists) throws Exception { synchronized(indexTreeListLock) {
+		
+		//Log.info("findOrCreateAssociatedIndexTree : size = " + indexTreeList.size());
 		for (IndexTreeDic indexTree : indexTreeList) {
 			if (indexTree.getAssociatedTableColumnIndex() == columnIndex) {
+				//Log.info("findOrCreateAssociatedIndexTree : TROUVE TROUVE TROUVE TROUVE");
 				return indexTree;
 			}
 		}
 		if (createTreeIfDoesNotExists == false) return null;
 		IndexTreeDic newTree = new IndexTreeDic(associatedTable, columnIndex);
 		indexTreeList.add(newTree);
+		//Log.info("findOrCreateAssociatedIndexTree : CREE CREE CREE CREE CREE");
 		return newTree;
 	} }
 	

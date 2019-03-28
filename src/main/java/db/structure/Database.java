@@ -46,13 +46,33 @@ public final class Database {
         return allTables;
     }
     
-    public void writeAdditionalSerialData(ObjectOutputStream objectOutputStream) throws IOException {
+    /** Ecrire les données : SEULEMENT LES TABLES
+     *  @param objectOutputStream
+     *  @throws IOException
+     */
+    public void writeSerialData(ObjectOutputStream objectOutputStream) throws IOException {
     	objectOutputStream.writeObject(nextTableID);
+    	objectOutputStream.writeObject(nextIndexTreeDicUniqueId);
+		for (Table cTable : allTables) {
+			cTable.doBeforeSerialWrite(); // flush des arbres sur le disque pour ne pas perdre de donnée
+		}
+		objectOutputStream.writeObject(allTables);
     }
     
-    public void readAdditionalSerialData(ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException {
-    	nextTableID = (AtomicInteger) objectInputStream.readObject();
+    /** Lire les données : SEULEMENT LES TABLES
+     *  @param objectOutputStream
+     *  @throws IOException
+     */
+    @SuppressWarnings("unchecked")
+	public void readSerialData(ObjectInputStream objectInputStream) throws ClassNotFoundException, IOException {
+    	nextTableID              = (AtomicInteger) objectInputStream.readObject();
+    	nextIndexTreeDicUniqueId = (AtomicInteger) objectInputStream.readObject();
+    	allTables                = (ArrayList<Table>) objectInputStream.readObject();
     }
+    
+    /*public void readAdditionalSerialData(ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException {
+    	nextTableID = (AtomicInteger) objectInputStream.readObject();
+    }*/
 
     public int getAndIncrementNextTableID() {
     	return nextTableID.getAndIncrement();

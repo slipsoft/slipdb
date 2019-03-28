@@ -15,9 +15,11 @@ import java.util.stream.Collectors;
 import com.dant.entity.ColumnEntity;
 import com.dant.entity.TableEntity;
 import com.dant.utils.EasyFile;
+import com.dant.utils.Log;
 
 import db.data.DataType;
 import db.disk.dataHandler.TableDataHandler;
+import db.disk.dataHandler.TableDataHandlerFile;
 import db.search.Predicate;
 import db.structure.recherches.TableHandler;
 
@@ -40,7 +42,7 @@ public class Table implements Serializable {
 	
 	//protected final String dataFilesOnDiskBasePath; devenu baseTablePath
 	protected final TableDataHandler dataHandler;
-	transient protected TableHandler tableHandler;
+	protected TableHandler tableHandler;
 	
 	protected final String name; // table name
 	
@@ -58,6 +60,11 @@ public class Table implements Serializable {
 		if (tableHandler != null) {
 			tableHandler.flushAllIndexTreesOnDisk();
 		}
+	}
+	
+	public void debugSerialShowVariables() {
+		Log.info("TableDataHandler : ");
+		dataHandler.debugSerialShowVariables();
 	}
 	
 	/** 
@@ -88,7 +95,15 @@ public class Table implements Serializable {
 		this.fileLinesOnDisk.createFileIfNotExist();
 		computeLineDataSize();
 	}
-
+	
+	/**
+	 *  NE PAS UTILISER CE CONSTRUCTEUR CAR MANQUE TABLE HANDLER EN PARAMETRE !
+	 *  UN NOUVEAU TABLE HANDLER SERA DONC GENERE LORS DE LA CREATION DE LA TABLE.
+	 * @param argName
+	 * @param argColumnsList
+	 * @throws IOException
+	 */
+	@Deprecated
 	public Table(String argName, List<Column> argColumnsList) throws IOException {
 		this(argName, argColumnsList, null);
 	}

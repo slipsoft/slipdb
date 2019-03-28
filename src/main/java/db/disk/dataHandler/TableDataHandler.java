@@ -64,6 +64,13 @@ public class TableDataHandler implements Serializable {
 		saveFileBaseName = "table_data_nid" + currentNodeID + "_fid"; // nodeID, fileID
 	}
 	
+	public void debugSerialShowVariables() {
+		Log.info("Nombre de fichiers connus : " + allFilesList.size());
+		for (TableDataHandlerFile hfile : allFilesList) {
+			hfile.debugSerialShowVariables();
+		}
+	}
+	
 	/*
 		Besoin :
 			- Ecrire une ligne sur le disque : peu importe où, on renvoie sa position (plus tard, éventuellement, optimisations sur la position)

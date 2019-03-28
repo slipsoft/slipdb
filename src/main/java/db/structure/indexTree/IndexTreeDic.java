@@ -97,14 +97,18 @@ public class IndexTreeDic extends Index implements Serializable {
 	protected String basePath; // initialisé via initialiseWithTableAndColumn    ancien : = "data_save/IndexTreeDic_DiskMemory/";//"target/IndexTreeDic_DiskMemory/";
 	//protected static int rootIndexTreeCount = 0;
 
-
+	
 	private void loadSerialAndCreateCommon() {
 		associatedBinIndexes = new TreeMap<Object, DataPositionList>();
 	}
 	
+	transient private Object indexingValueLock = new Object();
+	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		in.defaultReadObject();
 		loadSerialAndCreateCommon();
+		indexingValueLock = new Object();
+		Log.info("READ READ READ readObject IndexTreeDic");
 	}
 	
 	
@@ -400,7 +404,7 @@ public class IndexTreeDic extends Index implements Serializable {
 		flushOnDisk();
 	}
 
-	private Object indexingValueLock = new Object();
+	
 	//private Object indexingValueLockOnlyForAddAndDiskAndMemory = new Object(); // pas d'interblocage possible car les fonctions ne s'utilisent pas l'une l'autre
 	/** Ajouter une valeur et un binIndex associé
 	 *  @param associatedValue valeur indexée, ATTENTION : doit être du type du IndexTree utilisé (Integer, Float, Byte, Double, ...)
