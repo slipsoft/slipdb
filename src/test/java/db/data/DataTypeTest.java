@@ -3,6 +3,7 @@ package db.data;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.junit.jupiter.api.AfterAll;
@@ -65,6 +66,80 @@ class DataTypeTest {
 		// fail("Not yet implemented");
 	}
 
+	//@Test
+	void testEqualsSpeed() {
+		
+		int maxCountOperation = 1_000_000;
+		String maxCountOperationStr = "1_000_000";
+		Timer localTimer;
+		ByteBuffer bBuff = ByteBuffer.allocate(20);
+		
+		Log.info("Cout en millisecondes, pour " + maxCountOperationStr + " itérations :");
+		
+		localTimer = new Timer("Cout de fonctionnement de la boucle pour " + maxCountOperationStr + " opérations ");
+		int a = 46512;
+		int b = 74651275;
+		int c = 0;
+		for (int count = 0; count < maxCountOperation; count++) {
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			if (a == b) c = 1;
+			//if (a == b) c = 2;
+		}
+		localTimer.log();
+	}
+
+	//@Test
+	void testArrayListSpeed() {
+		
+		int maxCountOperation = 1_000_000;
+		String maxCountOperationStr = "1_000_000";
+		Timer localTimer;
+		
+		Log.info("Cout en millisecondes, pour " + maxCountOperationStr + " itérations :");
+		
+		int a = 46512;
+		int b = 74651275;
+		int c = 0;
+		ArrayList<Integer> al = new ArrayList<Integer>();
+		ArrayList<Integer> alModel = new ArrayList<Integer>();
+		for (int count = 0; count < maxCountOperation; count++) {
+			alModel.add(8575762);
+		}
+		
+
+		localTimer = new Timer("Cout de fonctionnement de la boucle pour " + maxCountOperationStr + " opérations ");
+		for (int count = 0; count < maxCountOperation; count++) {
+			al.add(alModel.get(count));
+		}
+		localTimer.log();
+	}
+	
+	
 	@Test
 	void testWriteToBuffer() {
 		
@@ -115,7 +190,7 @@ class DataTypeTest {
 			doubleType.parseAndWriteToBuffer("454689586.2132152", bBuff);
 		}
 		localTimer.log();
-		
+
 		localTimer = new Timer("Parsing de DateType ");
 		for (int count = 0; count < maxCountOperation; count++) {
 			bBuff.rewind();

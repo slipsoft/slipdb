@@ -1,5 +1,7 @@
 package db.data;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 //import java.util.Date;
 import java.util.Date;
@@ -10,17 +12,29 @@ import com.dant.utils.Utils;
 
 import db.search.Operator;
 
-public class DateType extends DataType {
+public class DateType extends DataType implements Serializable {
+	private static final long serialVersionUID = -2160294934147905077L;
 
 	public static boolean sizeIsRequired = false;
 	
 	// Nécessaire pour rendre les opérations trhead-safe, il ne peut pas y avoir de Utils ayant des méthodes statiques utilisant les mêmes objets instanciés.
 	// (sous peine d'exceptions dus à des problèmes de concurrence)
 	// Et ne pas utiliser de synchronized ou volatile, de préférence, cela réduirait grandement les performances)
-	Utils utilsInstance = new Utils();
+	transient public Utils utilsInstance = new Utils();
+	
+	/** Pour la déserialisation
+	 * @param in
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		in.defaultReadObject();
+		utilsInstance = new Utils();
+	}
 	
 	public DateType() {
 		super();
+		utilsInstance = new Utils();
 		this.sizeInBytes = 4;
 		// peu de dates crées ! :) System.out.println("DateType : nouvelle date !");
 	}

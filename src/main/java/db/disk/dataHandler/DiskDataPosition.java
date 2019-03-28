@@ -9,7 +9,7 @@ import java.io.RandomAccessFile;
  *  Position exacte d'une donnée (ligne) écrite sur le disque
  *
  */
-public class DiskDataPosition {
+public class DiskDataPosition implements Comparable<DiskDataPosition> {
 	
 	static public final int diskDataPositionSizeOnDisk = 2 + 2 + 4; // 8
 
@@ -42,6 +42,18 @@ public class DiskDataPosition {
 		short fileID = readFromRandFile.readShort();
 		int lineIndex = readFromRandFile.readInt();
 		return new DiskDataPosition(nodeID, fileID, lineIndex);
+	}
+	
+	@Override
+	public int compareTo(DiskDataPosition o) {
+		DiskDataPosition otherObject = (DiskDataPosition) o;
+		if (nodeID > otherObject.nodeID) return 1;
+		if (nodeID < otherObject.nodeID) return -1;
+		if (fileID > otherObject.fileID) return 1;
+		if (fileID < otherObject.fileID) return -1;
+		if (lineIndex > otherObject.lineIndex) return 1;
+		if (lineIndex < otherObject.lineIndex) return -1;
+		return 0;
 	}
 	
 }

@@ -156,6 +156,10 @@ public class IndexTreeTest {
 			// Attendre que toute la donnée soit parsée
 			tableHandler.multiThreadParsingJoinAllThreads();
 			
+			/**
+			 * Ne supporte pour l'instant pas recherches + indexing en même temps. (Problèmes de concurrence)
+			 * -> BIEN penser à faire tableHandler.multiThreadParsingJoinAllThreads();
+			 */
 			
 			
 			/*tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
@@ -287,16 +291,35 @@ public class IndexTreeTest {
 			searchQueryTimer = new Timer("Temps total recherche");
 			result = tableHandler.findIndexedResultsOfColumn("trip_distance", 17.78f, 18f, true);
 			searchQueryTimer.log();
-			searchQueryFullTimer = new Timer("Temps d'acquisition des résultats (chargement du disque de tous les champs)");
+			
+			
+			searchQueryFullTimer = new Timer("1Temps d'acquisition des résultats (chargement du disque de tous les champs)");
 			numberOfResults = result.size();// tableHandler.evaluateNumberOfResults(result);
 			//numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
 			
-			ResultSet fullResulsVariables = tableHandler.getFullResultsFromBinIndexes(result);
+			//ArrayList<ArrayList<Object>>
+			ResultSet fullResulsVariables = tableHandler.getFullResultsFromBinIndexes(result, true, -1, null);
 			
-			tableHandler.displayOnLogResults(fullResulsVariables);
+			//tableHandler.displayOnLogResults(fullResulsVariables);
+			
+			
+			searchQueryFullTimer.log();
+
+			searchQueryFullTimer = new Timer("2Temps d'acquisition des résultats certains champs seulement");
+			ArrayList<Integer> onlyThoseColumns = new ArrayList<Integer>();
+			onlyThoseColumns.add(6);
+			onlyThoseColumns.add(4);
+			fullResulsVariables = tableHandler.getFullResultsFromBinIndexes(result, true, -1, onlyThoseColumns);
+			
+			//tableHandler.displayOnLogResults(fullResulsVariables);
 			
 			searchQueryFullTimer.log();
 			Log.info("Nombre de résultats = " + numberOfResults);
+			
+			result = tableHandler.findIndexedResultsOfColumn("trip_distance", 18f);
+			numberOfResults = result.size();
+			Log.info("Nombre de résultats (pour 18 exact) = " + numberOfResults);
+			
 			
 			//Log.info("Nombre de lignes = " + numberOfLines);
 			
