@@ -32,11 +32,11 @@ public class DateType extends DataType {
 	}
 	
 	@Override
-	public Integer writeToBuffer(String input, ByteBuffer outputBuffer) {
+	public Object parseAndWriteToBuffer(String input, ByteBuffer outputBuffer) throws IllegalArgumentException { // throws NumberFormatException {
 		Integer dateAsInt = Utils.dateToSecInt(utilsInstance.dateFromString(input));
 		outputBuffer.putInt(dateAsInt);
 		/*
-		Utilisé pour chercher un big (qui s'sst évéré être le passage du format 12H au format 24H
+		Utilisé pour chercher un bug (qui s'sst évéré être le passage du format 12H au format 24H
 		int debugSearchForDate = Utils.dateToSecInt(Utils.dateFromStringNoThreadSafe(("2015-04-04 00:18:57")));
 		if (debugSearchForDate == dateAsInt) {
 			Log.error("AHAH : debugSearchForDate == dateAsInt " +  dateAsInt + "   input = " +input);
@@ -44,6 +44,14 @@ public class DateType extends DataType {
 		
 		return dateAsInt;
 	}
+	
+	/*
+	public Object parseAndWriteToBufferDateThreadSafe(String input, ByteBuffer outputBuffer, Utils localUtilsInstance) throws IllegalArgumentException { // throws NumberFormatException {
+		Integer dateAsInt = Utils.dateToSecInt(localUtilsInstance.dateFromString(input));
+		outputBuffer.putInt(dateAsInt);
+		return dateAsInt;
+	}*/
+	
 	
 	@Override
 	// Date -> Integer, for it to be indexed faster, and the same way Integers are (that's really convenient, see IndexTree for more)

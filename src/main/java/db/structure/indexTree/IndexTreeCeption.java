@@ -666,6 +666,7 @@ public class IndexTreeCeption {
 				// Ajout à la liste de tous les binIndex
 				for (int indexInList = 0; indexInList < numberOfAssociatedBinIndexes; indexInList++) {
 					int binIndex = randFile.readInt(); // position sur le disque de la donnée fine
+					// TODO mettre tout en LONG et non INT
 					binIndexList.add(binIndex); // ajout à l'IntegerArrayList en cours
 					debugDiskNumberOfExactValues++;
 				}
@@ -774,6 +775,7 @@ public class IndexTreeCeption {
 					writeInDataStream.writeInt(numberOfAssociatedBinIndexes);
 					// Ecriture de tous les binIndex
 					for (int indexInIntegerArrayList = 0; indexInIntegerArrayList < numberOfAssociatedBinIndexes; indexInIntegerArrayList++) {
+						// TODO mettre tout en LONG et non INT
 						int binIndex = binIndexesIntegerArrayList.get(indexInIntegerArrayList);
 						writeInDataStream.writeInt(binIndex);
 						debugNumberOfExactValuesWrittenOnDisk++;

@@ -29,11 +29,75 @@
 	Je pense que parser et charger l'ensemble des CSV des taxis de NY ne devrait pas prendre plus de 2h, sur une seule machine (en mono-thread)
 	La recherche sur disque sera sans doute assez rapide, également (même sur 200Go+), probablement pas plus de 10 secondes pour de la donnée fine
 	
-	- Au-delà du multi-thread (perf x4 si 4 coeurs), l faut que le multi-noeud soit fonctionnel.
+	- Au-delà du multi-thread (perf x4 si 4 coeurs), il faut que le multi-noeud soit fonctionnel.
 	- Il faut également prendre totalement en charge les fonctions SELECT … WHERE … GROUP BY  (FROM la table principale)
 	-> J'implémente ça, maintenant (2019-03-22, 21h)
 	
+	Pour un IndexTree de base :
+	SELECT colonneSelect WHERE (valeur minimale) (valeur maximale) GROUP BY colonneGoup
+	
+	-> En interne, une recherche (sur colonneSelect) doit être faite, et les résultats devont être ajoutés dans un arbre,
+	   en ayant en clef la valeur dans colonneGoup.
+	   -> Limiter le nombre de résultats pour ne pas en avoir trop.
+	   
+	Recherche personnalisée :
+	- Retourner, en résultat : select : seulement les colonnes demandées
+	                           résultats correspondant aux conditions (colonneId, valeurMin, valeurMax) x (nombre de colonnes)
+	                           group by : grouper les résultats en fonction de la bonne colonne ou des bonnes colonnes
+	                           order by : ordonner (via un TreeMap) en fonction d'une clef (colonne)
+	                           SUM, AVG, MIN, MAX, COUNT : à effectuer sur les résultats
+	                             -> Exemple : obtenir le min, max, sum et avg des distances parcourues entre date1 et date2
+	                           
+	                           
+	2019-03-23
+	-> Faire le chargement/sauvegarde d'un index complet sur le disque
+	-> Charger les données parsées sans avoir à les re-parser (csv)
+	-> Faire la recherche sur une colonne indexée
+	
+	2019-03-24
+	-> Avoir la liste des colonnes à indexer, les indexer pendant le parsing ou plus tard
+	
+	
+	SELECT … WHERE … GROUP BY
+	
 	SELECT : sélectionner une colonne
+	
+	2019-03-24 - 23h
+		Les fichiers de sauvegarde semblent être limités à 4Go.
+		-> Faire un système de sauvegarde propre au moteur :
+			- Plusieurs fichiers sur le disque, un path (String) et un AtomicBoolean pour dire si le fichier est utilisé (en écriture ou non et un AtomicBoolean pour la lecture, plus tard)
+			- Parsing multi-thread : écriture dans un des fichiers libres (non utilisé) et dont la taille est valide (inférieure à une certaine taile, 1go par exemple)
+			- Les binIndex des données devront être stockées sous la forme (id fichier)(position dans fichier), (int)(int) ou (short)(int), je garde double au début, au moins
+			  ça pourrait aussi être (short)(short)(int) : id du noeud, id du fichier, index (de la ligne) dans le fichier
+			- Important : écriture de l'état d'un IndexTreeDic sur le disque, pour pouvoir le charger du disque et le réutiliser, sans avoir à le re-créer à chaque fois
+		
+		-> Serveur avec les 200Go de CSV chargés, requêtes simples à faire dessus, pour montrer qu'on peut parser beaucoup de donnée
+	
+	-> Pour cette version, je ne me soucie pas des problèmes de suppression de lignes, ni d'ajout de lignes.
+		- Il serait nécessaire d'avoir pus de fichiers, et cela complexifie les choses. Déjà, avoir quelque chose de vraiment bien qui marche, et ensuite l'améliorer.
+	
+	-> Sauvegarde complet des index sur le disque, pour ne pas avoir à les re-charger à chaque fois (pour le parsing et indexation énorme, faire après le parsing multi-thread)
+	
+	Pour le parsing multi-thread : écrire de la donnée
+	
+	2019-03-26 - 20h15
+	-> OK Sauvegarde multi-fichiers
+	-> OK Chargement de la donnée depuis le disque pour affichage
+	-> OK parsing multi-thread
+	
+	
+	-> à faire : sauvegarder le noeud sur le disque : Table, STableHandler, IndexTreeDic ...
+	-> à faire : charger le noeud du disque (sans re-parser ni re-indexer), pouvoir indexer et parser à la suite sans problème
+	-> à faire : chargement de liste de donnée depuis le disque (doit être rapide, classer par fichier et position croissante dans le fichier puis charger en multi-thread)
+	-> à faire : indexer depuis la sauvegarde sur disque
+	-> à faire : multi-noeud très simple, requêtes en ligne de commande depuis le client
+	-> à faire : mettre tout ça en place et que ça fonctionne bien pour le vendredi 29 matin !
+	-> à faire : 
+	-> ATTENTION : attention aux exceptions qui pourraient arriver lors d'une requête et tout casser, à distance...
+	-> à faire : 
+	
+	
+	
 */
 
 
