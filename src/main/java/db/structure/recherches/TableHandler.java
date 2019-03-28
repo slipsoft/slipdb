@@ -15,6 +15,7 @@ import db.disk.dataHandler.DiskDataPosition;
 import db.disk.dataHandler.TableDataHandler;
 import db.data.DataPositionList;
 import db.parsers.CsvParser;
+import db.search.ResultSet;
 import db.structure.Column;
 import db.structure.Table;
 import db.structure.indexTree.IndexTreeDic;
@@ -56,6 +57,10 @@ public class TableHandler {
 	
 	public String getTableName() {
 		return tableName;
+	}
+
+	public Table getAssociatedTable() {
+		return this.associatedTable;
 	}
 	
 	public TableHandler(String argTableName) {
@@ -243,15 +248,6 @@ public class TableHandler {
 	}*/
 	
 	
-	/** Pour une valeur exacte
-	 *  @param columnName
-	 *  @param equalsExactValue
-	 *  @return
-	 *  @throws Exception
-	 */
-	public DataPositionList findIndexedResultsOfColumn(String columnName, Object equalsExactValue) throws Exception {
-		return findIndexedResultsOfColumn(columnName, equalsExactValue, null, true);
-	}
 	
 	/**
 	 * 
@@ -262,6 +258,7 @@ public class TableHandler {
 	 * @return
 	 * @throws Exception
 	 */
+	@Deprecated // in favor to Index.getPositionsFromPredicate
 	public DataPositionList findIndexedResultsOfColumn(String columnName, Object minValue, Object maxValue, boolean inclusive) throws Exception {
 		int columnIndex = getColumnIndex(columnName);
 		if (columnIndex == -1) throw new Exception("Colonne introuvable, impossible de faire une recherche sur ses index.");
@@ -311,10 +308,10 @@ public class TableHandler {
 	}
 	
 	//trip_distance
-	public ArrayList<ArrayList<Object>> getFullResultsFromBinIndexes(DataPositionList resultsCollection) throws Exception { // table connue ! , Table fromTable) {
+	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection) throws Exception { // table connue ! , Table fromTable) {
 		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");
 		
-		ArrayList<ArrayList<Object>> resultArrayList = new ArrayList<ArrayList<Object>>();
+		ResultSet resultArrayList = new ResultSet();
 		
 		TableDataHandler dataHandler = associatedTable.getDataHandler();
 		
@@ -346,8 +343,8 @@ public class TableHandler {
 		return resultArrayList;
 	}
 	
-	public void displayOnLogResults(ArrayList<ArrayList<Object>> resultArrayList) {
-		for (ArrayList<Object> objList : resultArrayList) {
+	public void displayOnLogResults(ResultSet resultArrayList) {
+		for (List<Object> objList : resultArrayList) {
 			Log.info("  objList = " + objList);
 		}
 	}

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -20,37 +21,38 @@ import db.search.Predicate;
 import db.structure.recherches.TableHandler;
 
 /**
- * A simple SQL-like table, consisting of 
+ * A simple SQL-like table, consisting of
  */
 public class Table {
-	
+
 	public final static short currentNodeID = 1;
 	protected static String oldSmellyBasePath = "target/tables/";
 	final public static String baseAllTablesDirPath = "data_save/tables/";
 	final public static String allTablesFileExtension = ".sbin";
 	protected static AtomicInteger nextTableID = new AtomicInteger(1);
-	
+
 	protected final int tableID;
 	protected final String baseTablePath;
 	protected int lineDataSize;
-	
-	
+
+
 	//protected final String dataFilesOnDiskBasePath; devenu baseTablePath
 	protected final TableDataHandler dataHandler;
 	protected final TableHandler tableHandler;
 	
 	protected final String name; // table name
-	
+
 	protected EasyFile fileLinesOnDisk; // <- les fichiers de sauvegarde des colonnes sont désormais indépendants
 	protected List<Column> columnsList = new ArrayList<Column>(); // liste des colonnes de la table
 	protected List<Index> indexesList = new ArrayList<Index>();   // liste des index générés pour cette table
-	
+
 	/**
 	 * Plus tard : Evolution, pour permettre le multi-thread, sauvegarder et indexer plus vite, avoir plusieurs fichiers par colonne, sauvegarde des données en entrée par colonne.
 	 * Pour l'instant, je laisse comme ça (Sylvain), et je fais l'index par dichotomie
 	 */
 	
-	/** Create a table with a name and a columns list
+	/** 
+	 * Create a table with a name and a columns list
 	 * @param argName
 	 * @param argColumnsList
 	 * @param argTableHandler
@@ -61,10 +63,10 @@ public class Table {
 		columnsList.addAll(argColumnsList);
 		tableHandler = argTableHandler;
 		baseTablePath = baseAllTablesDirPath + name + "/";
-		TableDataHandler.setNodeID(currentNodeID); // <- NODE ID 
+		TableDataHandler.setNodeID(currentNodeID); // <- NODE ID
 		dataHandler = new TableDataHandler(this, baseTablePath);
 		tableID = nextTableID.addAndGet(1);
-		
+
 		/* Désormais géré par TableDiskDataHandler*/
 		this.fileLinesOnDisk = new EasyFile(oldSmellyBasePath + name + ".bin");
 		this.fileLinesOnDisk.createFileIfNotExist();
@@ -89,41 +91,41 @@ public class Table {
 	public String getBaseTablePath() {
 		return baseTablePath;
 	}
-	
+
 	protected void computeLineDataSize() {
-		lineDataSize =  columnsList
-	    				.stream()
-	    				.mapToInt(Column::getSize)
-	    				.sum();
+		lineDataSize = columnsList
+				.stream()
+				.mapToInt(Column::getSize)
+				.sum();
 	}
-	
+
 	// dataHandler
-	
+
 	public String getName() {
 		return name;
 	}
-	
+
 	public List<Column> getColumns() {
 		return columnsList;
 	}
-	
+
 	public List<Index> getIndexes() {
 		return indexesList;
 	}
-	
+
 	public void addIndex(Index index) {
 		this.indexesList.add(index);
 		for (Column column : index.getColumnList()) {
 			column.addIndex(index);
 		}
 	}
-	
+
 	public int getLineSize() {
 		return lineDataSize;
 		/*return columnsList
-		    .stream()
-		    .mapToInt(Column::getSize)
-		    .sum();*/
+			.stream()
+			.mapToInt(Column::getSize)
+			.sum();*/
 		// -> do a performance benchmark with this function (seems very fast)
 		/*
 		Same as :
@@ -136,13 +138,18 @@ public class Table {
 		
 		*/
 	}
-	
+
+	public Optional<Column> findColumn(String name) {
+		return columnsList.stream().filter(column -> column.getName() == name).findFirst();
+	}
+
 	public boolean columnExist(String name) {
 		return this.columnsList.stream().anyMatch(col -> col.getName() == name);
 	}
-	
+
 	/**
 	 * Ajout d'une colonne
+	 *
 	 * @param colName
 	 * @return
 	 * @throws Exception
@@ -155,10 +162,11 @@ public class Table {
 		computeLineDataSize();
 		return true;
 	}
-	
+
 	/**
 	 * Trouver l'index d'une colonne à partir de son nom, dans la liste columns
-	 * @param colName  nom de la colonne à rechercher
+	 *
+	 * @param colName nom de la colonne à rechercher
 	 * @return -1 si introuvable, un entier >= 0 si existe
 	 */
 	public int findColumnNumber(String colName) {
@@ -170,34 +178,33 @@ public class Table {
 		}
 		return -1;
 	}
-	
+
 	/**
 	 * Give each column a number
 	 */
-	public void setColumnsNumber(String colName) {
+	public void setColumnsNumber() {
 		for (int colIndex = 0; colIndex < columnsList.size(); colIndex++) {
 			columnsList.get(colIndex).setNumber(colIndex);
 		}
 	}
-	
+
 	/**
-	 *  
-	 *  @param lineId is the position of the line, 0 being the first loaded line from the file (CSV for New York taxis)
-	 *  @return a list containing every entry associates with the line at position lineId
-	 *  @throws IOException
+	 * @param lineId is the position of the line, 0 being the first loaded line from the file (CSV for New York taxis)
+	 * @return a list containing every entry associates with the line at position lineId
+	 * @throws IOException
 	 */
 	@Deprecated
 	public ArrayList<Object> getValuesOfLineById(long lineId) throws IOException { // or getRowById
 		// TODO fonction à refaire avec des DiskDataPosition
 		// Get a new disposable FileInputStream with the file where all table rows are stored
 		FileInputStream fileAsStream = new FileInputStream(fileLinesOnDisk);
-		
+
 		// List of values stored in the line of id lineId
 		ArrayList<Object> lineValues = new ArrayList<>(); // rowValues
-		
+
 		// Seek to the right position in the stream
 		fileAsStream.skip(lineId * getLineSize());
-		
+
 		// For each column, reads the associated value
 		for (Column column : columnsList) {
 			byte[] columnValueAsByteArray = new byte[column.getSize()];
@@ -208,24 +215,25 @@ public class Table {
 		fileAsStream.close();
 		return lineValues;
 	}
-	
+
 	public OutputStream tableToOutputStream(boolean appendAtTheEnd) throws FileNotFoundException {
 		return new FileOutputStream(fileLinesOnDisk, appendAtTheEnd);
 	}
-	
+
 	public EasyFile getFileLinesOnDisk() {
 		return fileLinesOnDisk;
 	}
-	
+
 	public TableDataHandler getDataHandler() {
 		return dataHandler;
 	}
-	
+
 	/**
 	 * Returns the best index to use for a given filter
+	 *
 	 * @param predicate
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public Index findBestIndex(Predicate predicate) throws Exception {
 		for (Index index : indexesList) {
@@ -236,7 +244,7 @@ public class Table {
 		throw new Exception("no index can be used with this filter");
 	}
 
-	public TableEntity convertToEntity () {
+	public TableEntity convertToEntity() {
 		String name = this.name;
 		ArrayList<ColumnEntity> allColumns = this.columnsList.stream().map(Column::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
 		// ArrayList<IndexEntity> allIndexes = this.indexesList.stream().map(Index::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
