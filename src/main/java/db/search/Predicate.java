@@ -1,8 +1,10 @@
 package db.search;
 
+import db.data.DataPositionList;
 import db.structure.Column;
 import db.structure.Index;
 import db.structure.Table;
+import db.structure.indexTree.IndexException;
 
 public class Predicate implements FilterTerm {
 	protected Column column;
@@ -30,5 +32,16 @@ public class Predicate implements FilterTerm {
 
 	public Index getIndex() {
 		return this.index;
+	}
+
+	public Object getValue() { return this.value; }
+
+	@Override
+	public DataPositionList execute() throws SearchException {
+		try {
+			return this.index.getPositionsFromPredicate(this);
+		} catch (IndexException e) {
+			throw new SearchException(e.getMessage());
+		}
 	}
 }

@@ -3,6 +3,8 @@ package db.structure;
 import java.util.ArrayList;
 import java.util.Map;
 
+import db.data.DataPositionList;
+import db.structure.indexTree.IndexException;
 import org.apache.commons.lang3.ArrayUtils;
 
 import db.search.Operable;
@@ -57,4 +59,6 @@ public abstract class Index implements Operable {
 		boolean isOperatorCompatible = this.isOperatorCompatible(predicate.getOperator());
 		return containsColumn && isOperatorCompatible;
 	}
+
+	public abstract DataPositionList getPositionsFromPredicate(Predicate predicate) throws IndexException;
 }
