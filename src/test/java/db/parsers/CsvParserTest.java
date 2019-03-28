@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import db.structure.recherches.TableHandler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,7 +65,10 @@ class CsvParserTest {
 		} catch (Exception e) {
 			Log.error(e);
 		}
-		table = new Table("test", columns);
+		TableHandler tableHandler = new TableHandler("test");
+		columns.stream().forEach(c -> tableHandler.addColumn(c));
+
+		Table table = tableHandler.createTable();
 		//parser = new CsvParser2(table); // 790 ms
 		parser = new CsvParser(table); // 750 ms
 	}
