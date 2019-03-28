@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
+import db.structure.recherches.TableHandler;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -72,7 +73,9 @@ public class TestIndexTreeMT1 {
 	
 	static Table loadNewTableFromDisk(String tableName, String filePathOnDisk) throws IOException {
 		ArrayList<Column> columns = initializeColumnsForNYData();
-		Table newTable = new Table(tableName, columns);
+		TableHandler table = new TableHandler(tableName);
+		columns.stream().forEach(c -> table.addColumn(c));
+		Table newTable = table.createTable();
 		CsvParser newParser = new CsvParser(newTable);
 		FileInputStream is = new FileInputStream(filePathOnDisk);
 		//Timer parseTimer = new Timer("Temps pris par le parsing de " + tableName);

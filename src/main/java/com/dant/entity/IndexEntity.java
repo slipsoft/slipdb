@@ -1,12 +1,13 @@
 package com.dant.entity;
 
+import com.google.gson.Gson;
 import db.structure.Column;
 import db.structure.Index;
 
-public class IndexEntity {
-    public ColumnEntity[] columnsToIndex;
+import java.io.Serializable;
 
-    public String name;
+public class IndexEntity extends Entity implements Serializable {
+    public ColumnEntity[] columnsToIndex;
 
     public IndexEntity (ColumnEntity[] columnsToIndex) {
         this.columnsToIndex = columnsToIndex;
@@ -16,4 +17,9 @@ public class IndexEntity {
         Column[] indexedColumnsList = this.columnsToIndex.map(ColumnEntity::convertToColumn).toArray(Column[]::new);
         return new Index(indexedColumnsList);
     }*/
+
+    public String toString() {
+        Gson gson = new Gson();
+        return gson.toJson(this);
+    }
 }

@@ -1,5 +1,7 @@
 package db.structure;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,19 +11,34 @@ import com.dant.entity.ColumnEntity;
 
 import db.data.DataType;
 
-public class Column {
-
+public class Column implements Serializable {
+	private static final long serialVersionUID = -3714630692284399540L;
+	
 	protected String name = "Nom inconnu";
 	protected DataType storedDataType;
 	protected int number;
 	
 	protected Object minValue = null;
 	protected Object maxValue = null;
-	protected Object minMaxLock = new Object();
-
+	protected transient Object minMaxLock = new Object();
 	protected DataType dataType;
-	protected List<Index> relatedIndexesList = new ArrayList<>();
-
+	@Deprecated /* @CurrentlyUnused */ transient protected List<Index> relatedIndexesList = new ArrayList<>();
+	
+	/** Pour la déserialisation
+	 * @param in
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		in.defaultReadObject();
+		minMaxLock = new Object();
+	}
+	
+	/*public NetBuffer columnAsNetBuffer() {
+		
+	}*/
+	
+	
 	/**
 	 * Columns contructor
 	 *
@@ -156,7 +173,7 @@ public class Column {
 	}
 	
 	
-	public void addIndex(Index index) {
+	@Deprecated public void addIndex(Index index) { // TODO
 		this.relatedIndexesList.add(index);
 	}
 

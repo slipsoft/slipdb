@@ -4,6 +4,7 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -22,10 +23,18 @@ import db.structure.Table;
 import db.structure.indexTree.IndexTreeDic;
 import sj.network.tcpAndBuffers.NetBuffer;
 
-public class TableHandler {
+public class TableHandler implements Serializable {
+	/* Ordre de serialization :
 	
+	TableHandler -> Table -> Colonnes
+						  -> TableDataHandler
+				 -> IndexTree
+				 
+	
+	*/
+	private static final long serialVersionUID = -4180065130691064979L;
 	protected String tableName;
-	protected ArrayList<Column> columnsList = new ArrayList<Column>();
+	protected ArrayList<Column> columnsListForCreatingTableOnly = new ArrayList<Column>();
 	protected Table associatedTable;
 	//protected CsvParser csvParser = null;
 	// Possibilité de parser de plusieurs manières différentes (un jour...)
@@ -33,7 +42,7 @@ public class TableHandler {
 	
 	// Liste des threads faisant actuellement du parsing
 	
-	protected ArrayList<Thread> parsingThreadList = new ArrayList<Thread>();
+	protected transient ArrayList<Thread> parsingThreadList = new ArrayList<Thread>();
 	
 	protected ArrayList<IndexTreeDic> indexTreeList = new ArrayList<IndexTreeDic>(); // Liste des IndexTree associés à cette table
 	
@@ -75,15 +84,19 @@ public class TableHandler {
 	 * @throws Exception 
 	 */
 	public void addColumn(String argColumnName, DataType argColumnDataType) throws Exception {
-		for (Column col : columnsList) {
+		for (Column col : columnsListForCreatingTableOnly) {
 			if (col.getName().equals(argColumnName)) throw new Exception("Ajout de la colonne impossibe, il en exie déjà une du même nom : " + argColumnName);
 		}
 		Column newColumn = new Column(argColumnName, argColumnDataType);
-		columnsList.add(newColumn);
+		columnsListForCreatingTableOnly.add(newColumn);
+	}
+
+	public void addColumn(Column column) {
+		columnsListForCreatingTableOnly.add(column);
 	}
 	
 	public Table createTable() throws IOException {
-		associatedTable = new Table(tableName, columnsList);
+		associatedTable = new Table(tableName, columnsListForCreatingTableOnly);
 		return associatedTable;
 	}
 
@@ -99,6 +112,17 @@ public class TableHandler {
 			is.close();
 		} catch (Exception e) {
 			is.close();
+			throw e;
+		}
+	}
+
+	public void parseCsvData (InputStream is, boolean doRuntimeIndexing) throws Exception {
+		try {
+            parseCsvData(is, doRuntimeIndexing, false);
+			is.close();
+		} catch (Exception e) {
+			is.close();
+			Log.error(e);
 			throw e;
 		}
 	}
@@ -210,7 +234,7 @@ public class TableHandler {
 		indexEntry.associatedIndexTree.initialiseWithTableAndColumn(associatedTable, columnIndex); // Pour pouvoir indexer au runtime (lors du parsing)
 	}
 	
-
+	
 	public void createRuntimeIndexingColumn(String columnName) throws Exception {
 		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");
 		int colIndex = getColumnIndex(columnName);
@@ -234,6 +258,9 @@ public class TableHandler {
 	}*/
 	
 	
+	public DataPositionList findIndexedResultsOfColumn(String columnName, Object exactValue) throws Exception {
+		return findIndexedResultsOfColumn(columnName, exactValue, null, true);
+	}
 	
 	/**
 	 * 
@@ -244,7 +271,7 @@ public class TableHandler {
 	 * @return
 	 * @throws Exception
 	 */
-	@Deprecated // in favor to Index.getPositionsFromPredicate
+	@Deprecated // TODO in favor to Index.getPositionsFromPredicate
 	public DataPositionList findIndexedResultsOfColumn(String columnName, Object minValue, Object maxValue, boolean inclusive) throws Exception {
 		int columnIndex = getColumnIndex(columnName);
 		if (columnIndex == -1) throw new Exception("Colonne introuvable, impossible de faire une recherche sur ses index.");
@@ -293,40 +320,67 @@ public class TableHandler {
 		return resultsCollection.size();
 	}
 	
-	//trip_distance
+	private static boolean debugUseOldDeprecatedSearch = false; // bench : la nouvelle manière va environ 80x plus vite ^^
+	
+	
 	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection) throws StructureException, IOException { // table connue ! , Table fromTable) {
+		return getFullResultsFromBinIndexes(resultsCollection, true, -1);
+	}
+	/**
+	 *  @param resultsCollection
+	 *  @param waitForAllResults
+	 *  @param waitTimeLimitMs
+	 *  @return
+	 *  @throws Exception
+	 */
+	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection, boolean waitForAllResults, int waitTimeLimitMs) throws StructureException, IOException{ // table connue ! , Table fromTable) {
+		return getFullResultsFromBinIndexes(resultsCollection, waitForAllResults, waitTimeLimitMs, null);
+	}
+	//trip_distance
+	
+	/** 
+	 *  @param resultsCollection
+	 *  @param waitForAllResults
+	 *  @param waitTimeLimitMs
+	 *  @param onlyGetThoseColumnsIndex null si renvoyer tout les champs
+	 *  @return
+	 *  @throws Exception
+	 */
+	//public ArrayList<ArrayList<Object>> getFullResultsFromBinIndexes(DataPositionList resultsCollection) throws Exception { // table connue ! , Table fromTable) {
+	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection, boolean waitForAllResults, int waitTimeLimitMs, ArrayList<Integer> onlyGetThoseColumnsIndex) throws StructureException, IOException { // table connue ! , Table fromTable) {
 		if (associatedTable == null) throw new StructureException("Aucune table crée, indexation impossible.");
 		
 		ResultSet resultArrayList = new ResultSet();
 		
 		TableDataHandler dataHandler = associatedTable.getDataHandler();
 		
-		// Pour toutes les listes de valeurs identiques
-		// (il peut y avoir des listes distinctes associés à une même valeur indexée, du fait du multi-fichiers / multi-thread)
-		for (DiskDataPosition dataPos : resultsCollection) {
-			//Log.info("list size = " + list.size());
-			//for (DiskDataPosition dataPos : dataPosList) {
-				// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
-				ArrayList<Object> objList = dataHandler.getValuesOfLineByIdForSignleQuery(dataPos);
-				resultArrayList.add(objList);
-				//Log.info("  objList = " + objList);
-				
-				//Log.info("  index = " + index);
-				// TODO
-				// TODO
-				// TODO Résultats à lire depuis les fichiers binaires
-				// TODO
-				// TODO
-				//ArrayList<Object> objList = associatedTable.getValuesOfLineById(binIndex);
-				//resultArrayList.add(objList);
-				
-				//Object indexedValue = objList.get(indexingColumnIndex);
-				//indexingColumn.getDataType().
-				//Log.info("  valeur indexée = " + indexedValue);
-				//Log.info("  objList = " + objList);
-			//}
+		if (debugUseOldDeprecatedSearch == false) {
+			return dataHandler.getValuesOfLinesListById(resultsCollection, waitForAllResults, waitTimeLimitMs, onlyGetThoseColumnsIndex);
+		} else {
+			
+			// Pour toutes les listes de valeurs identiques
+			// (il peut y avoir des listes distinctes associés à une même valeur indexée, du fait du multi-fichiers / multi-thread)
+			for (DiskDataPosition dataPos : resultsCollection) {
+				//Log.info("list size = " + list.size());
+				//for (DiskDataPosition dataPos : dataPosList) {
+					// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
+					ArrayList<Object> objList = dataHandler.getValuesOfLineByIdForSignleQuery(dataPos);
+					resultArrayList.add(objList);
+					//Log.info("  objList = " + objList);
+					
+					//Log.info("  index = " + index);
+					// TO DO Résultats à lire depuis les fichiers binaires -> OK !!!
+					//ArrayList<Object> objList = associatedTable.getValuesOfLineById(binIndex);
+					//resultArrayList.add(objList);
+					
+					//Object indexedValue = objList.get(indexingColumnIndex);
+					//indexingColumn.getDataType().
+					//Log.info("  valeur indexée = " + indexedValue);
+					//Log.info("  objList = " + objList);
+				//}
+			}
+			return resultArrayList;
 		}
-		return resultArrayList;
 	}
 	
 	public void displayOnLogResults(ResultSet resultArrayList) {

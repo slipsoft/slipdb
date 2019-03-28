@@ -2,8 +2,8 @@ package com.dant.app;
 
 import com.dant.exception.RuntimeExceptionMapper;
 import com.dant.filter.GsonProvider;
+import db.structure.Database;
 
-import javax.annotation.PostConstruct;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 import java.util.HashSet;
@@ -14,9 +14,9 @@ import java.util.Set;
  */
 @ApplicationPath("")
 public class App extends Application {
-
 	@Override
 	public Set<Object> getSingletons() {
+		initialize();
 		Set<Object> sets = new HashSet<>(1);
 		sets.add(new DBEndpoint());
 		sets.add(new TableEndpoint());
@@ -29,5 +29,9 @@ public class App extends Application {
 		sets.add(GsonProvider.class);
 		sets.add(RuntimeExceptionMapper.class);
 		return sets;
+	}
+
+	public static void initialize() {
+		Database.getInstance().getConfigFromFile();
 	}
 }

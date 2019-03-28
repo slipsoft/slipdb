@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,12 +19,13 @@ import com.dant.utils.EasyFile;
 import db.data.DataType;
 import db.disk.dataHandler.TableDataHandler;
 import db.search.Predicate;
+import db.structure.recherches.TableHandler;
 
 /**
  * A simple SQL-like table, consisting of
  */
-public class Table {
-
+public class Table implements Serializable {
+	private static final long serialVersionUID = 2266328195200925214L;
 	public final static short currentNodeID = 1;
 	protected static String oldSmellyBasePath = "target/tables/";
 	final public static String baseAllTablesDirPath = "data_save/tables/";
@@ -31,45 +33,60 @@ public class Table {
 	protected static AtomicInteger nextTableID = new AtomicInteger(1);
 
 	protected final int tableID;
+	protected final short nodeID; // TODO à faire plus tard : importation d'une table depuis un autre noeud
 	protected final String baseTablePath;
 	protected int lineDataSize;
 
 
 	//protected final String dataFilesOnDiskBasePath; devenu baseTablePath
 	protected final TableDataHandler dataHandler;
-
+	protected TableHandler tableHandler;
+	
 	protected final String name; // table name
-
-	protected EasyFile fileLinesOnDisk; // <- les fichiers de sauvegarde des colonnes sont désormais indépendants
+	
+	@Deprecated protected EasyFile fileLinesOnDisk; // <- le système de fichiers à changé (il est mieux maintenant)
 	protected List<Column> columnsList = new ArrayList<Column>(); // liste des colonnes de la table
-	protected List<Index> indexesList = new ArrayList<Index>();   // liste des index générés pour cette table
-
+	/* @CurrentlyUseless */ @Deprecated protected List<Index> indexesList = new ArrayList<Index>();   // liste des index générés pour cette table
+	// -> Dans TableHandler.indexTreeList pour l'instant
+	
 	/**
 	 * Plus tard : Evolution, pour permettre le multi-thread, sauvegarder et indexer plus vite, avoir plusieurs fichiers par colonne, sauvegarde des données en entrée par colonne.
 	 * Pour l'instant, je laisse comme ça (Sylvain), et je fais l'index par dichotomie
 	 */
-
-	/**
+	
+	/** 
 	 * Create a table with a name and a columns list
-	 *
-	 * @param name
-	 * @param columnsList
+	 * @param argName
+	 * @param argColumnsList
+	 * @param argTableHandler
 	 * @throws IOException
 	 */
-	public Table(String argName, List<Column> argColumnsList) throws IOException {
-		this.name = argName;
-		this.columnsList.addAll(argColumnsList);
+	public Table(String argName, List<Column> argColumnsList, TableHandler argTableHandler) throws IOException {
+		this(argName, argColumnsList, currentNodeID, nextTableID.addAndGet(1), argTableHandler);
+	}
+	
+	public Table(String argName, List<Column> argColumnsList, short argNodeID, int argTableID, TableHandler argTableHandler) throws IOException {
+		name = argName;
+		columnsList.addAll(argColumnsList);
+		tableHandler = argTableHandler;
+		if (tableHandler == null) {
+			tableHandler = new TableHandler(argName);
+		}
+		
 		baseTablePath = baseAllTablesDirPath + name + "/";
-		TableDataHandler.setNodeID(currentNodeID); // <- NODE ID
 		dataHandler = new TableDataHandler(this, baseTablePath);
-		tableID = nextTableID.addAndGet(1);
-
+		tableID = argTableID;
+		nodeID = argNodeID;
 		/* Désormais géré par TableDiskDataHandler*/
 		this.fileLinesOnDisk = new EasyFile(oldSmellyBasePath + name + ".bin");
 		this.fileLinesOnDisk.createFileIfNotExist();
 		computeLineDataSize();
 	}
 
+	public Table(String argName, List<Column> argColumnsList) throws IOException {
+		this(argName, argColumnsList, currentNodeID, nextTableID.addAndGet(1), null);
+	}
+	
 	public String getBaseTablePath() {
 		return baseTablePath;
 	}
@@ -133,7 +150,6 @@ public class Table {
 	 * Ajout d'une colonne
 	 *
 	 * @param colName
-	 * @param defaultFillValue
 	 * @return
 	 * @throws Exception
 	 */
@@ -232,4 +248,34 @@ public class Table {
 		// ArrayList<IndexEntity> allIndexes = this.indexesList.stream().map(Index::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
 		return new TableEntity(name, allColumns);
 	}
+
+	public TableHandler getTableHandler() {
+		return tableHandler;
+	}
 }
+
+/*public NetBuffer tableAsNetBuffer() {
+NetBuffer tableBuff = new NetBuffer();
+tableBuff.writeInt(tableID);
+tableBuff.writeInt(nodeID);
+tableBuff.writeString(name);
+tableBuff.writeInt(columnsList.size());
+for (Column col : columnsList) {
+	NetBuffer colAsBuffer = columnsList.columnAsNetBuffer();
+	tableBuff.writeByteArray(colAsBuffer.convertToByteArray());
+}
+return tableBuff;
+}
+
+public static Table readTableFromNetBuffer(NetBuffer tableBuff) {
+int aTableID = tableBuff.readInt();
+int aNodeID = tableBuff.readInt();
+String aTableName = tableBuff.readString();
+int columnsCount = tableBuff.readInt();
+ArrayList<Column> addColumns = new ArrayList<Column>();
+addColumns.ensureCapacity(columnsCount);
+for (int colIndex = 0; colIndex < columnsCount; colIndex++) {
+	NetBuffer colAsBuffer = new NetBuffer(tableBuff.readByteArray());
+	addColumns.add(Column.readFromNetBuffer(colAsBuffer));
+}
+}*/

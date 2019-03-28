@@ -1,9 +1,10 @@
 package com.dant.utils;
 
-import com.dant.entity.Entity;
-import com.dant.entity.HttpResponse;
+import com.dant.entity.*;
 
 import javax.ws.rs.core.Response;
+
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -13,8 +14,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class Utils {
-	
+public class Utils implements Serializable {
+	private static final long serialVersionUID = -8896010424044154271L;
+
 	protected final static String dateFormatString = "yyyy-MM-dd HH:mm:ss";
 	// bien mettre MM pour "month" et HH pour le format 24H et non 12H. (cause des bugs lors du parsing sinon !!)
 	
@@ -62,7 +64,7 @@ public class Utils {
 	public static Date dateFromStringNoThreadSafe(String dateAsString) {
 		try {
 			return staticDateFormat.parse(dateAsString);
-			// Ne pas faire :  new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(...)  est BEAUCOUP plus lent
+			// Ne pas faire :  new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(...) est BEAUCOUP plus lent
 		} catch (ParseException e) {
 			return null; //new Date();
 		}
@@ -90,6 +92,6 @@ public class Utils {
 
 	public static boolean isNameDuplicate(ArrayList<Entity> entities, String toCheck) {
 		ArrayList<Entity> duplicates = entities.stream().filter(e -> e.name.equals(toCheck)).collect(Collectors.toCollection(ArrayList::new));
-		return duplicates.size() <= 0;
+		return duplicates.size() <= 1;
 	}
 }

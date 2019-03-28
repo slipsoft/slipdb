@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.dant.utils.BufferedDataInputStreamCustom;
@@ -159,6 +160,7 @@ public class TableDataHandlerFile {
 	 *  @return
 	 * @throws IOException 
 	 */
+	@Deprecated
 	public ArrayList<Object> getValuesOfLineById(DiskDataPosition dataPosition, Table inTable) throws IOException {
 		if (isReadOnlyMode == false) throw new IOException("Le fichier doit être ouvert en lecture."); // erreur, le fichier DOIT être ouvert en lecture
 		int binPosInFile = dataPosition.lineIndex * inTable.getLineSize();
@@ -177,6 +179,105 @@ public class TableDataHandlerFile {
 			//Log.debug(b); for debug purposes only
 			lineValues.add(column.getDataType().readTrueValue(columnValueAsByteArray));
 		}
+		return lineValues;
+		
+	}
+	
+	
+	
+
+	public ArrayList<Object> orderedReadGetValuesOfLineById(DiskDataPosition dataPosition, Table inTable) throws IOException {
+		return orderedReadGetValuesOfLineById(dataPosition, inTable, null, null);
+	}
+	
+	/** Adapté à plusieurs lectures à la fois
+	 *  @param dataPosition
+	 *  @param inTable
+	 *  @param sortedWantedColumnsIndex DOIT ÊTRE SORTED
+	 *  @return
+	 *  @throws IOException
+	 */
+	public ArrayList<Object> orderedReadGetValuesOfLineById(DiskDataPosition dataPosition, Table inTable, ArrayList<Integer> sortedWantedColumnsIndex, ArrayList<Integer> wantedColumnsIndexList) throws IOException {
+		if (isReadOnlyMode == false) throw new IOException("Le fichier doit être ouvert en lecture."); // erreur, le fichier DOIT être ouvert en lecture
+		int binPosInFile = dataPosition.lineIndex * inTable.getLineSize();
+		int skipSize = binPosInFile - positionInReadOnlyFile; // skip de la bonne valeur, forcément positif car orderedReadSeekFirst
+		if (skipSize < 0) {
+			 throw new IOException("orderedReadSeekFirst DOIT être utilisé pour lire dans l'ordre, il DOIT y avoir skipSize > 0 alors que skipSize = " + skipSize); // erreur,
+		}
+		streamReader.skipForce(skipSize);
+		positionInReadOnlyFile = binPosInFile;
+		
+		ArrayList<Object> lineValues = new ArrayList<>(); // rowValues
+		// Renvoyer toutes les colonnes
+		if (sortedWantedColumnsIndex == null) {
+			// For each column, reads the associated value
+			for (Column column : inTable.getColumns()) {
+				byte[] columnValueAsByteArray = new byte[column.getSize()];
+				streamReader.read(columnValueAsByteArray); // reads from the stream
+				//Log.debug(b); for debug purposes only
+				lineValues.add(column.getDataType().readTrueValue(columnValueAsByteArray));
+			}
+		} else {
+			// Renvoyer seulement certaines colonnes
+			//int currentColumnIndex = 0;
+			
+			/*
+			int[] 
+			for (int i = 0; i < sortedWantedColumnsIndex.size(); i++) {
+				int sortedCurrentColumnIndex = sortedWantedColumnsIndex.get(i);
+				int wantedColumnIndexAtThisPosition = wantedColumnsIndexList.get(i);
+				int whereToPutColumnData = 
+				lineValues.add(null);
+			}*/
+			
+			// TODO : faire ici
+			//wantedColumnsIndexList
+			
+			int lastColumnIndex = -1;
+			List<Column> columnList = inTable.getColumns();
+			//for (int currentColumnIndex : sortedWantedColumnsIndex) {
+
+			for (int currentColumnIndex = 0; currentColumnIndex < sortedWantedColumnsIndex.size(); currentColumnIndex++) {
+				//int sortedCurrentColumnIndex = sortedWantedColumnsIndex.get(currentColumnIndex);
+				//int wantedColumnIndexAtThisPosition = wantedColumnsIndexList.get(currentColumnIndex);
+				
+				// Ignorer les colonnes non utiles
+				int localSkipBytesNumber = 0;
+				for (int inBetweenColumnIndex = lastColumnIndex + 1; inBetweenColumnIndex < currentColumnIndex; inBetweenColumnIndex++) {
+					localSkipBytesNumber += columnList.get(inBetweenColumnIndex).getSize();
+				}
+				Column column = columnList.get(currentColumnIndex);
+				if (localSkipBytesNumber != 0) {
+					streamReader.skipForce(localSkipBytesNumber);
+					//Log.info("orderedReadGetValuesOfLineById : localSkipBytesNumber = " + localSkipBytesNumber + " taille lue = " + column.getDataSize());
+				}
+				
+				byte[] columnValueAsByteArray = new byte[column.getSize()];
+				streamReader.read(columnValueAsByteArray); // reads from the stream
+				//Log.debug(b); for debug purposes only
+				lineValues.add(column.getDataType().readTrueValue(columnValueAsByteArray));
+				lastColumnIndex = currentColumnIndex;
+			}
+			// Skip après, des colonnes non utilisées
+			
+			// Ignorer les colonnes non utiles
+			int localSkipBytesNumber = 0;
+			for (int inBetweenColumnIndex = lastColumnIndex + 1; inBetweenColumnIndex < columnList.size(); inBetweenColumnIndex++) {
+				localSkipBytesNumber += columnList.get(inBetweenColumnIndex).getSize();
+			}
+			if (localSkipBytesNumber != 0) {
+				streamReader.skipForce(localSkipBytesNumber);
+				//Log.info("orderedReadGetValuesOfLineById : AFTER localSkipBytesNumber = " + localSkipBytesNumber + " total size = " + inTable.getLineSize());
+			}
+			
+			
+			
+			
+			
+			
+		}
+		
+		
 		return lineValues;
 		
 	}

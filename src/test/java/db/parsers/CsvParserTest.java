@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
+import db.structure.recherches.TableHandler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,8 +22,6 @@ import db.data.DateType;
 import db.data.DoubleType;
 import db.data.FloatType;
 import db.data.StringType;
-import db.disk.dataHandler.DiskDataPosition;
-import db.disk.dataHandler.TableDataHandler;
 import db.structure.Column;
 import db.structure.Table;
 
@@ -64,7 +62,10 @@ class CsvParserTest {
 		} catch (Exception e) {
 			Log.error(e);
 		}
-		table = new Table("test", columns);
+		TableHandler tableHandler = new TableHandler("test");
+		columns.stream().forEach(c -> tableHandler.addColumn(c));
+
+		Table table = tableHandler.createTable();
 		//parser = new CsvParser2(table); // 790 ms
 		parser = new CsvParser(table); // 750 ms
 	}
