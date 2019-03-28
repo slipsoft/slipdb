@@ -270,7 +270,7 @@ public class TableHandler implements Serializable {
 	 * @return
 	 * @throws Exception
 	 */
-	// TODO @Deprecated // in favor to Index.getPositionsFromPredicate
+	@Deprecated // TODO in favor to Index.getPositionsFromPredicate
 	public DataPositionList findIndexedResultsOfColumn(String columnName, Object minValue, Object maxValue, boolean inclusive) throws Exception {
 		int columnIndex = getColumnIndex(columnName);
 		if (columnIndex == -1) throw new Exception("Colonne introuvable, impossible de faire une recherche sur ses index.");
