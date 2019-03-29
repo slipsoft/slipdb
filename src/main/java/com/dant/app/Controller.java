@@ -1,14 +1,15 @@
 package com.dant.app;
 
-import com.dant.entity.Location;
-import com.dant.entity.ResponseError;
-import com.dant.entity.TableEntity;
-import com.dant.entity.Type;
+import com.dant.entity.*;
 import com.dant.exception.BadRequestException;
+import com.dant.utils.Log;
+import db.search.ResultSet;
+import db.search.View;
 import db.structure.Database;
 import db.structure.Table;
 
 import javax.ws.rs.core.Response;
+import javax.xml.transform.Result;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -95,6 +96,22 @@ public class Controller {
             return Database.getInstance().getAllTables().stream().filter(t -> t.getName().equals(tableName)).findFirst();
         }
         return Optional.empty();
+    }
+
+    public static Response doSearch(ViewEntity viewEntity) {
+        try {
+            ArrayList<ResponseError> allErrors = new ArrayList<>();
+            viewEntity.validate(allErrors);
+            if (allErrors.size() > 0)
+                return com.dant.utils.Utils.generateResponse(400, "error", "application/json", allErrors);
+            View viewToExecute = viewEntity.convertToView();
+            ResultSet resultSet = viewToExecute.execute();
+            return com.dant.utils.Utils.generateResponse(200, "ok", "application/json", resultSet);
+        } catch (Exception exp) {
+            Log.error(exp);
+            return com.dant.utils.Utils.generateResponse(500, "error", "application/json", "error when doing search");
+        }
+
     }
 
 }

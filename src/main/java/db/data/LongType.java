@@ -52,4 +52,13 @@ public class LongType extends DataType {
 		}, op);
 	}
 
+	public boolean inputCanBeParsed(String input) {
+		try {
+			Long.parseLong(input);
+			return true;
+		} catch (IllegalArgumentException exp) {
+			return false;
+		}
+	}
+
 }

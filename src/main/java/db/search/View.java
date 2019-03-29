@@ -18,7 +18,7 @@ public class View {
 	protected List<Sort>   sorts  = new ArrayList<>();
 	protected Group groupBy;
 
-	View(TableHandler tableHandler, FilterTerm filter, List<Field> fields, List<Sort> sorts, Group groupBy){
+	public View(TableHandler tableHandler, FilterTerm filter, List<Field> fields, List<Sort> sorts, Group groupBy){
 		this.tableHandler = tableHandler;
 		this.filter = filter;
 		this.fields = fields;
@@ -30,7 +30,7 @@ public class View {
 		int nbFields = fields.size();
 		Column[] columns = new Column[nbFields];
 		for (int i = 0; i < nbFields; i++) {
-			Optional<Column> column = this.tableHandler.getAssociatedTable().findColumn(fields.get(i).name);
+			Optional<Column> column = this.tableHandler.getAssociatedTable().getColumnByName(fields.get(i).name);
 			if (column.isPresent()) {
 				columns[i] = column.get();
 			} else {

@@ -37,6 +37,13 @@ public abstract class DataType implements Operable {
 	 * @throws IllegalArgumentException
 	 */
 	abstract public Object parseAndWriteToBuffer(String input, ByteBuffer outputBuffer) throws IllegalArgumentException;
+
+	/**
+	 * check if input can be parsed into Typed Data.
+	 * @param input - raw string input
+	 * @return boolean
+	 */
+	abstract public boolean inputCanBeParsed(String input);
 	
 	/**
 	 * Convert bytes input into typed data

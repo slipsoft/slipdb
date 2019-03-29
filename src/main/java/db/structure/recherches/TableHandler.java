@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import com.dant.utils.Log;
 
@@ -17,6 +18,7 @@ import db.data.DataPositionList;
 import db.parsers.CsvParser;
 import db.search.ResultSet;
 import db.structure.Column;
+import db.structure.Database;
 import db.structure.Table;
 import db.structure.indexTree.IndexTreeDic;
 import sj.network.tcpAndBuffers.NetBuffer;
@@ -25,7 +27,7 @@ public class TableHandler {
 	
 	protected String tableName;
 	protected ArrayList<Column> columnsList = new ArrayList<Column>();
-	protected Table associatedTable;
+	public Table associatedTable;
 	//protected CsvParser csvParser = null;
 	// Possibilité de parser de plusieurs manières différentes (un jour...)
 	protected boolean firstTimeParsingData = true;
@@ -74,11 +76,18 @@ public class TableHandler {
 	 * @throws Exception 
 	 */
 	public void addColumn(String argColumnName, DataType argColumnDataType) throws Exception {
-		for (Column col : columnsList) {
-			if (col.getName().equals(argColumnName)) throw new Exception("Ajout de la colonne impossibe, il en exie déjà une du même nom : " + argColumnName);
-		}
+		if (columnExists(argColumnName)) throw new Exception("Ajout de la colonne impossibe, il en exie déjà une du même nom : " + argColumnName);
 		Column newColumn = new Column(argColumnName, argColumnDataType);
 		columnsList.add(newColumn);
+	}
+
+	public boolean columnExists(String columnName) {
+		for (Column col : columnsList) {
+			if (col.getName().equals(columnName)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void addColumn(Column column) {
@@ -86,7 +95,7 @@ public class TableHandler {
 	}
 	
 	public Table createTable() throws IOException {
-		associatedTable = new Table(tableName, columnsList, this);
+		this.associatedTable = new Table(tableName, columnsList, this);
 		return associatedTable;
 	}
 
@@ -421,6 +430,5 @@ public class TableHandler {
 	public void clearDataDirectory() throws IOException {
 		associatedTable.getDataHandler().clearDataDirectory();
 	}
-	
 	
 }

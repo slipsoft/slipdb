@@ -8,7 +8,8 @@ public enum Location {
     getTable("getTable"),
     addIndex("addIndex"),
     deleteIndex("deleteIndex"),
-    loadCSV("loadCSV");
+    loadCSV("loadCSV"),
+    search("search");
 
     private final String fieldDescription;
 

@@ -139,8 +139,11 @@ public class Table {
 		*/
 	}
 
-	public Optional<Column> findColumn(String name) {
-		return columnsList.stream().filter(column -> column.getName() == name).findFirst();
+	public Optional<Column> getColumnByName(String columnName) {
+		if (com.dant.utils.Utils.validateRegex(Database.getInstance().config.columnNamePattern, columnName)) {
+			return this.columnsList.stream().filter(c -> c.getName().equals(columnName)).findFirst();
+		}
+		return Optional.empty();
 	}
 
 	public boolean columnExist(String name) {

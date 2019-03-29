@@ -77,4 +77,13 @@ public class DateType extends DataType {
 			Operator.lessOrEquals,
 		}, op);
 	}
+
+	public boolean inputCanBeParsed(String input) {
+		try {
+			Utils.dateToSecInt(utilsInstance.dateFromString(input));
+			return true;
+		} catch (IllegalArgumentException exp) {
+			return false;
+		}
+	}
 }
