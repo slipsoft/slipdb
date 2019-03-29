@@ -157,8 +157,14 @@ public class Table implements Serializable {
 		*/
 	}
 
-	public Optional<Column> findColumn(String name) {
-		return columnsList.stream().filter(column -> column.getName() == name).findFirst();
+	public Optional<Column> getColumnByName(String columnName) {
+		if (com.dant.utils.Utils.validateRegex(Database.getInstance().config.columnNamePattern, columnName)) {
+			return this.columnsList.stream().filter(c -> c.getName().equals(columnName)).findFirst();
+		}
+		return Optional.empty();
+	}
+	public Optional<Column> getColumnByNameNoCheck(String columnName) {
+		return this.columnsList.stream().filter(c -> c.getName().equals(columnName)).findFirst();
 	}
 
 	public boolean columnExist(String name) {

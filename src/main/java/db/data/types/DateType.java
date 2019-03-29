@@ -91,4 +91,13 @@ public class DateType extends DataType implements Serializable {
 			Operator.lessOrEquals,
 		}, op);
 	}
+
+	public boolean inputCanBeParsed(String input) {
+		try {
+			Utils.dateToSecInt(utilsInstance.dateFromString(input));
+			return true;
+		} catch (IllegalArgumentException exp) {
+			return false;
+		}
+	}
 }

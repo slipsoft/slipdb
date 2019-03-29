@@ -45,7 +45,7 @@ class ViewTest {
 	void getListColumns() {
 		List<Column> expected = new ArrayList<>();
 		for (Field f : listFields) {
-			table.findColumn(f.getName()).ifPresent(expected::add);
+			table.getColumnByNameNoCheck(f.getName()).ifPresent(expected::add);
 		}
 		List<Column> actual = null;
 		try {

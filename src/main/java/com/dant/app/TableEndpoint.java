@@ -1,15 +1,10 @@
 package com.dant.app;
 
-import javax.print.attribute.standard.Media;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.dant.entity.Location;
-import com.dant.entity.ResponseError;
-import com.dant.entity.Type;
+import com.dant.entity.*;
 import com.dant.utils.Log;
 import db.structure.Table;
 
@@ -30,6 +25,8 @@ public class TableEndpoint {
             if (tableOptional.isPresent()) {
                 InputStream is = new ByteArrayInputStream(body.getBytes("UTF-8"));
                 tableOptional.get().getTableHandler().parseCsvData(is, true);
+                return com.dant.utils.Utils.generateResponse(200, "ok", "application/json", "ok");
+
             } else {
                 return com.dant.utils.Utils.generateResponse(500, "error", "application/json", new ResponseError(Location.loadCSV, Type.invalidData, "table name is invalid"));
             }
@@ -38,5 +35,19 @@ public class TableEndpoint {
             Log.error(exp);
         }
         return com.dant.utils.Utils.generateResponse(500, "error", "application/json", new ResponseError(Location.loadCSV, Type.invalidData, "error"));
+    }
+
+    @POST
+    @Path("{tableName}/search")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response search(@PathParam("tableName") String tableName, ViewEntity view) {
+        try {
+            return Controller.doSearch(view);
+
+        } catch (Exception exp) {
+            Log.error(exp);
+            return com.dant.utils.Utils.generateResponse(500, "non", "non", "non");
+        }
     }
 }

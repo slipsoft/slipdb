@@ -16,7 +16,7 @@ public class Network {
         Client client = ClientBuilder.newClient();
         ArrayList<WebTarget> allTargets = Database.getInstance().allNodes.stream().map(n -> client.target(n.address + endpoint)).collect(Collectors.toCollection(ArrayList::new));
         allTargets.stream().forEach(t -> {
-            t.request().post(Entity.entity("cul", "application/json"));
+            t.request().post(Entity.entity(body, "application/json"));
             /*TODO proper HTTP request*/
         });
         return true;

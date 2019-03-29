@@ -52,4 +52,12 @@ public class IntegerType extends DataType {
 		}, op);
 	}
 
+	public boolean inputCanBeParsed(String input) {
+		try {
+			Integer.parseInt(input);
+			return true;
+		} catch (IllegalArgumentException exp) {
+			return false;
+		}
+	}
 }

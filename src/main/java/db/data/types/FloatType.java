@@ -51,4 +51,13 @@ public class FloatType extends DataType {
 		}, op);
 	}
 
+	public boolean inputCanBeParsed(String input) {
+		try {
+			Float.parseFloat(input);
+			return true;
+		} catch (IllegalArgumentException exp) {
+			return false;
+		}
+	}
+
 }

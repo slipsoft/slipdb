@@ -52,4 +52,13 @@ public class DoubleType extends DataType {
 		}, op);
 	}
 
+	public boolean inputCanBeParsed(String input) {
+		try {
+			Double.parseDouble(input);
+			return true;
+		} catch (IllegalArgumentException exp) {
+			return false;
+		}
+	}
+
 }
