@@ -629,7 +629,7 @@ class IndexTreeMessyTest {
 
 	@Test
 	void executeView() {
-		Column column = table.getColumns().get(12);
+		Column column = table.getColumns().get(4);
 		Field field = new Field(column.getName());
 		Predicate predicate = new Predicate(table, column, Operator.equals, new Float("17.78"));
 		ArrayList<Field> listFields = new ArrayList<>();
@@ -638,11 +638,8 @@ class IndexTreeMessyTest {
 		ResultSet result = null;
 
 		try {
-			tableHandler.indexColumnWithTreeFromDisk("fare_amount");
 			result = view.execute();
 		} catch (SearchException e) {
-			Log.error(e);
-		} catch (StructureException e) {
 			Log.error(e);
 		}
 		Log.debug(result);
