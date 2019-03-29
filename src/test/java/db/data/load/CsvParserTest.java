@@ -30,7 +30,7 @@ class CsvParserTest {
 
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
-		Log.start("csvParserTest", 2);
+		Log.start("csvParserTest", 3);
 	}
 
 	@BeforeEach

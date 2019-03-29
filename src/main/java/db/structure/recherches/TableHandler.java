@@ -18,7 +18,9 @@ import db.data.types.DataPositionList;
 import db.data.load.CsvParser;
 import db.search.ResultSet;
 import db.structure.Column;
+import db.structure.StructureException;
 import db.structure.Table;
+import db.structure.indexTree.IndexException;
 import db.structure.indexTree.IndexTreeDic;
 
 public class TableHandler implements Serializable {
@@ -174,8 +176,8 @@ public class TableHandler implements Serializable {
 		
 	}
 	
-	protected int getColumnIndex(String columnName) throws Exception {
-		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");
+	protected int getColumnIndex(String columnName) throws StructureException {
+		if (associatedTable == null) throw new StructureException("Aucune table crée, indexation impossible.");
 		List<Column> columnList = associatedTable.getColumns();
 		for (int colIndex = 0; colIndex < columnList.size(); colIndex++) {
 			Column currentColumn = columnList.get(colIndex);
@@ -183,42 +185,44 @@ public class TableHandler implements Serializable {
 				return colIndex;
 			}
 		}
-		return -1;
+		throw new StructureException("Colonne introuvable, impossible de l'indexer.");
 	}
 	
-	public void indexColumnWithTreeFromDisk(String columnName) throws Exception {
+	public void indexColumnWithTreeFromDisk(String columnName) throws StructureException {
 		int colIndex = getColumnIndex(columnName);
-		if (colIndex == -1) throw new Exception("Colonne introuvable, impossible de l'indexer.");
 		indexColumnWithTreeFromDisk(colIndex);
 	}
 	
 	
 	
 	
-	protected IndexTreeDic findOrCreateAssociatedIndexTree(int columnIndex, boolean createTreeIfDoesNotExists) throws Exception { synchronized(indexTreeListLock) {
+	protected IndexTreeDic findOrCreateAssociatedIndexTree(int columnIndex, boolean createTreeIfDoesNotExists) throws IndexException {
+		synchronized(indexTreeListLock) {
 		
-		//Log.info("findOrCreateAssociatedIndexTree : size = " + indexTreeList.size());
-		for (IndexTreeDic indexTree : indexTreeList) {
-			if (indexTree.getAssociatedTableColumnIndex() == columnIndex) {
-				//Log.info("findOrCreateAssociatedIndexTree : TROUVE TROUVE TROUVE TROUVE");
-				return indexTree;
+			//Log.info("findOrCreateAssociatedIndexTree : size = " + indexTreeList.size());
+			for (IndexTreeDic indexTree : indexTreeList) {
+				if (indexTree.getAssociatedTableColumnIndex() == columnIndex) {
+					//Log.info("findOrCreateAssociatedIndexTree : TROUVE TROUVE TROUVE TROUVE");
+					return indexTree;
+				}
 			}
+			if (createTreeIfDoesNotExists == false) return null;
+			IndexTreeDic newTree = new IndexTreeDic(associatedTable, columnIndex);
+			indexTreeList.add(newTree);
+			associatedTable.addIndex(newTree);
+			//Log.info("findOrCreateAssociatedIndexTree : CREE CREE CREE CREE CREE");
+			return newTree;
 		}
-		if (createTreeIfDoesNotExists == false) return null;
-		IndexTreeDic newTree = new IndexTreeDic(associatedTable, columnIndex);
-		indexTreeList.add(newTree);
-		//Log.info("findOrCreateAssociatedIndexTree : CREE CREE CREE CREE CREE");
-		return newTree;
-	} }
+	}
 	
 	/** Pas
 	 *  @param columnIndex
-	 *  @throws Exception
+	 *  @throws StructureException
 	 */
-	public void indexColumnWithTreeFromDisk(int columnIndex) throws Exception {
-		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");
+	public void indexColumnWithTreeFromDisk(int columnIndex) throws StructureException {
+		if (associatedTable == null) throw new StructureException("Aucune table crée, indexation impossible.");
 		List<Column> columnList = associatedTable.getColumns();
-		if (columnIndex < 0 || columnIndex >= columnList.size()) throw new Exception("Index de la colonne invalide. (columnIndex=" + columnIndex + " non compris entre 0 et columnList.size()=" + columnList.size());
+		if (columnIndex < 0 || columnIndex >= columnList.size()) throw new IndexException("Index de la colonne invalide. (columnIndex=" + columnIndex + " non compris entre 0 et columnList.size()=" + columnList.size());
 		
 		
 		IndexTreeDic alreadyExistingTree = findOrCreateAssociatedIndexTree(columnIndex, true); /*findTreeAssociatedWithColumnIndex(columnIndex);
@@ -229,7 +233,11 @@ public class TableHandler implements Serializable {
 		}*/
 		
 		//IndexTreeDic indexingObject = new IndexTreeDic();
-		alreadyExistingTree.indexColumnFromDisk(associatedTable, columnIndex);
+		try {
+			alreadyExistingTree.indexColumnFromDisk(associatedTable, columnIndex);
+		} catch (Exception e) {
+			throw new StructureException(e);
+		}
 	}
 	
 	
@@ -344,7 +352,7 @@ public class TableHandler implements Serializable {
 	private static boolean debugUseOldDeprecatedSearch = false; // bench : la nouvelle manière va environ 80x plus vite ^^
 	
 	
-	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection) throws Exception { // table connue ! , Table fromTable) {
+	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection) throws StructureException, IOException { // table connue ! , Table fromTable) {
 		return getFullResultsFromBinIndexes(resultsCollection, true, -1);
 	}
 	/**
@@ -354,7 +362,7 @@ public class TableHandler implements Serializable {
 	 *  @return
 	 *  @throws Exception
 	 */
-	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection, boolean waitForAllResults, int waitTimeLimitMs) throws Exception { // table connue ! , Table fromTable) {
+	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection, boolean waitForAllResults, int waitTimeLimitMs) throws StructureException, IOException{ // table connue ! , Table fromTable) {
 		return getFullResultsFromBinIndexes(resultsCollection, waitForAllResults, waitTimeLimitMs, null);
 	}
 	//trip_distance
@@ -368,8 +376,8 @@ public class TableHandler implements Serializable {
 	 *  @throws Exception
 	 */
 	//public ArrayList<ArrayList<Object>> getFullResultsFromBinIndexes(DataPositionList resultsCollection) throws Exception { // table connue ! , Table fromTable) {
-	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection, boolean waitForAllResults, int waitTimeLimitMs, ArrayList<Integer> onlyGetThoseColumnsIndex) throws Exception { // table connue ! , Table fromTable) {
-		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");
+	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection, boolean waitForAllResults, int waitTimeLimitMs, ArrayList<Integer> onlyGetThoseColumnsIndex) throws StructureException, IOException { // table connue ! , Table fromTable) {
+		if (associatedTable == null) throw new StructureException("Aucune table crée, indexation impossible.");
 		
 		ResultSet resultArrayList = new ResultSet();
 		
