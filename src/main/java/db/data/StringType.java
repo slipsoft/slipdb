@@ -7,6 +7,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import db.search.Operator;
 
 public class StringType extends DataType {
+	private static final long serialVersionUID = -3628502984256891019L;
 	public static boolean sizeIsRequired = true;
 	public static int maxSizeInBytes = 65535; //obligatoire si sizeIsRequired => true:
 	

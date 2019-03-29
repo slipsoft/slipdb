@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -14,42 +15,57 @@ import java.util.stream.Collectors;
 import com.dant.entity.ColumnEntity;
 import com.dant.entity.TableEntity;
 import com.dant.utils.EasyFile;
+import com.dant.utils.Log;
 
 import db.data.DataType;
 import db.disk.dataHandler.TableDataHandler;
+import db.disk.dataHandler.TableDataHandlerFile;
 import db.search.Predicate;
 import db.structure.recherches.TableHandler;
 
 /**
  * A simple SQL-like table, consisting of
  */
-public class Table {
-
+public class Table implements Serializable {
+	private static final long serialVersionUID = 2266328195200925214L;
 	public final static short currentNodeID = 1;
+	
 	protected static String oldSmellyBasePath = "target/tables/";
 	final public static String baseAllTablesDirPath = "data_save/tables/";
 	final public static String allTablesFileExtension = ".sbin";
-	protected static AtomicInteger nextTableID = new AtomicInteger(1);
-
+	
 	protected final int tableID;
+	protected final short nodeID; // TODO à faire plus tard : importation d'une table depuis un autre noeud
 	protected final String baseTablePath;
 	protected int lineDataSize;
-
-
+	
+	
 	//protected final String dataFilesOnDiskBasePath; devenu baseTablePath
 	protected final TableDataHandler dataHandler;
-	protected final TableHandler tableHandler;
+	protected TableHandler tableHandler;
 	
 	protected final String name; // table name
-
-	protected EasyFile fileLinesOnDisk; // <- les fichiers de sauvegarde des colonnes sont désormais indépendants
+	
+	@Deprecated protected EasyFile fileLinesOnDisk; // <- le système de fichiers à changé (il est mieux maintenant)
 	protected List<Column> columnsList = new ArrayList<Column>(); // liste des colonnes de la table
-	protected List<Index> indexesList = new ArrayList<Index>();   // liste des index générés pour cette table
-
+	/* @CurrentlyUseless */ @Deprecated protected List<Index> indexesList = new ArrayList<Index>();   // liste des index générés pour cette table
+	// -> Dans TableHandler.indexTreeList pour l'instant
+	
 	/**
 	 * Plus tard : Evolution, pour permettre le multi-thread, sauvegarder et indexer plus vite, avoir plusieurs fichiers par colonne, sauvegarde des données en entrée par colonne.
 	 * Pour l'instant, je laisse comme ça (Sylvain), et je fais l'index par dichotomie
 	 */
+	
+	public void doBeforeSerialWrite() {
+		if (tableHandler != null) {
+			tableHandler.flushAllIndexTreesOnDisk();
+		}
+	}
+	
+	public void debugSerialShowVariables() {
+		Log.info("TableDataHandler : ");
+		dataHandler.debugSerialShowVariables();
+	}
 	
 	/** 
 	 * Create a table with a name and a columns list
@@ -59,33 +75,37 @@ public class Table {
 	 * @throws IOException
 	 */
 	public Table(String argName, List<Column> argColumnsList, TableHandler argTableHandler) throws IOException {
+		this(argName, argColumnsList, currentNodeID, Database.getInstance().getAndIncrementNextTableID(), argTableHandler);
+	}
+	
+	public Table(String argName, List<Column> argColumnsList, short argNodeID, int argTableID, TableHandler argTableHandler) throws IOException {
 		name = argName;
 		columnsList.addAll(argColumnsList);
 		tableHandler = argTableHandler;
+		if (tableHandler == null) {
+			tableHandler = new TableHandler(argName);
+		}
+		
 		baseTablePath = baseAllTablesDirPath + name + "/";
-		TableDataHandler.setNodeID(currentNodeID); // <- NODE ID
 		dataHandler = new TableDataHandler(this, baseTablePath);
-		tableID = nextTableID.addAndGet(1);
-
+		tableID = argTableID;
+		nodeID = argNodeID;
 		/* Désormais géré par TableDiskDataHandler*/
 		this.fileLinesOnDisk = new EasyFile(oldSmellyBasePath + name + ".bin");
 		this.fileLinesOnDisk.createFileIfNotExist();
 		computeLineDataSize();
 	}
-
+	
+	/**
+	 *  NE PAS UTILISER CE CONSTRUCTEUR CAR MANQUE TABLE HANDLER EN PARAMETRE !
+	 *  UN NOUVEAU TABLE HANDLER SERA DONC GENERE LORS DE LA CREATION DE LA TABLE.
+	 * @param argName
+	 * @param argColumnsList
+	 * @throws IOException
+	 */
+	@Deprecated
 	public Table(String argName, List<Column> argColumnsList) throws IOException {
-		name = argName;
-		columnsList.addAll(argColumnsList);
-		tableHandler = new TableHandler(argName);
-		baseTablePath = baseAllTablesDirPath + name + "/";
-		TableDataHandler.setNodeID(currentNodeID); // <- NODE ID
-		dataHandler = new TableDataHandler(this, baseTablePath);
-		tableID = nextTableID.addAndGet(1);
-
-		/* Désormais géré par TableDiskDataHandler*/
-		this.fileLinesOnDisk = new EasyFile(oldSmellyBasePath + name + ".bin");
-		this.fileLinesOnDisk.createFileIfNotExist();
-		computeLineDataSize();
+		this(argName, argColumnsList, null);
 	}
 	
 	public String getBaseTablePath() {
@@ -144,6 +164,9 @@ public class Table {
 			return this.columnsList.stream().filter(c -> c.getName().equals(columnName)).findFirst();
 		}
 		return Optional.empty();
+	}
+	public Optional<Column> getColumnByNameNoCheck(String columnName) {
+		return this.columnsList.stream().filter(c -> c.getName().equals(columnName)).findFirst();
 	}
 
 	public boolean columnExist(String name) {
@@ -233,18 +256,17 @@ public class Table {
 
 	/**
 	 * Returns the best index to use for a given filter
-	 *
-	 * @param predicate
-	 * @return
-	 * @throws Exception
+	 * @param predicate a predicate without index
+	 * @return Index
+	 * @throws StructureException if no index is found
 	 */
-	public Index findBestIndex(Predicate predicate) throws Exception {
+	public Index findBestIndex(Predicate predicate) throws StructureException {
 		for (Index index : indexesList) {
 			if (index.canBeUsedWithPredicate(predicate)) {
 				return index;
 			}
 		}
-		throw new Exception("no index can be used with this filter");
+		throw new StructureException("no index can be used with this filter");
 	}
 
 	public TableEntity convertToEntity() {
@@ -258,3 +280,29 @@ public class Table {
 		return tableHandler;
 	}
 }
+
+/*public NetBuffer tableAsNetBuffer() {
+NetBuffer tableBuff = new NetBuffer();
+tableBuff.writeInt(tableID);
+tableBuff.writeInt(nodeID);
+tableBuff.writeString(name);
+tableBuff.writeInt(columnsList.size());
+for (Column col : columnsList) {
+	NetBuffer colAsBuffer = columnsList.columnAsNetBuffer();
+	tableBuff.writeByteArray(colAsBuffer.convertToByteArray());
+}
+return tableBuff;
+}
+
+public static Table readTableFromNetBuffer(NetBuffer tableBuff) {
+int aTableID = tableBuff.readInt();
+int aNodeID = tableBuff.readInt();
+String aTableName = tableBuff.readString();
+int columnsCount = tableBuff.readInt();
+ArrayList<Column> addColumns = new ArrayList<Column>();
+addColumns.ensureCapacity(columnsCount);
+for (int colIndex = 0; colIndex < columnsCount; colIndex++) {
+	NetBuffer colAsBuffer = new NetBuffer(tableBuff.readByteArray());
+	addColumns.add(Column.readFromNetBuffer(colAsBuffer));
+}
+}*/

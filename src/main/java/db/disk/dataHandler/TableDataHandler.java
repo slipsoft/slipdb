@@ -2,13 +2,17 @@ package db.disk.dataHandler;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.FileUtils;
 
 import com.dant.utils.Log;
 
+import db.data.DataPositionList;
+import db.search.ResultSet;
 import db.structure.Table;
 
 /**
@@ -22,26 +26,49 @@ import db.structure.Table;
  *  Thread-safe pour les parties qui le nécessitent,
  *  mais globalement non-thread-safe : doit être utilisé par le thread qui gère la table myTable.
  */
-public class TableDataHandler {
+public class TableDataHandler implements Serializable {
+	private static final long serialVersionUID = 5501412889994005013L;
 	
-	static protected short currentNodeID = 1;
-	static protected String saveFileBaseName = "table_data_n1_";
+	/*static {
+		setNodeID((short) 1); // TODO parametrer le VRAI NodeID
+	}*/
+	
+	protected short currentNodeID = 1; // TODO faire une vraie gestion de cette variable
+	protected String saveFileBaseName = "table_data_n1_";
 	static final public String fileExtension = ".bin";
 	
-	protected final Table myTable; // Table associée
+	protected final Table myTable; // TODO -> transient ??  Table associée  (à retrouver lors de la déserialization)
 	protected final String baseTablePath;
 	// Liste de tous les fichiers (pleins, utilisés ou non utilisés) :
 	protected ArrayList<TableDataHandlerFile> allFilesList = new ArrayList<TableDataHandlerFile>();
 	// Liste des jobs en cours
-	protected ArrayList<TableDataHandlerWriteJob> allRunningJobsList = new ArrayList<TableDataHandlerWriteJob>();
+	transient protected ArrayList<TableDataHandlerWriteJob> allRunningJobsList = new ArrayList<TableDataHandlerWriteJob>();
 	
 	protected AtomicInteger nextFileID = new AtomicInteger(1);
 	
-	protected Object allFilesListLock = new Object();
+	transient protected Object allFilesListLock = new Object();
 	
-	static public void setNodeID(short argCurrentNodeID) {
+	/** Pour la déserialisation
+	 * @param in
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		in.defaultReadObject();
+		allFilesListLock = new Object();
+		allRunningJobsList = new ArrayList<TableDataHandlerWriteJob>();
+	}
+	
+	public void setNodeID(short argCurrentNodeID) {
 		currentNodeID = argCurrentNodeID;
 		saveFileBaseName = "table_data_nid" + currentNodeID + "_fid"; // nodeID, fileID
+	}
+	
+	public void debugSerialShowVariables() {
+		Log.info("Nombre de fichiers connus : " + allFilesList.size());
+		for (TableDataHandlerFile hfile : allFilesList) {
+			hfile.debugSerialShowVariables();
+		}
 	}
 	
 	/*
@@ -80,10 +107,11 @@ public class TableDataHandler {
 	 *  @return
 	 *  @throws IOException
 	 */
+	@Deprecated
 	public ArrayList<Object> getValuesOfLineByIdForSignleQuery(DiskDataPosition dataPosition) throws IOException { // or getRowById
 		
 		if (debugLastFileID != dataPosition.fileID) { // Afficher un message à chaque changement de fichier
-			Log.info("getValuesOfLineByIdForSignleQuery depuis fileID = " + dataPosition.fileID);
+			//Log.info("getValuesOfLineByIdForSignleQuery depuis fileID = " + dataPosition.fileID);
 			debugLastFileID = dataPosition.fileID;
 		}
 		
@@ -104,6 +132,171 @@ public class TableDataHandler {
 		}
 		return new ArrayList<Object>();
 	}
+	
+	/** Rechercher de la donnée sur le disque.
+	 *  Cette fonction est optimisée pour faire le moins d'appels disques possibles,
+	 *  et garantit que tous les résultats seront bien lus, si waitForAllResults == true
+	 *  
+	 *  Une optimisation de plus serait de rendre la lecture sur fichiers multi-thread (à faire, plus tard)
+	 * @param dataPosition
+	 * @return
+	 * @throws IOException
+	 */
+	@SuppressWarnings("unchecked")
+	public ResultSet getValuesOfLinesListById(DataPositionList argDataPositionList, boolean waitForAllResults, int waitTimeLimitMs, ArrayList<Integer> neededColumnsIndexList) { // or getRowById
+		
+		ResultSet resultsArraySortedByColumns = new ResultSet(); // ArrayList<ArrayList<Object>>
+		ArrayList<Integer> neededColumnsIndexListSorted = null;
+		if (neededColumnsIndexList != null) {
+			neededColumnsIndexListSorted = (ArrayList<Integer>) neededColumnsIndexList.clone();
+			Collections.sort(neededColumnsIndexListSorted);
+		}
+		
+		DataPositionList dataPositionList = (DataPositionList) argDataPositionList.clone(); // copie de la liste
+		// Je classe par fichiers
+		// Je classe par position dans le fichier
+		Collections.sort(dataPositionList); // pas super opti pour un très grand nombre de résultats (100 000+)
+		// Regrouper par fichier
+		short oldNodeID = -1;
+		short oldFileID = -1;
+		//int oldSingleID = (oldNodeID << 16) + (oldFileID << 0);
+		
+		// Je mets toutes les demandes portant sur le même fichier dans la même liste
+		ArrayList<ArrayList<DiskDataPosition>> a2OrderedByFileList = new ArrayList<ArrayList<DiskDataPosition>>();
+		ArrayList<DiskDataPosition> a1CurrentDataPosArray = null;
+		
+		
+		for (DiskDataPosition dataPosition : dataPositionList) {
+			if (dataPosition.nodeID != oldNodeID || dataPosition.fileID != oldFileID) {
+				a1CurrentDataPosArray = new ArrayList<DiskDataPosition>();
+				a2OrderedByFileList.add(a1CurrentDataPosArray);
+				oldNodeID = dataPosition.nodeID;
+				oldFileID = dataPosition.fileID;
+			}
+			a1CurrentDataPosArray.add(dataPosition); // pas opti de les ajouter un par un mais bon... C'est déjà opti de faire fichier par fichier !
+		}
+
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		// TODO : multithread ici ! (pour la lecture des résultats du disque !)
+		synchronized (allFilesListLock) {
+			int checkIndex = 0;
+			while (a2OrderedByFileList.size() > 0) {
+				if (checkIndex >= a1CurrentDataPosArray.size()) {
+					checkIndex = 0; // boucle, revenir au premier fichier
+				}
+				a1CurrentDataPosArray = a2OrderedByFileList.get(checkIndex);
+				if (a1CurrentDataPosArray.size() == 0) { // (improbable) liste vide, je passe à la suivante et je la supprime
+					a2OrderedByFileList.remove(checkIndex);
+					continue;
+				}
+				
+				DiskDataPosition firstDataPos = a1CurrentDataPosArray.get(0); // existe bien
+				//short nodeID = firstDataPos.nodeID;
+				short fileID = firstDataPos.fileID;
+				
+				TableDataHandlerFile fondUsableDataFile = null;
+				boolean foundFileInList = false;
+				// Je trouve le fichier associé
+				for (TableDataHandlerFile dataFile : allFilesList) {
+					if (dataFile.getFileID() == fileID) {
+						foundFileInList = true; // trouvé, mais pas forcément libre
+						try {
+							if (dataFile.tryToUseThisFile(true, true)) {
+								fondUsableDataFile = dataFile;
+							} else {
+								break; // puis checkIndex++ si waitForAllResults
+								//throw new IOException("Impossible de lire du fichier : il est occupé.");
+							}
+						} catch (IOException e) {
+							Log.error(e);
+							e.printStackTrace(); // ne devrait jamais arriver
+						}
+					}
+				}
+				
+				if (foundFileInList == false) { // fichier introuvable donc, je l'ignore
+					a2OrderedByFileList.remove(checkIndex);
+					continue; // sans checkIndex++
+				}
+				
+				// Fichier trouvé et donc à lire
+				if (fondUsableDataFile != null) {
+					//Log.info("Fichier trouvé " + fileID);
+					// Pour chaque donnée à lire, je la lis
+					for (DiskDataPosition dataPos : a1CurrentDataPosArray) {
+						ArrayList<Object> entryAsArray;
+						try {
+							entryAsArray = fondUsableDataFile.orderedReadGetValuesOfLineById(dataPos, myTable, neededColumnsIndexListSorted, neededColumnsIndexList);
+							resultsArraySortedByColumns.add(entryAsArray);
+						} catch (IOException e) {
+							Log.error(e);
+							e.printStackTrace();
+						}
+					}
+					try {
+						fondUsableDataFile.stopFileUse();
+					} catch (IOException e) {
+						Log.error(e);
+						e.printStackTrace();
+					}
+					a2OrderedByFileList.remove(checkIndex);
+					continue; // sans checkIndex++
+				} else { // si fondUsableDataFile == null
+					if (waitForAllResults == false) {
+						a2OrderedByFileList.remove(checkIndex);
+						continue;
+					}
+					
+				}
+				checkIndex++;
+			}
+		}
+		
+		//argDataPositionList.toArray()
+		//dataPositionList.set(index, element)
+		
+		/*
+		// puis réordoner les résultats dans l'ordre demandé : neededColumnsIndexList
+		ArrayList<ArrayList<Object>> resultsArrayInAskedOrder = new ArrayList<ArrayList<Object>>();
+		
+		// Il s'agit de réordonner les champs de chaque objet pour les faire correpondre à l'ordre demandé
+		
+		if (neededColumnsIndexListSorted != null) {
+			for (int askedColIndexLocalPos = 0; askedColIndexLocalPos < neededColumnsIndexList.size(); askedColIndexLocalPos++) { // les colonnes dans l'ordre demandé
+				Integer askedColumnIndex = neededColumnsIndexList.get(askedColIndexLocalPos);
+				int neededResultColumnIndex = neededColumnsIndexListSorted.indexOf(askedColumnIndex); // la position dans mon résultat local
+				Log.info("askedColumnIndex = " + askedColumnIndex + "   neededResultColumnIndex = " + neededResultColumnIndex);
+				//ArrayList<Object> 
+				//resultsArrayInAskedOrder.add();
+			}
+			
+		} else {
+			resultsArrayInAskedOrder = resultsArraySortedByColumns;
+		}*/
+		/*
+		neededColumnsIndexList
+		neededColumnsIndexListSorted*/
+		
+		
+		return resultsArraySortedByColumns;
+		
+		
+	}
+	
 	
 	
 	/** 
@@ -126,7 +319,7 @@ public class TableDataHandler {
 			if (foundDataFile == null) {
 				short fileID = (short)nextFileID.getAndIncrement();
 				String fullFilePath = baseTablePath + saveFileBaseName + fileID + fileExtension;// getFileNameFromDataPosition(); //
-				foundDataFile = new TableDataHandlerFile(fileID, fullFilePath);
+				foundDataFile = new TableDataHandlerFile(currentNodeID, fileID, fullFilePath);
 				boolean canUseFile = foundDataFile.tryToUseThisFile(false, true);
 				//Log.info("TableDataHandler.findOrCreateWriteFile : créé   foundDataFile == " + foundDataFile);
 				if (canUseFile == false) {

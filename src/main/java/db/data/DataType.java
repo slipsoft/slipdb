@@ -2,20 +2,21 @@ package db.data;
 
 import java.io.DataInput;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 
 import db.search.Operable;
 
 
-public abstract class DataType implements Operable {
+public abstract class DataType implements Operable, Serializable {
+	private static final long serialVersionUID = 4426175636422784230L;
 
 	public static boolean sizeIsRequired; // nécessaire au bon fonctionnement de l'API, si set à true => public static int maxSizeInBytes = [max]; obligatoire
 
 	protected int sizeInBytes;
-
-	//c'est en fait inutile (merci Nicolas ;) ) : protected final Utils currentUtilsInstance; // doit être initialisé
 	
-	protected Object currentValue;
+	//c'est en fait inutile (merci Nicolas ;) ) : protected final Utils currentUtilsInstance; // doit être initialisé
+	//protected Object currentValue;
 	
 	//@SuppressWarnings("rawtypes") protected Class associatedIndexClassType;
 	

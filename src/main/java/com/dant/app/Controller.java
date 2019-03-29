@@ -5,11 +5,11 @@ import com.dant.exception.BadRequestException;
 import com.dant.utils.Log;
 import db.search.ResultSet;
 import db.search.View;
+import db.serial.SerialStructure;
 import db.structure.Database;
 import db.structure.Table;
 
 import javax.ws.rs.core.Response;
-import javax.xml.transform.Result;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -59,7 +59,8 @@ public class Controller {
         }).collect(Collectors.toCollection(ArrayList::new));
 
         tablesToAdd.stream().forEach(t -> Database.getInstance().getAllTables().add(t));
-
+        
+		SerialStructure.saveStructure();
         return null;
     }
 

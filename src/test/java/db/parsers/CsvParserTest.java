@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import db.structure.recherches.TableHandler;
 import org.junit.jupiter.api.AfterEach;
@@ -23,8 +22,6 @@ import db.data.DateType;
 import db.data.DoubleType;
 import db.data.FloatType;
 import db.data.StringType;
-import db.disk.dataHandler.DiskDataPosition;
-import db.disk.dataHandler.TableDataHandler;
 import db.structure.Column;
 import db.structure.Table;
 
@@ -35,7 +32,7 @@ class CsvParserTest {
 
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
-		Log.start("csvParserTest", 2);
+		Log.start("csvParserTest", 3);
 	}
 
 	@BeforeEach

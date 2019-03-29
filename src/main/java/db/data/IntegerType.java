@@ -7,7 +7,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import db.search.Operator;
 
 public class IntegerType extends DataType {
-
+	private static final long serialVersionUID = 433681923805061790L;
 	public static boolean sizeIsRequired = false;
 	
 	public IntegerType() {

@@ -2,10 +2,8 @@ package db.search;
 
 import db.data.DataPositionList;
 import db.structure.Column;
-import db.structure.Table;
 import db.structure.recherches.TableHandler;
 
-import java.awt.image.ColorModel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -26,11 +24,11 @@ public class View {
 		this.groupBy = groupBy;
 	}
 
-	public Column[] getListColumns() throws SearchException {
+	Column[] getListColumns() throws SearchException {
 		int nbFields = fields.size();
 		Column[] columns = new Column[nbFields];
 		for (int i = 0; i < nbFields; i++) {
-			Optional<Column> column = this.tableHandler.getAssociatedTable().getColumnByName(fields.get(i).name);
+			Optional<Column> column = this.tableHandler.getAssociatedTable().getColumnByNameNoCheck(fields.get(i).name);
 			if (column.isPresent()) {
 				columns[i] = column.get();
 			} else {
@@ -40,9 +38,13 @@ public class View {
 		return columns;
 	}
 
-	public ResultSet execute() throws SearchException, Exception {
+	public ResultSet execute() throws SearchException {
 		Column[] columns = getListColumns();
 		DataPositionList positions = this.filter.execute();
+		try {
 		return tableHandler.getFullResultsFromBinIndexes(positions);
+		} catch (Exception e) {
+			throw new SearchException(e);
+		}
 	}
 }

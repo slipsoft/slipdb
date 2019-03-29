@@ -1,14 +1,14 @@
 package db.sTreeIndex;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import db.search.ResultSet;
+import db.search.*;
+import db.serial.SerialStructure;
+import db.structure.StructureException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -27,31 +27,57 @@ import db.data.DataPositionList;
 import db.data.StringType;
 import db.parsers.Parser;
 import db.structure.Column;
+import db.structure.Database;
 import db.structure.Table;
 import db.structure.indexTree.IndexTreeCeption;
 import db.structure.indexTree.IndexTreeDic;
 import db.structure.recherches.SGlobalHandler;
 import db.structure.recherches.TableHandler;
 
-public class IndexTreeTest {
+import static org.junit.jupiter.api.Assertions.*;
+
+class IndexTreeMessyTest {
 	
 	// Voir constante dans IndexTreeDic : static public int maxResultCountPerIndexInstance = 10;
 	// -> limitation du nombre de résultats affichés par arbre
 	
 	//protected static Parser parser;
-	protected static Table table;
-	protected static Utils currentlyUsedUils = new Utils(); // For thread-safety ! (but, here, it's static so thread unsafe... ^^')
-	protected static TableHandler tableHandler;
+	private static Table table;
+	private static Utils currentlyUsedUils = new Utils(); // For thread-safety ! (but, here, it's static so thread unsafe... ^^')
+	private static TableHandler tableHandler;
 	
-	protected static boolean parseAgain = true;
+	private static boolean parseAgain = true;
+	private boolean doItWithTableHandler = true;
+	
+	/** Pour la déserialisation
+	 * @param in
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
+	
+	private static String serializeFromPath = "data_save/serialStructureEverything.bin";
+	
+	//@BeforeAll
+	static void setUpBeforeAll() throws Exception {
+		SerialStructure.loadStructureFrom(serializeFromPath);
+		table = Database.getInstance().getAllTables().get(0);
+		tableHandler = table.getTableHandler();
+		/*Log.info(table.getName());
+		//table.debugSerialShowVariables();
+		
+		//tableHandler.associatedTable = table;
+		if (tableHandler.associatedTable == null) {
+			Log.error("tableHandler.associatedTable == null");
+		}*/
+	}
 	
 	@BeforeAll
-	static void setUpBeforeAll() throws Exception {
+	static void setUpBeforeAllDe() throws Exception {
 		Log.info("setUpBeforeAll");
-		Log.start("indexingTreeTest", 2);
+		Log.start("indexingTreeTest", 3);
 		
 		tableHandler = SGlobalHandler.initializeTable("NYtest");
-		assertEquals(true, tableHandler != null);
+		assertNotNull(tableHandler);
 		
 		//getValuesOfLineByIdForSignleQuery
 
@@ -156,6 +182,10 @@ public class IndexTreeTest {
 			// Attendre que toute la donnée soit parsée
 			tableHandler.multiThreadParsingJoinAllThreads();
 			
+			/**
+			 * Ne supporte pour l'instant pas recherches + indexing en même temps. (Problèmes de concurrence)
+			 * -> BIEN penser à faire tableHandler.multiThreadParsingJoinAllThreads();
+			 */
 			
 			
 			/*tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
@@ -198,6 +228,17 @@ public class IndexTreeTest {
 		// Nécessaire d'avoir plusieurs fichiers, à voir plus tard.
 		
 		Log.info("setUpBeforeAll OK");
+		Database.getInstance().getAllTables().add(table);
+		SerialStructure.writeStructureTo(serializeFromPath);
+		
+		/*if (tableHandler.associatedTable == null) {
+			Log.error("tableHandler.associatedTable == null");
+		} else {
+			Log.error("tableHandler.associatedTable != null");
+			
+		}*/
+		
+		//setUpBeforeAll();
 	}
 	
 	/*
@@ -222,8 +263,6 @@ public class IndexTreeTest {
 		
 	}*/
 	
-	protected boolean doItWithTableHandler = true;
-	
 	@Test
 	void testIndexTreeDic() throws Exception {
 		//if (true) return;
@@ -241,13 +280,13 @@ public class IndexTreeTest {
 		
 		if (doItWithTableHandler) {
 
-			Timer localTimer = new Timer("Temps pris pour indexer tpep_pickup_datetime");
+			/*Timer localTimer = new Timer("Temps pris pour indexer tpep_pickup_datetime");
 			tableHandler.indexColumnWithTreeFromDisk("tpep_pickup_datetime");
 			tableHandler.indexColumnWithTreeFromDisk("tpep_dropoff_datetime");
 			tableHandler.indexColumnWithTreeFromDisk("trip_distance");
 			tableHandler.indexColumnWithTreeFromDisk("pickup_longitude");
 			tableHandler.indexColumnWithTreeFromDisk("pickup_latitude");
-			localTimer.log();
+			localTimer.log();*/
 			//tableHandler.indexColumnWithTreeFromDisk("trip_distance");
 			
 			
@@ -287,16 +326,35 @@ public class IndexTreeTest {
 			searchQueryTimer = new Timer("Temps total recherche");
 			result = tableHandler.findIndexedResultsOfColumn("trip_distance", 17.78f, 18f, true);
 			searchQueryTimer.log();
-			searchQueryFullTimer = new Timer("Temps d'acquisition des résultats (chargement du disque de tous les champs)");
+			
+			
+			searchQueryFullTimer = new Timer("1Temps d'acquisition des résultats (chargement du disque de tous les champs)");
 			numberOfResults = result.size();// tableHandler.evaluateNumberOfResults(result);
 			//numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
 			
-			ResultSet fullResulsVariables = tableHandler.getFullResultsFromBinIndexes(result);
+			//ArrayList<ArrayList<Object>>
+			ResultSet fullResulsVariables = tableHandler.getFullResultsFromBinIndexes(result, true, -1, null);
 			
-			tableHandler.displayOnLogResults(fullResulsVariables);
+			//tableHandler.displayOnLogResults(fullResulsVariables);
+			
+			
+			searchQueryFullTimer.log();
+
+			searchQueryFullTimer = new Timer("2Temps d'acquisition des résultats certains champs seulement");
+			ArrayList<Integer> onlyThoseColumns = new ArrayList<Integer>();
+			onlyThoseColumns.add(6);
+			onlyThoseColumns.add(4);
+			fullResulsVariables = tableHandler.getFullResultsFromBinIndexes(result, true, -1, onlyThoseColumns);
+			
+			//tableHandler.displayOnLogResults(fullResulsVariables);
 			
 			searchQueryFullTimer.log();
 			Log.info("Nombre de résultats = " + numberOfResults);
+			
+			result = tableHandler.findIndexedResultsOfColumn("trip_distance", 18f);
+			numberOfResults = result.size();
+			Log.info("Nombre de résultats (pour 18 exact) = " + numberOfResults);
+			
 			
 			//Log.info("Nombre de lignes = " + numberOfLines);
 			
@@ -567,6 +625,28 @@ public class IndexTreeTest {
 		Log.info("Number of results = " + numberOfResults);
 		Log.info("Number of lines = " + numberOfLines);
 		
+	}
+
+	@Test
+	void executeView() {
+		Column column = table.getColumns().get(12);
+		Field field = new Field(column.getName());
+		Predicate predicate = new Predicate(table, column, Operator.equals, new Float("17.78"));
+		ArrayList<Field> listFields = new ArrayList<>();
+		listFields.add(field);
+		View view = new View(tableHandler, predicate, listFields, new ArrayList<>(), new Group());
+		ResultSet result = null;
+
+		try {
+			tableHandler.indexColumnWithTreeFromDisk("fare_amount");
+			result = view.execute();
+		} catch (SearchException e) {
+			Log.error(e);
+		} catch (StructureException e) {
+			Log.error(e);
+		}
+		Log.debug(result);
+
 	}
 	
 	@AfterAll

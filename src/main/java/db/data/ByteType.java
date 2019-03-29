@@ -1,8 +1,5 @@
 package db.data;
 
-import java.io.DataInput;
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -11,6 +8,7 @@ import db.search.Operator;
 
 
 public class ByteType extends DataType {
+	private static final long serialVersionUID = 1440808484191469445L;
 	public static boolean sizeIsRequired = false;
 	
 	public ByteType() {

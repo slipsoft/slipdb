@@ -5,7 +5,9 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.dant.utils.BufferedDataInputStreamCustom;
@@ -15,24 +17,27 @@ import com.dant.utils.Log;
 import db.structure.Column;
 import db.structure.Table;
 
-public class TableDataHandlerFile {
+public class TableDataHandlerFile implements Serializable {
 	
 	// Champs mis en public pour gagner du temps
 	// Thread-safe (c'est d'ailleurs le but !)
 	
 	//private Object forceWaitToUseThisFileLock = new Object();
 
-	// Utilisé de l'extérieur (thread différent)
+	private static final long serialVersionUID = 2906608573394264418L;
+	
+		// Utilisé de l'extérieur (thread différent)
 		private AtomicBoolean currentlyInUse = new AtomicBoolean(true); // si le fichier est actuellement utilisé (lecture ou écriture)
 		private AtomicBoolean fileIsFull = new AtomicBoolean(false); // impossible de rajouter de la donnée si fileIsFull
 	
 	
 	// Utilisé de l'intérieur (même thread)
-	private EasyFile fileOnDisk;
+	transient private EasyFile fileOnDisk; // re-créé lors de la lecture serial
 	private String filePath;
 	private int currentFileSize = 0;
 	private int currentFileEntriesNumber = 0;
 	private final short fileID;
+	private final short nodeID;
 	
 	// Nonthread-safe, seulement utilisé par quelques fonctions spécifiques, et dans des cas bien précis
 	private DataOutputStream streamWriter = null;
@@ -43,12 +48,35 @@ public class TableDataHandlerFile {
 	
 	static public final int maxFileSizeOnDisk = 150_000_000; // 500_000_000 Max 500 mo sur disque (grosse marge de sécurité)
 	
-	public TableDataHandlerFile(short argFileID, String argFilePath) throws IOException {
-		fileID = argFileID;
-		filePath = argFilePath;
+	public void debugSerialShowVariables() {
+		Log.info("filePath = " + filePath);
+		Log.info("currentFileSize = " + currentFileSize);
+		Log.info("fileID = " + fileID);
+		Log.info("nodeID = " + nodeID);
+	}
+	
+	private void initOrLoadCommon() throws IOException {
 		fileOnDisk = new EasyFile(filePath);
 		fileOnDisk.createFileIfNotExist();
 		currentlyInUse.set(false);
+	}
+	
+	/** Pour la déserialisation
+	 * @param in
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		in.defaultReadObject();
+		initOrLoadCommon();
+	}
+	
+	
+	public TableDataHandlerFile(short argNodeID, short argFileID, String argFilePath) throws IOException {
+		nodeID = argNodeID;
+		fileID = argFileID;
+		filePath = argFilePath;
+		initOrLoadCommon();
 	}
 	
 	/** Thread-safe, car lecture seule (et la ressource ne change pas de position mémoire)
@@ -149,7 +177,7 @@ public class TableDataHandlerFile {
 			fileIsFull.set(true);
 			stopFileUse();
 		}
-		TableDataPositionResult dataPositionResult = new TableDataPositionResult(TableDataHandler.currentNodeID, fileID, currentFileEntriesNumber - 1, canStillUseThisFile);
+		TableDataPositionResult dataPositionResult = new TableDataPositionResult(nodeID, fileID, currentFileEntriesNumber - 1, canStillUseThisFile);
 		return dataPositionResult;
 	}
 	
@@ -159,6 +187,7 @@ public class TableDataHandlerFile {
 	 *  @return
 	 * @throws IOException 
 	 */
+	@Deprecated
 	public ArrayList<Object> getValuesOfLineById(DiskDataPosition dataPosition, Table inTable) throws IOException {
 		if (isReadOnlyMode == false) throw new IOException("Le fichier doit être ouvert en lecture."); // erreur, le fichier DOIT être ouvert en lecture
 		int binPosInFile = dataPosition.lineIndex * inTable.getLineSize();
@@ -177,6 +206,105 @@ public class TableDataHandlerFile {
 			//Log.debug(b); for debug purposes only
 			lineValues.add(column.getDataType().readTrueValue(columnValueAsByteArray));
 		}
+		return lineValues;
+		
+	}
+	
+	
+	
+
+	public ArrayList<Object> orderedReadGetValuesOfLineById(DiskDataPosition dataPosition, Table inTable) throws IOException {
+		return orderedReadGetValuesOfLineById(dataPosition, inTable, null, null);
+	}
+	
+	/** Adapté à plusieurs lectures à la fois
+	 *  @param dataPosition
+	 *  @param inTable
+	 *  @param sortedWantedColumnsIndex DOIT ÊTRE SORTED
+	 *  @return
+	 *  @throws IOException
+	 */
+	public ArrayList<Object> orderedReadGetValuesOfLineById(DiskDataPosition dataPosition, Table inTable, ArrayList<Integer> sortedWantedColumnsIndex, ArrayList<Integer> wantedColumnsIndexList) throws IOException {
+		if (isReadOnlyMode == false) throw new IOException("Le fichier doit être ouvert en lecture."); // erreur, le fichier DOIT être ouvert en lecture
+		int binPosInFile = dataPosition.lineIndex * inTable.getLineSize();
+		int skipSize = binPosInFile - positionInReadOnlyFile; // skip de la bonne valeur, forcément positif car orderedReadSeekFirst
+		if (skipSize < 0) {
+			 throw new IOException("orderedReadSeekFirst DOIT être utilisé pour lire dans l'ordre, il DOIT y avoir skipSize > 0 alors que skipSize = " + skipSize); // erreur,
+		}
+		streamReader.skipForce(skipSize);
+		positionInReadOnlyFile = binPosInFile;
+		
+		ArrayList<Object> lineValues = new ArrayList<>(); // rowValues
+		// Renvoyer toutes les colonnes
+		if (sortedWantedColumnsIndex == null) {
+			// For each column, reads the associated value
+			for (Column column : inTable.getColumns()) {
+				byte[] columnValueAsByteArray = new byte[column.getSize()];
+				streamReader.read(columnValueAsByteArray); // reads from the stream
+				//Log.debug(b); for debug purposes only
+				lineValues.add(column.getDataType().readTrueValue(columnValueAsByteArray));
+			}
+		} else {
+			// Renvoyer seulement certaines colonnes
+			//int currentColumnIndex = 0;
+			
+			/*
+			int[] 
+			for (int i = 0; i < sortedWantedColumnsIndex.size(); i++) {
+				int sortedCurrentColumnIndex = sortedWantedColumnsIndex.get(i);
+				int wantedColumnIndexAtThisPosition = wantedColumnsIndexList.get(i);
+				int whereToPutColumnData = 
+				lineValues.add(null);
+			}*/
+			
+			// TODO : faire ici
+			//wantedColumnsIndexList
+			
+			int lastColumnIndex = -1;
+			List<Column> columnList = inTable.getColumns();
+			//for (int currentColumnIndex : sortedWantedColumnsIndex) {
+
+			for (int currentColumnIndex = 0; currentColumnIndex < sortedWantedColumnsIndex.size(); currentColumnIndex++) {
+				//int sortedCurrentColumnIndex = sortedWantedColumnsIndex.get(currentColumnIndex);
+				//int wantedColumnIndexAtThisPosition = wantedColumnsIndexList.get(currentColumnIndex);
+				
+				// Ignorer les colonnes non utiles
+				int localSkipBytesNumber = 0;
+				for (int inBetweenColumnIndex = lastColumnIndex + 1; inBetweenColumnIndex < currentColumnIndex; inBetweenColumnIndex++) {
+					localSkipBytesNumber += columnList.get(inBetweenColumnIndex).getSize();
+				}
+				Column column = columnList.get(currentColumnIndex);
+				if (localSkipBytesNumber != 0) {
+					streamReader.skipForce(localSkipBytesNumber);
+					//Log.info("orderedReadGetValuesOfLineById : localSkipBytesNumber = " + localSkipBytesNumber + " taille lue = " + column.getDataSize());
+				}
+				
+				byte[] columnValueAsByteArray = new byte[column.getSize()];
+				streamReader.read(columnValueAsByteArray); // reads from the stream
+				//Log.debug(b); for debug purposes only
+				lineValues.add(column.getDataType().readTrueValue(columnValueAsByteArray));
+				lastColumnIndex = currentColumnIndex;
+			}
+			// Skip après, des colonnes non utilisées
+			
+			// Ignorer les colonnes non utiles
+			int localSkipBytesNumber = 0;
+			for (int inBetweenColumnIndex = lastColumnIndex + 1; inBetweenColumnIndex < columnList.size(); inBetweenColumnIndex++) {
+				localSkipBytesNumber += columnList.get(inBetweenColumnIndex).getSize();
+			}
+			if (localSkipBytesNumber != 0) {
+				streamReader.skipForce(localSkipBytesNumber);
+				//Log.info("orderedReadGetValuesOfLineById : AFTER localSkipBytesNumber = " + localSkipBytesNumber + " total size = " + inTable.getLineSize());
+			}
+			
+			
+			
+			
+			
+			
+		}
+		
+		
 		return lineValues;
 		
 	}

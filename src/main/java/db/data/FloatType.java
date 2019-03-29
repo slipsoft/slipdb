@@ -7,7 +7,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import db.search.Operator;
 
 public class FloatType extends DataType {
-
+	private static final long serialVersionUID = -8609612884136762449L;
 	public static boolean sizeIsRequired = false;
 	
 	public FloatType() {

@@ -56,7 +56,7 @@ public class FilterTermEntity {
         }
 
         if (this.column != null && this.operator != null && this.value != null) {
-            return new Predicate(table.getColumnByName(this.column).get(), this.operator, this.value, table);
+            return new Predicate(table, table.getColumnByName(this.column).get(), this.operator, this.value);
         }
     return null;
     }

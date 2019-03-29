@@ -1,16 +1,18 @@
 package db.structure.recherches;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import db.disk.dataHandler.DiskDataPosition;
 import db.structure.Column;
 import db.structure.Table;
 import db.structure.indexTree.IndexTreeDic;
 
-public class RuntimeIndexingEntry implements Comparable<RuntimeIndexingEntry> {
+public class RuntimeIndexingEntry implements Comparable<RuntimeIndexingEntry>, Serializable {
 	
 	// Support des index mono-colonne uniquement, à ce jour
 	
+	private static final long serialVersionUID = 2604537941424926968L;
 	public int columnIndex;
 	public IndexTreeDic associatedIndexTree;
 	public Table associatedTable;

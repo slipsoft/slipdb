@@ -7,7 +7,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import db.search.Operator;
 
 public class LongType extends DataType {
-
+	private static final long serialVersionUID = -7928604950572059766L;
 	public static boolean sizeIsRequired = false;
 	
 	public LongType() {
