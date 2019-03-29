@@ -857,6 +857,14 @@ public class IndexTreeDic extends Index implements Serializable {
 			switch (predicate.getOperator()) {
 				case equals:
 					return findMatchingBinIndexes(predicate.getValue(), null, true, false);
+				case between:
+					Object[] values;
+					try {
+						values = (Object[]) predicate.getValue();
+					} catch (Exception e) {
+						throw new IndexException(e);
+					}
+					return findMatchingBinIndexes(values[0], values[1], false, false);
 				default:
 					throw new IndexException("invalid operator");
 			}
