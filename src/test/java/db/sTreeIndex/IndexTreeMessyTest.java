@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import db.data.load.Loader;
 import db.search.ResultSet;
 import db.serial.SerialStructure;
 
@@ -27,7 +28,6 @@ import db.data.types.FloatType;
 import db.data.types.IntegerArrayList;
 import db.data.types.DataPositionList;
 import db.data.types.StringType;
-import db.data.load.Parser;
 import db.structure.Column;
 import db.structure.Database;
 import db.structure.Table;
@@ -41,7 +41,7 @@ public class IndexTreeMessyTest {
 	// Voir constante dans IndexTreeDic : static public int maxResultCountPerIndexInstance = 10;
 	// -> limitation du nombre de résultats affichés par arbre
 	
-	//protected static Parser parser;
+	//protected static Loader loader;
 	protected static Table table;
 	protected static Utils currentlyUsedUils = new Utils(); // For thread-safety ! (but, here, it's static so thread unsafe... ^^')
 	protected static TableHandler tableHandler;
@@ -123,7 +123,7 @@ public class IndexTreeMessyTest {
 		
 		if (parseAgain) {
 			Timer parseTimer = new Timer("TEMPS TOTAL pris par le parsing");
-			Log.info("Nombre de résultats/entrées parsés INIT : " + Parser.debugNumberOfEntriesWritten.get());
+			Log.info("Nombre de résultats/entrées parsés INIT : " + Loader.debugNumberOfEntriesWritten.get());
 			//tableHandler.forceAppendNotFirstParsing();
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-06.csv", true);
 			
@@ -173,7 +173,7 @@ public class IndexTreeMessyTest {
 			tPars2.join();
 			tPars3.join();
 			tPars4.join();*/
-			// Parser de la donnée en multi-thread
+			// Loader de la donnée en multi-thread
 			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
@@ -196,7 +196,7 @@ public class IndexTreeMessyTest {
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-08.csv", true);
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-09.csv", true);
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-10.csv", true);
-			Log.info("Nombre de résultats/entrées parsés FINAL : " + Parser.debugNumberOfEntriesWritten.get());
+			Log.info("Nombre de résultats/entrées parsés FINAL : " + Loader.debugNumberOfEntriesWritten.get());
 			
 			
 			/**/

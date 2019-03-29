@@ -3,8 +3,6 @@ package db.data.load;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-import db.structure.Table;
-
 
 /**
  * CsvParser : CsvParser version 2
@@ -22,20 +20,13 @@ public class CsvParser extends Parser {
 
 	protected final static String csvSeparator = ","; // the CSV separator used to delimit fields
 
-	public CsvParser(Table schema) {
-		super(schema);
-	}
-
-
-
-
 	/** Lecture du CSV depuis un InputStream (peu importe la provenance)
 	 *  Exécution mono-thread, en l'état, faire du multi-thread serait super super compliqué
 	 *
 	 *  Chaque colonne aura son propre fichier binaire.
 	 */
 	@Override
-	public String processReader(BufferedReader input) throws IOException {
+	protected String processReader(BufferedReader input) throws IOException {
 		return input.readLine();
 	}
 

@@ -10,6 +10,7 @@ import java.util.List;
 
 import com.dant.utils.Log;
 
+import db.data.load.Loader;
 import db.data.types.DataType;
 import db.disk.dataHandler.DiskDataPosition;
 import db.disk.dataHandler.TableDataHandler;
@@ -158,14 +159,14 @@ public class TableHandler implements Serializable {
 		if (associatedTable == null) throw new Exception("La table associée est null, elle doit être crée via createTable avant tout parsing.");
 		//if (csvParser == null)
 		// Thread-safe
-		CsvParser csvParser = new CsvParser(associatedTable);
+		Loader csvLoader = new Loader(associatedTable, new CsvParser());
 		
 		if (doRuntimeIndexing)
-			csvParser.setRuntimeIndexing(runtimeIndexingList);
+			csvLoader.setRuntimeIndexing(runtimeIndexingList);
 		else
-			csvParser.setRuntimeIndexing(null);
+			csvLoader.setRuntimeIndexing(null);
 		
-		csvParser.parse(csvStream, !firstTimeParsingData);
+		csvLoader.parse(csvStream, !firstTimeParsingData);
 		if (closeStreamAfterUsage)
 			csvStream.close();
 		

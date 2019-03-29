@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
+import db.data.load.Loader;
 import db.structure.recherches.TableHandler;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterAll;
@@ -74,10 +75,10 @@ public class TestIndexTreeMT1 {
 		TableHandler table = new TableHandler(tableName);
 		columns.stream().forEach(c -> table.addColumn(c));
 		Table newTable = table.createTable();
-		CsvParser newParser = new CsvParser(newTable);
+		Loader loader = new Loader(newTable, new CsvParser());
 		FileInputStream is = new FileInputStream(filePathOnDisk);
 		//Timer parseTimer = new Timer("Temps pris par le parsing de " + tableName);
-		newParser.parse(is, false); // Supprimer les données déjà écrites
+		loader.parse(is, false); // Supprimer les données déjà écrites
 		is.close();
 		//parseTimer.log();
 		return newTable;
@@ -122,8 +123,8 @@ public class TestIndexTreeMT1 {
 		
 		/**
 		 * Bilan : le parsing demande beaucoup plus de calculs que de disque.
-		 * -> Voir quelles sont les fonctions qui prennent le plus de temps à parser
-		 * -> Possible de parser le même fichier, en partant à des index différents (mais pas une bonne idée, car je ne sais pas d'où partir, de peur de couper une ligne)
+		 * -> Voir quelles sont les fonctions qui prennent le plus de temps à loader
+		 * -> Possible de loader le même fichier, en partant à des index différents (mais pas une bonne idée, car je ne sais pas d'où partir, de peur de couper une ligne)
 		 */
 		Timer parseTimer = new Timer("Temps pris par le parsing de " + maxRunCount + " fichiers");
 		
@@ -140,8 +141,8 @@ public class TestIndexTreeMT1 {
 		parseTimer.log();
 		
 		/**
-		 * En première idée, pour parser :
-		 * 1) Sauvegarder chaque colonne sur disque, parsée ou non : éviter, autant que possible, de parser les dates par exemple
+		 * En première idée, pour loader :
+		 * 1) Sauvegarder chaque colonne sur disque, parsée ou non : éviter, autant que possible, de loader les dates par exemple
 		 * */
 		
 		Log.info("setUpBeforeAll OK");
