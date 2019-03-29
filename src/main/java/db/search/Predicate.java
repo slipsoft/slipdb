@@ -1,13 +1,12 @@
 package db.search;
 
+import com.dant.utils.Log;
 import db.data.DataPositionList;
 import db.structure.Column;
 import db.structure.Index;
 import db.structure.StructureException;
 import db.structure.Table;
-import db.structure.indexTree.IndexException;
 
-import java.util.Optional;
 
 public class Predicate implements FilterTerm {
 	protected Table table;
@@ -21,6 +20,11 @@ public class Predicate implements FilterTerm {
 		this.column = column;
 		this.operator = operator;
 		this.value = value;
+		try {
+			findBestIndex();
+		} catch (Exception exp) {
+			this.index = null;
+		}
 	}
 
 	private Index findBestIndex() throws StructureException {

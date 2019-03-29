@@ -46,4 +46,13 @@ public class ByteType extends DataType {
 			Operator.equals
 		}, op);
 	}
+
+	public boolean inputCanBeParsed(String input) {
+		try {
+			Byte asByte = Byte.parseByte(input);
+			return true;
+		} catch (IllegalArgumentException exp) {
+			return false;
+		}
+	}
 }

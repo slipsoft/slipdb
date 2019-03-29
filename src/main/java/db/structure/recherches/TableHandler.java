@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import com.dant.utils.Log;
 
@@ -17,6 +18,7 @@ import db.data.DataPositionList;
 import db.parsers.CsvParser;
 import db.search.ResultSet;
 import db.structure.Column;
+import db.structure.Database;
 import db.structure.StructureException;
 import db.structure.Table;
 import db.structure.indexTree.IndexException;
@@ -107,11 +109,13 @@ public class TableHandler implements Serializable {
 	 * @throws Exception 
 	 */
 	public void addColumn(String argColumnName, DataType argColumnDataType) throws Exception {
-		for (Column col : columnsListForCreatingTableOnly) {
-			if (col.getName().equals(argColumnName)) throw new Exception("Ajout de la colonne impossibe, il en exie déjà une du même nom : " + argColumnName);
-		}
+		if (this.columnExist(argColumnName)) throw new Exception("Ajout de la colonne impossibe, il en exie déjà une du même nom : " + argColumnName);
 		Column newColumn = new Column(argColumnName, argColumnDataType);
 		columnsListForCreatingTableOnly.add(newColumn);
+	}
+
+	public boolean columnExist(String name) {
+		return this.columnsListForCreatingTableOnly.stream().anyMatch(col -> col.getName() == name);
 	}
 
 	public void addColumn(Column column) {
@@ -487,6 +491,5 @@ public class TableHandler implements Serializable {
 	public void clearDataDirectory() throws IOException {
 		associatedTable.getDataHandler().clearDataDirectory();
 	}
-	
 	
 }

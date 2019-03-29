@@ -62,4 +62,8 @@ public class StringType extends DataType {
 		}, op);
 	}
 
+	public boolean inputCanBeParsed(String input) {
+		return true;
+	}
+
 }
