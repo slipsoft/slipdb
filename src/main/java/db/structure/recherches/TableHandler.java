@@ -11,11 +11,12 @@ import java.util.Optional;
 
 import com.dant.utils.Log;
 
-import db.data.DataType;
+import db.data.load.Loader;
+import db.data.types.DataType;
 import db.disk.dataHandler.DiskDataPosition;
 import db.disk.dataHandler.TableDataHandler;
-import db.data.DataPositionList;
-import db.parsers.CsvParser;
+import db.data.types.DataPositionList;
+import db.data.load.CsvParser;
 import db.search.ResultSet;
 import db.structure.Column;
 import db.structure.Database;
@@ -164,14 +165,14 @@ public class TableHandler implements Serializable {
 		if (associatedTable == null) throw new Exception("La table associée est null, elle doit être crée via createTable avant tout parsing.");
 		//if (csvParser == null)
 		// Thread-safe
-		CsvParser csvParser = new CsvParser(associatedTable);
+		Loader csvLoader = new Loader(associatedTable, new CsvParser());
 		
 		if (doRuntimeIndexing)
-			csvParser.setRuntimeIndexing(runtimeIndexingList);
+			csvLoader.setRuntimeIndexing(runtimeIndexingList);
 		else
-			csvParser.setRuntimeIndexing(null);
+			csvLoader.setRuntimeIndexing(null);
 		
-		csvParser.parse(csvStream, !firstTimeParsingData);
+		csvLoader.parse(csvStream, !firstTimeParsingData);
 		if (closeStreamAfterUsage)
 			csvStream.close();
 		

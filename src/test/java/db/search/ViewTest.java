@@ -1,7 +1,7 @@
 package db.search;
 
 import com.dant.utils.Log;
-import db.data.StringType;
+import db.data.types.StringType;
 import db.structure.Column;
 import db.structure.Table;
 import db.structure.recherches.TableHandler;
@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 

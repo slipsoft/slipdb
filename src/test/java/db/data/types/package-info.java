@@ -5,4 +5,4 @@
  * Tests autour du parsing
  *
  */
-package db.data;
+package db.data.types;

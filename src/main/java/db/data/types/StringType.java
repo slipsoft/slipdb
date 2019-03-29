@@ -1,4 +1,4 @@
-package db.data;
+package db.data.types;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;

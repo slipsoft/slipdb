@@ -7,7 +7,6 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,8 +23,8 @@ import com.dant.utils.Log;
 import com.dant.utils.MemUsage;
 import com.dant.utils.Timer;
 
-import db.data.DataType;
-import db.data.DataPositionList;
+import db.data.types.DataType;
+import db.data.types.DataPositionList;
 import db.disk.dataHandler.DiskDataPosition;
 import db.search.Operator;
 import db.search.Predicate;

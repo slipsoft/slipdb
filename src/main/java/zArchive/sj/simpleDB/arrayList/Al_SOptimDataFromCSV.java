@@ -3,7 +3,7 @@ package zArchive.sj.simpleDB.arrayList;
 
 public enum Al_SOptimDataFromCSV {
 	
-	// Parser de la donnée simplement
+	// Loader de la donnée simplement
 	toByte(AL_SStorageDataType.isByte),
 	toChar(AL_SStorageDataType.isChar),
 	toInteger(AL_SStorageDataType.isInteger),
@@ -11,7 +11,7 @@ public enum Al_SOptimDataFromCSV {
 	toFloat(AL_SStorageDataType.isFloat),
 	toDouble(AL_SStorageDataType.isDouble),
 	
-	// Parser avec conversion
+	// Loader avec conversion
 	floatToByte(AL_SStorageDataType.isByte), // multiplie par 10
 	floatToShort(AL_SStorageDataType.isShort), // multiplie par 100
 	dateStringToInteger(AL_SStorageDataType.isInteger) // convertit la date en nombre

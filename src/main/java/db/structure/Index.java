@@ -3,7 +3,7 @@ package db.structure;
 import java.util.ArrayList;
 import java.util.Map;
 
-import db.data.DataPositionList;
+import db.data.types.DataPositionList;
 import db.structure.indexTree.IndexException;
 import org.apache.commons.lang3.ArrayUtils;
 

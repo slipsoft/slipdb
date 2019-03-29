@@ -1,4 +1,4 @@
-package db.parsers;
+package db.data.load;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -15,18 +15,19 @@ import com.dant.utils.Timer;
 
 import db.disk.dataHandler.TableDataHandler;
 import db.disk.dataHandler.TableDataHandlerWriteJob;
-import db.data.DateType;
+import db.data.types.DateType;
 import db.disk.dataHandler.DiskDataPosition;
 import db.structure.Column;
 import db.structure.Table;
 import db.structure.recherches.RuntimeIndexingEntry;
 import db.structure.recherches.RuntimeIndexingEntryList;
 
-public abstract class Parser {
-	protected Table schema;
-	protected Table currentTable;
-	protected int lineByteSize; // number of bytes used to store information
-	protected int totalEntryCount = 0;
+public class Loader {
+	private Table schema;
+	private Table currentTable;
+	private Parser parser;
+	private int lineByteSize; // number of bytes used to store information
+	private int totalEntryCount = 0;
 	
 	static public AtomicLong totalReadEntryNb = new AtomicLong(0);
 	static public long updateTotalReadEntryNbEach = 100_000;
@@ -34,7 +35,7 @@ public abstract class Parser {
 	
 	public static AtomicLong debugNumberOfEntriesWritten = new AtomicLong(0);
 	
-	/** Thread-safe
+	/* Thread-safe
 	protected void updateTotalResultCount(long addToTotal) {
 	}*/
 	
@@ -42,11 +43,12 @@ public abstract class Parser {
 	/** Avant le parsing, définir runtimeIndexingEntries.
 	 *  Au moment du parsing, runtimeIndexingEntries doit être en lecture seule, donc thread-safe.
 	 */
-	protected RuntimeIndexingEntryList runtimeIndexingEntries = null;
-	
-	public Parser(Table schema) {
+	private RuntimeIndexingEntryList runtimeIndexingEntries = null;
+
+	public Loader(Table schema, Parser parser) {
 		this.schema = schema; // <- C'est Nicolas qui a voulu appeler ça comme ça, pas moi :p
 		currentTable = schema;
+		this.parser = parser;
 		this.lineByteSize = schema.getLineSize();
 	}
 	
@@ -85,7 +87,7 @@ public abstract class Parser {
 			while (localReadEntryNb != limit) {
 				
 				// Lecture d'une nouvelle ligne / entrée
-				String entryAsString = processReader(bRead); // "entrée", ligne lue (d'un fichier CSV par exemple pour CSVParser)
+				String entryAsString = parser.processReader(bRead); // "entrée", ligne lue (d'un fichier CSV par exemple pour CSVParser)
 				if (entryAsString == null) break; // fin de la lecture
 				
 				// Ecriture de l'entrée
@@ -103,7 +105,7 @@ public abstract class Parser {
 				
 				// Affichage d'une entrée toutes les showInfoEveryParsedLines entrées lues
 				if (showInfoEveryParsedLines != -1 && localReadEntryNb % showInfoEveryParsedLines == 0) {
-					Log.info("Parser : nombre de résultats (local) parsés = " + localReadEntryNb + "   temps écoulé = " + timeTookTimer.pretty());
+					Log.info("Loader : nombre de résultats (local) parsés = " + localReadEntryNb + "   temps écoulé = " + timeTookTimer.pretty());
 					MemUsage.printMemUsage();
 				}
 				
@@ -125,7 +127,7 @@ public abstract class Parser {
 	}
 	
 	
-	
+
 	/**
 	 * 
 	/** Ecriture d'une entrée (ligne, donnée complète) sur un DataOutputStream (nécessaire pour avoir le fonction .size())
@@ -136,7 +138,7 @@ public abstract class Parser {
 	 */
 	protected final void parseAndWriteEntry(String entryString, TableDataHandlerWriteJob writeJob) throws IncorrectEntryException, IOException {
 		
-		String[] valuesAsStringArray = processEntry(entryString);
+		String[] valuesAsStringArray = parser.processEntry(entryString);
 		List<Column> columnsList = currentTable.getColumns();
 		
 		DateType localDateTypeThreadSafe = new DateType();
@@ -188,50 +190,6 @@ public abstract class Parser {
 		
 	}
 	
-	/*
-	protected final void writeEntry(String entryString, /*OutputStream* /DataOutputStream output) throws IncorrectEntryException, IOException {
-		String[] valuesAsStringArray = processEntry(entryString);
-		
-		if (!isCorrectSize(valuesAsStringArray)) {
-			throw new IncorrectEntryException(totalEntryCount, "incorrect size");
-		}
-		
-		// the buffer used to store the line data as an array of bytes
-		ByteBuffer entryBuffer = ByteBuffer.allocate(lineByteSize);
-		Object[] entriesArray = new Object[valuesAsStringArray.length];
-		
-		
-		long entryBinIndex = output.size();
-		try {
-		// for each column, parse and write data into entryBuffer
-			for (int columnIndex = 0; columnIndex < schema.getColumns().size(); columnIndex++) {
-				Column currentColumn = schema.getColumns().get(columnIndex);
-				
-				// Converts the string value into an array of bytes representing the same data
-				Object currentValue = currentColumn.writeToBuffer(valuesAsStringArray[columnIndex], entryBuffer);
-				currentColumn.evaluateMinMax(currentValue); // <- Indispensable pour le IndexTreeCeption (non utile pour le IndexTreeDic)
-				// Indexer au moment de parser (pour de meilleures performances)
-				
-				if (runtimeIndexingEntries != null) {
-					SRuntimeIndexingEntry indexingEntry = runtimeIndexingEntries.getEntryAssociatedWithColumnIndex(columnIndex);
-					if (indexingEntry != null) {
-						// Indexer cette entrée
-						indexingEntry.addIndexValue(currentValue, entryBinIndex);
-						//Log.info("Indexer valeur = " + currentValue);
-					}
-					//Log.info("Indexer2 valeur = " + currentValue);
-				}
-				
-				
-				entriesArray[columnIndex] = currentValue;
-			}
-		} catch (Exception e) {
-			throw new IncorrectEntryException(totalEntryCount, "incorrect data");
-		}
-		// writes the line in the output stream associated with the current file
-		output.write(entryBuffer.array());
-	}*/
-	
 	/**
 	 * Checks if the number of values in an array is the same as the number of columns in the schema.
 	 *
@@ -241,23 +199,4 @@ public abstract class Parser {
 	private final boolean isCorrectSize(String[] valuesArray) {
 		return valuesArray.length == schema.getColumns().size();
 	}
-	
-	
-	//////////////////////////////// Interface to implement ////////////////////////////////
-	
-	/**
-	 * Reads a BufferedReader and return an entry String.
-	 *
-	 * @param input - the input as a buffered reader
-	 * @return entryString or *null* if there is no more entries
-	 */
-	abstract protected String processReader(BufferedReader input) throws IOException;
-	
-	/** 
-	 * Converts a string entry (such as a CSV line) to a byte array of raw data.
-	 *
-	 * @param entryString
-	 * @return the data stored by the line as string array
-	 */
-	abstract protected String[] processEntry(String entryString);
 }

@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import db.data.load.Loader;
 import db.search.*;
 import db.serial.SerialStructure;
 import db.structure.StructureException;
@@ -18,14 +19,13 @@ import com.dant.utils.MemUsage;
 import com.dant.utils.Timer;
 import com.dant.utils.Utils;
 
-import db.data.ByteType;
-import db.data.DateType;
-import db.data.DoubleType;
-import db.data.FloatType;
-import db.data.IntegerArrayList;
-import db.data.DataPositionList;
-import db.data.StringType;
-import db.parsers.Parser;
+import db.data.types.ByteType;
+import db.data.types.DateType;
+import db.data.types.DoubleType;
+import db.data.types.FloatType;
+import db.data.types.IntegerArrayList;
+import db.data.types.DataPositionList;
+import db.data.types.StringType;
 import db.structure.Column;
 import db.structure.Database;
 import db.structure.Table;
@@ -41,7 +41,7 @@ class IndexTreeMessyTest {
 	// Voir constante dans IndexTreeDic : static public int maxResultCountPerIndexInstance = 10;
 	// -> limitation du nombre de résultats affichés par arbre
 	
-	//protected static Parser parser;
+	//protected static Loader parser;
 	private static Table table;
 	private static Utils currentlyUsedUils = new Utils(); // For thread-safety ! (but, here, it's static so thread unsafe... ^^')
 	private static TableHandler tableHandler;
@@ -124,7 +124,7 @@ class IndexTreeMessyTest {
 		
 		if (parseAgain) {
 			Timer parseTimer = new Timer("TEMPS TOTAL pris par le parsing");
-			Log.info("Nombre de résultats/entrées parsés INIT : " + Parser.debugNumberOfEntriesWritten.get());
+			Log.info("Nombre de résultats/entrées parsés INIT : " + Loader.debugNumberOfEntriesWritten.get());
 			//tableHandler.forceAppendNotFirstParsing();
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-06.csv", true);
 			
@@ -174,7 +174,7 @@ class IndexTreeMessyTest {
 			tPars2.join();
 			tPars3.join();
 			tPars4.join();*/
-			// Parser de la donnée en multi-thread
+			// Loader de la donnée en multi-thread
 			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
@@ -197,7 +197,7 @@ class IndexTreeMessyTest {
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-08.csv", true);
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-09.csv", true);
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-10.csv", true);
-			Log.info("Nombre de résultats/entrées parsés FINAL : " + Parser.debugNumberOfEntriesWritten.get());
+			Log.info("Nombre de résultats/entrées parsés FINAL : " + Loader.debugNumberOfEntriesWritten.get());
 			
 			
 			/**/

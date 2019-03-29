@@ -1,4 +1,4 @@
-package db.data;
+package db.data.types;
 
 import java.nio.ByteBuffer;
 
@@ -6,38 +6,39 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import db.search.Operator;
 
-public class FloatType extends DataType {
-	private static final long serialVersionUID = -8609612884136762449L;
+public class LongType extends DataType {
+	private static final long serialVersionUID = -7928604950572059766L;
 	public static boolean sizeIsRequired = false;
 	
-	public FloatType() {
+	public LongType() {
 		super();
-		this.sizeInBytes = Float.BYTES;
+		this.sizeInBytes = Long.BYTES;
 	}
 	
+
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Class getAssociatedClassType() {
-		return Float.class;
+		return Long.class;
 	}
-
+	
 	@Override
 	public Object parseAndWriteToBuffer(String input, ByteBuffer outputBuffer) throws IllegalArgumentException { // throws NumberFormatException {
-		Float asFloat = Float.parseFloat(input);
-		outputBuffer.putFloat(asFloat);
-		return asFloat;
+		Long asLong = Long.parseLong(input);
+		outputBuffer.putLong(asLong);
+		return asLong;
 	}
 	
 	@Override
-	public Float readTrueValue(byte[] bytes) {
+	public Long readTrueValue(byte[] bytes) {
 		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
-		return wrapped.getFloat();
+		return wrapped.getLong();
 	}
 	
 	@Override
-	public Float readIndexValue(byte[] bytes) {
+	public Long readIndexValue(byte[] bytes) {
 		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
-		return wrapped.getFloat();
+		return wrapped.getLong();
 	}
 
 	@Override
@@ -53,7 +54,7 @@ public class FloatType extends DataType {
 
 	public boolean inputCanBeParsed(String input) {
 		try {
-			Float.parseFloat(input);
+			Long.parseLong(input);
 			return true;
 		} catch (IllegalArgumentException exp) {
 			return false;

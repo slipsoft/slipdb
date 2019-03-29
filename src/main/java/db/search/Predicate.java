@@ -1,7 +1,6 @@
 package db.search;
 
-import com.dant.utils.Log;
-import db.data.DataPositionList;
+import db.data.types.DataPositionList;
 import db.structure.Column;
 import db.structure.Index;
 import db.structure.StructureException;
