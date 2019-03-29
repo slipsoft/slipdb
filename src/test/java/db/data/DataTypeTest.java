@@ -31,7 +31,7 @@ class DataTypeTest {
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
 		//Log.info("setUpBeforeAll");
-		Log.start("dataTypesTest", 2);
+		Log.start("dataTypesTest", 3);
 		
 	}
 
@@ -182,7 +182,8 @@ class DataTypeTest {
 		}
 		localTimer.log();
 		
-		/** Valeurs mise à jour (Sylvain)
+		/*
+			Valeurs mise à jour (Sylvain)
 		 	Pour 5_000_000 opérations : 
 		    Cout fonctionnement de la boucle pour 5_000_000 opérations : 8 ms
 		    Parsing de ByteType    : 27 ms

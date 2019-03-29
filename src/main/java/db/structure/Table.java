@@ -250,18 +250,17 @@ public class Table implements Serializable {
 
 	/**
 	 * Returns the best index to use for a given filter
-	 *
-	 * @param predicate
-	 * @return
-	 * @throws Exception
+	 * @param predicate a predicate without index
+	 * @return Index
+	 * @throws StructureException if no index is found
 	 */
-	public Index findBestIndex(Predicate predicate) throws Exception {
+	public Index findBestIndex(Predicate predicate) throws StructureException {
 		for (Index index : indexesList) {
 			if (index.canBeUsedWithPredicate(predicate)) {
 				return index;
 			}
 		}
-		throw new Exception("no index can be used with this filter");
+		throw new StructureException("no index can be used with this filter");
 	}
 
 	public TableEntity convertToEntity() {

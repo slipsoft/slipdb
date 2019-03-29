@@ -1,16 +1,14 @@
 package db.sTreeIndex;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import db.search.ResultSet;
+import db.search.*;
 import db.serial.SerialStructure;
-
+import db.structure.StructureException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -36,17 +34,20 @@ import db.structure.indexTree.IndexTreeDic;
 import db.structure.recherches.SGlobalHandler;
 import db.structure.recherches.TableHandler;
 
-public class IndexTreeMessyTest {
+import static org.junit.jupiter.api.Assertions.*;
+
+class IndexTreeMessyTest {
 	
 	// Voir constante dans IndexTreeDic : static public int maxResultCountPerIndexInstance = 10;
 	// -> limitation du nombre de résultats affichés par arbre
 	
 	//protected static Parser parser;
-	protected static Table table;
-	protected static Utils currentlyUsedUils = new Utils(); // For thread-safety ! (but, here, it's static so thread unsafe... ^^')
-	protected static TableHandler tableHandler;
+	private static Table table;
+	private static Utils currentlyUsedUils = new Utils(); // For thread-safety ! (but, here, it's static so thread unsafe... ^^')
+	private static TableHandler tableHandler;
 	
-	protected static boolean parseAgain = true;
+	private static boolean parseAgain = true;
+	private boolean doItWithTableHandler = true;
 	
 	/** Pour la déserialisation
 	 * @param in
@@ -73,10 +74,10 @@ public class IndexTreeMessyTest {
 	@BeforeAll
 	static void setUpBeforeAllDe() throws Exception {
 		Log.info("setUpBeforeAll");
-		Log.start("indexingTreeTest", 2);
+		Log.start("indexingTreeTest", 3);
 		
 		tableHandler = SGlobalHandler.initializeTable("NYtest");
-		assertEquals(true, tableHandler != null);
+		assertNotNull(tableHandler);
 		
 		//getValuesOfLineByIdForSignleQuery
 
@@ -261,8 +262,6 @@ public class IndexTreeMessyTest {
 		MemUsage.printMemUsage();
 		
 	}*/
-	
-	protected boolean doItWithTableHandler = true;
 	
 	@Test
 	void testIndexTreeDic() throws Exception {
@@ -626,6 +625,28 @@ public class IndexTreeMessyTest {
 		Log.info("Number of results = " + numberOfResults);
 		Log.info("Number of lines = " + numberOfLines);
 		
+	}
+
+	@Test
+	void executeView() {
+		Column column = table.getColumns().get(12);
+		Field field = new Field(column.getName());
+		Predicate predicate = new Predicate(table, column, Operator.equals, new Float("17.78"));
+		ArrayList<Field> listFields = new ArrayList<>();
+		listFields.add(field);
+		View view = new View(tableHandler, predicate, listFields, new ArrayList<>(), new Group());
+		ResultSet result = null;
+
+		try {
+			tableHandler.indexColumnWithTreeFromDisk("fare_amount");
+			result = view.execute();
+		} catch (SearchException e) {
+			Log.error(e);
+		} catch (StructureException e) {
+			Log.error(e);
+		}
+		Log.debug(result);
+
 	}
 	
 	@AfterAll
