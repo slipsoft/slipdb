@@ -11,7 +11,7 @@ import org.apache.commons.io.FileUtils;
 
 import com.dant.utils.Log;
 
-import db.data.DataPositionList;
+import db.data.types.DataPositionList;
 import db.search.ResultSet;
 import db.structure.Table;
 

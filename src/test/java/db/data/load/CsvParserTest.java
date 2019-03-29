@@ -1,4 +1,4 @@
-package db.parsers;
+package db.data.load;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,11 +17,11 @@ import com.dant.utils.Log;
 import com.dant.utils.Timer;
 import com.dant.utils.Utils;
 
-import db.data.ByteType;
-import db.data.DateType;
-import db.data.DoubleType;
-import db.data.FloatType;
-import db.data.StringType;
+import db.data.types.ByteType;
+import db.data.types.DateType;
+import db.data.types.DoubleType;
+import db.data.types.FloatType;
+import db.data.types.StringType;
 import db.structure.Column;
 import db.structure.Table;
 

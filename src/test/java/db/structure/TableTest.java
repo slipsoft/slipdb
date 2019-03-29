@@ -9,8 +9,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import db.data.IntegerType;
-import db.data.StringType;
+import db.data.types.IntegerType;
+import db.data.types.StringType;
 
 class TableTest {
 	protected Table table;

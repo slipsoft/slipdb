@@ -1,6 +1,6 @@
 package db.search;
 
-import db.data.DataPositionList;
+import db.data.types.DataPositionList;
 import org.apache.commons.collections4.ListUtils;
 
 public class FilterGroup implements FilterTerm {

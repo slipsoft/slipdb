@@ -9,7 +9,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import com.dant.entity.ColumnEntity;
@@ -17,9 +16,8 @@ import com.dant.entity.TableEntity;
 import com.dant.utils.EasyFile;
 import com.dant.utils.Log;
 
-import db.data.DataType;
+import db.data.types.DataType;
 import db.disk.dataHandler.TableDataHandler;
-import db.disk.dataHandler.TableDataHandlerFile;
 import db.search.Predicate;
 import db.structure.recherches.TableHandler;
 

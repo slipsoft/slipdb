@@ -2,11 +2,8 @@ package zArchive.sj.simpleDB.treeIndexing;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
-import db.data.IntegerArrayList;
-import db.data.DataPositionList;
+import db.data.types.IntegerArrayList;
 
 /** Retourner les valeurs correspondant aux filtres passés en argument
  * 

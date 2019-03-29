@@ -1,4 +1,4 @@
-package db.data;
+package db.data.types;
 
 import java.io.IOException;
 import java.io.Serializable;

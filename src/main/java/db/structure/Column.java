@@ -9,7 +9,7 @@ import java.util.Map;
 
 import com.dant.entity.ColumnEntity;
 
-import db.data.DataType;
+import db.data.types.DataType;
 
 public class Column implements Serializable {
 	private static final long serialVersionUID = -3714630692284399540L;

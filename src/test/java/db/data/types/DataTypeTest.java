@@ -1,4 +1,4 @@
-package db.data;
+package db.data.types;
 
 import static org.junit.jupiter.api.Assertions.*;
 

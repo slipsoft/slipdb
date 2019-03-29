@@ -1,4 +1,4 @@
-package db.parsers;
+package db.data.load;
 
 import java.io.BufferedReader;
 import java.io.IOException;

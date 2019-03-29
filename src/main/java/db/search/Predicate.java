@@ -1,6 +1,6 @@
 package db.search;
 
-import db.data.DataPositionList;
+import db.data.types.DataPositionList;
 import db.structure.Column;
 import db.structure.Index;
 import db.structure.Table;

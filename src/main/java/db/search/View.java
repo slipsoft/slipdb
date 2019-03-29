@@ -1,11 +1,9 @@
 package db.search;
 
-import db.data.DataPositionList;
+import db.data.types.DataPositionList;
 import db.structure.Column;
-import db.structure.Table;
 import db.structure.recherches.TableHandler;
 
-import java.awt.image.ColorModel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package db.data;
+package db.data.types;
 
 import java.nio.ByteBuffer;
 
@@ -6,39 +6,38 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import db.search.Operator;
 
-
-public class DoubleType extends DataType {
-	private static final long serialVersionUID = 205941428943957057L;
+public class FloatType extends DataType {
+	private static final long serialVersionUID = -8609612884136762449L;
 	public static boolean sizeIsRequired = false;
 	
-	public DoubleType() {
+	public FloatType() {
 		super();
-		this.sizeInBytes = Double.BYTES;
+		this.sizeInBytes = Float.BYTES;
 	}
 	
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Class getAssociatedClassType() {
-		return Double.class;
+		return Float.class;
 	}
-	
+
 	@Override
 	public Object parseAndWriteToBuffer(String input, ByteBuffer outputBuffer) throws IllegalArgumentException { // throws NumberFormatException {
-		Double valueAsDouble = Double.parseDouble(input);
-		outputBuffer.putDouble(valueAsDouble);
-		return valueAsDouble;
+		Float asFloat = Float.parseFloat(input);
+		outputBuffer.putFloat(asFloat);
+		return asFloat;
 	}
 	
 	@Override
-	public Double readTrueValue(byte[] bytes) {
+	public Float readTrueValue(byte[] bytes) {
 		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
-		return wrapped.getDouble();
+		return wrapped.getFloat();
 	}
 	
 	@Override
-	public Double readIndexValue(byte[] bytes) {
+	public Float readIndexValue(byte[] bytes) {
 		ByteBuffer wrapped = ByteBuffer.wrap(bytes);
-		return wrapped.getDouble();
+		return wrapped.getFloat();
 	}
 
 	@Override

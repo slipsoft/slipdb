@@ -1,4 +1,4 @@
-package db.parsers;
+package db.data.load;
 
 public class IncorrectEntryException extends Exception {
 

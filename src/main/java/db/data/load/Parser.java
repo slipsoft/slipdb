@@ -1,4 +1,4 @@
-package db.parsers;
+package db.data.load;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -15,7 +15,7 @@ import com.dant.utils.Timer;
 
 import db.disk.dataHandler.TableDataHandler;
 import db.disk.dataHandler.TableDataHandlerWriteJob;
-import db.data.DateType;
+import db.data.types.DateType;
 import db.disk.dataHandler.DiskDataPosition;
 import db.structure.Column;
 import db.structure.Table;

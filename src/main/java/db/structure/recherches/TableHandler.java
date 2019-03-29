@@ -10,11 +10,11 @@ import java.util.List;
 
 import com.dant.utils.Log;
 
-import db.data.DataType;
+import db.data.types.DataType;
 import db.disk.dataHandler.DiskDataPosition;
 import db.disk.dataHandler.TableDataHandler;
-import db.data.DataPositionList;
-import db.parsers.CsvParser;
+import db.data.types.DataPositionList;
+import db.data.load.CsvParser;
 import db.search.ResultSet;
 import db.structure.Column;
 import db.structure.Table;

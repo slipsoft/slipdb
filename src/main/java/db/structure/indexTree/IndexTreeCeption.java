@@ -17,8 +17,8 @@ import java.util.Map.Entry;
 
 import com.dant.utils.EasyFile;
 
-import db.data.DataType;
-import db.data.IntegerArrayList;
+import db.data.types.DataType;
+import db.data.types.IntegerArrayList;
 import db.search.Operator;
 import db.structure.Column;
 import db.structure.Table;
