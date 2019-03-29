@@ -631,18 +631,22 @@ class IndexTreeMessyTest {
 	void executeView() {
 		Column column = table.getColumns().get(4);
 		Field field = new Field(column.getName());
-		Predicate predicate = new Predicate(table, column, Operator.equals, new Float("17.78"));
 		ArrayList<Field> listFields = new ArrayList<>();
 		listFields.add(field);
-		View view = new View(tableHandler, predicate, listFields, new ArrayList<>(), new Group());
+		Predicate predicate1 = new Predicate(table, column, Operator.equals, new Float("17.78"));
+		Predicate predicate2 = new Predicate(table, column, Operator.between, new Float[] {17.78f, 18f});
+		View view1 = new View(tableHandler, predicate1, listFields, new ArrayList<>(), new Group());
+		View view2 = new View(tableHandler, predicate2, listFields, new ArrayList<>(), new Group());
 		ResultSet result = null;
 
 		try {
-			result = view.execute();
+			result = view1.execute();
+			Log.debug(result);
+			result = view2.execute();
+			Log.debug(result);
 		} catch (SearchException e) {
 			Log.error(e);
 		}
-		Log.debug(result);
 
 	}
 	
