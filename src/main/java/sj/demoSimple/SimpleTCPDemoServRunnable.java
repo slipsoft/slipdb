@@ -18,12 +18,36 @@ public class SimpleTCPDemoServRunnable implements Runnable {
 	private TCPServer tcpServ = new TCPServer(serverPort);
 	private ArrayList<TCPClient> clientsList = new ArrayList<TCPClient>();
 	
+	private boolean loadFromDisk = true;
+	private String sessionDatabaseName = "Database2_2015";//"Database2015";//"";//
+	
+	
 	public boolean startServer() {
 		class LocalLog {
 			public void log(String message) {
 				System.out.println("testTCP_withServer : " + message);
 			}
 		}
+		//SimpleTCPDemoCreateTable demo = new SimpleTCPDemoCreateTable();
+		Log.info("Serveur : CSV LOAD");
+		try {
+			SimpleTCPDemoCreateTable.setDatabaseName00(sessionDatabaseName);
+			if (loadFromDisk) {
+				SimpleTCPDemoCreateTable.loadSerialData03();
+				SimpleTCPDemoCreateTable.parseCsvData02();
+				SimpleTCPDemoCreateTable.saveSerialData03();
+			} else {
+				SimpleTCPDemoCreateTable.initTable01();
+				SimpleTCPDemoCreateTable.parseCsvData02();
+				SimpleTCPDemoCreateTable.saveSerialData03();
+			}
+			// Faire la recherche
+			SimpleTCPDemoCreateTable.search04();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Log.info("Serveur : CSV LOAD OKAY !");
 		
 		LocalLog localLog = new LocalLog();
 		localLog.log("Serveur : Initialisation...");

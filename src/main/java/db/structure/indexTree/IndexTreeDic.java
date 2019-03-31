@@ -33,6 +33,7 @@ import db.structure.Column;
 import db.structure.Database;
 import db.structure.Index;
 import db.structure.Table;
+import sj.demoSimple.SimpleTCPDemoCreateTable;
 import sj.network.tcpAndBuffers.NetBuffer;
 
 /**
@@ -76,19 +77,19 @@ public class IndexTreeDic extends Index implements Serializable {
 	 *
 	 *
 	 */
-
+	
 	// Pour la recherche multi-thread, ce nombre est multiplié autant de fois qu'il y a d'arbre !
 	static public int maxResultCountPerIndexInstance = 20_000_000_00;
 	static public int maxResultCountInTotal = 20_000_000_00; // new AtomicInteger(lent, mais pour peu de résultats, ça passera !
 	
-	public int flushOnDiskOnceReachedThisTotalEntrySize = 40_000_000; // <- Globalement, la taille des fichiers mis sur le disque     ancien : EntryNumber
+	public int flushOnDiskOnceReachedThisTotalEntrySize = 120_000_000; // <- Globalement, la taille des fichiers mis sur le disque     ancien : EntryNumber
 	protected int currentTotalEntrySizeInMemory = 0; // nombre actuel de résultats en mémoire vive, multiplié par la taille de chaque résultat (en octets) (utile pour le flush sur le disque)
 	public boolean useMultithreadSearch = true;
-	public boolean showMemUsageAtEachFlush = true;
-	public boolean forceGarbageCollectorAtEachFlush = true;
-
+	public boolean showMemUsageAtEachFlush = false;
+	public boolean forceGarbageCollectorAtEachFlush = false;
+	
 	protected String baseAssociatedTablePath;
-
+	
 	// Contient tous les index des données indexées
 	transient protected TreeMap<Object/*clef, valeur indexée*/, DataPositionList/*valeur*/> associatedBinIndexes;// = new TreeMap<Object, DataPositionList>();
 	//protected EasyFile fileStoringDataBlocks; // link between the disk and onDiskDataBlocks
@@ -96,7 +97,7 @@ public class IndexTreeDic extends Index implements Serializable {
 	//protected String currentSaveFilePath = null;
 	protected String basePath; // initialisé via initialiseWithTableAndColumn    ancien : = "data_save/IndexTreeDic_DiskMemory/";//"target/IndexTreeDic_DiskMemory/";
 	//protected static int rootIndexTreeCount = 0;
-
+	
 	
 	private void loadSerialAndCreateCommon() {
 		associatedBinIndexes = new TreeMap<Object, DataPositionList>();
@@ -108,7 +109,7 @@ public class IndexTreeDic extends Index implements Serializable {
 		in.defaultReadObject();
 		loadSerialAndCreateCommon();
 		indexingValueLock = new Object();
-		Log.info("READ READ READ readObject IndexTreeDic");
+		//Log.info("READ READ READ readObject IndexTreeDic");
 	}
 	
 	
@@ -245,7 +246,7 @@ public class IndexTreeDic extends Index implements Serializable {
 		int dataSizeInBytes = columnDataType.getSize();
 		storedValueSizeInBytes = dataSizeInBytes;
 		diskEntryTotalSize = storedValueSizeInBytes + binIndexStorageSize; // nombre d'octets pris par chaque entrée (valeur + binIndex)
-
+		
 	}
 	
 	/** Sera bientôt remplacée par une fonction supportant le nouveau système de fichiers
@@ -484,9 +485,25 @@ public class IndexTreeDic extends Index implements Serializable {
 		indexWrittenOnDiskFilePathsArray.add(saveFileName);
 		associatedBinIndexes = new TreeMap<Object, DataPositionList>(); // réinitialisation
 		currentTotalEntrySizeInMemory = 0;
-
+		
 		if (showMemUsageAtEachFlush) MemUsage.printMemUsage("IndexTreeDic.flushOnDisk");//, baseSaveFilePath = " + baseSaveFilePath);
-	}  }
+		//SimpleTCPDemoCreateTable.saveSerialData03(); // TODO
+		// TODO
+		// TODO
+		// TODO
+		// TODO
+		// TODO
+		// TODO
+		// TODO
+		// TODO
+		// TODO
+		// TODO
+		// TODO
+		// TODO
+		// TODO
+		// TODO
+		// TODO
+		}  }
 
 	/** Ecrire l'index sur le disque
 	 *  @param appendAtTheEnd   mettre à true pour écrire les données sur le disque

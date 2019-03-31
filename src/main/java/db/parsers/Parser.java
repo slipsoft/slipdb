@@ -61,6 +61,8 @@ public abstract class Parser {
 	
 	protected int showInfoEveryParsedLines = 100_000; // mettre -1 pour désactiver l'affichage
 	
+	protected boolean enableErrorLog = false;
+	
 	/**
 	 * Parse an input stream into an output stream according to a schema with a
 	 * limit of lines (-1 : no limit)
@@ -94,11 +96,11 @@ public abstract class Parser {
 					localReadEntryNb++;
 					totalEntryCount++;
 				} catch (IncorrectEntryException e) {
-					Log.error(e);
+					if (enableErrorLog) Log.error(e);
 					//e.printStackTrace();
 					// TODO: handle exception
 				} catch (IOException e) {
-					Log.error(e);
+					if (enableErrorLog) Log.error(e);
 					// TODO: handle exception
 				}
 				

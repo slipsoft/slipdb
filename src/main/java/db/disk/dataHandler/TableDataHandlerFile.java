@@ -46,7 +46,7 @@ public class TableDataHandlerFile implements Serializable {
 	private boolean isReadOnlyMode;
 	private int positionInReadOnlyFile = 0;
 	
-	static public final int maxFileSizeOnDisk = 150_000_000; // 500_000_000 Max 500 mo sur disque (grosse marge de sécurité)
+	static public final int maxFileSizeOnDisk = 450_000_000; // 500_000_000 Max 500 mo sur disque (grosse marge de sécurité)
 	
 	public void debugSerialShowVariables() {
 		Log.info("filePath = " + filePath);

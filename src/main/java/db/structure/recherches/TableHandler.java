@@ -44,20 +44,20 @@ public class TableHandler implements Serializable {
 	transient protected ArrayList<Thread> parsingThreadList;
 	
 	// indexColumnList est la liste des colonnes à indexer
-	transient public RuntimeIndexingEntryList runtimeIndexingList = new RuntimeIndexingEntryList();//ArrayList<SRuntimeIndexingEntry>();
+	transient public RuntimeIndexingEntryList runtimeIndexingList;//ArrayList<SRuntimeIndexingEntry>();
 	// TODO
 	protected ArrayList<IndexTreeDic> indexTreeList = new ArrayList<IndexTreeDic>(); // Liste des IndexTree associés à cette table
 	
 	public void flushAllIndexTreesOnDisk() {
-		Log.error("TableHandler.flushAllIndexTreesOnDisk : size = " + indexTreeList.size());
+		//Log.error("TableHandler.flushAllIndexTreesOnDisk : size = " + indexTreeList.size());
 		for (IndexTreeDic indexTree : indexTreeList) {
 			try {
 				indexTree.flushOnDisk();
-				Log.error("TableHandler.flushAllIndexTreesOnDisk : flush de l'arbre !" + indexTree);
+				//Log.error("TableHandler.flushAllIndexTreesOnDisk : flush de l'arbre !" + indexTree);
 			} catch (IOException e) {
-				Log.error("TableHandler.flushAllIndexTreesOnDisk : l'arbre n'a pas pu être écrit sur le disque, IOException.");
+				//Log.error("TableHandler.flushAllIndexTreesOnDisk : l'arbre n'a pas pu être écrit sur le disque, IOException.");
 				Log.error(e);
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 		}
 	}
@@ -67,6 +67,7 @@ public class TableHandler implements Serializable {
 		indexTreeListLock = new Object();
 		parsingThreadList = new ArrayList<Thread>();
 		multiThreadParsingListLock = new Object();
+		runtimeIndexingList = new RuntimeIndexingEntryList();
 	}
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -137,7 +138,7 @@ public class TableHandler implements Serializable {
 		}
 	}
 
-	public void parseCsvData (InputStream is, boolean doRuntimeIndexing) throws Exception {
+	public void parseCsvData(InputStream is, boolean doRuntimeIndexing) throws Exception {
 		try {
             parseCsvData(is, doRuntimeIndexing, false);
 			is.close();
