@@ -3,11 +3,11 @@ package db.sTreeIndex;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
+import db.data.load.Loader;
 import db.structure.recherches.TableHandler;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterAll;
@@ -19,14 +19,13 @@ import com.dant.utils.MemUsage;
 import com.dant.utils.Timer;
 import com.dant.utils.Utils;
 
-import db.data.ByteType;
-import db.data.DateType;
-import db.data.DoubleType;
-import db.data.FloatType;
-import db.data.IntegerArrayList;
-import db.data.DataPositionList;
-import db.data.StringType;
-import db.parsers.CsvParser;
+import db.data.types.ByteType;
+import db.data.types.DateType;
+import db.data.types.DoubleType;
+import db.data.types.FloatType;
+import db.data.types.IntegerArrayList;
+import db.data.types.StringType;
+import db.data.load.CsvParser;
 import db.structure.Column;
 import db.structure.Table;
 import db.structure.indexTree.IndexTreeCeption;
@@ -76,10 +75,10 @@ public class TestIndexTreeMT1 {
 		TableHandler table = new TableHandler(tableName);
 		columns.stream().forEach(c -> table.addColumn(c));
 		Table newTable = table.createTable();
-		CsvParser newParser = new CsvParser(newTable);
+		Loader loader = new Loader(newTable, new CsvParser());
 		FileInputStream is = new FileInputStream(filePathOnDisk);
 		//Timer parseTimer = new Timer("Temps pris par le parsing de " + tableName);
-		newParser.parse(is, false); // Supprimer les données déjà écrites
+		loader.parse(is, false); // Supprimer les données déjà écrites
 		is.close();
 		//parseTimer.log();
 		return newTable;
@@ -100,7 +99,7 @@ public class TestIndexTreeMT1 {
 	@BeforeAll
 	static void setUpBeforeAll() throws Exception {
 		Log.info("setUpBeforeAll");
-		Log.start("indexingTreeTest", 2);
+		Log.start("indexingTreeTest", 3);
 
 		
 		//createFileCopies(10);
@@ -124,8 +123,8 @@ public class TestIndexTreeMT1 {
 		
 		/**
 		 * Bilan : le parsing demande beaucoup plus de calculs que de disque.
-		 * -> Voir quelles sont les fonctions qui prennent le plus de temps à parser
-		 * -> Possible de parser le même fichier, en partant à des index différents (mais pas une bonne idée, car je ne sais pas d'où partir, de peur de couper une ligne)
+		 * -> Voir quelles sont les fonctions qui prennent le plus de temps à loader
+		 * -> Possible de loader le même fichier, en partant à des index différents (mais pas une bonne idée, car je ne sais pas d'où partir, de peur de couper une ligne)
 		 */
 		Timer parseTimer = new Timer("Temps pris par le parsing de " + maxRunCount + " fichiers");
 		
@@ -142,8 +141,8 @@ public class TestIndexTreeMT1 {
 		parseTimer.log();
 		
 		/**
-		 * En première idée, pour parser :
-		 * 1) Sauvegarder chaque colonne sur disque, parsée ou non : éviter, autant que possible, de parser les dates par exemple
+		 * En première idée, pour loader :
+		 * 1) Sauvegarder chaque colonne sur disque, parsée ou non : éviter, autant que possible, de loader les dates par exemple
 		 * */
 		
 		Log.info("setUpBeforeAll OK");

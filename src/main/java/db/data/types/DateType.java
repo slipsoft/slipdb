@@ -1,4 +1,4 @@
-package db.data;
+package db.data.types;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -90,5 +90,14 @@ public class DateType extends DataType implements Serializable {
 			Operator.greaterOrEquals,
 			Operator.lessOrEquals,
 		}, op);
+	}
+
+	public boolean inputCanBeParsed(String input) {
+		try {
+			Utils.dateToSecInt(utilsInstance.dateFromString(input));
+			return true;
+		} catch (IllegalArgumentException exp) {
+			return false;
+		}
 	}
 }

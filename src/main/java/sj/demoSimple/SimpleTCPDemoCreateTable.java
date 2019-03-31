@@ -8,13 +8,14 @@ import java.util.ArrayList;
 import com.dant.utils.Log;
 import com.dant.utils.Timer;
 
-import db.data.ByteType;
-import db.data.DataPositionList;
-import db.data.DateType;
-import db.data.DoubleType;
-import db.data.FloatType;
-import db.data.StringType;
-import db.parsers.Parser;
+import db.data.types.ByteType;
+import db.data.types.DataPositionList;
+import db.data.types.DateType;
+import db.data.types.DoubleType;
+import db.data.types.FloatType;
+import db.data.types.StringType;
+import db.data.load.Loader;
+import db.data.load.Parser;
 import db.search.ResultSet;
 import db.serial.SerialStructure;
 import db.structure.Database;
@@ -153,7 +154,7 @@ public class SimpleTCPDemoCreateTable {
 
 		// Attendre que toute la donnée soit parsée
 		tableHandler.multiThreadParsingJoinAllThreads();
-		Log.info("Nombre de résultats/entrées parsés FINAL : " + Parser.debugNumberOfEntriesWritten.get());
+		Log.info("Nombre de résultats/entrées parsés FINAL : " + Loader.debugNumberOfEntriesWritten.get());
 		tableHandler.flushEveryIndexOnDisk();
 	}
 	

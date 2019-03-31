@@ -1,13 +1,11 @@
-package db.parsers;
+package db.data.load;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import db.structure.recherches.TableHandler;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,22 +15,22 @@ import com.dant.utils.Log;
 import com.dant.utils.Timer;
 import com.dant.utils.Utils;
 
-import db.data.ByteType;
-import db.data.DateType;
-import db.data.DoubleType;
-import db.data.FloatType;
-import db.data.StringType;
+import db.data.types.ByteType;
+import db.data.types.DateType;
+import db.data.types.DoubleType;
+import db.data.types.FloatType;
+import db.data.types.StringType;
 import db.structure.Column;
 import db.structure.Table;
 
 class CsvParserTest {
-	protected Parser parser;
+	protected Loader loader;
 	protected Table table;
 	Utils utilsInstance;
 
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
-		Log.start("csvParserTest", 2);
+		Log.start("csvParserTest", 3);
 	}
 
 	@BeforeEach
@@ -66,24 +64,16 @@ class CsvParserTest {
 		columns.stream().forEach(c -> tableHandler.addColumn(c));
 
 		Table table = tableHandler.createTable();
-		//parser = new CsvParser2(table); // 790 ms
-		parser = new CsvParser(table); // 750 ms
-	}
-
-	@AfterEach
-	void tearDown() throws Exception {
+		loader = new Loader(table, new CsvParser()); // 750 ms
 	}
 
 	@Test
-	void testParseInputStreamInt() throws IOException {
-		Executable exec = new Executable() {
-			@Override
-			public void execute() throws Throwable {
-				FileInputStream is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
-				Timer parseTimer = new Timer("Temps pris par le parsing");
-				parser.parse(is, false); // Supprimer les données déjà écrites
-				parseTimer.log();
-			}
+	void testParseInputStreamInt() {
+		Executable exec = () -> {
+			FileInputStream is = new FileInputStream("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv");
+			Timer parseTimer = new Timer("Temps pris par le parsing");
+			loader.parse(is, false); // Supprimer les données déjà écrites
+			parseTimer.log();
 		};
 		assertDoesNotThrow(exec);
 		

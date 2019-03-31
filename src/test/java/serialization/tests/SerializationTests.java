@@ -13,16 +13,15 @@ import org.junit.jupiter.api.Test;
 
 import com.dant.utils.Utils;
 
-import db.data.ByteType;
-import db.data.DataType;
-import db.data.DateType;
-import db.data.DoubleType;
-import db.data.FloatType;
-import db.data.StringType;
+import db.data.types.ByteType;
+import db.data.types.DataType;
+import db.data.types.DateType;
+import db.data.types.DoubleType;
+import db.data.types.FloatType;
+import db.data.types.StringType;
 import db.serial.SerialStructure;
 import db.structure.Database;
 import db.structure.Table;
-import db.structure.recherches.SGlobalHandler;
 import db.structure.recherches.TableHandler;
 
 public class SerializationTests {

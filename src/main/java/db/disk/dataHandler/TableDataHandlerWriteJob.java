@@ -11,7 +11,7 @@ import java.io.IOException;
  *  Le WriteJob permet d'écrire de la donnée sur le disque sans avoir à se soucier du fichier
  *  dans laquelle la donnée va, et sans avoir à gérer les accès concurrents des autres threads.
  *  
- *  Pour écrire de la donnée (d'un Parser par exemple), il suffit de créer un nouveau TableDataHandlerWriteJob
+ *  Pour écrire de la donnée (d'un Loader par exemple), il suffit de créer un nouveau TableDataHandlerWriteJob
  *  et de faire des writeDataLine(..). Ne pas oublier de closeJob (ou close) quand l'écriture du thread est terminée.
  *
  */

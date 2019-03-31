@@ -1,16 +1,15 @@
 package db.sTreeIndex;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import db.search.ResultSet;
+import db.data.load.Loader;
+import db.search.*;
 import db.serial.SerialStructure;
-
+import db.structure.StructureException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -20,14 +19,13 @@ import com.dant.utils.MemUsage;
 import com.dant.utils.Timer;
 import com.dant.utils.Utils;
 
-import db.data.ByteType;
-import db.data.DateType;
-import db.data.DoubleType;
-import db.data.FloatType;
-import db.data.IntegerArrayList;
-import db.data.DataPositionList;
-import db.data.StringType;
-import db.parsers.Parser;
+import db.data.types.ByteType;
+import db.data.types.DateType;
+import db.data.types.DoubleType;
+import db.data.types.FloatType;
+import db.data.types.IntegerArrayList;
+import db.data.types.DataPositionList;
+import db.data.types.StringType;
 import db.structure.Column;
 import db.structure.Database;
 import db.structure.Table;
@@ -36,17 +34,20 @@ import db.structure.indexTree.IndexTreeDic;
 import db.structure.recherches.SGlobalHandler;
 import db.structure.recherches.TableHandler;
 
-public class IndexTreeMessyTest {
+import static org.junit.jupiter.api.Assertions.*;
+
+class IndexTreeMessyTest {
 	
 	// Voir constante dans IndexTreeDic : static public int maxResultCountPerIndexInstance = 10;
 	// -> limitation du nombre de résultats affichés par arbre
 	
-	//protected static Parser parser;
-	protected static Table table;
-	protected static Utils currentlyUsedUils = new Utils(); // For thread-safety ! (but, here, it's static so thread unsafe... ^^')
-	protected static TableHandler tableHandler;
+	//protected static Loader parser;
+	private static Table table;
+	private static Utils currentlyUsedUils = new Utils(); // For thread-safety ! (but, here, it's static so thread unsafe... ^^')
+	private static TableHandler tableHandler;
 	
-	protected static boolean parseAgain = true;
+	private static boolean parseAgain = true;
+	private boolean doItWithTableHandler = true;
 	
 	/** Pour la déserialisation
 	 * @param in
@@ -73,10 +74,10 @@ public class IndexTreeMessyTest {
 	@BeforeAll
 	static void setUpBeforeAllDe() throws Exception {
 		Log.info("setUpBeforeAll");
-		Log.start("indexingTreeTest", 2);
+		Log.start("indexingTreeTest", 3);
 		
 		tableHandler = SGlobalHandler.initializeTable("NYtest");
-		assertEquals(true, tableHandler != null);
+		assertNotNull(tableHandler);
 		
 		//getValuesOfLineByIdForSignleQuery
 
@@ -123,7 +124,7 @@ public class IndexTreeMessyTest {
 		
 		if (parseAgain) {
 			Timer parseTimer = new Timer("TEMPS TOTAL pris par le parsing");
-			Log.info("Nombre de résultats/entrées parsés INIT : " + Parser.debugNumberOfEntriesWritten.get());
+			Log.info("Nombre de résultats/entrées parsés INIT : " + Loader.debugNumberOfEntriesWritten.get());
 			//tableHandler.forceAppendNotFirstParsing();
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-06.csv", true);
 			
@@ -173,7 +174,7 @@ public class IndexTreeMessyTest {
 			tPars2.join();
 			tPars3.join();
 			tPars4.join();*/
-			// Parser de la donnée en multi-thread
+			// Loader de la donnée en multi-thread
 			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
@@ -196,7 +197,7 @@ public class IndexTreeMessyTest {
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-08.csv", true);
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-09.csv", true);
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-10.csv", true);
-			Log.info("Nombre de résultats/entrées parsés FINAL : " + Parser.debugNumberOfEntriesWritten.get());
+			Log.info("Nombre de résultats/entrées parsés FINAL : " + Loader.debugNumberOfEntriesWritten.get());
 			
 			
 			/**/
@@ -261,8 +262,6 @@ public class IndexTreeMessyTest {
 		MemUsage.printMemUsage();
 		
 	}*/
-	
-	protected boolean doItWithTableHandler = true;
 	
 	@Test
 	void testIndexTreeDic() throws Exception {
@@ -626,6 +625,29 @@ public class IndexTreeMessyTest {
 		Log.info("Number of results = " + numberOfResults);
 		Log.info("Number of lines = " + numberOfLines);
 		
+	}
+
+	@Test
+	void executeView() {
+		Column column = table.getColumns().get(4);
+		Field field = new Field(column.getName());
+		ArrayList<Field> listFields = new ArrayList<>();
+		listFields.add(field);
+		Predicate predicate1 = new Predicate(table, column, Operator.equals, new Float("17.78"));
+		Predicate predicate2 = new Predicate(table, column, Operator.between, new Float[] {17.78f, 18f});
+		View view1 = new View(tableHandler, predicate1, listFields, new ArrayList<>(), new Group());
+		View view2 = new View(tableHandler, predicate2, listFields, new ArrayList<>(), new Group());
+		ResultSet result = null;
+
+		try {
+			result = view1.execute();
+			Log.debug(result);
+			result = view2.execute();
+			Log.debug(result);
+		} catch (SearchException e) {
+			Log.error(e);
+		}
+
 	}
 	
 	@AfterAll

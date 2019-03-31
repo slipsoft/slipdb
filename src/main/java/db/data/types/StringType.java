@@ -1,4 +1,4 @@
-package db.data;
+package db.data.types;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -60,6 +60,10 @@ public class StringType extends DataType {
 		return ArrayUtils.contains(new Operator[] {
 			Operator.equals
 		}, op);
+	}
+
+	public boolean inputCanBeParsed(String input) {
+		return true;
 	}
 
 }

@@ -1,4 +1,4 @@
-package db.data;
+package db.data.types;
 
 import java.nio.ByteBuffer;
 
@@ -50,6 +50,15 @@ public class LongType extends DataType {
 			Operator.greaterOrEquals,
 			Operator.lessOrEquals,
 		}, op);
+	}
+
+	public boolean inputCanBeParsed(String input) {
+		try {
+			Long.parseLong(input);
+			return true;
+		} catch (IllegalArgumentException exp) {
+			return false;
+		}
 	}
 
 }

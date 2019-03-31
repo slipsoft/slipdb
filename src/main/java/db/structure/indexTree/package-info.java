@@ -21,7 +21,7 @@
 	2019 - 03 - 22
 	
 	L'IndexTreeDic est fonctionnel, et il est possible de charger autant de donnée qu'on veut.
-	-> Parser et indexer se fait en mono-thread
+	-> Loader et indexer se fait en mono-thread
 		-> Pour prendre en charge me multi-thread, parser plusieurs fichiers à la fois, et écrire dans plusieurs fichiers, idem pour l'indexing (pas prioritaire)
 	-> Rechercher des valeurs se fait en multi-thread (stable et fiable)
 		-> Recherche sur chaque fichier d'index flush sur le disque simultanément

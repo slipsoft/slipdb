@@ -1,4 +1,4 @@
-package db.data;
+package db.data.types;
 
 import java.nio.ByteBuffer;
 
@@ -45,5 +45,14 @@ public class ByteType extends DataType {
 		return ArrayUtils.contains(new Operator[] {
 			Operator.equals
 		}, op);
+	}
+
+	public boolean inputCanBeParsed(String input) {
+		try {
+			Byte asByte = Byte.parseByte(input);
+			return true;
+		} catch (IllegalArgumentException exp) {
+			return false;
+		}
 	}
 }

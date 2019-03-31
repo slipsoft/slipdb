@@ -2,8 +2,7 @@ package com.dant.entity;
 
 import com.dant.utils.Log;
 import com.google.gson.Gson;
-import db.data.DataType;
-import db.data.DateType;
+import db.data.types.DataType;
 import db.structure.Column;
 import db.structure.Database;
 

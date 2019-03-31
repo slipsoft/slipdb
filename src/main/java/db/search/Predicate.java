@@ -1,25 +1,34 @@
 package db.search;
 
-import db.data.DataPositionList;
+import db.data.types.DataPositionList;
 import db.structure.Column;
 import db.structure.Index;
+import db.structure.StructureException;
 import db.structure.Table;
-import db.structure.indexTree.IndexException;
+
 
 public class Predicate implements FilterTerm {
+	protected Table table;
 	protected Column column;
 	protected Operator operator;
 	protected Object value;
 	protected Index index;
 
-	public Predicate(Column column, Operator operator, Object value) {
+	public Predicate(Table table, Column column, Operator operator, Object value) {
+		this.table = table;
 		this.column = column;
 		this.operator = operator;
 		this.value = value;
+		try {
+			findBestIndex();
+		} catch (Exception exp) {
+			this.index = null;
+		}
 	}
 
-	public void findBestIndex(Table table) throws Exception {
-		this.index = table.findBestIndex(this);
+	private Index findBestIndex() throws StructureException {
+		index = table.findBestIndex(this);
+		return index;
 	}
 
 	public Column getColumn() {
@@ -30,8 +39,11 @@ public class Predicate implements FilterTerm {
 		return operator;
 	}
 
-	public Index getIndex() {
-		return this.index;
+	public Index getIndex() throws StructureException {
+		if (this.index == null){
+			findBestIndex();
+		}
+		return index;
 	}
 
 	public Object getValue() { return this.value; }
@@ -39,9 +51,9 @@ public class Predicate implements FilterTerm {
 	@Override
 	public DataPositionList execute() throws SearchException {
 		try {
-			return this.index.getPositionsFromPredicate(this);
-		} catch (IndexException e) {
-			throw new SearchException(e.getMessage());
+			return getIndex().getPositionsFromPredicate(this);
+		} catch (StructureException e) {
+			throw new SearchException(e);
 		}
 	}
 }

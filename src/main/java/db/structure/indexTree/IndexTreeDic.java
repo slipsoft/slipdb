@@ -7,7 +7,6 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,8 +23,8 @@ import com.dant.utils.Log;
 import com.dant.utils.MemUsage;
 import com.dant.utils.Timer;
 
-import db.data.DataType;
-import db.data.DataPositionList;
+import db.data.types.DataType;
+import db.data.types.DataPositionList;
 import db.disk.dataHandler.DiskDataPosition;
 import db.search.Operator;
 import db.search.Predicate;
@@ -33,7 +32,7 @@ import db.structure.Column;
 import db.structure.Database;
 import db.structure.Index;
 import db.structure.Table;
-import sj.demoSimple.SimpleTCPDemoCreateTable;
+import org.apache.commons.lang3.ArrayUtils;
 import sj.network.tcpAndBuffers.NetBuffer;
 
 /**
@@ -116,7 +115,7 @@ public class IndexTreeDic extends Index implements Serializable {
 	/** Pour la sauvegarde sur disque de cet IndexTree
 	 *  -> Les données de l'arbre (pour dichotomie etc.) sont sauvegardées autrement (via saveOnDisk())
 	 *  La mémoire vive est supposée avoir été tptalement écrite sur le disque
-	 * @throws IOException
+	 * @throws IOException problème d'I/O
 	 */
 	public void saveVariablesOnStream(DataOutputStream outStream) throws IOException {
 		flushOnDisk(); // écriture des données en mémoire vive, s'il y en a
@@ -152,9 +151,9 @@ public class IndexTreeDic extends Index implements Serializable {
 	protected int associatedTableColumnIndex;
 
 	/** Ce constructeur : Lors de la création d'un nouvel index uniquement
-	 * @throws Exception
+	 * @throws IndexException erreur lors de la création
 	 */
-	public IndexTreeDic(Table inTable, int columnIndex) throws Exception {//(Class argStoredValuesClassType) {
+	public IndexTreeDic(Table inTable, int columnIndex) throws IndexException {//(Class argStoredValuesClassType) {
 
 		initialiseWithTableAndColumn(inTable, columnIndex);
 		basePath = baseAssociatedTablePath + "IndexTreeDic_DiskMemory/";
@@ -174,11 +173,14 @@ public class IndexTreeDic extends Index implements Serializable {
 		//rootIndexTreeCount++;
 	}
 
-	/** Constructeur : Pour le chargement du disque (index sauvegardé)
-	 *  @param argUniqueID
-	 * @throws Exception
+	/**
+	 * Constructeur : Pour le chargement du disque (index sauvegardé)
+	 * @param inTable la table associée à cet index
+	 * @param columnIndex le numéro de la colonne associée
+	 * @param argUniqueID un id unique ?
+	 * @throws IndexException erreur lors de la création
 	 */
-	public IndexTreeDic(Table inTable, int columnIndex, int argUniqueID) throws Exception {//(Class argStoredValuesClassType) {
+	public IndexTreeDic(Table inTable, int columnIndex, int argUniqueID) throws IndexException {//(Class argStoredValuesClassType) {
 
 		initialiseWithTableAndColumn(inTable, columnIndex);
 		basePath = baseAssociatedTablePath + "IndexTreeDic_DiskMemory/";
@@ -226,20 +228,21 @@ public class IndexTreeDic extends Index implements Serializable {
 	int intDateTo = Utils.dateToSecInt(dateTo);*/
 
 	/** Utile pour le RuntimeIndexing
-	 * @throws Exception
+	 * @throws IndexException
 	 */
-	public void initialiseWithTableAndColumn(Table inTable, int columnIndex) throws Exception {
+	public void initialiseWithTableAndColumn(Table inTable, int columnIndex) throws IndexException {
 		loadSerialAndCreateCommon();
-		if (inTable == null) throw new Exception("Impossible d'initialiser cet index avec une Table null.");
+		if (inTable == null) throw new IndexException("Impossible d'initialiser cet index avec une Table null.");
 		List<Column> columnsList = inTable.getColumns();
 		int columnsNumber = columnsList.size();
-		if (columnsNumber <= columnIndex) throw new Exception("Impossible d'initialiser cet index avec un index invalide de colonne."); // invalid columnIndex
+		if (columnsNumber <= columnIndex) throw new IndexException("Impossible d'initialiser cet index avec un index invalide de colonne."); // invalid columnIndex
 
 		baseAssociatedTablePath = inTable.getBaseTablePath();
 
 
 		associatedTableColumnIndex = columnIndex;
 		Column indexThisColumn = columnsList.get(associatedTableColumnIndex);
+		indexedColumnsList = new Column[]{indexThisColumn}; // added here for now but will maybe move
 		DataType columnDataType = indexThisColumn.getDataType();
 
 		storedValuesClassType = columnDataType.getAssociatedClassType();
@@ -410,7 +413,7 @@ public class IndexTreeDic extends Index implements Serializable {
 	/** Ajouter une valeur et un binIndex associé
 	 *  @param associatedValue valeur indexée, ATTENTION : doit être du type du IndexTree utilisé (Integer, Float, Byte, Double, ...)
 	 *  @param binIndex position (dans le fichier binaire global) de la donnée stockée dans la table
-	 * @throws IOException
+	 * @throws IOException problème d'I/O
 	 */
 	public void addValue(Object argAssociatedValue, DiskDataPosition dataPosition) throws IOException { synchronized (indexingValueLock) {
 
@@ -869,11 +872,19 @@ public class IndexTreeDic extends Index implements Serializable {
 			switch (predicate.getOperator()) {
 				case equals:
 					return findMatchingBinIndexes(predicate.getValue(), null, true, false);
+				case between:
+					Object[] values;
+					try {
+						values = (Object[]) predicate.getValue();
+					} catch (Exception e) {
+						throw new IndexException(e);
+					}
+					return findMatchingBinIndexes(values[0], values[1], false, false);
 				default:
 					throw new IndexException("invalid operator");
 			}
 		} catch (IOException e) {
-			throw new IndexException("IOException");
+			throw new IndexException(e);
 		}
 	}
 
@@ -1242,11 +1253,17 @@ public class IndexTreeDic extends Index implements Serializable {
 		return associatedTableColumnIndex;
 	}
 
-
 	@Override
 	public boolean isOperatorCompatible(Operator op) {
-		// TODO Auto-generated method stub
-		return false;
+		return ArrayUtils.contains(new Operator[] {
+				Operator.equals,
+				Operator.greater,
+				Operator.less,
+				Operator.greaterOrEquals,
+				Operator.lessOrEquals,
+				Operator.in,
+				Operator.between
+		}, op);
 	}
 
 	// compareValues : nom pas clair !

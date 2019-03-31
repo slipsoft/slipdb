@@ -9,7 +9,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import com.dant.entity.ColumnEntity;
@@ -17,9 +16,8 @@ import com.dant.entity.TableEntity;
 import com.dant.utils.EasyFile;
 import com.dant.utils.Log;
 
-import db.data.DataType;
+import db.data.types.DataType;
 import db.disk.dataHandler.TableDataHandler;
-import db.disk.dataHandler.TableDataHandlerFile;
 import db.search.Predicate;
 import db.structure.recherches.TableHandler;
 
@@ -159,8 +157,14 @@ public class Table implements Serializable {
 		*/
 	}
 
-	public Optional<Column> findColumn(String name) {
-		return columnsList.stream().filter(column -> column.getName() == name).findFirst();
+	public Optional<Column> getColumnByName(String columnName) {
+		if (com.dant.utils.Utils.validateRegex(Database.getInstance().config.columnNamePattern, columnName)) {
+			return this.columnsList.stream().filter(c -> c.getName().equals(columnName)).findFirst();
+		}
+		return Optional.empty();
+	}
+	public Optional<Column> getColumnByNameNoCheck(String columnName) {
+		return this.columnsList.stream().filter(c -> c.getName().equals(columnName)).findFirst();
 	}
 
 	public boolean columnExist(String name) {
@@ -250,18 +254,17 @@ public class Table implements Serializable {
 
 	/**
 	 * Returns the best index to use for a given filter
-	 *
-	 * @param predicate
-	 * @return
-	 * @throws Exception
+	 * @param predicate a predicate without index
+	 * @return Index
+	 * @throws StructureException if no index is found
 	 */
-	public Index findBestIndex(Predicate predicate) throws Exception {
+	public Index findBestIndex(Predicate predicate) throws StructureException {
 		for (Index index : indexesList) {
 			if (index.canBeUsedWithPredicate(predicate)) {
 				return index;
 			}
 		}
-		throw new Exception("no index can be used with this filter");
+		throw new StructureException("no index can be used with this filter");
 	}
 
 	public TableEntity convertToEntity() {
