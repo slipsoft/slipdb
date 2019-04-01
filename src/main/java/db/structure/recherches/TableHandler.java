@@ -22,8 +22,8 @@ import db.structure.Column;
 import db.structure.Database;
 import db.structure.StructureException;
 import db.structure.Table;
-import db.structure.indexTree.IndexException;
-import db.structure.indexTree.IndexTreeDic;
+import index.indexTree.IndexException;
+import index.indexTree.IndexTreeDic;
 
 public class TableHandler implements Serializable {
 	/* Ordre de serialization :

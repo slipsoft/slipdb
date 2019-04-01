@@ -29,10 +29,10 @@ import db.data.types.StringType;
 import db.structure.Column;
 import db.structure.Database;
 import db.structure.Table;
-import db.structure.indexTree.IndexTreeCeption;
-import db.structure.indexTree.IndexTreeDic;
 import db.structure.recherches.SGlobalHandler;
 import db.structure.recherches.TableHandler;
+import index.indexTree.IndexTreeCeption;
+import index.indexTree.IndexTreeDic;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -4,11 +4,12 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import db.data.types.DataPositionList;
-import db.structure.indexTree.IndexException;
+
 import org.apache.commons.lang3.ArrayUtils;
 
 import db.search.Operable;
 import db.search.Predicate;
+import index.indexTree.IndexException;
 
 /**
  * Classe Index, permettant d'indexer une ou plusieurs colonnes Exemple :

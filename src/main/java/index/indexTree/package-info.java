@@ -228,4 +228,4 @@ Plusieurs types d'arbres possibles :
 
 
 
-package db.structure.indexTree;
+package index.indexTree;

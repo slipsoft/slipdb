@@ -9,6 +9,8 @@ import java.util.Date;
 
 import db.data.load.Loader;
 import db.structure.recherches.TableHandler;
+import index.indexTree.IndexTreeCeption;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -28,7 +30,6 @@ import db.data.types.StringType;
 import db.data.load.CsvParser;
 import db.structure.Column;
 import db.structure.Table;
-import db.structure.indexTree.IndexTreeCeption;
 
 /***
  * Premier test de multi-thread simple

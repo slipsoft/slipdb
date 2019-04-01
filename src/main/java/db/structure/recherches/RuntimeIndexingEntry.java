@@ -6,7 +6,7 @@ import java.io.Serializable;
 import db.disk.dataHandler.DiskDataPosition;
 import db.structure.Column;
 import db.structure.Table;
-import db.structure.indexTree.IndexTreeDic;
+import index.indexTree.IndexTreeDic;
 
 public class RuntimeIndexingEntry implements Comparable<RuntimeIndexingEntry>, Serializable {
 	
