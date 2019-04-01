@@ -18,7 +18,7 @@ public class SimpleTCPDemoServRunnable implements Runnable {
 	private TCPServer tcpServ = new TCPServer(serverPort);
 	private ArrayList<TCPClient> clientsList = new ArrayList<TCPClient>();
 	
-	private boolean loadFromDisk = true;
+	private boolean loadFromDisk = false;
 	private String sessionDatabaseName = "Database2_2015";//"Database2015";//"";//
 	
 	
