@@ -1,9 +1,7 @@
 package sj.demoSimple;
 
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import com.dant.utils.Log;
 import com.dant.utils.Timer;
@@ -15,8 +13,6 @@ import db.data.types.DoubleType;
 import db.data.types.FloatType;
 import db.data.types.StringType;
 import db.data.load.Loader;
-import db.data.load.Parser;
-import db.search.ResultSet;
 import db.serial.SerialStructure;
 import db.structure.Database;
 import db.structure.Table;
@@ -106,6 +102,7 @@ public class SimpleTCPDemoCreateTable {
 			tableHandler.createRuntimeIndexingColumn(colIndex);
 		}*/
 		
+		String basePath = "E:/L3 DANT disque E/csv/"; // "D:/csv/"; //
 		
 		
 		//tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
@@ -113,19 +110,19 @@ public class SimpleTCPDemoCreateTable {
 		/*tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 		tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 		*/
-		
-		//tableHandler.multiThreadParsingAddAndStartCsv("D:/csv/yellow_tripdata_2015-01.csv", true);
-		//tableHandler.multiThreadParsingAddAndStartCsv("D:/csv/yellow_tripdata_2015-02.csv", true);
-		tableHandler.multiThreadParsingAddAndStartCsv("D:/csv/yellow_tripdata_2015-03.csv", true);
-		tableHandler.multiThreadParsingAddAndStartCsv("D:/csv/yellow_tripdata_2015-04.csv", true);
-		tableHandler.multiThreadParsingAddAndStartCsv("D:/csv/yellow_tripdata_2015-05.csv", true);
-		//tableHandler.multiThreadParsingAddAndStartCsv("D:/csv/yellow_tripdata_2015-06.csv", true);
-		/*tableHandler.multiThreadParsingAddAndStartCsv("D:/csv/yellow_tripdata_2015-07.csv", true);
-		tableHandler.multiThreadParsingAddAndStartCsv("D:/csv/yellow_tripdata_2015-08.csv", true);
-		tableHandler.multiThreadParsingAddAndStartCsv("D:/csv/yellow_tripdata_2015-09.csv", true);
-		tableHandler.multiThreadParsingAddAndStartCsv("D:/csv/yellow_tripdata_2015-10.csv", true);
-		tableHandler.multiThreadParsingAddAndStartCsv("D:/csv/yellow_tripdata_2015-11.csv", true);
-		tableHandler.multiThreadParsingAddAndStartCsv("D:/csv/yellow_tripdata_2015-12.csv", true);
+
+		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-01.csv", true);
+		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-02.csv", true);
+		/*tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-03.csv", true);
+		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-04.csv", true);
+		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-05.csv", true);
+		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-06.csv", true);
+		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-07.csv", true);
+		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-08.csv", true);
+		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-09.csv", true);
+		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-10.csv", true);
+		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-11.csv", true);
+		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-12.csv", true);
 		*/
 		
 		

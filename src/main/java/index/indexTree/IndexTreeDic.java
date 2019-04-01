@@ -66,6 +66,9 @@ import sj.network.tcpAndBuffers.NetBuffer;
  * Il faut un score pour classer les colonnes/index, prendre, pour la première requete, l'Index associé ayant le score le plus élevé :
  * -> nombre de valeurs différentes dans l'arbre, pour tenter de limiter un maximum les résultats.
  *
+ *	  -> Justification de la redondance de l'information pour l'IndexTreeDic : ne pas avoir un aute fichier d'ouvert,
+ *       ne pas faire de seek supplémentaire, améliore grandement les performances et ne prend pas beaucoup plus d'espace disque.
+ *
  */
 
 public class IndexTreeDic extends Index implements Serializable {

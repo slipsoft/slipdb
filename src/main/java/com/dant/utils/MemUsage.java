@@ -6,12 +6,12 @@ public class MemUsage {
 	
 
 	public static void printMemUsage() {
-		printMemUsage("", 4);
+		printMemUsage("", 4, 4);
 		
 	}
 
 	public static void printMemUsage(String message) {
-		printMemUsage(message, 4);
+		printMemUsage(message, 4, 4);
 	}
 	
 	public static long getMemUsage() {
@@ -26,8 +26,9 @@ public class MemUsage {
 		NumberFormat format = NumberFormat.getInstance();
 		return format.format(usedMemory / 1024);
 	}
-	
-	public static void printMemUsage(String message, int logLevel) {
+
+
+	public static void printMemUsage(String message, int logLevel, int logDepth) {
 		/*Runtime runtime = Runtime.getRuntime();
 		
 		
@@ -53,5 +54,9 @@ public class MemUsage {
 		Log.info("max memory: " + format.format(maxMemory / 1024));
 		Log.info("total free memory: " + format.format((freeMemory + (maxMemory - allocatedMemory)) / 1024));*/
 		
+	}
+	
+	public static void printMemUsage(String message, int logLevel) {
+		printMemUsage(message, logLevel, 4);
 	}
 }

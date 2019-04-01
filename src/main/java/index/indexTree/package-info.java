@@ -14,6 +14,10 @@
  *      Création d'arbres imbriqués, pour avoir le plus de données possibles écrites sur le disque, mais n'avoir à charger que très
  *      peu de données pour retrouver les bonnes listes.
  * v3, et IndexTreeDic (= v4)
+ * 
+ *  *	  -> Justification de la redondance de l'information pour l'IndexTreeDic : ne pas avoir un aute fichier d'ouvert,
+ *       ne pas faire de seek supplémentaire, améliore grandement les performances et ne prend pas beaucoup plus d'espace disque.
+ *       
  */
 
 
