@@ -9,21 +9,47 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.dant.entity.ColumnEntity;
+import com.dant.utils.Log;
 
+import db.data.types.ByteType;
 import db.data.types.DataType;
+import db.data.types.DateType;
+import db.data.types.DoubleType;
+import db.data.types.FloatType;
+import db.data.types.IntegerType;
+import db.data.types.LongType;
+import db.data.types.StringType;
 
 public class Column implements Serializable {
 	private static final long serialVersionUID = -3714630692284399540L;
 	
 	protected String name = "Nom inconnu";
-	protected DataType storedDataType;
 	protected int number;
+	
+	public final boolean keepDataInMemory;
 	
 	protected Object minValue = null;
 	protected Object maxValue = null;
 	protected transient Object minMaxLock = new Object();
 	protected DataType dataType;
 	@Deprecated /* @CurrentlyUnused */ transient protected List<Index> relatedIndexesList = new ArrayList<>();
+	private transient Object writeInMemoryLock = new Object();
+
+	protected DataType storedDataType; // <- type de la donnée stockée
+	// Stockage de la donnée à garder en mémoire ici
+	// -> Il n'est pas possible d'utiliser l'héritage ici, il faut un truc qui prenne le moins de mémoire possible, donc pas des objets.
+	protected ArrayList<ColumnDataChunk> a2DataChunk = new ArrayList<ColumnDataChunk>();
+	
+	public final static int chunkDataTypeAllocationSize = 1_000_000;
+	
+	public int getTotalDataLength() {
+		int totalSize = 0;
+		for (ColumnDataChunk dataChunk : a2DataChunk) {
+			totalSize += dataChunk.currentSizePosition;
+		}
+		return totalSize;
+	}
+	
 	
 	/** Pour la déserialisation
 	 * @param in
@@ -33,6 +59,7 @@ public class Column implements Serializable {
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		in.defaultReadObject();
 		minMaxLock = new Object();
+		writeInMemoryLock = new Object();
 		relatedIndexesList = new ArrayList<>();
 	}
 	
@@ -50,6 +77,18 @@ public class Column implements Serializable {
 	public Column(String name, DataType dataType) {
 		this.name = name;
 		this.dataType = dataType;
+		keepDataInMemory = false;
+	}
+
+	/** 
+	 *  @param name
+	 *  @param dataType
+	 *  @param argKeepDataInMemory  garder en mémoire les données ou juste les écrire sur le disque
+	 */
+	public Column(String name, DataType dataType, boolean argKeepDataInMemory) {
+		this.name = name;
+		this.dataType = dataType;
+		this.keepDataInMemory = argKeepDataInMemory;
 	}
 
 	public String getName() {
@@ -187,4 +226,55 @@ public class Column implements Serializable {
 		String type = Database.getInstance().config.DataTypes.entrySet().stream().filter(e -> (DataTypesClassPathPrefix + e.getValue()).equals(typeClassName)).map(Map.Entry::getKey).findFirst().get();
 		return new ColumnEntity(this.name, type, typeClassSize);
 	}
+	
+	
+	public void writeDataInMemory(Object dataAsPrimitiveObject)  {
+		synchronized(writeInMemoryLock) {
+			//Log.info("Write in memory !");
+			if (a2DataChunk.size() == 0) {
+				ColumnDataChunk newDataChunk = new ColumnDataChunk(dataType, chunkDataTypeAllocationSize);
+				Log.info("Initialisation chunk");
+				a2DataChunk.add(newDataChunk);
+			}
+			int dataChunkListSize = a2DataChunk.size();
+			ColumnDataChunk dataChunk = a2DataChunk.get(dataChunkListSize - 1);
+			
+			/** TODO
+			 * TODO
+			 * TODO
+			 * TODO
+			 * TODO
+			 * TODO
+			 * Finir l'écriture de la donnée en mémoire vive
+			 * Faire l'IndexMemDic (indexer une Column)
+			 * Faire les recherches dans l'IndexMemDic
+			 */
+			boolean needAnotherChunk = false;
+			if (dataAsPrimitiveObject.getClass() == Byte.class)
+				needAnotherChunk = dataChunk.writeByteData( ((Byte)dataAsPrimitiveObject).byteValue() );
+			
+			if ((dataAsPrimitiveObject.getClass() == Integer.class))
+				needAnotherChunk = dataChunk.writeIntData( ((Integer)dataAsPrimitiveObject).intValue() );
+			
+			if (dataAsPrimitiveObject.getClass() == Long.class)
+				needAnotherChunk = dataChunk.writeLongData( ((Long)dataAsPrimitiveObject).longValue() );
+			
+			if (dataAsPrimitiveObject.getClass() == Float.class)
+				needAnotherChunk = dataChunk.writeFloatData( ((Float)dataAsPrimitiveObject).floatValue() );
+			
+			if (dataAsPrimitiveObject.getClass() == Double.class)
+				needAnotherChunk = dataChunk.writeDoubleData( ((Double)dataAsPrimitiveObject).doubleValue() );
+			
+			if (dataAsPrimitiveObject.getClass() == String.class)
+				needAnotherChunk = dataChunk.writeStringData( ((String)dataAsPrimitiveObject) );
+			
+			if (needAnotherChunk) {
+				Log.info("Nouveau chunk");
+				ColumnDataChunk newDataChunk = new ColumnDataChunk(dataType, chunkDataTypeAllocationSize);
+				a2DataChunk.add(newDataChunk);
+			}
+			
+		}
+	}
+	
 }

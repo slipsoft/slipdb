@@ -73,6 +73,9 @@ public class Loader {
 	 * @param limit
 	 */
 	public final void parse(InputStream input, int limit, boolean appendAtTheEndOfSave) {
+		Log.info("PARSE : memusage init = ");
+		System.gc();
+		MemUsage.printMemUsage();
 		int localReadEntryNb = 0;
 		int localReadEntryNbToAddToTotalCount = 0;
 		TableDataHandler dataHandler = currentTable.getDataHandler();
@@ -128,6 +131,10 @@ public class Loader {
 			Log.error(e);
 			// TODO: handle exception
 		}
+
+		Log.info("PARSE : FINAL USAGE");
+		System.gc();
+		MemUsage.printMemUsage();
 	}
 	
 	
@@ -167,6 +174,12 @@ public class Loader {
 				} else {
 					currentValue = currentColumn.parseAndWriteToBuffer(valuesAsStringArray[columnIndex], entryBuffer);
 				}
+				// Si je dois garder la donnée en mémoire, je la stocke dans la colonne
+				if (currentColumn.keepDataInMemory) {
+					currentColumn.writeDataInMemory(currentValue); // <- C'est vraiment pas super opti de faire data -> cast en objet -> cast en data mais rush et c'est la "Structure" de Nico
+				}
+				
+				
 				// TEMPORAIREMENT désactivé (rush) currentColumn.evaluateMinMax(currentValue); // <- Indispensable pour le IndexTreeCeption (non utile pour le IndexTreeDic)
 				entriesArray[columnIndex] = currentValue;
 			}

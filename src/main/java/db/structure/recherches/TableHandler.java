@@ -112,7 +112,7 @@ public class TableHandler implements Serializable {
 	 */
 	public void addColumn(String argColumnName, DataType argColumnDataType) throws Exception {
 		if (this.columnExist(argColumnName)) throw new Exception("Ajout de la colonne impossibe, il en exie déjà une du même nom : " + argColumnName);
-		Column newColumn = new Column(argColumnName, argColumnDataType);
+		Column newColumn = new Column(argColumnName, argColumnDataType, true);
 		columnsListForCreatingTableOnly.add(newColumn);
 	}
 
