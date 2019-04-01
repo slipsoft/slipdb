@@ -37,7 +37,11 @@ public class TableDataHandlerFile implements Serializable {
 	private int currentFileSize = 0;
 	private int currentFileEntriesNumber = 0;
 	private final short fileID;
-	private final short nodeID;
+	//private final short nodeID;
+	/* MAJ 01-04-2019
+	 * Suppression de nodeID, il faudra explicitement importer les données d'un autre noeud pour pouvoir les utiliser.
+	 * */
+	
 	
 	// Nonthread-safe, seulement utilisé par quelques fonctions spécifiques, et dans des cas bien précis
 	private DataOutputStream streamWriter = null;
@@ -52,7 +56,7 @@ public class TableDataHandlerFile implements Serializable {
 		Log.info("filePath = " + filePath);
 		Log.info("currentFileSize = " + currentFileSize);
 		Log.info("fileID = " + fileID);
-		Log.info("nodeID = " + nodeID);
+		//Log.info("nodeID = " + nodeID);
 	}
 	
 	private void initOrLoadCommon() throws IOException {
@@ -72,8 +76,8 @@ public class TableDataHandlerFile implements Serializable {
 	}
 	
 	
-	public TableDataHandlerFile(short argNodeID, short argFileID, String argFilePath) throws IOException {
-		nodeID = argNodeID;
+	public TableDataHandlerFile(short argFileID, String argFilePath) throws IOException { // short argNodeID, 
+		//nodeID = argNodeID;
 		fileID = argFileID;
 		filePath = argFilePath;
 		initOrLoadCommon();
@@ -177,7 +181,7 @@ public class TableDataHandlerFile implements Serializable {
 			fileIsFull.set(true);
 			stopFileUse();
 		}
-		TableDataPositionResult dataPositionResult = new TableDataPositionResult(nodeID, fileID, currentFileEntriesNumber - 1, canStillUseThisFile);
+		TableDataPositionResult dataPositionResult = new TableDataPositionResult(fileID, currentFileEntriesNumber - 1, canStillUseThisFile);
 		return dataPositionResult;
 	}
 	

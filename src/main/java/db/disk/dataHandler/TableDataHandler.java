@@ -157,7 +157,7 @@ public class TableDataHandler implements Serializable {
 		// Je classe par position dans le fichier
 		Collections.sort(dataPositionList); // pas super opti pour un très grand nombre de résultats (100 000+)
 		// Regrouper par fichier
-		short oldNodeID = -1;
+		//short oldNodeID = -1;
 		short oldFileID = -1;
 		//int oldSingleID = (oldNodeID << 16) + (oldFileID << 0);
 		
@@ -167,10 +167,10 @@ public class TableDataHandler implements Serializable {
 		
 		
 		for (DiskDataPosition dataPosition : dataPositionList) {
-			if (dataPosition.nodeID != oldNodeID || dataPosition.fileID != oldFileID) {
+			if (dataPosition.fileID != oldFileID) { // dataPosition.nodeID != oldNodeID || 
 				a1CurrentDataPosArray = new ArrayList<DiskDataPosition>();
 				a2OrderedByFileList.add(a1CurrentDataPosArray);
-				oldNodeID = dataPosition.nodeID;
+				//oldNodeID = dataPosition.nodeID;
 				oldFileID = dataPosition.fileID;
 			}
 			a1CurrentDataPosArray.add(dataPosition); // pas opti de les ajouter un par un mais bon... C'est déjà opti de faire fichier par fichier !
@@ -319,7 +319,7 @@ public class TableDataHandler implements Serializable {
 			if (foundDataFile == null) {
 				short fileID = (short)nextFileID.getAndIncrement();
 				String fullFilePath = baseTablePath + saveFileBaseName + fileID + fileExtension;// getFileNameFromDataPosition(); //
-				foundDataFile = new TableDataHandlerFile(currentNodeID, fileID, fullFilePath);
+				foundDataFile = new TableDataHandlerFile(fileID, fullFilePath);
 				boolean canUseFile = foundDataFile.tryToUseThisFile(false, true);
 				//Log.info("TableDataHandler.findOrCreateWriteFile : créé   foundDataFile == " + foundDataFile);
 				if (canUseFile == false) {

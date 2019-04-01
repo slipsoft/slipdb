@@ -14,44 +14,47 @@ public class DiskDataPosition implements Comparable<DiskDataPosition>, Serializa
 	
 	private static final long serialVersionUID = 8763520237301457678L;
 	
-	static public final int diskDataPositionSizeOnDisk = 2 + 2 + 4; // 8
-
-	public final short nodeID;
+	static public final int diskDataPositionSizeOnDisk = 0 + 2 + 4; // 8
+	
+	/* MAJ 01-04-2019
+	 * Suppression de nodeID, il faudra explicitement importer les données d'un autre noeud pour pouvoir les utiliser.
+	 * */
+	//public final short nodeID;
 	public final short fileID;
 	public final int lineIndex;
 	
-	public DiskDataPosition(short argNodeID, short argFileID, int argLineIndex) {
-		nodeID = argNodeID;
+	public DiskDataPosition(short argFileID, int argLineIndex) { // short argNodeID, 
+		//nodeID = argNodeID;
 		fileID = argFileID;
 		lineIndex = argLineIndex;
 	}
 
 	public void writeInStream(DataOutputStream writeInDataStream) throws IOException {
-		writeInDataStream.writeShort(nodeID);
+		//writeInDataStream.writeShort(nodeID);
 		writeInDataStream.writeShort(fileID);
 		writeInDataStream.writeInt(lineIndex);
 	}
 	
 
 	public static DiskDataPosition readFromStream(DataInputStream readFromDataStream) throws IOException {
-		short nodeID = readFromDataStream.readShort();
+		//short nodeID = readFromDataStream.readShort();
 		short fileID = readFromDataStream.readShort();
 		int lineIndex = readFromDataStream.readInt();
-		return new DiskDataPosition(nodeID, fileID, lineIndex);
+		return new DiskDataPosition(fileID, lineIndex);
 	}
 
 	public static DiskDataPosition readFromRandFile(RandomAccessFile readFromRandFile) throws IOException {
-		short nodeID = readFromRandFile.readShort();
+		//short nodeID = readFromRandFile.readShort();
 		short fileID = readFromRandFile.readShort();
 		int lineIndex = readFromRandFile.readInt();
-		return new DiskDataPosition(nodeID, fileID, lineIndex);
+		return new DiskDataPosition(fileID, lineIndex);
 	}
 	
 	@Override
 	public int compareTo(DiskDataPosition o) {
 		DiskDataPosition otherObject = (DiskDataPosition) o;
-		if (nodeID > otherObject.nodeID) return 1;
-		if (nodeID < otherObject.nodeID) return -1;
+		//if (nodeID > otherObject.nodeID) return 1;
+		//if (nodeID < otherObject.nodeID) return -1;
 		if (fileID > otherObject.fileID) return 1;
 		if (fileID < otherObject.fileID) return -1;
 		if (lineIndex > otherObject.lineIndex) return 1;
