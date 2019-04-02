@@ -83,6 +83,29 @@ class IndexTreeMessyTest {
 
 		tableHandler.addColumn("VendorID", new ByteType());
 		// -> On a bien les mêmes résultats en castant la date et en la traîtant comme une string
+		tableHandler.addColumn("tpep_pickup_datetime", new DateType(), false); //new StringType(19));//
+		tableHandler.addColumn("tpep_dropoff_datetime", new DateType(), false);//new StringType(19)); // 
+		tableHandler.addColumn("passenger_count", new ByteType(), false);
+		tableHandler.addColumn("trip_distance", new FloatType(), true);
+		tableHandler.addColumn("pickup_longitude", new DoubleType(), false);
+		tableHandler.addColumn("pickup_latitude", new DoubleType(), false);
+		tableHandler.addColumn("RateCodeID", new ByteType(), false);
+		tableHandler.addColumn("store_and_fwd_flag", new StringType(1), false);
+		tableHandler.addColumn("dropoff_longitude", new DoubleType(), false);
+		tableHandler.addColumn("dropoff_latitude", new DoubleType(), false);
+		tableHandler.addColumn("payment_type",  new ByteType(), false);
+		tableHandler.addColumn("fare_amount", new FloatType(), false);
+		tableHandler.addColumn("extra", new FloatType(), false);
+		tableHandler.addColumn("mta_tax", new FloatType(), false);
+		tableHandler.addColumn("tip_amount", new FloatType(), false);
+		tableHandler.addColumn("tolls_amount", new FloatType(), false);
+		tableHandler.addColumn("improvement_surcharge", new FloatType(), false);
+		tableHandler.addColumn("total_amount", new FloatType(), false);
+		
+		/*
+		 Sauvegarde : 
+		tableHandler.addColumn("VendorID", new ByteType());
+		// -> On a bien les mêmes résultats en castant la date et en la traîtant comme une string
 		tableHandler.addColumn("tpep_pickup_datetime", new DateType()); //new StringType(19));//
 		tableHandler.addColumn("tpep_dropoff_datetime", new DateType());//new StringType(19)); // 
 		tableHandler.addColumn("passenger_count", new ByteType());
@@ -100,7 +123,8 @@ class IndexTreeMessyTest {
 		tableHandler.addColumn("tip_amount", new FloatType());
 		tableHandler.addColumn("tolls_amount", new FloatType());
 		tableHandler.addColumn("improvement_surcharge", new FloatType());
-		tableHandler.addColumn("total_amount", new FloatType());
+		tableHandler.addColumn("total_amount", new FloatType());*/
+		
 		
 		table = tableHandler.createTable();
 		
@@ -174,11 +198,33 @@ class IndexTreeMessyTest {
 			tPars2.join();
 			tPars3.join();
 			tPars4.join();*/
+			
+			
+			String basePath = "E:/L3 DANT disque E/csv/";
+			
+			//tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-01.csv", true);
+			//tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-02.csv", true);
+			/*tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-03.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-04.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-05.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-06.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-07.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-08.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-09.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-10.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-11.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-12.csv", true);
+			*/
+			
+			
 			// Loader de la donnée en multi-thread
+			//for (int i = 0; i < 20; i++)
 			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			//tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			/*tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);*/
+			
+			
 			// Attendre que toute la donnée soit parsée
 			tableHandler.multiThreadParsingJoinAllThreads();
 			
@@ -188,16 +234,16 @@ class IndexTreeMessyTest {
 			 */
 			
 			
+			//for (int i = 0; i < 6; i++)
+			//tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			/*tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);*/
 
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-07.csv", true);
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-08.csv", true);
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-09.csv", true);
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-10.csv", true);
-			Log.info("Nombre de résultats/entrées parsés FINAL : " + Loader.debugNumberOfEntriesWritten.get());
+			//Log.info("Nombre de résultats/entrées parsés FINAL : " + Loader.debugNumberOfEntriesWritten.get());
 			
 			
 			/**/
@@ -300,12 +346,12 @@ class IndexTreeMessyTest {
 			
 			/*Object searchFromValue = new Float(12.78641);
 			Object searchToValue = new Float(14.748621);*/
-	
+			
 			
 			Object searchFromValue = intDateFrom;//stringDateFrom;//
 			Object searchToValue = intDateTo;//stringDateTo;//
 			
-
+			
 			Timer searchQueryTimer = new Timer("Temps total recherche"); // "Time took to return the matching elements" : flemme d'écrire en anglais
 			
 			DataPositionList result = tableHandler.findIndexedResultsOfColumn("tpep_pickup_datetime", searchFromValue, searchToValue, true);
@@ -627,7 +673,7 @@ class IndexTreeMessyTest {
 		
 	}
 
-	@Test
+	//@Test
 	void executeView() {
 		Column column = table.getColumns().get(4);
 		Field field = new Field(column.getName());

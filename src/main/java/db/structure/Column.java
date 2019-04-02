@@ -79,7 +79,7 @@ public class Column implements Serializable {
 	 * @param dataType
 	 */
 	public Column(String name, DataType dataType) {
-		this(name, dataType, false, false);
+		this(name, dataType, true, true);
 	}
 	
 	public Column(String name, DataType dataType, boolean argKeepDataInMemory) {
@@ -94,11 +94,12 @@ public class Column implements Serializable {
 	public Column(String name, DataType dataType, boolean argKeepDataInMemory, boolean argWriteDataOnDisk) {
 		this.name = name;
 		this.dataType = dataType;
-		this.keepDataInMemory = argKeepDataInMemory;
-		this.writeDataOnDisk = argWriteDataOnDisk;
+		this.keepDataInMemory = argKeepDataInMemory;//true;//
+		this.writeDataOnDisk = argWriteDataOnDisk;//true;//
+		
 	}
-
-
+	
+	
 	public String getName() {
 		return name;
 	}
@@ -116,6 +117,7 @@ public class Column implements Serializable {
 	public DataType getDataType() {
 		return dataType;
 	}
+	
 
 	public Column setDataType(DataType dataType) {
 		this.dataType = dataType;

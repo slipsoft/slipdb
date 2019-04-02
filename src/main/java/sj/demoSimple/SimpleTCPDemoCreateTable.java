@@ -62,7 +62,7 @@ public class SimpleTCPDemoCreateTable {
 		tableHandler.addColumn("tpep_pickup_datetime", new DateType()); //new StringType(19));//
 		tableHandler.addColumn("tpep_dropoff_datetime", new DateType());//new StringType(19)); // 
 		tableHandler.addColumn("passenger_count", new ByteType());
-		tableHandler.addColumn("trip_distance", new FloatType());
+		tableHandler.addColumn("trip_distance", new FloatType(), true);
 		tableHandler.addColumn("pickup_longitude", new DoubleType());
 		tableHandler.addColumn("pickup_latitude", new DoubleType());
 		tableHandler.addColumn("RateCodeID", new ByteType());
@@ -105,15 +105,17 @@ public class SimpleTCPDemoCreateTable {
 		String basePath = "E:/L3 DANT disque E/csv/"; // "D:/csv/"; //
 		
 		
-		//tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-		//tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+		tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+		tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 		/*tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 		tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 		*/
-
-		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-01.csv", true);
-		//tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-02.csv", true);
-		/*tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-03.csv", true);
+		
+		//tableHandler.parseCsvData(basePath + "yellow_tripdata_2015-01.csv", true);
+		
+		/*tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-01.csv", true);
+		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-02.csv", true);
+		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-03.csv", true);
 		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-04.csv", true);
 		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-05.csv", true);
 		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-06.csv", true);
@@ -172,7 +174,8 @@ public class SimpleTCPDemoCreateTable {
 	
 	static public void search04() throws Exception {
 		Timer searchQueryTimer = new Timer("Temps total recherche");
-		DataPositionList result = tableHandler.findIndexedResultsOfColumn("trip_distance", 17.78f, 18f, true);
+		//DataPositionList result = tableHandler.findIndexedResultsOfColumn("trip_distance", 17.78f, 18f, true);
+		DataPositionList result = tableHandler.findIndexedResultsOfColumn("trip_distance", 18f);
 		searchQueryTimer.log();
 		//ResultSet fullResulsVariables = tableHandler.getFullResultsFromBinIndexes(result, true, -1, null);
 		

@@ -14,7 +14,8 @@ public class DiskDataPosition implements Comparable<DiskDataPosition>, Serializa
 	
 	private static final long serialVersionUID = 8763520237301457678L;
 	
-	static public final int diskDataPositionSizeOnDisk = 0 + 2 + 4; // 8
+	 // A DEBUGER TODO (6 octets au lieu de 8) virer vraiment nodeID
+	static public final int diskDataPositionSizeOnDisk = 2 + 2 + 4; // 8
 	
 	/* MAJ 01-04-2019
 	 * Suppression de nodeID, il faudra explicitement importer les données d'un autre noeud pour pouvoir les utiliser.
@@ -31,6 +32,7 @@ public class DiskDataPosition implements Comparable<DiskDataPosition>, Serializa
 
 	public void writeInStream(DataOutputStream writeInDataStream) throws IOException {
 		//writeInDataStream.writeShort(nodeID);
+		writeInDataStream.writeShort(0);// A DEBUGER TODO (6 octets au lieu de 8) virer vraiment nodeID
 		writeInDataStream.writeShort(fileID);
 		writeInDataStream.writeInt(lineIndex);
 	}
@@ -38,6 +40,7 @@ public class DiskDataPosition implements Comparable<DiskDataPosition>, Serializa
 
 	public static DiskDataPosition readFromStream(DataInputStream readFromDataStream) throws IOException {
 		//short nodeID = readFromDataStream.readShort();
+		readFromDataStream.readShort();// A DEBUGER TODO (6 octets au lieu de 8) virer vraiment nodeID
 		short fileID = readFromDataStream.readShort();
 		int lineIndex = readFromDataStream.readInt();
 		return new DiskDataPosition(fileID, lineIndex);
@@ -45,6 +48,7 @@ public class DiskDataPosition implements Comparable<DiskDataPosition>, Serializa
 
 	public static DiskDataPosition readFromRandFile(RandomAccessFile readFromRandFile) throws IOException {
 		//short nodeID = readFromRandFile.readShort();
+		readFromRandFile.readShort();// A DEBUGER TODO (6 octets au lieu de 8) virer vraiment nodeID
 		short fileID = readFromRandFile.readShort();
 		int lineIndex = readFromRandFile.readInt();
 		return new DiskDataPosition(fileID, lineIndex);

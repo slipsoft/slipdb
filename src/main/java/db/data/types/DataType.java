@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 
+import com.dant.utils.Log;
+
 import db.search.Operable;
 
 
@@ -92,5 +94,11 @@ public abstract class DataType implements Operable, Serializable {
 		dataInput.readFully(dataAsByteArray); // renvoie une exception si les données n'ont pas pu être lues
 		return dataAsByteArray;
 	}
+	
+	public abstract Object getDefaultValue();
+	/*public Object getDefaultValue() {
+		Log.info("DEFAULT VALUEEEEE");
+		return new Object();
+	}*/
 
 }

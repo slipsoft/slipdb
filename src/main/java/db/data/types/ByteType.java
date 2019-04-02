@@ -55,4 +55,8 @@ public class ByteType extends DataType {
 			return false;
 		}
 	}
+	
+	public Object getDefaultValue() {
+		return new Byte((byte) 0);
+	}
 }

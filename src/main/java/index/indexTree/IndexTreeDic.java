@@ -87,7 +87,7 @@ public class IndexTreeDic extends Index implements Serializable {
 	public int flushOnDiskOnceReachedThisTotalEntrySize = 120_000_000; // <- Globalement, la taille des fichiers mis sur le disque     ancien : EntryNumber
 	protected int currentTotalEntrySizeInMemory = 0; // nombre actuel de résultats en mémoire vive, multiplié par la taille de chaque résultat (en octets) (utile pour le flush sur le disque)
 	public boolean useMultithreadSearch = true;
-	public boolean showMemUsageAtEachFlush = false;
+	public boolean showMemUsageAtEachFlush = true;
 	public boolean forceGarbageCollectorAtEachFlush = false;
 	
 	protected String baseAssociatedTablePath;
@@ -152,7 +152,7 @@ public class IndexTreeDic extends Index implements Serializable {
 	protected final byte binIndexStorageSize = DiskDataPosition.diskDataPositionSizeOnDisk;//8;
 	protected long diskEntryTotalSize; // = storedValueSizeInBytes + binIndexStorageSize; // nombre d'octets pris par chaque entrée (valeur + binIndex)
 	protected int associatedTableColumnIndex;
-
+	
 	/** Ce constructeur : Lors de la création d'un nouvel index uniquement
 	 * @throws IndexException erreur lors de la création
 	 */
@@ -175,7 +175,7 @@ public class IndexTreeDic extends Index implements Serializable {
 		//storedValuesClassType = argStoredValuesClassType;
 		//rootIndexTreeCount++;
 	}
-
+	
 	/**
 	 * Constructeur : Pour le chargement du disque (index sauvegardé)
 	 * @param inTable la table associée à cet index
@@ -419,7 +419,7 @@ public class IndexTreeDic extends Index implements Serializable {
 	 * @throws IOException problème d'I/O
 	 */
 	public void addValue(Object argAssociatedValue, DiskDataPosition dataPosition) throws IOException { synchronized (indexingValueLock) {
-
+		
 		// Je peux ajouter la donnée fine
 		DataPositionList binIndexList = associatedBinIndexes.get(argAssociatedValue);
 		if (binIndexList == null) {
@@ -428,8 +428,8 @@ public class IndexTreeDic extends Index implements Serializable {
 		}
 		binIndexList.add(dataPosition);
 		currentTotalEntrySizeInMemory += storedValueSizeInBytes + binIndexStorageSize;
-		//Log.info(" currentTotalEntrySizeInMemory = " + currentTotalEntrySizeInMemory + "  /  " + flushOnDiskOnceReachedThisTotalEntrySize + "  (storedValueDataByteSize = "+storedValueDataByteSize+")");
-
+		//Log.info(" currentTotalEntrySizeInMemory = " + currentTotalEntrySizeInMemory + "  /  " + flushOnDiskOnceReachedThisTotalEntrySize + "  (storedValueDataByteSize = "+storedValueSizeInBytes+")"  + "  (binIndexStorageSize = "+binIndexStorageSize+")");
+		
 		// S'il y a trop de valeurs mises en mémoire, j'écris l'index sur le disque et je retiens le nom du fichier écrit.
 		if (currentTotalEntrySizeInMemory > flushOnDiskOnceReachedThisTotalEntrySize) {
 			flushOnDisk();
@@ -481,7 +481,7 @@ public class IndexTreeDic extends Index implements Serializable {
 	
 	public void flushOnDisk() throws IOException { synchronized (indexingValueLock) {
 		if (associatedBinIndexes.size() == 0) return;
-
+		
 		String saveFileName = baseSaveFilePath + uniqueFileIdForThisTree + suffixSaveFilePath;
 		uniqueFileIdForThisTree++;
 		// -> TRES IMPORTANT : évaluer la distance moyenne entre deux éléments de l'index, pour savoir quel index donnera le moins de résultats !
@@ -503,14 +503,8 @@ public class IndexTreeDic extends Index implements Serializable {
 		// TODO
 		// TODO
 		// TODO
-		// TODO
-		// TODO
-		// TODO
-		// TODO
-		// TODO
-		// TODO
 		}  }
-
+	
 	/** Ecrire l'index sur le disque
 	 *  @param appendAtTheEnd   mettre à true pour écrire les données sur le disque
 	 *  @throws IOException
@@ -524,8 +518,8 @@ public class IndexTreeDic extends Index implements Serializable {
 		//System.out.println("IndexTreeCeption.saveOnDisk : debugNumberOfExactValuesWrittenOnDisk=" + debugNumberOfExactValuesWrittenOnDisk);
 
 	}
-
-
+	
+	
 	/** Ecrire les données sur le disque, d'une manière facile à retrouver
 	 * 1) Ecrire toutes les IntegerArrayList sur le disque, en sauvegarder le binIndex
 	 * 2) Ecrire le tableau des associations valeur - binIndex, retenir le binIndex de ce tableau (table de routage, si on veut)
@@ -619,7 +613,8 @@ public class IndexTreeDic extends Index implements Serializable {
 	 */
 	protected IndexTreeDic_localDichotomyResult findValueIndexByDichotomy(Object searchValue, RandomAccessFile randFile, long routingTableBinIndex, boolean findLeftValue) throws IOException {
 		IndexTreeDic_localDichotomyResult localResultAsFalse = new IndexTreeDic_localDichotomyResult();
-
+		Log.info("searchValue = " + searchValue + " routingTableBinIndex = " + routingTableBinIndex);
+		
 		final byte routingTableLengthIndicationSize = 4; // nombre d'octets nécessaire pour écrire
 
 		randFile.seek(routingTableBinIndex);
@@ -631,7 +626,9 @@ public class IndexTreeDic extends Index implements Serializable {
 		long intervalStartIndex = 0;
 		long intervalStopIndex = totalNumberOfDistinctValues - 1;
 		long intervalLength = totalNumberOfDistinctValues; //intervalStopIndex - intervalStartIndex + 1;
-
+		Log.info("totalNumberOfDistinctValues = " + totalNumberOfDistinctValues);
+		
+		
 		// Je recherche la valeur la plus proche
 		Object lastApprochingValue = null;
 		while (intervalLength > 1) {

@@ -65,5 +65,9 @@ public class StringType extends DataType {
 	public boolean inputCanBeParsed(String input) {
 		return true;
 	}
+	
+	public Object getDefaultValue() { // padding avec des zéros
+		return new String(Arrays.copyOf("".getBytes(), this.sizeInBytes));
+	}
 
 }

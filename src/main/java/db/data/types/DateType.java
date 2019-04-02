@@ -100,4 +100,9 @@ public class DateType extends DataType implements Serializable {
 			return false;
 		}
 	}
+	
+
+	public Object getDefaultValue() {
+		return new Integer(0);
+	}
 }

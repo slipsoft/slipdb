@@ -111,8 +111,16 @@ public class TableHandler implements Serializable {
 	 * @throws Exception 
 	 */
 	public void addColumn(String argColumnName, DataType argColumnDataType) throws Exception {
+		addColumn(argColumnName, argColumnDataType, false, false);
+	}
+
+	public void addColumn(String argColumnName, DataType argColumnDataType, boolean argKeepDataInMemory) throws Exception {
+		addColumn(argColumnName, argColumnDataType, argKeepDataInMemory, false);
+	}
+	
+	public void addColumn(String argColumnName, DataType argColumnDataType, boolean argKeepDataInMemory, boolean argWriteDataOnDisk) throws Exception {
 		if (this.columnExist(argColumnName)) throw new Exception("Ajout de la colonne impossibe, il en exie déjà une du même nom : " + argColumnName);
-		Column newColumn = new Column(argColumnName, argColumnDataType, true);
+		Column newColumn = new Column(argColumnName, argColumnDataType, argKeepDataInMemory, argWriteDataOnDisk);
 		columnsListForCreatingTableOnly.add(newColumn);
 	}
 
@@ -310,6 +318,7 @@ public class TableHandler implements Serializable {
 		int columnIndex = getColumnIndex(columnName);
 		if (columnIndex == -1) throw new Exception("Colonne introuvable, impossible de faire une recherche sur ses index.");
 		if (IndexTreeDic.firstValueIsHigherThatSecondValue(minValue, maxValue) > 0) {
+			Log.error("Mauvais intervalle de valeurs");
 			return new DataPositionList(); // aucun résultat
 		}
 		//return findIndexedResultsOfColumn();
@@ -322,6 +331,7 @@ public class TableHandler implements Serializable {
 			}
 		}*/
 		if (makeRequestOnThisTree == null) {
+			Log.error("Aucun arbre IndexTreeDic associé");
 			return new DataPositionList();
 		}
 		return makeRequestOnThisTree.findMatchingBinIndexes(minValue, maxValue, inclusive, false);

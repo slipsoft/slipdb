@@ -181,14 +181,20 @@ public class Loader {
 			// for each column, parse and write data into entryBuffer
 			for (int columnIndex = 0; columnIndex < columnsListSize; columnIndex++) {
 				Column currentColumn = columnsList.get(columnIndex);
+				boolean ignoreThisData = ((currentColumn.keepDataInMemory == false) && (currentColumn.writeDataOnDisk == false));
 				Object currentValue = null;
 				
-				//Log.info("parseAndWriteEntry : valuesAsStringArray["+columnIndex+"] = " + valuesAsStringArray[columnIndex]);
-				// Converts the string value into an array of bytes representing the same data
-				if (currentColumn.getDataType().getClass() == DateType.class) {
-					currentValue = localDateTypeThreadSafe.parseAndWriteToBuffer(valuesAsStringArray[columnIndex], localEntryBuffer);
+				if (ignoreThisData == false) {
+					
+					//Log.info("parseAndWriteEntry : valuesAsStringArray["+columnIndex+"] = " + valuesAsStringArray[columnIndex]);
+					// Converts the string value into an array of bytes representing the same data
+					if (currentColumn.getDataType().getClass() == DateType.class) {
+						currentValue = localDateTypeThreadSafe.parseAndWriteToBuffer(valuesAsStringArray[columnIndex], localEntryBuffer);
+					} else {
+						currentValue = currentColumn.parseAndWriteToBuffer(valuesAsStringArray[columnIndex], localEntryBuffer);
+					}
 				} else {
-					currentValue = currentColumn.parseAndWriteToBuffer(valuesAsStringArray[columnIndex], localEntryBuffer);
+					currentValue = currentColumn.getDataType().getDefaultValue();
 				}
 				
 				// TEMPORAIREMENT désactivé (rush) currentColumn.evaluateMinMax(currentValue); // <- Indispensable pour le IndexTreeCeption (non utile pour le IndexTreeDic)
