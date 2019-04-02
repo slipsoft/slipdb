@@ -45,11 +45,20 @@ public class Loader {
 	 */
 	private RuntimeIndexingEntryList runtimeIndexingEntries = null;
 
+
+	DateType localDateTypeThreadSafe;
+	ByteBuffer localEntryBuffer;
+	Object[] localEntriesArray;
+	
 	public Loader(Table schema, Parser parser) {
 		this.schema = schema; // <- C'est Nicolas qui a voulu appeler ça comme ça, pas moi :p
 		currentTable = schema;
 		this.parser = parser;
 		this.lineByteSize = schema.getLineSize();
+
+		localDateTypeThreadSafe = new DateType();
+		localEntryBuffer = ByteBuffer.allocate(lineByteSize);
+		localEntriesArray = new Object[schema.getColumns().size()];
 	}
 	
 	// Pour indexer au moment du parsing
@@ -136,7 +145,7 @@ public class Loader {
 		System.gc();
 		MemUsage.printMemUsage();
 	}
-	
+
 	
 	
 	/**
@@ -152,28 +161,35 @@ public class Loader {
 		String[] valuesAsStringArray = parser.processEntry(entryString);
 		List<Column> columnsList = currentTable.getColumns();
 		
-		DateType localDateTypeThreadSafe = new DateType();
+		localEntryBuffer.rewind();
+		//if (true) return;
 		
 		if (!isCorrectSize(valuesAsStringArray)) {
 			throw new IncorrectEntryException(totalEntryCount, "incorrect size");
 		}
 		// the buffer used to store the line data as an array of bytes
-		ByteBuffer entryBuffer = ByteBuffer.allocate(lineByteSize);
-		Object[] entriesArray = new Object[valuesAsStringArray.length];
-		
+		// Mis en global : plus rapide !
+		/*DateType localDateTypeThreadSafe;
+		ByteBuffer localEntryBuffer;
+		Object[] localEntriesArray;
+		localDateTypeThreadSafe = new DateType();
+		localEntryBuffer = ByteBuffer.allocate(lineByteSize);
+		localEntriesArray = new Object[schema.getColumns().size()];
+		*/
 		try {
 			// for each column, parse and write data into entryBuffer
 			for (int columnIndex = 0; columnIndex < columnsList.size(); columnIndex++) {
 				Column currentColumn = columnsList.get(columnIndex);
-				Object currentValue;
+				Object currentValue = null;
 				
 				//Log.info("parseAndWriteEntry : valuesAsStringArray["+columnIndex+"] = " + valuesAsStringArray[columnIndex]);
 				// Converts the string value into an array of bytes representing the same data
 				if (currentColumn.getDataType().getClass() == DateType.class) {
-					currentValue = localDateTypeThreadSafe.parseAndWriteToBuffer(valuesAsStringArray[columnIndex], entryBuffer);
+					currentValue = localDateTypeThreadSafe.parseAndWriteToBuffer(valuesAsStringArray[columnIndex], localEntryBuffer);
 				} else {
-					currentValue = currentColumn.parseAndWriteToBuffer(valuesAsStringArray[columnIndex], entryBuffer);
+					currentValue = currentColumn.parseAndWriteToBuffer(valuesAsStringArray[columnIndex], localEntryBuffer);
 				}
+				
 				// Si je dois garder la donnée en mémoire, je la stocke dans la colonne
 				if (currentColumn.keepDataInMemory) {
 					currentColumn.writeDataInMemory(currentValue); // <- C'est vraiment pas super opti de faire data -> cast en objet -> cast en data mais rush et c'est la "Structure" de Nico
@@ -181,21 +197,22 @@ public class Loader {
 				
 				
 				// TEMPORAIREMENT désactivé (rush) currentColumn.evaluateMinMax(currentValue); // <- Indispensable pour le IndexTreeCeption (non utile pour le IndexTreeDic)
-				entriesArray[columnIndex] = currentValue;
+				localEntriesArray[columnIndex] = currentValue;
 			}
 		} catch (IllegalArgumentException e) {
 			//e.printStackTrace();
 			throw new IncorrectEntryException(totalEntryCount, "incorrect data");
 		}
+		//if (true) return;
 		
-		DiskDataPosition dataPosition = writeJob.writeDataLine(entryBuffer.array());
+		DiskDataPosition dataPosition = writeJob.writeDataLine(localEntryBuffer.array());
 		
 		// Indexer au moment de parser (pour de meilleures performances)
 		if (runtimeIndexingEntries != null) {
 			for (int columnIndex = 0; columnIndex < columnsList.size(); columnIndex++) {
 				RuntimeIndexingEntry indexingEntry = runtimeIndexingEntries.getEntryAssociatedWithColumnIndex(columnIndex);
 				if (indexingEntry != null) {
-					Object currentValue = entriesArray[columnIndex];
+					Object currentValue = localEntriesArray[columnIndex];
 					// Indexer cette entrée
 					indexingEntry.addIndexValue(currentValue, dataPosition);
 					//Log.info("Indexer valeur = " + currentValue);
