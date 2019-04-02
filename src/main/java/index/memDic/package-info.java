@@ -25,10 +25,18 @@
  *    b) Classer la liste en fonction des valeurs
  *    c) Ecrire l'array des lineIndex, donc ici classée par valeur associée croissante
  * 3) Chaque recherche sur un index (une colonne indexée) sera faite par dichotomie, en mémoire :
- *    A chaque lineIndex, il est facile de retrouver l valeur associée car elle est en mémoire.
+ *    A chaque lineIndex, il est facile de retrouver la valeur associée car elle est en mémoire.
  *    
  *    -> Justification de la redondance de l'information pour l'IndexTreeDic : ne pas avoir un aute fichier d'ouvert,
  *       ne pas faire de seek supplémentaire, améliore grandement les performances et ne prend pas beaucoup plus d'espace disque.
- *
+ * 
+ * 
+ * Toute la donnée est écrite sur le disque, également.
+ * -> Il faudrait que la donnée soit simultanément écrite sur disque et stockée en mémoire
+ *    (pour rester compatible et parce que c'est opti).
+ *    Donc que ce soit TableDataHandler qui gère la donnée des colonnes en mémoire, et pas les colonnes.
+ *    
+ *    
+ *    
  */
 package index.memDic;

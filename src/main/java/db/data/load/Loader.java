@@ -146,7 +146,7 @@ public class Loader {
 		MemUsage.printMemUsage();
 	}
 
-	
+	private static Object writeInMemoryLock = new Object();
 	
 	/**
 	 * 
@@ -176,9 +176,10 @@ public class Loader {
 		localEntryBuffer = ByteBuffer.allocate(lineByteSize);
 		localEntriesArray = new Object[schema.getColumns().size()];
 		*/
+		int columnsListSize = columnsList.size();
 		try {
 			// for each column, parse and write data into entryBuffer
-			for (int columnIndex = 0; columnIndex < columnsList.size(); columnIndex++) {
+			for (int columnIndex = 0; columnIndex < columnsListSize; columnIndex++) {
 				Column currentColumn = columnsList.get(columnIndex);
 				Object currentValue = null;
 				
@@ -190,12 +191,6 @@ public class Loader {
 					currentValue = currentColumn.parseAndWriteToBuffer(valuesAsStringArray[columnIndex], localEntryBuffer);
 				}
 				
-				// Si je dois garder la donnée en mémoire, je la stocke dans la colonne
-				if (currentColumn.keepDataInMemory) {
-					currentColumn.writeDataInMemory(currentValue); // <- C'est vraiment pas super opti de faire data -> cast en objet -> cast en data mais rush et c'est la "Structure" de Nico
-				}
-				
-				
 				// TEMPORAIREMENT désactivé (rush) currentColumn.evaluateMinMax(currentValue); // <- Indispensable pour le IndexTreeCeption (non utile pour le IndexTreeDic)
 				localEntriesArray[columnIndex] = currentValue;
 			}
@@ -203,6 +198,20 @@ public class Loader {
 			//e.printStackTrace();
 			throw new IncorrectEntryException(totalEntryCount, "incorrect data");
 		}
+		
+		// Ecriture de la donnée en mémoire, en un seul bloc atomique, pour garantir la cohérence de la donnée (pas un lock par colonne donc !)
+		synchronized(writeInMemoryLock) {
+			for (int columnIndex = 0; columnIndex < columnsListSize; columnIndex++) {
+				Column currentColumn = columnsList.get(columnIndex);
+				Object currentValue = localEntriesArray[columnIndex];
+				
+				// Si je dois garder la donnée en mémoire, je la stocke dans la colonne
+				if (currentColumn.keepDataInMemory) {
+					currentColumn.writeDataInMemory(currentValue); // <- C'est vraiment pas super opti de faire data -> cast en objet -> cast en data mais rush et c'est la "Structure" de Nico
+				}
+			}
+		}
+		
 		//if (true) return;
 		
 		DiskDataPosition dataPosition = writeJob.writeDataLine(localEntryBuffer.array());

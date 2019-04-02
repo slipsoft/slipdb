@@ -3,6 +3,8 @@ package db.disk.dataHandler;
 import java.io.Closeable;
 import java.io.IOException;
 
+import com.dant.utils.Log;
+
 /**
  *  -> Un WriteJob par thread, le WriteJob NE PEUT PAS être partagé entre plusieurs threads.
  *  -> Il peut (et c'est le but) y avoir plusieurs WriteJobs qui s'exécutent simultanément de plusieurs threads
@@ -35,6 +37,7 @@ public class TableDataHandlerWriteJob implements Closeable { // AutoClosable né
 		if (dataPositionResult.canStillUseThisFile == false) {
 			currentWriteFile = dataHandler.findOrCreateWriteFile();
 		}
+		//Log.infoOnly("fid=" + dataPositionResult.dataPosition.fileID + "  lid=" + dataPositionResult.dataPosition.lineIndex);
 		return dataPositionResult.dataPosition;
 	}
 	

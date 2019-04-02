@@ -146,6 +146,14 @@ class DataTypeTest {
 			byteType.parseAndWriteToBuffer("78", bBuff);
 		}
 		localTimer.log();
+		
+		// Gain vraiment minime lorsque DataType non utilisé
+		localTimer = new Timer("Parsing de ByteType, plus rapide ??");
+		for (int count = 0; count < maxCountOperation; count++) {
+			bBuff.rewind();
+			bBuff.put(Byte.parseByte("78"));
+		}
+		localTimer.log();
 
 		localTimer = new Timer("Parsing de IntegerType ");
 		for (int count = 0; count < maxCountOperation; count++) {
@@ -181,6 +189,17 @@ class DataTypeTest {
 			dateType.parseAndWriteToBuffer("2015-04-27 15:45:38", bBuff);
 		}
 		localTimer.log();
+		
+		/* Gain vraiment minime, pas la peine de s'embêter
+		Utils utilsInstance = new Utils();
+		int dateAsInt;
+		localTimer = new Timer("Parsing de DateType plus rapide ??");
+		for (int count = 0; count < maxCountOperation; count++) {
+			bBuff.rewind();
+			dateAsInt = Utils.dateToSecInt(utilsInstance.dateFromString("2015-04-27 15:45:38"));
+			bBuff.putInt(dateAsInt);
+		}
+		localTimer.log();*/
 		
 		/*
 			Valeurs mise à jour (Sylvain)

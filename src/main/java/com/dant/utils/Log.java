@@ -49,6 +49,13 @@ public class Log {
 	public static void info(String msg) {
 		logInfoMessage(msg, "", 3);
 	}
+
+	public static void infoOnly(String msg) {
+		msg = prefixString("INFO/") + msg + getCaller(2);
+		if (Log.level >= 1) {
+			System.out.println(msg);
+		}
+	}
 	
 	/**
 	 * Log an info message.
