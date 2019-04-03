@@ -12,6 +12,7 @@ import db.data.types.DateType;
 import db.data.types.DoubleType;
 import db.data.types.FloatType;
 import db.data.types.StringType;
+import db.search.ResultSet;
 import db.data.load.Loader;
 import db.serial.SerialStructure;
 import db.structure.Database;
@@ -57,26 +58,26 @@ public class SimpleTCPDemoCreateTable {
 		
 		
 		// Modèle 2015
-		tableHandler.addColumn("VendorID", new ByteType());
+		tableHandler.addColumn("VendorID",                 new ByteType(), false, false);
 		// -> On a bien les mêmes résultats en castant la date et en la traîtant comme une string
-		tableHandler.addColumn("tpep_pickup_datetime", new DateType()); //new StringType(19));//
-		tableHandler.addColumn("tpep_dropoff_datetime", new DateType());//new StringType(19)); // 
-		tableHandler.addColumn("passenger_count", new ByteType());
-		tableHandler.addColumn("trip_distance", new FloatType(), true);
-		tableHandler.addColumn("pickup_longitude", new DoubleType());
-		tableHandler.addColumn("pickup_latitude", new DoubleType());
-		tableHandler.addColumn("RateCodeID", new ByteType());
-		tableHandler.addColumn("store_and_fwd_flag", new StringType(1));
-		tableHandler.addColumn("dropoff_longitude", new DoubleType());
-		tableHandler.addColumn("dropoff_latitude", new DoubleType());
-		tableHandler.addColumn("payment_type",  new ByteType());
-		tableHandler.addColumn("fare_amount", new FloatType());
-		tableHandler.addColumn("extra", new FloatType());
-		tableHandler.addColumn("mta_tax", new FloatType());
-		tableHandler.addColumn("tip_amount", new FloatType());
-		tableHandler.addColumn("tolls_amount", new FloatType());
-		tableHandler.addColumn("improvement_surcharge", new FloatType());
-		tableHandler.addColumn("total_amount", new FloatType());
+		tableHandler.addColumn("tpep_pickup_datetime",     new DateType(), false, false); //new StringType(19));//
+		tableHandler.addColumn("tpep_dropoff_datetime",    new DateType(), false, false);   //new StringType(19)); // 
+		tableHandler.addColumn("passenger_count",          new ByteType(), false, false);
+		tableHandler.addColumn("trip_distance",            new FloatType(), true, false);
+		tableHandler.addColumn("pickup_longitude",       new DoubleType(), false, false);
+		tableHandler.addColumn("pickup_latitude",        new DoubleType(), false, false);
+		tableHandler.addColumn("RateCodeID",               new ByteType(), false, false);
+		tableHandler.addColumn("store_and_fwd_flag",    new StringType(1), false, false);
+		tableHandler.addColumn("dropoff_longitude",      new DoubleType(), false, false);
+		tableHandler.addColumn("dropoff_latitude",       new DoubleType(), false, false);
+		tableHandler.addColumn("payment_type",             new ByteType(), false, false);
+		tableHandler.addColumn("fare_amount",             new FloatType(), false, false);
+		tableHandler.addColumn("extra",                   new FloatType(), false, false);
+		tableHandler.addColumn("mta_tax",                 new FloatType(), false, false);
+		tableHandler.addColumn("tip_amount",              new FloatType(), false, false);
+		tableHandler.addColumn("tolls_amount",            new FloatType(), false, false);
+		tableHandler.addColumn("improvement_surcharge",   new FloatType(), false, false);
+		tableHandler.addColumn("total_amount",            new FloatType(), false, false);
 		
 		// 2014 : 
 		
@@ -105,21 +106,21 @@ public class SimpleTCPDemoCreateTable {
 		String basePath = "E:/L3 DANT disque E/csv/"; // "D:/csv/"; //
 		
 		
-		tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-		tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+		//tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+		//tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 		/*tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 		tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 		*/
 		
 		//tableHandler.parseCsvData(basePath + "yellow_tripdata_2015-01.csv", true);
 		
-		/*tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-01.csv", true);
-		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-02.csv", true);
-		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-03.csv", true);
-		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-04.csv", true);
-		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-05.csv", true);
-		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-06.csv", true);
-		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-07.csv", true);
+		//tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-01.csv", true);
+		//tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-02.csv", true);
+		//tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-03.csv", true);
+		//tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-04.csv", true);
+		//tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-05.csv", true);
+		//tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-06.csv", true);
+		/*tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-07.csv", true);
 		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-08.csv", true);
 		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-09.csv", true);
 		tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-10.csv", true);
@@ -177,7 +178,7 @@ public class SimpleTCPDemoCreateTable {
 		//DataPositionList result = tableHandler.findIndexedResultsOfColumn("trip_distance", 17.78f, 18f, true);
 		DataPositionList result = tableHandler.findIndexedResultsOfColumn("trip_distance", 18f);
 		searchQueryTimer.log();
-		//ResultSet fullResulsVariables = tableHandler.getFullResultsFromBinIndexes(result, true, -1, null);
+		ResultSet fullResulsVariables = tableHandler.getFullResultsFromBinIndexes(result, true, -1, null);
 		
 		//tableHandler.displayOnLogResults(fullResulsVariables);
 		int numberOfResults = result.size();

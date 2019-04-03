@@ -613,7 +613,7 @@ public class IndexTreeDic extends Index implements Serializable {
 	 */
 	protected IndexTreeDic_localDichotomyResult findValueIndexByDichotomy(Object searchValue, RandomAccessFile randFile, long routingTableBinIndex, boolean findLeftValue) throws IOException {
 		IndexTreeDic_localDichotomyResult localResultAsFalse = new IndexTreeDic_localDichotomyResult();
-		Log.info("searchValue = " + searchValue + " routingTableBinIndex = " + routingTableBinIndex);
+		//Log.info("searchValue = " + searchValue + " routingTableBinIndex = " + routingTableBinIndex);
 		
 		final byte routingTableLengthIndicationSize = 4; // nombre d'octets nécessaire pour écrire
 
@@ -626,7 +626,7 @@ public class IndexTreeDic extends Index implements Serializable {
 		long intervalStartIndex = 0;
 		long intervalStopIndex = totalNumberOfDistinctValues - 1;
 		long intervalLength = totalNumberOfDistinctValues; //intervalStopIndex - intervalStartIndex + 1;
-		Log.info("totalNumberOfDistinctValues = " + totalNumberOfDistinctValues);
+		//Log.info("totalNumberOfDistinctValues = " + totalNumberOfDistinctValues);
 		
 		
 		// Je recherche la valeur la plus proche
