@@ -35,7 +35,7 @@ import db.structure.Table;
 import org.apache.commons.lang3.ArrayUtils;
 import sj.network.tcpAndBuffers.NetBuffer;
 
-/**
+/*
  * Exploite une extraordinaire propritété des TreeMap (arbre rouge-noir) :
  * Les résultats sont classés par ordre croissants.
  * Il est donc possible de faire des recherches rapides par dichotomie,
@@ -78,19 +78,19 @@ public class IndexTreeDic extends Index implements Serializable {
 	 */
 
 	// Pour la recherche multi-thread, ce nombre est multiplié autant de fois qu'il y a d'arbre !
-	static public int maxResultCountPerIndexInstance = 20_000_000_00;
-	static public int maxResultCountInTotal = 20_000_000_00; // new AtomicInteger(lent, mais pour peu de résultats, ça passera !
-	
-	public int flushOnDiskOnceReachedThisTotalEntrySize = 40_000_000; // <- Globalement, la taille des fichiers mis sur le disque     ancien : EntryNumber
-	protected int currentTotalEntrySizeInMemory = 0; // nombre actuel de résultats en mémoire vive, multiplié par la taille de chaque résultat (en octets) (utile pour le flush sur le disque)
-	public boolean useMultithreadSearch = true;
-	public boolean showMemUsageAtEachFlush = true;
-	public boolean forceGarbageCollectorAtEachFlush = true;
+	static private int maxResultCountPerIndexInstance = 20_000_000_00;
+	static private int maxResultCountInTotal = 20_000_000_00; // new AtomicInteger(lent, mais pour peu de résultats, ça passera !
 
-	protected String baseAssociatedTablePath;
+	private int flushOnDiskOnceReachedThisTotalEntrySize = 40_000_000; // <- Globalement, la taille des fichiers mis sur le disque     ancien : EntryNumber
+	private int currentTotalEntrySizeInMemory = 0; // nombre actuel de résultats en mémoire vive, multiplié par la taille de chaque résultat (en octets) (utile pour le flush sur le disque)
+	private boolean useMultithreadSearch = true;
+	private boolean showMemUsageAtEachFlush = true;
+	private boolean forceGarbageCollectorAtEachFlush = true;
+
+	private String baseAssociatedTablePath;
 
 	// Contient tous les index des données indexées
-	transient protected TreeMap<Object/*clef, valeur indexée*/, DataPositionList/*valeur*/> associatedBinIndexes;// = new TreeMap<Object, DataPositionList>();
+	transient private TreeMap<Object/*clef, valeur indexée*/, DataPositionList/*valeur*/> associatedBinIndexes;// = new TreeMap<Object, DataPositionList>();
 	//protected EasyFile fileStoringDataBlocks; // link between the disk and onDiskDataBlocks
 	//protected EasyFile fileSaveOnDisk = null;
 	//protected String currentSaveFilePath = null;
@@ -99,15 +99,14 @@ public class IndexTreeDic extends Index implements Serializable {
 
 	
 	private void loadSerialAndCreateCommon() {
-		associatedBinIndexes = new TreeMap<Object, DataPositionList>();
+		associatedBinIndexes = new TreeMap<>();
 	}
 	
-	transient private Object indexingValueLock = new Object();
+	transient private final Object indexingValueLock = new Object();
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		in.defaultReadObject();
 		loadSerialAndCreateCommon();
-		indexingValueLock = new Object();
 		Log.info("READ READ READ readObject IndexTreeDic");
 	}
 	
@@ -136,19 +135,19 @@ public class IndexTreeDic extends Index implements Serializable {
 	}
 
 	// Thread-safe
-	protected int indexTreeDicUniqueId; // id unique de cet index
-	protected final String baseSaveFilePath, suffixSaveFilePath;
-	protected int uniqueFileIdForThisTree = 1;
+	private int indexTreeDicUniqueId; // id unique de cet index
+	private final String baseSaveFilePath, suffixSaveFilePath;
+	private int uniqueFileIdForThisTree = 1;
 
 	// storedValuesClassType et storedValueDataByteSize sont définis dans indexColumnFromDisk(...)
 	// -> c'est à dire au moment d'indexer une colonne
 	@SuppressWarnings("rawtypes")
-	protected Class storedValuesClassType;
-	protected int storedValueSizeInBytes; // nombre d'octets pris par chaque valeur (associée à chaque IntegerArrayList)
+	private Class storedValuesClassType;
+	private int storedValueSizeInBytes; // nombre d'octets pris par chaque valeur (associée à chaque IntegerArrayList)
 
-	protected final byte binIndexStorageSize = DiskDataPosition.diskDataPositionSizeOnDisk;//8;
-	protected long diskEntryTotalSize; // = storedValueSizeInBytes + binIndexStorageSize; // nombre d'octets pris par chaque entrée (valeur + binIndex)
-	protected int associatedTableColumnIndex;
+	private final byte binIndexStorageSize = DiskDataPosition.diskDataPositionSizeOnDisk;//8;
+	private long diskEntryTotalSize; // = storedValueSizeInBytes + binIndexStorageSize; // nombre d'octets pris par chaque entrée (valeur + binIndex)
+	private int associatedTableColumnIndex;
 
 	/** Ce constructeur : Lors de la création d'un nouvel index uniquement
 	 * @throws IndexException erreur lors de la création
@@ -209,16 +208,11 @@ public class IndexTreeDic extends Index implements Serializable {
 
 	// Il ne peut pas y avoir de Append sur un fichier
 	// Liste des noms de fichiers sauvegardés sur le disque
-	protected ArrayList<String> indexWrittenOnDiskFilePathsArray = new ArrayList<String>();
+	private ArrayList<String> indexWrittenOnDiskFilePathsArray = new ArrayList<>();
 	protected int indexWrittenOnDiskFileCount = 0;
 	//protected String indexWrittenOnDiskBasePath = "target/treeIndexDiskMemory/";
 
-	/** Index a column and
-	 *  @param inTable
-	 *  @param columnIndex
-	 *  @throws FileNotFoundException
-	 */
-	
+
 	/* Débugs
 	String stringDateFrom = "2015-04-04 00:00:00";//"2015-04-04 00:01:00";//
 	String stringDateTo = "2015-04-04 03:20:00";//"2015-04-04 00:18:57";//
@@ -227,8 +221,9 @@ public class IndexTreeDic extends Index implements Serializable {
 	int intDateFrom = Utils.dateToSecInt(dateFrom);
 	int intDateTo = Utils.dateToSecInt(dateTo);*/
 
-	/** Utile pour le RuntimeIndexing
-	 * @throws IndexException
+	/**
+	 * Utile pour le RuntimeIndexing
+	 * @throws IndexException - if the operation failed
 	 */
 	public void initialiseWithTableAndColumn(Table inTable, int columnIndex) throws IndexException {
 		loadSerialAndCreateCommon();
@@ -246,20 +241,19 @@ public class IndexTreeDic extends Index implements Serializable {
 		DataType columnDataType = indexThisColumn.getDataType();
 
 		storedValuesClassType = columnDataType.getAssociatedClassType();
-		int dataSizeInBytes = columnDataType.getSize();
-		storedValueSizeInBytes = dataSizeInBytes;
+		storedValueSizeInBytes = columnDataType.getSize();
 		diskEntryTotalSize = storedValueSizeInBytes + binIndexStorageSize; // nombre d'octets pris par chaque entrée (valeur + binIndex)
 
 	}
 	
 	/** Sera bientôt remplacée par une fonction supportant le nouveau système de fichiers
-	 *  @param inTable
-	 *  @param columnIndex
-	 *  @throws IOException
-	 *  @throws Exception
+	 *  @param inTable - table with the column to index
+	 *  @param columnIndex - number of the column to index
+	 *  @throws IOException - in case of IO Falure
+	 *  @throws IndexException - in any other case
 	 */
 	@Deprecated
-	public void indexColumnFromDisk(Table inTable, int columnIndex) throws IOException, Exception {
+	public void indexColumnFromDisk(Table inTable, int columnIndex) throws IOException, IndexException {
 		//indexedColumnsList = new Column[0];
 
 		debug_AnnoyingTable = inTable;
@@ -376,9 +370,6 @@ public class IndexTreeDic extends Index implements Serializable {
 					Object readValue = col.getDataType().readIndexValue(fileAsStream);
 
 
-
-
-
 					if (iColumn == columnIndex) {
 						// TODO this.addValue(readValue, lineIndex);// TODO
 						// TODO
@@ -410,10 +401,11 @@ public class IndexTreeDic extends Index implements Serializable {
 
 	
 	//private Object indexingValueLockOnlyForAddAndDiskAndMemory = new Object(); // pas d'interblocage possible car les fonctions ne s'utilisent pas l'une l'autre
-	/** Ajouter une valeur et un binIndex associé
-	 *  @param associatedValue valeur indexée, ATTENTION : doit être du type du IndexTree utilisé (Integer, Float, Byte, Double, ...)
-	 *  @param binIndex position (dans le fichier binaire global) de la donnée stockée dans la table
-	 * @throws IOException problème d'I/O
+	/**
+	 * Ajouter une valeur et un binIndex associé
+	 * @param argAssociatedValue - valeur indexée, ATTENTION : doit être du type du IndexTree utilisé (Integer, Float, Byte, Double, ...)
+	 * @param dataPosition - position (dans le fichier binaire global) de la donnée stockée dans la table
+	 * @throws IOException - problème d'I/O
 	 */
 	public void addValue(Object argAssociatedValue, DiskDataPosition dataPosition) throws IOException { synchronized (indexingValueLock) {
 
@@ -445,11 +437,11 @@ public class IndexTreeDic extends Index implements Serializable {
 
 	/** Only gets the matching binIndexes from memory, not from stored data on disk
 	 *
-	 * @param minValue
-	 * @param maxValue
-	 * @param isInclusive
+	 * @param minValueExact - minimum value
+	 * @param maxValueExact - maximum value
+	 * @param isInclusive - inclusive superior and inferior
 	 * @return la collection contenant tous les binIndex correspondants
-	 * @throws Exception
+	 * @throws IndexException - if the operation fails
 	 */
 	public Collection<DataPositionList> findMatchingBinIndexesFromMemory(Object minValueExact, Object maxValueExact, boolean isInclusive) throws IndexException {// synchronized (indexingValueLockOnlyForAddAndDiskAndMemory) { // NavigableMap<Integer, IntegerArrayList> findSubTree
 		// arbre terminal : je retourne la liste des binIndex
@@ -467,13 +459,13 @@ public class IndexTreeDic extends Index implements Serializable {
 		NavigableMap<Object, DataPositionList> subTree = associatedBinIndexes.subMap(minValueExact, isInclusive, maxValueExact, isInclusive);
 		Collection<DataPositionList> collectionValues = subTree.values();
 		if (collectionValues == null) // pour ne pas renvoyer null
-			collectionValues = new ArrayList<DataPositionList>();
+			collectionValues = new ArrayList<>();
 		return collectionValues;
 		
 	}
 	
-	int debugNumberOfExactArrayListValuesWrittenOnDisk = 0;
-	int debugNumberOfExactValuesWrittenOnDisk = 0;
+	private int debugNumberOfExactArrayListValuesWrittenOnDisk = 0;
+	private int debugNumberOfExactValuesWrittenOnDisk = 0;
 	
 	
 	public void flushOnDisk() throws IOException { synchronized (indexingValueLock) {
@@ -492,11 +484,12 @@ public class IndexTreeDic extends Index implements Serializable {
 		if (showMemUsageAtEachFlush) MemUsage.printMemUsage("IndexTreeDic.flushOnDisk");//, baseSaveFilePath = " + baseSaveFilePath);
 	}  }
 
-	/** Ecrire l'index sur le disque
-	 *  @param appendAtTheEnd   mettre à true pour écrire les données sur le disque
-	 *  @throws IOException
+	/**
+	 * Ecrire l'index sur le disque
+	 * @param appendAtTheEnd - mettre à true pour écrire les données sur le disque
+	 * @throws IOException - if failed to save on disk
 	 */
-	protected void saveOnDisk(EasyFile writeOnFile, boolean appendAtTheEnd) throws IOException {
+	private void saveOnDisk(EasyFile writeOnFile, boolean appendAtTheEnd) throws IOException {
 		//fileSaveOnDisk
 		DataOutputStream writeInDataStream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(writeOnFile, appendAtTheEnd)));
 		writeAllStoredDataOnDisk(writeInDataStream);
@@ -511,10 +504,10 @@ public class IndexTreeDic extends Index implements Serializable {
 	 * 1) Ecrire toutes les IntegerArrayList sur le disque, en sauvegarder le binIndex
 	 * 2) Ecrire le tableau des associations valeur - binIndex, retenir le binIndex de ce tableau (table de routage, si on veut)
 	 * 3) Ecrire le binIndex de la table de routage à la fin du fichier
-	 * @param writeInDataStream
-	 * @throws IOException
+	 * @param writeInDataStream - were the data should be written
+	 * @throws IOException - in case of IO failure
 	 */
-	public void writeAllStoredDataOnDisk(DataOutputStream writeInDataStream) throws IOException { // SubTrees
+	private void writeAllStoredDataOnDisk(DataOutputStream writeInDataStream) throws IOException { // SubTrees
 
 		// 1) Ecriture des données
 		int totalNumberOfDistinctValues = associatedBinIndexes.size();
@@ -563,24 +556,24 @@ public class IndexTreeDic extends Index implements Serializable {
 
 
 
-	public static int debugDiskNumberOfIntegerArrayList = 0;
-	public static int debugDiskNumberOfExactValuesEvaluated = 0;
+	private static int debugDiskNumberOfIntegerArrayList = 0;
+	private static int debugDiskNumberOfExactValuesEvaluated = 0;
 
 
 
 	protected class IndexTreeDic_localDichotomyResult {
 		public final boolean success;// = false;
-		public final long keyIndex;// = -1;
-		public final long binIndex;// = -1;
+		final long keyIndex;// = -1;
+		final long binIndex;// = -1;
 
 		// success == false, juste pour plus de lisibilité
-		public IndexTreeDic_localDichotomyResult() {
+		IndexTreeDic_localDichotomyResult() {
 			success = false;
 			keyIndex = -1;
 			binIndex = -1;
 		}
 
-		public IndexTreeDic_localDichotomyResult(boolean argSuccess, long argKeyIndex, long argBinIndex) {
+		IndexTreeDic_localDichotomyResult(boolean argSuccess, long argKeyIndex, long argBinIndex) {
 			success = argSuccess;
 			keyIndex = argKeyIndex;
 			binIndex = argBinIndex;
@@ -590,15 +583,16 @@ public class IndexTreeDic extends Index implements Serializable {
 	}
 
 
-	/** Trouve la position de la valeur immédiatement supérieure ou égale à la valeur recherchée : searchValue
-	 *  @param searchValue
-	 *  @param randFile
-	 *  @param routingTableBinIndex
-	 *  @param findLeftValue   true si prendre la valeur approchée la plus petite, false si prendre la plus grande (s'il n'y a pas égalité avec les valeurs trouvées)
-	 *  @return true si la valeur recherchée est valide, (utilise getTheSmallestApprochingValue)
-	 *  @throws IOException
+	/**
+	 * Trouve la position de la valeur immédiatement supérieure ou égale à la valeur recherchée : searchValue
+	 * @param searchValue - value to search
+	 * @param randFile - file were to make the dichotomy
+	 * @param routingTableBinIndex
+	 * @param findLeftValue   true si prendre la valeur approchée la plus petite, false si prendre la plus grande (s'il n'y a pas égalité avec les valeurs trouvées)
+	 * @return true si la valeur recherchée est valide, (utilise getTheSmallestApprochingValue)
+	 * @throws IOException - in case of IO failure
 	 */
-	protected IndexTreeDic_localDichotomyResult findValueIndexByDichotomy(Object searchValue, RandomAccessFile randFile, long routingTableBinIndex, boolean findLeftValue) throws IOException {
+	private IndexTreeDic_localDichotomyResult findValueIndexByDichotomy(Object searchValue, RandomAccessFile randFile, long routingTableBinIndex, boolean findLeftValue) throws IOException {
 		IndexTreeDic_localDichotomyResult localResultAsFalse = new IndexTreeDic_localDichotomyResult();
 
 		final byte routingTableLengthIndicationSize = 4; // nombre d'octets nécessaire pour écrire
@@ -614,7 +608,7 @@ public class IndexTreeDic extends Index implements Serializable {
 		long intervalLength = totalNumberOfDistinctValues; //intervalStopIndex - intervalStartIndex + 1;
 
 		// Je recherche la valeur la plus proche
-		Object lastApprochingValue = null;
+		Object lastApprochingValue;
 		while (intervalLength > 1) {
 
 			// Je me mets au milieu de l'intervalle
@@ -706,8 +700,6 @@ public class IndexTreeDic extends Index implements Serializable {
 					Log.error("NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNERREUR dichotomie (1), firstValueIsHigher=" + firstValueIsHigher + " et checkFirstValueIsHigher=" + checkFirstValueIsHigher);
 					//Log.error("En théorie, je devrais avoir : checkValue < searchValue < lastApprochingValue");
 					Log.error("NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNMais j'ai : checkValue("+checkValue+") < searchValue("+searchValue+") < lastApprochingValue("+lastApprochingValue+")");
-				} else {
-					//Log.info("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVérification dichotomie OK 1 !");
 				}
 			}
 
@@ -750,11 +742,11 @@ public class IndexTreeDic extends Index implements Serializable {
 
 					// C'est du débug, ça partira au prochain commit
 					//new showLocalValue(debugOriginalIndex);
-					new showLocalValue(intervalStartIndex - 2);
-					new showLocalValue(intervalStartIndex - 1);
-					new showLocalValue(intervalStartIndex - 0);
-					new showLocalValue(intervalStartIndex + 1);
-					new showLocalValue(intervalStartIndex + 2);
+//					new showLocalValue(intervalStartIndex - 2);
+//					new showLocalValue(intervalStartIndex - 1);
+//					new showLocalValue(intervalStartIndex - 0);
+//					new showLocalValue(intervalStartIndex + 1);
+//					new showLocalValue(intervalStartIndex + 2);
 					
 					
 					/*
@@ -780,7 +772,7 @@ public class IndexTreeDic extends Index implements Serializable {
 		//Object associatedValue = readObjectValueFromDisk(randFile, storedValuesClassType); // (débug) valeur associée
 
 		// Je regarde si cette entrée est valide :
-		/**
+		/*
 			Cas non valide :
 			le min est après la valeur maximale
 			le max est avant la valeur minimale
@@ -803,8 +795,8 @@ public class IndexTreeDic extends Index implements Serializable {
 
 	//protected int findValueIndexBy_keyIndex = -1;
 	//protected int findValueIndexBy_binIndex = -1;
-	public static Table debug_AnnoyingTable;
-	public static int debug_AnnoyingColmnIndex;
+	private static Table debug_AnnoyingTable;
+	private static int debug_AnnoyingColmnIndex;
 
 	// V0 : je parcours tout, sans dichotomie
 	/*public int findValueIndexBySimpleReading(Object searchValue, RandomAccessFile randFile, long routingTableBinIndex) throws IOException {
@@ -836,9 +828,9 @@ public class IndexTreeDic extends Index implements Serializable {
 	/** Fonction pour évaluer le nombre de résultats (binIndex) trouvés, sans retourner les résultats
 	 *  -> PAS SUR : Du coup, pour que ça aille plus vite, écrire le nombre d'éléments de chaque liste avant son binIndex (int) ?
 	 *    -> Faire un benchmark pour ça. pour l'instant, je laisse comme c'est
-	 * @param minValueExact
-	 * @param maxValueExact
-	 * @param isInclusive
+	 * @param minValueExact - minimum value
+	 * @param maxValueExact - maximaum value
+	 * @param isInclusive - inclusive inferior and superior
 	 * @return
 	 */
 	public int evaluateResultNumber(Object minValueExact, Object maxValueExact, boolean isInclusive) {
@@ -846,10 +838,9 @@ public class IndexTreeDic extends Index implements Serializable {
 	}
 
 	/** Pour faire un Equals (demandé par Nicolas)
-	 *  @param equalsExactValue
-	 *  @param justEvaluateResultNumber
-	 *  @return
-	 *  @throws Exception
+	 *  @param predicate - the predicate to execute
+	 *  @return - a list of data positions
+	 *  @throws IndexException - if coulnd't execute the predicate
 	 */
 	public DataPositionList getPositionsFromPredicate(Predicate predicate) throws IndexException {
 		try {
@@ -872,22 +863,21 @@ public class IndexTreeDic extends Index implements Serializable {
 		}
 	}
 
-	/** Trouve les résultats dans la mémoire et sur le disque
-	 *  @param minValueExact
-	 *  @param maxValueExact
-	 *  @param isInclusive
-	 *  @param justEvaluateResultNumber
-	 *  @return
-	 *  @throws Exception
+	/**
+	 * Trouve les résultats dans la mémoire et sur le disque
+	 * @param minValueExact - minimum value
+	 * @param maxValueExact - maximum value
+	 * @param isInclusive - inclusive inferior and superior
+	 * @param justEvaluateResultNumber
+	 * @return a positions list
+	 * @throws IOException - in case of IO failure
+	 * @throws IndexException - in any other case
 	 */
 	public DataPositionList findMatchingBinIndexes(Object minValueExact, Object maxValueExact, boolean isInclusive, boolean justEvaluateResultNumber) throws IndexException, IOException {
 		synchronized (indexingValueLock) { // NavigableMap<Integer, IntegerArrayList> findSubTree
 			this.flushOnDisk();
-			Collection<DataPositionList> fromDisk = findMatchingBinIndexesFromDisk(minValueExact, maxValueExact, isInclusive, justEvaluateResultNumber);
-			Collection<DataPositionList> fromMemory = findMatchingBinIndexesFromMemory(minValueExact, maxValueExact, isInclusive); // new ArrayList<DataPositionList>();//
-
-			Collection<DataPositionList> allResults = fromDisk;
-			allResults.addAll(fromMemory);
+			Collection<DataPositionList> allResults = findMatchingBinIndexesFromDisk(minValueExact, maxValueExact, isInclusive, justEvaluateResultNumber);
+			allResults.addAll(findMatchingBinIndexesFromMemory(minValueExact, maxValueExact, isInclusive));
 
 			DataPositionList simpleResultList = new DataPositionList();
 			for (DataPositionList subList : allResults) {
@@ -897,13 +887,14 @@ public class IndexTreeDic extends Index implements Serializable {
 			return simpleResultList;
 	} }
 
-	/** Gets the matching results from disk !
+	/**
+	 * Gets the matching results from disk !
 	 *
-	 *  @param minValue
-	 *  @param maxValue
-	 *  @param isInclusive
-	 *  @return la collection contenant tous les binIndex correspondants
-	 * @throws Exception
+	 * @param argMinValueExact - minimum value
+	 * @param argMaxValueExact - maximum value
+	 * @param isInclusive - inclusive inferior and superior
+	 * @return la collection contenant tous les binIndex correspondants
+	 * @throws  IndexException, IOException
 	 */
 	public Collection<DataPositionList> findMatchingBinIndexesFromDisk(Object argMinValueExact, Object argMaxValueExact, boolean isInclusive, boolean justEvaluateResultNumber) throws IndexException, IOException { //synchronized (indexingValueLockOnlyForAddAndDiskAndMemory) { // NavigableMap<Integer, IntegerArrayList> findSubTree
 		
@@ -923,7 +914,7 @@ public class IndexTreeDic extends Index implements Serializable {
 		final AtomicInteger totalResultCount = new AtomicInteger(0); // <- lent, mais pour peu de résultats, ça passera !
 
 		// Lecture du dernier float écrit dans le disque, i.e. de la position de la table de routage de l'arbre principal
-		/**
+		/*
 			Optimiser : faire le moins de seek/skip possibles
 		 */
 
@@ -931,15 +922,15 @@ public class IndexTreeDic extends Index implements Serializable {
 
 			private final String filePath;
 
-			public ArrayList<DataPositionList> listOfLocalMatchingArraysOfBinIndexes = new ArrayList<DataPositionList>();
+			private ArrayList<DataPositionList> listOfLocalMatchingArraysOfBinIndexes = new ArrayList<>();
 
-			public SearchInFile(String argFilePath) throws IOException {
+			private SearchInFile(String argFilePath) {
 				filePath = argFilePath;
 			}
 
 			// IKKI ICI
 
-			public void doSearch() throws IOException {
+			private void doSearch() throws IOException {
 
 				//long fileSize = fileSaveOnDisk.length();
 				RandomAccessFile randFile = new RandomAccessFile(filePath, "r");
@@ -956,8 +947,8 @@ public class IndexTreeDic extends Index implements Serializable {
 				// Lecture de la table de routage
 
 				// Pas besoin de récursvité pour l'arbre avec dichotomie
-				/** 1) Je cherche le binIndex de la valeur minimale, puis de la valeur maximale
-				 *  2) Je vais à tous les index, je mets les valeurs en mémoire.
+				/* 1) Je cherche le binIndex de la valeur minimale, puis de la valeur maximale
+				 * 2) Je vais à tous les index, je mets les valeurs en mémoire.
 				 */
 				long minBinIndex = -1;
 				//long maxBinIndex = -1;
@@ -1064,11 +1055,11 @@ public class IndexTreeDic extends Index implements Serializable {
 		// Ouvre tous les fichiers où les index sont sauvegardés (threads séparés),
 
 		Timer tempsPrisPourRecherchesSurFichiers = new Timer("tempsPrisPourRecherchesSurFichiers");
-		ArrayList<DataPositionList> listOfMatchingArraysOfBinIndexes = new ArrayList<DataPositionList>();
+		ArrayList<DataPositionList> listOfMatchingArraysOfBinIndexes = new ArrayList<>();
 
 		//Runnable searchInF
-		ArrayList<SearchInFile> runnableSearchesList = new ArrayList<SearchInFile>();
-		ArrayList<Thread> threadsRunningSearchesList = new ArrayList<Thread>();
+		ArrayList<SearchInFile> runnableSearchesList = new ArrayList<>();
+		ArrayList<Thread> threadsRunningSearchesList = new ArrayList<>();
 
 		//int filesNb = indexWrittenOnDiskFilePathsArray.size();
 		for (String filePath : indexWrittenOnDiskFilePathsArray) {
@@ -1143,20 +1134,20 @@ public class IndexTreeDic extends Index implements Serializable {
 	//public static boolean debugWriteOnce = true;
 	/**
 	 *
-	 * @param originalAssociatedValue
-	 * @param writeInDataOutput
-	 * @throws IOException
+	 * @param originalAssociatedValue - value to write
+	 * @param writeInDataOutput - where to write the value
+	 * @throws IOException - in case of IO failure
 	 */
-	protected void writeObjectValueOnDisk(Object originalAssociatedValue, DataOutput writeInDataOutput) throws IOException  {
+	private void writeObjectValueOnDisk(Object originalAssociatedValue, DataOutput writeInDataOutput) throws IOException  {
 
 		//if (originalAssociatedValue.getClass() != String.class)
 		// ancien débug	Log.info("originalAssociatedValue.getClass() != String.class - originalAssociatedValue = " + originalAssociatedValue);
 
-		if (originalAssociatedValue.getClass() == Float.class)    { writeInDataOutput.writeFloat(((Float) originalAssociatedValue).floatValue());    return; }
-		if (originalAssociatedValue.getClass() == Double.class)   { writeInDataOutput.writeDouble(((Double) originalAssociatedValue).doubleValue()); return; }
-		if (originalAssociatedValue.getClass() == Byte.class)     { writeInDataOutput.writeByte(((Byte) originalAssociatedValue).byteValue());       return; }
-		if (originalAssociatedValue.getClass() == Integer.class)  { writeInDataOutput.writeInt(((Integer) originalAssociatedValue).intValue());      return; }
-		if (originalAssociatedValue.getClass() == Long.class)     { writeInDataOutput.writeFloat(((Long) originalAssociatedValue).longValue());      return; }
+		if (originalAssociatedValue.getClass() == Float.class)    { writeInDataOutput.writeFloat((Float) originalAssociatedValue);    return; }
+		if (originalAssociatedValue.getClass() == Double.class)   { writeInDataOutput.writeDouble((Double) originalAssociatedValue); return; }
+		if (originalAssociatedValue.getClass() == Byte.class)     { writeInDataOutput.writeByte((Byte) originalAssociatedValue);       return; }
+		if (originalAssociatedValue.getClass() == Integer.class)  { writeInDataOutput.writeInt((Integer) originalAssociatedValue);      return; }
+		if (originalAssociatedValue.getClass() == Long.class)     { writeInDataOutput.writeFloat((Long) originalAssociatedValue);      return; }
 		if (originalAssociatedValue.getClass() == String.class)   {
 			byte[] stringAsByteAray = ((String)originalAssociatedValue).getBytes();
 			//if (stringAsByteAray.length != 19) Log.error("stringAsByteAray.length != 19 ->  "+ stringAsByteAray.length);
@@ -1166,36 +1157,31 @@ public class IndexTreeDic extends Index implements Serializable {
 				Log.info("stringAsByteAray.length = " + stringAsByteAray.length + " originalAssociatedValue = " + originalAssociatedValue);
 				debugWriteOnce = false;
 			}*/
-			return;
 		}
 	}
 
 	/**
-	 * @param dataInput   randAccessFile ou dataClassType
-	 * @param dataClassType
-	 *  @return
-	 * @throws IOException
+	 * @param dataInput - randAccessFile ou dataClassType
+	 * @param dataClassType - type of the data to read
+	 * @return - a typed data object
+	 * @throws IOException - in case of IO failure
 	 */
 	@SuppressWarnings("rawtypes") // J'utilise Class pour rendre générique ma fonction
-	protected Object readObjectValueFromDisk(DataInput dataInput, Class dataClassType) throws IOException  {
+	private Object readObjectValueFromDisk(DataInput dataInput, Class dataClassType) throws IOException  {
 
-		if (dataClassType == Float.class)    { return new Float(dataInput.readFloat()); }// new Float() : il le fait tout seul et essaie d'optimiser le truc, je pense !
-		if (dataClassType == Double.class)   { return new Double(dataInput.readDouble()); }
-		if (dataClassType == Byte.class)     { return new Byte(dataInput.readByte()); }
-		if (dataClassType == Integer.class)  { return new Integer(dataInput.readInt()); }
-		if (dataClassType == Long.class)     { return new Long(dataInput.readLong()); }
+		if (dataClassType == Float.class)    { return dataInput.readFloat(); }// new Float() : il le fait tout seul et essaie d'optimiser le truc, je pense !
+		if (dataClassType == Double.class)   { return dataInput.readDouble(); }
+		if (dataClassType == Byte.class)     { return dataInput.readByte(); }
+		if (dataClassType == Integer.class)  { return dataInput.readInt(); }
+		if (dataClassType == Long.class)     { return dataInput.readLong(); }
 		if (dataClassType == String.class)   {
 			//dataInput.skipBytes(1);
 			long stringAsByteArrayLength = storedValueSizeInBytes;//19;//dataInput.readInt(); // 2 octets
 			byte[] stringAsByteAray = new byte[(int) stringAsByteArrayLength];
 			//int stringAsByteArrayCheckLength =
 			dataInput.readFully(stringAsByteAray, 0, stringAsByteAray.length);
-			String resultString = new String(stringAsByteAray);
 
-			// débug Log.error("stringAsByteAray.length = " + stringAsByteAray.length + " resultString = " + resultString);
-
-			//if (stringAsByteArrayLength != stringAsByteArrayCheckLength) throw new IOException("readObjectValueFromDisk : stringAsByteArrayLength("+stringAsByteArrayLength+") != stringAsByteArrayCheckLength("+stringAsByteArrayCheckLength+")");
-			return resultString;
+			return new String(stringAsByteAray);
 		}
 
 		return null;
