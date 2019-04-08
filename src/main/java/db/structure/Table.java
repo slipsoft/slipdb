@@ -1,10 +1,7 @@
 package db.structure;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +13,11 @@ import com.dant.entity.TableEntity;
 import com.dant.utils.EasyFile;
 import com.dant.utils.Log;
 
+import db.data.types.DataPositionList;
 import db.data.types.DataType;
 import db.disk.dataHandler.TableDataHandler;
 import db.search.Predicate;
+import db.search.ResultSet;
 import db.structure.recherches.TableHandler;
 
 /**
@@ -26,27 +25,27 @@ import db.structure.recherches.TableHandler;
  */
 public class Table implements Serializable {
 	private static final long serialVersionUID = 2266328195200925214L;
-	public final static short currentNodeID = 1;
-	
-	protected static String oldSmellyBasePath = "target/tables/";
-	final public static String baseAllTablesDirPath = "data_save/tables/";
+	private final static short currentNodeID = 1;
+
+	@Deprecated private static String oldSmellyBasePath = "target/tables/";
+	final private static String baseAllTablesDirPath = "data_save/tables/";
 	final public static String allTablesFileExtension = ".sbin";
 	
-	protected final int tableID;
-	protected final short nodeID; // TODO à faire plus tard : importation d'une table depuis un autre noeud
-	protected final String baseTablePath;
-	protected int lineDataSize;
+	private final int tableID;
+	private final short nodeID; // TODO à faire plus tard : importation d'une table depuis un autre noeud
+	private final String baseTablePath;
+	private int lineDataSize;
 	
 	
 	//protected final String dataFilesOnDiskBasePath; devenu baseTablePath
 	protected final TableDataHandler dataHandler;
-	protected TableHandler tableHandler;
+	@Deprecated protected TableHandler tableHandler;
 	
 	protected final String name; // table name
 	
 	@Deprecated protected EasyFile fileLinesOnDisk; // <- le système de fichiers à changé (il est mieux maintenant)
-	protected List<Column> columnsList = new ArrayList<Column>(); // liste des colonnes de la table
-	/* @CurrentlyUseless */ @Deprecated protected List<Index> indexesList = new ArrayList<Index>();   // liste des index générés pour cette table
+	private List<Column> columnsList = new ArrayList<>(); // liste des colonnes de la table
+	/* @CurrentlyUseless */ @Deprecated protected List<Index> indexesList = new ArrayList<>();   // liste des index générés pour cette table
 	// -> Dans TableHandler.indexTreeList pour l'instant
 	
 	/**
@@ -67,12 +66,12 @@ public class Table implements Serializable {
 	
 	/** 
 	 * Create a table with a name and a columns list
-	 * @param argName
-	 * @param argColumnsList
-	 * @param argTableHandler
-	 * @throws IOException
+	 * @param argName - name of the table
+	 * @param argColumnsList - list of columns
+	 * @param argTableHandler - table handler
+	 * @throws IOException - if cannot create file
 	 */
-	public Table(String argName, List<Column> argColumnsList, TableHandler argTableHandler) throws IOException {
+	public Table(String argName, List<Column> argColumnsList, TableHandler argTableHandler) throws  IOException {
 		this(argName, argColumnsList, currentNodeID, Database.getInstance().getAndIncrementNextTableID(), argTableHandler);
 	}
 	
@@ -94,30 +93,9 @@ public class Table implements Serializable {
 		computeLineDataSize();
 	}
 	
-	/**
-	 *  NE PAS UTILISER CE CONSTRUCTEUR CAR MANQUE TABLE HANDLER EN PARAMETRE !
-	 *  UN NOUVEAU TABLE HANDLER SERA DONC GENERE LORS DE LA CREATION DE LA TABLE.
-	 * @param argName
-	 * @param argColumnsList
-	 * @throws IOException
-	 */
-	@Deprecated
-	public Table(String argName, List<Column> argColumnsList) throws IOException {
-		this(argName, argColumnsList, null);
-	}
-	
 	public String getBaseTablePath() {
 		return baseTablePath;
 	}
-
-	protected void computeLineDataSize() {
-		lineDataSize = columnsList
-				.stream()
-				.mapToInt(Column::getSize)
-				.sum();
-	}
-
-	// dataHandler
 
 	public String getName() {
 		return name;
@@ -131,6 +109,23 @@ public class Table implements Serializable {
 		return indexesList;
 	}
 
+	public TableDataHandler getDataHandler() {
+		return dataHandler;
+	}
+
+	public TableHandler getTableHandler() {
+		return tableHandler;
+	}
+
+	public int getLineSize() {
+		return lineDataSize;
+	}
+
+	@Deprecated
+	public EasyFile getFileLinesOnDisk() {
+		return fileLinesOnDisk;
+	}
+
 	public void addIndex(Index index) {
 		this.indexesList.add(index);
 		for (Column column : index.getColumnList()) {
@@ -138,23 +133,11 @@ public class Table implements Serializable {
 		}
 	}
 
-	public int getLineSize() {
-		return lineDataSize;
-		/*return columnsList
-			.stream()
-			.mapToInt(Column::getSize)
-			.sum();*/
-		// -> do a performance benchmark with this function (seems very fast)
-		/*
-		Same as :
-		
-		int lineSize = 0;
-		for (int columnIndex = 0; columnIndex < columnsList.size(); columnIndex++) {
-			lineSize += columnsList.get(columnIndex).getSize();
-		}
-		return lineSize;
-		
-		*/
+	private void computeLineDataSize() {
+		lineDataSize = columnsList
+				.stream()
+				.mapToInt(Column::getSize)
+				.sum();
 	}
 
 	public Optional<Column> getColumnByName(String columnName) {
@@ -167,24 +150,22 @@ public class Table implements Serializable {
 		return this.columnsList.stream().filter(c -> c.getName().equals(columnName)).findFirst();
 	}
 
-	public boolean columnExist(String name) {
-		return this.columnsList.stream().anyMatch(col -> col.getName() == name);
+	private boolean columnExist(String name) {
+		return this.columnsList.stream().anyMatch(col -> col.getName().equals(name));
 	}
 
 	/**
 	 * Ajout d'une colonne
 	 *
-	 * @param colName
-	 * @return
-	 * @throws Exception
+	 * @param colName - name of the column
+	 * @throws StructureException - if column allready exists
 	 */
-	public boolean addColumn(String colName, DataType dataType) throws Exception {
-		if (columnExist(colName)) throw new Exception("Column already exists, colName = " + colName);
+	public void addColumn(String colName, DataType dataType) throws StructureException {
+		if (columnExist(colName)) throw new StructureException("Column already exists, colName = " + colName);
 		// Ajout de la colonne
 		Column newColumn = new Column(colName, dataType).setNumber(columnsList.size());
 		columnsList.add(newColumn);
 		computeLineDataSize();
-		return true;
 	}
 
 	/**
@@ -240,16 +221,29 @@ public class Table implements Serializable {
 		return lineValues;
 	}
 
-	public OutputStream tableToOutputStream(boolean appendAtTheEnd) throws FileNotFoundException {
-		return new FileOutputStream(fileLinesOnDisk, appendAtTheEnd);
+	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection) { // table connue ! , Table fromTable) {
+		return getFullResultsFromBinIndexes(resultsCollection, true, -1);
 	}
 
-	public EasyFile getFileLinesOnDisk() {
-		return fileLinesOnDisk;
+	/**
+	 * @param resultsCollection - positions list
+	 * @param waitForAllResults -
+	 * @param waitTimeLimitMs - time limit
+	 * @return a full resultset
+	 */
+	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection, boolean waitForAllResults, int waitTimeLimitMs) { // table connue ! , Table fromTable) {
+		return getFullResultsFromBinIndexes(resultsCollection, waitForAllResults, waitTimeLimitMs, null);
 	}
 
-	public TableDataHandler getDataHandler() {
-		return dataHandler;
+	/**
+	 * @param resultsCollection - positions list
+	 * @param waitForAllResults -
+	 * @param waitTimeLimitMs - time limit
+	 * @param onlyGetThoseColumnsIndex null si renvoyer tout les champs
+	 * @return a full resultset
+	 */
+	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection, boolean waitForAllResults, int waitTimeLimitMs, ArrayList<Integer> onlyGetThoseColumnsIndex) { // table connue ! , Table fromTable) {
+		return getDataHandler().getValuesOfLinesListById(resultsCollection, waitForAllResults, waitTimeLimitMs, onlyGetThoseColumnsIndex);
 	}
 
 	/**
@@ -274,33 +268,4 @@ public class Table implements Serializable {
 		return new TableEntity(name, allColumns);
 	}
 
-	public TableHandler getTableHandler() {
-		return tableHandler;
-	}
 }
-
-/*public NetBuffer tableAsNetBuffer() {
-NetBuffer tableBuff = new NetBuffer();
-tableBuff.writeInt(tableID);
-tableBuff.writeInt(nodeID);
-tableBuff.writeString(name);
-tableBuff.writeInt(columnsList.size());
-for (Column col : columnsList) {
-	NetBuffer colAsBuffer = columnsList.columnAsNetBuffer();
-	tableBuff.writeByteArray(colAsBuffer.convertToByteArray());
-}
-return tableBuff;
-}
-
-public static Table readTableFromNetBuffer(NetBuffer tableBuff) {
-int aTableID = tableBuff.readInt();
-int aNodeID = tableBuff.readInt();
-String aTableName = tableBuff.readString();
-int columnsCount = tableBuff.readInt();
-ArrayList<Column> addColumns = new ArrayList<Column>();
-addColumns.ensureCapacity(columnsCount);
-for (int colIndex = 0; colIndex < columnsCount; colIndex++) {
-	NetBuffer colAsBuffer = new NetBuffer(tableBuff.readByteArray());
-	addColumns.add(Column.readFromNetBuffer(colAsBuffer));
-}
-}*/

@@ -1,10 +1,7 @@
 package db.sTreeIndex;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import db.data.load.Loader;
 import db.search.*;
@@ -333,7 +330,7 @@ class IndexTreeMessyTest {
 			//numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
 			
 			//ArrayList<ArrayList<Object>>
-			ResultSet fullResulsVariables = tableHandler.getFullResultsFromBinIndexes(result, true, -1, null);
+			ResultSet fullResulsVariables = table.getFullResultsFromBinIndexes(result, true, -1, null);
 			
 			//tableHandler.displayOnLogResults(fullResulsVariables);
 			
@@ -344,7 +341,7 @@ class IndexTreeMessyTest {
 			ArrayList<Integer> onlyThoseColumns = new ArrayList<Integer>();
 			onlyThoseColumns.add(6);
 			onlyThoseColumns.add(4);
-			fullResulsVariables = tableHandler.getFullResultsFromBinIndexes(result, true, -1, onlyThoseColumns);
+			fullResulsVariables = table.getFullResultsFromBinIndexes(result, true, -1, onlyThoseColumns);
 			
 			//tableHandler.displayOnLogResults(fullResulsVariables);
 			
@@ -635,15 +632,17 @@ class IndexTreeMessyTest {
 		listFields.add(field);
 		Predicate predicate1 = new Predicate(table, column, Operator.equals, new Float("17.78"));
 		Predicate predicate2 = new Predicate(table, column, Operator.between, new Float[] {17.78f, 18f});
-		View view1 = new View(tableHandler, predicate1, listFields, new ArrayList<>(), new Group());
-		View view2 = new View(tableHandler, predicate2, listFields, new ArrayList<>(), new Group());
+		View view1 = new View(table, predicate1, listFields, new ArrayList<>(), new Group());
+		View view2 = new View(table, predicate2, listFields, new ArrayList<>(), new Group());
 		ResultSet result = null;
 
 		try {
 			result = view1.execute();
 			Log.debug(result);
+			assertEquals(20, result.size());
 			result = view2.execute();
 			Log.debug(result);
+			assertEquals(700, result.size());
 		} catch (SearchException e) {
 			Log.error(e);
 		}

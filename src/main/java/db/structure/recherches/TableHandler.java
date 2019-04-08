@@ -25,6 +25,7 @@ import db.structure.Table;
 import db.structure.indexTree.IndexException;
 import db.structure.indexTree.IndexTreeDic;
 
+@Deprecated
 public class TableHandler implements Serializable {
 	/* Ordre de serialization :
 	
@@ -80,7 +81,7 @@ public class TableHandler implements Serializable {
 	}
 	
 	
-	
+
 	public TableHandler() {
 		loadSerialAndCreateCommon();
 	}
@@ -97,7 +98,7 @@ public class TableHandler implements Serializable {
 	public Table getAssociatedTable() {
 		return this.associatedTable;
 	}
-	
+
 	public TableHandler(String argTableName) {
 		this();
 		tableName = argTableName;
@@ -346,74 +347,6 @@ public class TableHandler implements Serializable {
 			}*/
 		}
 		return numberOfResults;
-	}
-
-	//trip_distance
-	public int evaluateNumberOfArrayListLines(Collection<DataPositionList> resultsCollection) {
-		return resultsCollection.size();
-	}
-	
-	private static boolean debugUseOldDeprecatedSearch = false; // bench : la nouvelle manière va environ 80x plus vite ^^
-	
-	
-	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection) throws StructureException, IOException { // table connue ! , Table fromTable) {
-		return getFullResultsFromBinIndexes(resultsCollection, true, -1);
-	}
-	/**
-	 *  @param resultsCollection
-	 *  @param waitForAllResults
-	 *  @param waitTimeLimitMs
-	 *  @return
-	 *  @throws Exception
-	 */
-	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection, boolean waitForAllResults, int waitTimeLimitMs) throws StructureException, IOException{ // table connue ! , Table fromTable) {
-		return getFullResultsFromBinIndexes(resultsCollection, waitForAllResults, waitTimeLimitMs, null);
-	}
-	//trip_distance
-	
-	/** 
-	 *  @param resultsCollection
-	 *  @param waitForAllResults
-	 *  @param waitTimeLimitMs
-	 *  @param onlyGetThoseColumnsIndex null si renvoyer tout les champs
-	 *  @return
-	 *  @throws Exception
-	 */
-	//public ArrayList<ArrayList<Object>> getFullResultsFromBinIndexes(DataPositionList resultsCollection) throws Exception { // table connue ! , Table fromTable) {
-	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection, boolean waitForAllResults, int waitTimeLimitMs, ArrayList<Integer> onlyGetThoseColumnsIndex) throws StructureException, IOException { // table connue ! , Table fromTable) {
-		if (associatedTable == null) throw new StructureException("Aucune table crée, indexation impossible.");
-		
-		ResultSet resultArrayList = new ResultSet();
-		
-		TableDataHandler dataHandler = associatedTable.getDataHandler();
-		
-		if (debugUseOldDeprecatedSearch == false) {
-			return dataHandler.getValuesOfLinesListById(resultsCollection, waitForAllResults, waitTimeLimitMs, onlyGetThoseColumnsIndex);
-		} else {
-			
-			// Pour toutes les listes de valeurs identiques
-			// (il peut y avoir des listes distinctes associés à une même valeur indexée, du fait du multi-fichiers / multi-thread)
-			for (DiskDataPosition dataPos : resultsCollection) {
-				//Log.info("list size = " + list.size());
-				//for (DiskDataPosition dataPos : dataPosList) {
-					// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
-					ArrayList<Object> objList = dataHandler.getValuesOfLineByIdForSignleQuery(dataPos);
-					resultArrayList.add(objList);
-					//Log.info("  objList = " + objList);
-					
-					//Log.info("  index = " + index);
-					// TO DO Résultats à lire depuis les fichiers binaires -> OK !!!
-					//ArrayList<Object> objList = associatedTable.getValuesOfLineById(binIndex);
-					//resultArrayList.add(objList);
-					
-					//Object indexedValue = objList.get(indexingColumnIndex);
-					//indexingColumn.getDataType().
-					//Log.info("  valeur indexée = " + indexedValue);
-					//Log.info("  objList = " + objList);
-				//}
-			}
-			return resultArrayList;
-		}
 	}
 	
 	public void displayOnLogResults(ResultSet resultArrayList) {

@@ -38,7 +38,7 @@ class ViewTest {
 		field = new Field("testcolumn");
 		predicate = new Predicate(table, column, Operator.equals, "test");
 		listFields.add(field);
-		view = new View(tableHandler, predicate, listFields, new ArrayList<>(), new Group());
+		view = new View(table, predicate, listFields, new ArrayList<>(), new Group());
 	}
 
 	@Test

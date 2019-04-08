@@ -27,7 +27,7 @@ class PredicateTest {
 	void setUp() throws Exception {
 		column = new Column("testcolumn", new StringType(12));
 		columns.add(column);
-		table = new Table("testtable", columns);
+		table = new Table("testtable", columns, null);
 		predicate = new Predicate(table, column, Operator.equals, "test");
 	}
 

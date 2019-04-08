@@ -66,9 +66,8 @@ public class ViewEntity {
 
     public View convertToView() {
         Table table = Controller.getTableByName(tableName).get();
-        TableHandler handler = table.getTableHandler();
         FilterTerm concreteFilterTerm = filterTerm.convertToFilterTerm(table);
 
-        return new View(handler, concreteFilterTerm, this.fieldList, this.sortList, this.groupBy);
+        return new View(table, concreteFilterTerm, this.fieldList, this.sortList, this.groupBy);
     }
 }
