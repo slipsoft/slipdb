@@ -13,9 +13,9 @@ import db.data.types.IntegerType;
 import db.data.types.StringType;
 
 class TableTest {
-	protected Table table;
-	protected List<Column> columns = new ArrayList<>();
-	protected List<Index> indexes = new ArrayList<>();
+	private Table table;
+	private List<Column> columns = new ArrayList<>();
+	private List<Index> indexes = new ArrayList<>();
 
 	@BeforeEach
 	void setUp() throws Exception {
@@ -25,12 +25,12 @@ class TableTest {
 		Column[] cols = {columns.get(0)};
 		Index index = new IndexHash(cols);
 		indexes.add(index);
-		table = new Table("test", columns, null);
+		table = new Table("test", columns);
 		table.addIndex(index);
 	}
 
 	@AfterEach
-	void tearDown() throws Exception {
+	void tearDown() {
 	}
 
 	@Test

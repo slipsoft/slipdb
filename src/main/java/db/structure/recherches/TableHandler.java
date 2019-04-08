@@ -125,7 +125,7 @@ public class TableHandler implements Serializable {
 	}
 	
 	public Table createTable() throws IOException {
-		associatedTable = new Table(tableName, columnsListForCreatingTableOnly, this);
+		associatedTable = new Table(tableName, columnsListForCreatingTableOnly);
 		return associatedTable;
 	}
 

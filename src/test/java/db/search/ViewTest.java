@@ -4,7 +4,6 @@ import com.dant.utils.Log;
 import db.data.types.StringType;
 import db.structure.Column;
 import db.structure.Table;
-import db.structure.recherches.TableHandler;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class ViewTest {
 	private Column column;
 	private Table table;
-	private TableHandler tableHandler;
 	private Field field;
 	private List<Field> listFields = new ArrayList<>();
 	private Predicate predicate;
@@ -31,8 +29,7 @@ class ViewTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		tableHandler = new TableHandler("testtable");
-		table = tableHandler.createTable();
+		table = new Table("testtable");
 		table.addColumn("testcolumn", new StringType(12));
 		column = table.getColumns().get(0);
 		field = new Field("testcolumn");

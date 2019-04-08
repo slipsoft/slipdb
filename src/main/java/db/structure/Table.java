@@ -45,7 +45,7 @@ public class Table implements Serializable {
 	
 	@Deprecated protected EasyFile fileLinesOnDisk; // <- le système de fichiers à changé (il est mieux maintenant)
 	private List<Column> columnsList = new ArrayList<>(); // liste des colonnes de la table
-	/* @CurrentlyUseless */ @Deprecated protected List<Index> indexesList = new ArrayList<>();   // liste des index générés pour cette table
+	/* @CurrentlyUseless */ protected List<Index> indexesList = new ArrayList<>();   // liste des index générés pour cette table
 	// -> Dans TableHandler.indexTreeList pour l'instant
 	
 	/**
@@ -63,25 +63,25 @@ public class Table implements Serializable {
 		Log.info("TableDataHandler : ");
 		dataHandler.debugSerialShowVariables();
 	}
+
+	public Table(String name) throws IOException {
+		this(name, new ArrayList<>());
+	}
 	
 	/** 
 	 * Create a table with a name and a columns list
 	 * @param argName - name of the table
 	 * @param argColumnsList - list of columns
-	 * @param argTableHandler - table handler
 	 * @throws IOException - if cannot create file
 	 */
-	public Table(String argName, List<Column> argColumnsList, TableHandler argTableHandler) throws  IOException {
-		this(argName, argColumnsList, currentNodeID, Database.getInstance().getAndIncrementNextTableID(), argTableHandler);
+	public Table(String argName, List<Column> argColumnsList) throws  IOException {
+		this(argName, argColumnsList, currentNodeID, Database.getInstance().getAndIncrementNextTableID());
 	}
 	
-	public Table(String argName, List<Column> argColumnsList, short argNodeID, int argTableID, TableHandler argTableHandler) throws IOException {
+	public Table(String argName, List<Column> argColumnsList, short argNodeID, int argTableID) throws IOException {
 		name = argName;
 		columnsList.addAll(argColumnsList);
-		tableHandler = argTableHandler;
-		if (tableHandler == null) {
-			tableHandler = new TableHandler(argName);
-		}
+		tableHandler = new TableHandler(argName);
 		
 		baseTablePath = baseAllTablesDirPath + name + "/";
 		dataHandler = new TableDataHandler(this, baseTablePath);
