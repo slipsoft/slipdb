@@ -155,16 +155,26 @@ public class Table implements Serializable {
 	}
 
 	/**
-	 * Ajout d'une colonne
+	 * Add a column
 	 *
 	 * @param colName - name of the column
+	 * @param dataType - type of the column
 	 * @throws StructureException - if column allready exists
 	 */
 	public void addColumn(String colName, DataType dataType) throws StructureException {
-		if (columnExist(colName)) throw new StructureException("Column already exists, colName = " + colName);
-		// Ajout de la colonne
 		Column newColumn = new Column(colName, dataType).setNumber(columnsList.size());
-		columnsList.add(newColumn);
+		this.addColumn(newColumn);
+	}
+
+	/**
+	 * Add a column
+	 *
+	 * @param column - column to add to the table
+	 * @throws StructureException - if column allready exists
+	 */
+	public void addColumn(Column column) throws StructureException {
+		if (columnExist(column.getName())) throw new StructureException("Column already exists, colName = " + column.getName());
+		columnsList.add(column);
 		computeLineDataSize();
 	}
 

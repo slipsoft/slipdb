@@ -12,7 +12,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import db.structure.Table;
-import db.structure.recherches.TableHandler;
 
 public class TableEntity extends Entity implements Serializable {
     public ArrayList<ColumnEntity> allColumns;
@@ -63,14 +62,14 @@ public class TableEntity extends Entity implements Serializable {
 
     public Table convertToTable() throws IOException {
         ArrayList<Column> allColumns = this.allColumns.stream().map(ColumnEntity::convertToColumn).collect(Collectors.toCollection(ArrayList::new));
-        TableHandler tableHandler = new TableHandler(this.name);
+        Table table = new Table(this.name);
         allColumns.forEach(c -> {
             try {
-                tableHandler.addColumn(c);
+                table.addColumn(c);
             } catch (Exception exp) {
                 Log.error(exp);
             }
         });
-        return tableHandler.createTable();
+        return table;
     }
 }
