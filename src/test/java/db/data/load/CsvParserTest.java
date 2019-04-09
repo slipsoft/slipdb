@@ -4,8 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.List;
 
-import db.structure.recherches.TableHandler;
+import db.data.types.*;
+import db.disk.dataHandler.DiskDataPosition;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,18 +17,12 @@ import com.dant.utils.Log;
 import com.dant.utils.Timer;
 import com.dant.utils.Utils;
 
-import db.data.types.ByteType;
-import db.data.types.DateType;
-import db.data.types.DoubleType;
-import db.data.types.FloatType;
-import db.data.types.StringType;
-import db.structure.Column;
 import db.structure.Table;
 
 class CsvParserTest {
-	protected Loader loader;
-	protected Table table;
-	Utils utilsInstance;
+	private Loader loader;
+	private Table table;
+	private Utils utilsInstance;
 
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
@@ -35,35 +31,31 @@ class CsvParserTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		ArrayList<Column> columns = new ArrayList<Column>();
 		utilsInstance = new Utils(); // For thread-safety !
+		table = new Table("test");
 		try {
-			columns.add(new Column("VendorID", new ByteType()));
-			columns.add(new Column("tpep_pickup_datetime", new DateType()));
-			columns.add(new Column("tpep_dropoff_datetime", new DateType()));
-			columns.add(new Column("passenger_count", new ByteType()));
-			columns.add(new Column("trip_distance", new FloatType()));
-			columns.add(new Column("pickup_longitude", new DoubleType()));
-			columns.add(new Column("pickup_latitude", new DoubleType()));
-			columns.add(new Column("RateCodeID", new ByteType()));
-			columns.add(new Column("store_and_fwd_flag", new StringType(3))); // <- Longueur de 1, test du padding
-			columns.add(new Column("dropoff_longitude", new DoubleType()));
-			columns.add(new Column("dropoff_latitude", new DoubleType()));
-			columns.add(new Column("payment_type", new ByteType()));
-			columns.add(new Column("fare_amount", new FloatType()));
-			columns.add(new Column("extra", new FloatType()));
-			columns.add(new Column("mta_tax", new FloatType()));
-			columns.add(new Column("tip_amount", new FloatType()));
-			columns.add(new Column("tolls_amount", new FloatType()));
-			columns.add(new Column("improvement_surcharge", new FloatType()));
-			columns.add(new Column("total_amount", new FloatType()));
+			table.addColumn("VendorID", new ByteType());
+			table.addColumn("tpep_pickup_datetime", new DateType());
+			table.addColumn("tpep_dropoff_datetime", new DateType());
+			table.addColumn("passenger_count", new ByteType());
+			table.addColumn("trip_distance", new FloatType());
+			table.addColumn("pickup_longitude", new DoubleType());
+			table.addColumn("pickup_latitude", new DoubleType());
+			table.addColumn("RateCodeID", new ByteType());
+			table.addColumn("store_and_fwd_flag", new StringType(3)); // <- Longueur de 1, test du padding
+			table.addColumn("dropoff_longitude", new DoubleType());
+			table.addColumn("dropoff_latitude", new DoubleType());
+			table.addColumn("payment_type", new ByteType());
+			table.addColumn("fare_amount", new FloatType());
+			table.addColumn("extra", new FloatType());
+			table.addColumn("mta_tax", new FloatType());
+			table.addColumn("tip_amount", new FloatType());
+			table.addColumn("tolls_amount", new FloatType());
+			table.addColumn("improvement_surcharge", new FloatType());
+			table.addColumn("total_amount", new FloatType());
 		} catch (Exception e) {
 			Log.error(e);
 		}
-		TableHandler tableHandler = new TableHandler("test");
-		columns.stream().forEach(c -> tableHandler.addColumn(c));
-
-		Table table = tableHandler.createTable();
 		loader = new Loader(table, new CsvParser()); // 750 ms
 	}
 
@@ -76,18 +68,8 @@ class CsvParserTest {
 			parseTimer.log();
 		};
 		assertDoesNotThrow(exec);
-		
-		/*
-		DiskDataPosition dataPos = new DiskDataPosition(1, );
-		TableDataHandler dataHandler = table.getDataHandler();
-		ArrayList<Object> objList = dataHandler.getValuesOfLineByIdForSignleQuery(dataPos);
-		TODO
-		TODO Faire avec la nouvelle version
-		TODO
-		TODO
-		Log.debug(table.getValuesOfLineById(0), "entry/0");
-		Log.debug(table.getValuesOfLineById(69), "entry/69");
-		List<Object> expected = new ArrayList<Object>();
+
+		List<Object> expected = new ArrayList<>();
 		expected.add((byte) 2);
 		expected.add(utilsInstance.dateFromString("2015-04-09 19:29:33"));
 		expected.add(utilsInstance.dateFromString("2015-04-09 19:37:09"));
@@ -108,6 +90,10 @@ class CsvParserTest {
 		expected.add((float) 0.3);
 		expected.add((float) 9.96);
 
-		assertEquals(expected, table.getValuesOfLineById(70));*/
+		DataPositionList positions = new DataPositionList();
+		positions.add(new DiskDataPosition((short) 1, (short)1, 70));
+		List<Object> result = table.getFullResultsFromBinIndexes(positions).get(0);
+		Log.debug(result, "line/70");
+		assertEquals(expected, result);
 	}
 }

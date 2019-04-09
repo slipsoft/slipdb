@@ -1,14 +1,11 @@
 package com.dant.entity;
 
 import com.dant.app.Controller;
-import com.dant.utils.Log;
 import com.google.gson.Gson;
 import db.search.*;
 import db.structure.Database;
 import db.structure.Table;
-import db.structure.recherches.TableHandler;
 
-import javax.xml.crypto.Data;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
