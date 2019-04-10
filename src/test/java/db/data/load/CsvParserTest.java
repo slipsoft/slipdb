@@ -56,7 +56,7 @@ class CsvParserTest {
 		} catch (Exception e) {
 			Log.error(e);
 		}
-		loader = new Loader(table, new CsvParser()); // 750 ms
+		loader = new Loader(table, new CsvParser(), false); // 750 ms
 	}
 
 	@Test

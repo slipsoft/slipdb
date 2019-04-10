@@ -6,7 +6,7 @@ import java.util.*;
 import db.data.load.Loader;
 import db.search.*;
 import db.serial.SerialStructure;
-import db.structure.StructureException;
+import db.structure.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -23,13 +23,8 @@ import db.data.types.FloatType;
 import db.data.types.IntegerArrayList;
 import db.data.types.DataPositionList;
 import db.data.types.StringType;
-import db.structure.Column;
-import db.structure.Database;
-import db.structure.Table;
 import db.structure.indexTree.IndexTreeCeption;
 import db.structure.indexTree.IndexTreeDic;
-import db.structure.recherches.SGlobalHandler;
-import db.structure.recherches.TableHandler;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,9 +34,10 @@ class IndexTreeMessyTest {
 	// -> limitation du nombre de résultats affichés par arbre
 	
 	//protected static Loader parser;
+	private static Index indexTripDistance;
+	private static Index indexPickupDate;
 	private static Table table;
 	private static Utils currentlyUsedUils = new Utils(); // For thread-safety ! (but, here, it's static so thread unsafe... ^^')
-	private static TableHandler tableHandler;
 	
 	private static boolean parseAgain = true;
 	private boolean doItWithTableHandler = true;
@@ -58,7 +54,6 @@ class IndexTreeMessyTest {
 	static void setUpBeforeAll() throws Exception {
 		SerialStructure.loadStructureFrom(serializeFromPath);
 		table = Database.getInstance().getAllTables().get(0);
-		tableHandler = table.getTableHandler();
 		/*Log.info(table.getName());
 		//table.debugSerialShowVariables();
 		
@@ -73,41 +68,43 @@ class IndexTreeMessyTest {
 		Log.info("setUpBeforeAll");
 		Log.start("indexingTreeTest", 3);
 		
-		tableHandler = SGlobalHandler.initializeTable("NYtest");
-		assertNotNull(tableHandler);
+		table = new Table("NYtest");
+		assertNotNull(table);
 		
 		//getValuesOfLineByIdForSignleQuery
 
-		tableHandler.addColumn("VendorID", new ByteType());
+		table.addColumn("VendorID", new ByteType());
 		// -> On a bien les mêmes résultats en castant la date et en la traîtant comme une string
-		tableHandler.addColumn("tpep_pickup_datetime", new DateType()); //new StringType(19));//
-		tableHandler.addColumn("tpep_dropoff_datetime", new DateType());//new StringType(19)); // 
-		tableHandler.addColumn("passenger_count", new ByteType());
-		tableHandler.addColumn("trip_distance", new FloatType());
-		tableHandler.addColumn("pickup_longitude", new DoubleType());
-		tableHandler.addColumn("pickup_latitude", new DoubleType());
-		tableHandler.addColumn("RateCodeID", new ByteType());
-		tableHandler.addColumn("store_and_fwd_flag", new StringType(1));
-		tableHandler.addColumn("dropoff_longitude", new DoubleType());
-		tableHandler.addColumn("dropoff_latitude", new DoubleType());
-		tableHandler.addColumn("payment_type",  new ByteType());
-		tableHandler.addColumn("fare_amount", new FloatType());
-		tableHandler.addColumn("extra", new FloatType());
-		tableHandler.addColumn("mta_tax", new FloatType());
-		tableHandler.addColumn("tip_amount", new FloatType());
-		tableHandler.addColumn("tolls_amount", new FloatType());
-		tableHandler.addColumn("improvement_surcharge", new FloatType());
-		tableHandler.addColumn("total_amount", new FloatType());
-		
-		table = tableHandler.createTable();
-		
-		tableHandler.clearDataDirectory();
+		table.addColumn("tpep_pickup_datetime", new DateType()); //new StringType(19));//
+		table.addColumn("tpep_dropoff_datetime", new DateType());//new StringType(19)); //
+		table.addColumn("passenger_count", new ByteType());
+		table.addColumn("trip_distance", new FloatType());
+		table.addColumn("pickup_longitude", new DoubleType());
+		table.addColumn("pickup_latitude", new DoubleType());
+		table.addColumn("RateCodeID", new ByteType());
+		table.addColumn("store_and_fwd_flag", new StringType(1));
+		table.addColumn("dropoff_longitude", new DoubleType());
+		table.addColumn("dropoff_latitude", new DoubleType());
+		table.addColumn("payment_type",  new ByteType());
+		table.addColumn("fare_amount", new FloatType());
+		table.addColumn("extra", new FloatType());
+		table.addColumn("mta_tax", new FloatType());
+		table.addColumn("tip_amount", new FloatType());
+		table.addColumn("tolls_amount", new FloatType());
+		table.addColumn("improvement_surcharge", new FloatType());
+		table.addColumn("total_amount", new FloatType());
 
-		//tableHandler.createRuntimeIndexingColumn("tpep_pickup_datetime");
-		tableHandler.createRuntimeIndexingColumn("trip_distance"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
+		
+		//table.clearDataDirectory();
+
+		indexPickupDate = new IndexTreeDic(table, 1);
+		indexTripDistance = new IndexTreeDic(table, 4);
+		table.addIndex(indexPickupDate);
+		table.addIndex(indexTripDistance);
+		//tableHandler.createRuntimeIndexingColumn("trip_distance"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
 		//tableHandler.createRuntimeIndexingColumn("tpep_dropoff_datetime"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
 		//tableHandler.createRuntimeIndexingColumn("dropoff_longitude"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
-		
+
 		//tableHandler.createRuntimeIndexingColumn(1);
 		/*tableHandler.createRuntimeIndexingColumn(2);
 		tableHandler.createRuntimeIndexingColumn(3);
@@ -172,12 +169,12 @@ class IndexTreeMessyTest {
 			tPars3.join();
 			tPars4.join();*/
 			// Loader de la donnée en multi-thread
-			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-			tableHandler.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			// Attendre que toute la donnée soit parsée
-			tableHandler.multiThreadParsingJoinAllThreads();
+			table.multiThreadParsingJoinAllThreads();
 			
 			/**
 			 * Ne supporte pour l'instant pas recherches + indexing en même temps. (Problèmes de concurrence)
@@ -220,7 +217,9 @@ class IndexTreeMessyTest {
 			// tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); Fichiers identiques, donc 2 fois plus de résultats !
 			parseTimer.log();
 		}
-		tableHandler.flushEveryIndexOnDisk();
+		//table.flushEveryIndexOnDisk();
+
+
 		// -> Go faire le parsing multi-thread maintenant !!
 		// Nécessaire d'avoir plusieurs fichiers, à voir plus tard.
 		
@@ -269,7 +268,7 @@ class IndexTreeMessyTest {
 		//SIndexingTreeFloat indexingFoat = new SIndexingTreeFloat();
 		Log.info("Lancé");
 		
-		// Index the column on index 4
+		// Index the column on indexTripDistance 4
 		//int indexingColumnIndex = 3; // passanger count
 		//int indexingColumnIndex = 4; // trip distance
 		//int indexingColumnIndex = 5; // latitude
@@ -287,8 +286,8 @@ class IndexTreeMessyTest {
 			//tableHandler.indexColumnWithTreeFromDisk("trip_distance");
 			
 			
-			String stringDateFrom = "2015-11-04 00:00:00";//"2015-04-04 00:01:00";//
-			String stringDateTo = "2015-11-04 03:20:00";//"2015-04-04 00:18:57";//
+			String stringDateFrom = "2015-04-05 00:00:00";//"2015-04-04 00:01:00";//
+			String stringDateTo = "2015-04-05 03:20:00";//"2015-04-04 00:18:57";//
 			
 			Date dateFrom = currentlyUsedUils.dateFromString(stringDateFrom);
 			Date dateTo = currentlyUsedUils.dateFromString(stringDateTo);
@@ -301,11 +300,13 @@ class IndexTreeMessyTest {
 			
 			Object searchFromValue = intDateFrom;//stringDateFrom;//
 			Object searchToValue = intDateTo;//stringDateTo;//
-			
+
 
 			Timer searchQueryTimer = new Timer("Temps total recherche"); // "Time took to return the matching elements" : flemme d'écrire en anglais
-			
-			DataPositionList result = tableHandler.findIndexedResultsOfColumn("tpep_pickup_datetime", searchFromValue, searchToValue, true);
+
+			Column column = table.getColumns().get(1);
+			Predicate predicate = new Predicate(table, column, Operator.between, new Object[] {searchFromValue, searchToValue});
+			DataPositionList result = indexPickupDate.getPositionsFromPredicate(predicate);
 			
 			
 			searchQueryTimer.log();
@@ -313,20 +314,24 @@ class IndexTreeMessyTest {
 			
 			Timer searchQueryFullTimer = new Timer("Temps parcours des résultats");
 			int numberOfResults = result.size();
+			assertEquals(3116, numberOfResults);
 			//int numberOfResults = tableHandler.evaluateNumberOfResults(result);
 			//int numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
 			searchQueryFullTimer.log();
 			Log.info("Nombre de résultats = " + numberOfResults);
 			//Log.info("Nombre de lignes = " + numberOfLines);
-			
+
 			
 			searchQueryTimer = new Timer("Temps total recherche");
-			result = tableHandler.findIndexedResultsOfColumn("trip_distance", 17.78f, 18f, true);
+			column = table.getColumns().get(4);
+			predicate = new Predicate(table, column, Operator.between, new Float[] {17.78f, 18f});
+			result = indexTripDistance.getPositionsFromPredicate(predicate);
 			searchQueryTimer.log();
 			
 			
 			searchQueryFullTimer = new Timer("1Temps d'acquisition des résultats (chargement du disque de tous les champs)");
 			numberOfResults = result.size();// tableHandler.evaluateNumberOfResults(result);
+			assertEquals(700, numberOfResults);
 			//numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
 			
 			//ArrayList<ArrayList<Object>>
@@ -347,9 +352,11 @@ class IndexTreeMessyTest {
 			
 			searchQueryFullTimer.log();
 			Log.info("Nombre de résultats = " + numberOfResults);
-			
-			result = tableHandler.findIndexedResultsOfColumn("trip_distance", 18f);
+
+			predicate = new Predicate(table, column, Operator.equals, 18f);
+			result = indexTripDistance.getPositionsFromPredicate(predicate);
 			numberOfResults = result.size();
+			assertEquals(116, numberOfResults);
 			Log.info("Nombre de résultats (pour 18 exact) = " + numberOfResults);
 			
 			
@@ -374,8 +381,8 @@ class IndexTreeMessyTest {
 			
 			// Index the column from the disk
 			// -> reading fron the disk is quite slow
-			// --> a very cool optimization will be to index a bunch of columns at the same time
-			Timer loadFromDiskTimer = new Timer("Time took to index this column, from disk");
+			// --> a very cool optimization will be to indexTripDistance a bunch of columns at the same time
+			Timer loadFromDiskTimer = new Timer("Time took to indexTripDistance this column, from disk");
 			MemUsage.printMemUsage();
 			indexingObject.indexColumnFromDisk(table, indexingColumnIndex);
 			MemUsage.printMemUsage();
@@ -437,10 +444,10 @@ class IndexTreeMessyTest {
 				numberOfResults += list.size();
 				numberOfLines++;
 				/*if (false)
-				for (Long index : list) {
-					// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
-					//Log.info("  index = " + index);
-					List<Object> objList = table.getValuesOfLineById(index);
+				for (Long indexTripDistance : list) {
+					// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(indexTripDistance);
+					//Log.info("  indexTripDistance = " + indexTripDistance);
+					List<Object> objList = table.getValuesOfLineById(indexTripDistance);
 					Object indexedValue = objList.get(indexingColumnIndex);
 					//indexingColumn.getDataType().
 					Log.info("  valeur indexée = " + indexedValue);
@@ -472,11 +479,11 @@ class IndexTreeMessyTest {
 				//Log.info("Line("+numberOfLines+") : nb=" + list.size());
 				
 				/*if (showAllResults) {
-					for (Long index : list) {
-						// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
-						List<Object> objList = table.getValuesOfLineById(index);
+					for (Long indexTripDistance : list) {
+						// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(indexTripDistance);
+						List<Object> objList = table.getValuesOfLineById(indexTripDistance);
 						Object indexedValue = objList.get(indexingColumnIndex);
-						Log.info("  index = " + index + "   val = " + indexedValue);
+						Log.info("  indexTripDistance = " + indexTripDistance + "   val = " + indexedValue);
 						
 						//Log.info("  valeur indexée = " + indexedValue);
 						//Log.info("  objList = " + objList);
@@ -498,7 +505,7 @@ class IndexTreeMessyTest {
 		//SIndexingTreeFloat indexingFoat = new SIndexingTreeFloat();
 		Log.info("Lancé");
 		
-		// Index the column on index 4
+		// Index the column on indexTripDistance 4
 		//int indexingColumnIndex = 3; // passanger count
 		//int indexingColumnIndex = 4; // trip distance
 		//int indexingColumnIndex = 5; // latitude
@@ -516,8 +523,8 @@ class IndexTreeMessyTest {
 		
 		// Index the column from the disk
 		// -> reading fron the disk is quite slow
-		// --> a very cool optimization will be to index a bunch of columns at the same time
-		Timer loadFromDiskTimer = new Timer("Time took to index this column, from disk");
+		// --> a very cool optimization will be to indexTripDistance a bunch of columns at the same time
+		Timer loadFromDiskTimer = new Timer("Time took to indexTripDistance this column, from disk");
 		MemUsage.printMemUsage();
 		indexingObject.indexColumnFromDisk(table, indexingColumnIndex);
 		MemUsage.printMemUsage();
@@ -574,9 +581,9 @@ class IndexTreeMessyTest {
 			numberOfResults += list.size();
 			numberOfLines++;
 			for (Integer index : list) {
-				// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
-				/*Log.info("  index = " + index);
-				List<Object> objList = table.getValuesOfLineById(index);
+				// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(indexTripDistance);
+				/*Log.info("  indexTripDistance = " + indexTripDistance);
+				List<Object> objList = table.getValuesOfLineById(indexTripDistance);
 				Object indexedValue = objList.get(indexingColumnIndex);
 				
 				//Log.info("  valeur indexée = " + indexedValue);
@@ -608,10 +615,10 @@ class IndexTreeMessyTest {
 
 			if (showAllResults) {
 				for (Integer index : list) {
-					// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
+					// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(indexTripDistance);
 					List<Object> objList = table.getValuesOfLineById(index);
 					Object indexedValue = objList.get(indexingColumnIndex);
-					Log.info("  index = " + index + "   val = " + indexedValue);
+					Log.info("  indexTripDistance = " + index + "   val = " + indexedValue);
 					
 					//Log.info("  valeur indexée = " + indexedValue);
 					//Log.info("  objList = " + objList);
@@ -638,10 +645,8 @@ class IndexTreeMessyTest {
 
 		try {
 			result = view1.execute();
-			Log.debug(result);
 			assertEquals(20, result.size());
 			result = view2.execute();
-			Log.debug(result);
 			assertEquals(700, result.size());
 		} catch (SearchException e) {
 			Log.error(e);

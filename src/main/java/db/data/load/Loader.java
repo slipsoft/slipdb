@@ -17,6 +17,7 @@ import db.disk.dataHandler.TableDataHandler;
 import db.disk.dataHandler.TableDataHandlerWriteJob;
 import db.data.types.DateType;
 import db.disk.dataHandler.DiskDataPosition;
+import db.structure.indexTree.IndexException;
 import db.structure.Column;
 import db.structure.Table;
 import db.structure.recherches.RuntimeIndexingEntry;
@@ -40,19 +41,23 @@ public class Loader {
 	}*/
 	
 	
+	private final boolean doRuntimeIndexing;
 	/** Avant le parsing, définir runtimeIndexingEntries.
 	 *  Au moment du parsing, runtimeIndexingEntries doit être en lecture seule, donc thread-safe.
 	 */
+	@Deprecated // replaced by the upper boolean
 	private RuntimeIndexingEntryList runtimeIndexingEntries = null;
 
-	public Loader(Table schema, Parser parser) {
+	public Loader(Table schema, Parser parser, boolean doRuntimeIndexing) {
 		this.schema = schema; // <- C'est Nicolas qui a voulu appeler ça comme ça, pas moi :p
 		currentTable = schema;
 		this.parser = parser;
+		this.doRuntimeIndexing = doRuntimeIndexing;
 		this.lineByteSize = schema.getLineSize();
 	}
 	
 	// Pour indexer au moment du parsing
+	@Deprecated
 	public void setRuntimeIndexing(RuntimeIndexingEntryList argIndexingEntryList) {
 		runtimeIndexingEntries = argIndexingEntryList;
 	}
@@ -79,7 +84,7 @@ public class Loader {
 				TableDataHandlerWriteJob writeJob = dataHandler.createNewWriteJob();
 				//DataOutputStream bWrite = new DataOutputStream(new BufferedOutputStream(schema.tableToOutputStream(appendAtTheEndOfSave)));
 		) {
-			
+
 			
 			Timer timeTookTimer = new Timer("Temps écoulé");
 			
@@ -174,16 +179,11 @@ public class Loader {
 		DiskDataPosition dataPosition = writeJob.writeDataLine(entryBuffer.array());
 		
 		// Indexer au moment de parser (pour de meilleures performances)
-		if (runtimeIndexingEntries != null) {
-			for (int columnIndex = 0; columnIndex < columnsList.size(); columnIndex++) {
-				RuntimeIndexingEntry indexingEntry = runtimeIndexingEntries.getEntryAssociatedWithColumnIndex(columnIndex);
-				if (indexingEntry != null) {
-					Object currentValue = entriesArray[columnIndex];
-					// Indexer cette entrée
-					indexingEntry.addIndexValue(currentValue, dataPosition);
-					//Log.info("Indexer valeur = " + currentValue);
-				}
-				//Log.info("Indexer2 valeur = " + currentValue);
+		if (doRuntimeIndexing) {
+			try {
+				schema.indexEntry(entriesArray, dataPosition);
+			} catch (IndexException e) {
+				Log.error(e);
 			}
 		}
 		

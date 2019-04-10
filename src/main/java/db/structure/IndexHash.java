@@ -1,9 +1,10 @@
 package db.structure;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.HashMap;
 
 import db.data.types.DataPositionList;
+import db.disk.dataHandler.DiskDataPosition;
 import db.search.Predicate;
 import db.structure.indexTree.IndexException;
 import org.apache.commons.lang3.ArrayUtils;
@@ -12,9 +13,9 @@ import db.search.Operator;
 
 public class IndexHash extends Index {
 
-	public IndexHash(Column[] columns) {
-		super(columns);
-		this.indexedValuesMap = new HashMap<Key, ArrayList<Integer>>();
+	public IndexHash(Column column) {
+		super(column);
+		this.indexedValuesMap = new HashMap<>();
 	}
 
 	@Override
@@ -24,16 +25,19 @@ public class IndexHash extends Index {
 	}
 
 	@Override
+	public void addValue(Object value, DiskDataPosition position) throws IOException {
+		// TODO
+	}
+
+	@Override
 	public boolean isOperatorCompatible(Operator op) {
 		if(!ArrayUtils.contains(new Operator[] {
 				Operator.equals
 			}, op)) {
 			return false;
 		}
-		for (Column column : indexedColumnsList) {
-			if (!column.getDataType().isOperatorCompatible(op)) {
-				return false;
-			}
+		if (!indexedColumn.getDataType().isOperatorCompatible(op)) {
+			return false;
 		}
 		return true;
 	}

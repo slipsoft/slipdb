@@ -2,6 +2,7 @@ package db.structure;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +14,14 @@ import com.dant.entity.TableEntity;
 import com.dant.utils.EasyFile;
 import com.dant.utils.Log;
 
+import db.data.load.CsvParser;
+import db.data.load.Loader;
+import db.data.load.Parser;
 import db.data.types.DataPositionList;
 import db.data.types.DataType;
+import db.disk.dataHandler.DiskDataPosition;
 import db.disk.dataHandler.TableDataHandler;
+import db.structure.indexTree.IndexException;
 import db.search.Predicate;
 import db.search.ResultSet;
 import db.structure.recherches.TableHandler;
@@ -42,6 +48,10 @@ public class Table implements Serializable {
 	@Deprecated protected TableHandler tableHandler;
 	
 	protected final String name; // table name
+	
+	// obj non serial
+	transient private final Object multiThreadParsingListLock = new Object();
+	transient protected ArrayList<Thread> parsingThreadList = new ArrayList<>();
 	
 	@Deprecated protected EasyFile fileLinesOnDisk; // <- le système de fichiers à changé (il est mieux maintenant)
 	private List<Column> columnsList = new ArrayList<>(); // liste des colonnes de la table
@@ -113,6 +123,7 @@ public class Table implements Serializable {
 		return dataHandler;
 	}
 
+	@Deprecated
 	public TableHandler getTableHandler() {
 		return tableHandler;
 	}
@@ -128,9 +139,7 @@ public class Table implements Serializable {
 
 	public void addIndex(Index index) {
 		this.indexesList.add(index);
-		for (Column column : index.getColumnList()) {
-			column.addIndex(index);
-		}
+		index.getIndexedColumn().addIndex(index);
 	}
 
 	private void computeLineDataSize() {
@@ -203,9 +212,67 @@ public class Table implements Serializable {
 		}
 	}
 
+	/** Thread-safe, la table est en lecture seule
+	 * @param csvStream - stream contenant les données en CSV à parser
+	 * @param doRuntimeIndexing
+	 * @throws Exception
+	 */
+	public void loadData(Parser parser, InputStream csvStream, boolean doRuntimeIndexing) {
+		//if (csvParser == null)
+		// Thread-safe
+		Loader csvLoader = new Loader(this, parser, doRuntimeIndexing);
+		csvLoader.parse(csvStream, true);
+
+	}
+
+	public void multiThreadParsingAddAndStartCsv(String csvPath, boolean doRuntimeIndexing) {
+		synchronized(multiThreadParsingListLock) {
+			Thread newParsingThread = new Thread(() -> {
+				try (InputStream is = new FileInputStream(csvPath)) {
+					this.loadData(new CsvParser(), is, doRuntimeIndexing);
+				} catch (Exception e) {
+					Log.error(e);
+				}
+			});
+			parsingThreadList.add(newParsingThread);
+			newParsingThread.start();
+		}
+	}
+
+	public void multiThreadParsingWaitForAllThreads() {
+		multiThreadParsingJoinAllThreads();
+	}
+
+	/** Attendre que tous les threads soient finis.
+	 *  Si un thread a rencontré une erreur et ne peut pas être arrêté, il est gardé dans la liste et je passe au suivant.
+	 */
+	public void multiThreadParsingJoinAllThreads() { synchronized(multiThreadParsingListLock) {
+
+		int invalidThreadNumber = 0;
+		while (invalidThreadNumber < parsingThreadList.size()) {
+			Thread parsingThread = parsingThreadList.get(invalidThreadNumber);
+			try {
+				parsingThread.join();
+				parsingThreadList.remove(invalidThreadNumber);
+				// Je resue au même index, donc
+			} catch (InterruptedException e) {
+				Log.error(e);
+				e.printStackTrace();
+				invalidThreadNumber++; // je passe au thread suivant, celi-là est invalide
+			}
+		}
+
+	} }
+
+	public void indexEntry(Object[] entry, DiskDataPosition position) throws IndexException {
+		for (Index index: indexesList) {
+			index.indexEntry(entry, position);
+		}
+	}
+
 	/**
-	 * @param lineId is the position of the line, 0 being the first loaded line from the file (CSV for New York taxis)
-	 * @return a list containing every entry associates with the line at position lineId
+	 * @param lineId - the position of the line, 0 being the first loaded line from the file (CSV for New York taxis)
+	 * @return - a list containing every entry associates with the line at position lineId
 	 * @throws IOException
 	 */
 	@Deprecated

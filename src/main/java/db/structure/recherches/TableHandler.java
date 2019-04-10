@@ -134,6 +134,7 @@ public class TableHandler implements Serializable {
 	 * @param doRuntimeIndexing
 	 * @throws Exception
 	 */
+	@Deprecated
 	public void parseCsvData(String csvPath, boolean doRuntimeIndexing) throws Exception {
 		InputStream is = new FileInputStream(csvPath);
 		try {
@@ -145,7 +146,8 @@ public class TableHandler implements Serializable {
 		}
 	}
 
-	public void parseCsvData (InputStream is, boolean doRuntimeIndexing) throws Exception {
+	@Deprecated
+	public void parseCsvData(InputStream is, boolean doRuntimeIndexing) throws Exception {
 		try {
             parseCsvData(is, doRuntimeIndexing, false);
 			is.close();
@@ -162,11 +164,12 @@ public class TableHandler implements Serializable {
 	 * @param closeStreamAfterUsage Fermer le stream après usage (true ou false)
 	 * @throws Exception
 	 */
+	@Deprecated
 	public void parseCsvData(InputStream csvStream, boolean doRuntimeIndexing, boolean closeStreamAfterUsage) throws Exception {
 		if (associatedTable == null) throw new Exception("La table associée est null, elle doit être crée via createTable avant tout parsing.");
 		//if (csvParser == null)
 		// Thread-safe
-		Loader csvLoader = new Loader(associatedTable, new CsvParser());
+		Loader csvLoader = new Loader(associatedTable, new CsvParser(), doRuntimeIndexing);
 		
 		if (doRuntimeIndexing)
 			csvLoader.setRuntimeIndexing(runtimeIndexingList);
@@ -180,7 +183,7 @@ public class TableHandler implements Serializable {
 		firstTimeParsingData = false;
 		
 	}
-	
+
 	protected int getColumnIndex(String columnName) throws StructureException {
 		if (associatedTable == null) throw new StructureException("Aucune table crée, indexation impossible.");
 		List<Column> columnList = associatedTable.getColumns();
@@ -362,6 +365,7 @@ public class TableHandler implements Serializable {
 		
 	}
 	
+	@Deprecated
 	public void multiThreadParsingAddAndStartCsv(String csvPath, boolean doRuntimeIndexing) { synchronized(multiThreadParsingListLock) {
 		Thread newParsingThread = new Thread(() -> {
 			try {
@@ -375,7 +379,7 @@ public class TableHandler implements Serializable {
 		newParsingThread.start();
 	} }
 	
-	
+	@Deprecated
 	public void multiThreadParsingAddAndStartCsv(InputStream csvStream, boolean doRuntimeIndexing, boolean closeStreamAfterUsage) { synchronized(multiThreadParsingListLock) {
 		Thread newParsingThread = new Thread(() -> {
 			try {
@@ -389,6 +393,7 @@ public class TableHandler implements Serializable {
 		newParsingThread.start();
 	} }
 	
+	@Deprecated
 	public void multiThreadParsingWaitForAllThreads() {
 		multiThreadParsingJoinAllThreads();
 	}
@@ -396,6 +401,7 @@ public class TableHandler implements Serializable {
 	/** Attendre que tous les threads soient finis.
 	 *  Si un thread a rencontré une erreur et ne peut pas être arrêté, il est gardé dans la liste et je passe au suivant.
 	 */
+	@Deprecated
 	public void multiThreadParsingJoinAllThreads() { synchronized(multiThreadParsingListLock) {
 		
 		int invalidThreadNumber = 0;
