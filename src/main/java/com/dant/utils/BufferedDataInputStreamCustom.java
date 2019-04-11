@@ -13,7 +13,7 @@ public class BufferedDataInputStreamCustom extends DataInputStream {
 	}
 	
 	public void skipForce(int skipBytesNumber) throws IOException {
-		int bytesRemaining = skipBytesNumber;
+		int bytesRemaining = skipBytesNumber;// débug + 500000000;
 		/*Log.infoOnly("skipForce int skipBytesNumber = " + skipBytesNumber);
 		if (skipBytesNumber <= 0) {
 			Log.error("skipForce ERREUR : skipBytesNumber = " + skipBytesNumber);
@@ -23,8 +23,11 @@ public class BufferedDataInputStreamCustom extends DataInputStream {
 			bytesRemaining = bytesRemaining - skipBytes(bytesRemaining); //skip(bytesRemaining);
 			//if (bytesRemaining < 0) 
 			//Log.infoOnly("bytesRemaining = " + bytesRemaining);
-			if (bytesRemaining > 0) 
+			if (bytesRemaining > 0) {
+				if (7931 == bytesRemaining) try { Thread.sleep(1000); } catch (Exception e) { }
+				
 				Log.error("bytesRemaining = " + bytesRemaining);
+			}
 		}
 		
 	}
