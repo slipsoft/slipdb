@@ -2,6 +2,7 @@ package hashmap.tests;
 
 import java.util.HashMap;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Test;
 import com.dant.utils.Log;
 
@@ -21,7 +22,7 @@ public class HashMapTests {
 		ClumsyHashedObject c2 = new ClumsyHashedObject("Salut vous !");
 		hm.put(c1, 40);
 		hm.put(c2, 60);
-		
+		//ArrayUtils.hashCode(array)
 		Integer res = hm.get(c1);
 		Log.info("" + res);
 		
