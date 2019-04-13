@@ -167,7 +167,7 @@ public class TableDataHandler implements Serializable {
 		
 		
 		for (DiskDataPosition dataPosition : dataPositionList) {
-			Log.infoOnly("dataPosition = fid=" + dataPosition.fileID + "  line=" + dataPosition.lineIndex);
+			//Log.infoOnly("dataPosition = fid=" + dataPosition.fileID + "  line=" + dataPosition.lineIndex);
 			if (dataPosition.fileID != oldFileID) { // dataPosition.nodeID != oldNodeID || 
 				a1CurrentDataPosArray = new ArrayList<DiskDataPosition>();
 				a2OrderedByFileList.add(a1CurrentDataPosArray);
@@ -241,20 +241,20 @@ public class TableDataHandler implements Serializable {
 					//Log.info("Fichier trouvé " + fileID);
 					// Pour chaque donnée à lire, je la lis
 					for (DiskDataPosition dataPos : a1CurrentDataPosArray) {
-						Log.infoOnly("LU : fid=" + dataPos.fileID + "  line=" + dataPos.lineIndex);
+						//Log.infoOnly("LU : fid=" + dataPos.fileID + "  line=" + dataPos.lineIndex);
 						ArrayList<Object> entryAsArray;
 						try {
 
-							Log.infoOnly("LU 1");
+							//Log.infoOnly("LU 1");
 							entryAsArray = fondUsableDataFile.orderedReadGetValuesOfLineById(dataPos, myTable, null, neededColumnsIndexList); //  neededColumnsIndexListSorted
-							Log.infoOnly("LU 2");
+							//Log.infoOnly("LU 2");
 							resultsArraySortedByColumns.add(entryAsArray);
-							Log.infoOnly("LU 3");
+							//Log.infoOnly("LU 3");
 						} catch (IOException e) {
 							Log.error(e);
 							e.printStackTrace();
 						}
-						Log.infoOnly("LU OK !!");
+						//Log.infoOnly("LU OK !!");
 					}
 					try {
 						fondUsableDataFile.stopFileUse();

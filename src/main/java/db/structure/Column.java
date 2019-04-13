@@ -109,6 +109,10 @@ public class Column implements Serializable {
 		return this;
 	}
 
+	public int getNumber() {
+		return number;
+	}
+
 	public Column setNumber(int number) {
 		this.number = number;
 		return this;
@@ -130,6 +134,12 @@ public class Column implements Serializable {
 	
 	public int getDataSize() {
 		return dataType.getSize();
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		Column column = (Column) o;
+		return column.getName().equals(this.name);
 	}
 	
 	/** Au passage, @Nicolas, le parseAndWriteToBuffer est spécifique au format string -> objet parsé et n'est pas si générique que ça... (cas de l'hexa par exemple)

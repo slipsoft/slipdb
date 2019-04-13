@@ -229,27 +229,27 @@ public class TableDataHandlerFile implements Serializable {
 	 *  @throws IOException
 	 */
 	public ArrayList<Object> orderedReadGetValuesOfLineById(DiskDataPosition dataPosition, Table inTable, ArrayList<Integer> sortedWantedColumnsIndex, ArrayList<Integer> wantedColumnsIndexList) throws IOException {
-		Log.infoOnly("readLineBa 0 ");
+		//Log.infoOnly("readLineBa 0 ");
 		if (isReadOnlyMode == false) throw new IOException("Le fichier doit être ouvert en lecture."); // erreur, le fichier DOIT être ouvert en lecture
-		Log.infoOnly("readLineBa 0.1 ");
+		//Log.infoOnly("readLineBa 0.1 ");
 		int binPosInFile = dataPosition.lineIndex * inTable.getLineSize();
-		Log.infoOnly("readLineBa 0.2 ");
+		//Log.infoOnly("readLineBa 0.2 ");
 		int skipSize = binPosInFile - positionInReadOnlyFile; // skip de la bonne valeur, forcément positif car orderedReadSeekFirst
-		Log.infoOnly("readLineBa 0.3 ");
+		//Log.infoOnly("readLineBa 0.3 ");
 		if (skipSize < 0) {
 			String errorMessage = "orderedReadSeekFirst DOIT être utilisé pour lire dans l'ordre, il DOIT y avoir skipSize > 0 alors que skipSize = " + skipSize;
 			Log.error(errorMessage);
 			 throw new IOException(errorMessage); // erreur,
 		}
-		Log.infoOnly("readLineBa 0.4 ");
+		//Log.infoOnly("readLineBa 0.4 ");
 		streamReader.skipForce(skipSize);
-		Log.infoOnly("readLineBa 0.5 ");
+		//Log.infoOnly("readLineBa 0.5 ");
 		positionInReadOnlyFile = binPosInFile;
 		
 		ArrayList<Object> lineValues = new ArrayList<>(); // rowValues
 		// Renvoyer toutes les colonnes
 		if (sortedWantedColumnsIndex == null) {
-			Log.infoOnly("readLineBa 1 ");
+			//Log.infoOnly("readLineBa 1 ");
 			// For each column, reads the associated value
 			for (Column column : inTable.getColumns()) {
 				byte[] columnValueAsByteArray = new byte[column.getSize()];
@@ -257,7 +257,7 @@ public class TableDataHandlerFile implements Serializable {
 				//Log.debug(b); for debug purposes only
 				lineValues.add(column.getDataType().readTrueValue(columnValueAsByteArray));
 			}
-			Log.infoOnly("readLineBa 2 ");
+			//Log.infoOnly("readLineBa 2 ");
 		} else {
 			// Renvoyer seulement certaines colonnes
 			//int currentColumnIndex = 0;

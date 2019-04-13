@@ -23,6 +23,12 @@ public class DiskDataPosition implements Comparable<DiskDataPosition>, Serializa
 	//public final short nodeID;
 	public final short fileID;
 	public final int lineIndex;
+
+	@Deprecated
+	// Pour la rétro-compatibilité
+	public DiskDataPosition(short argFileID, short argNodeID, int argLineIndex) { // short argNodeID, 
+		this(argFileID, argLineIndex);
+	}
 	
 	public DiskDataPosition(short argFileID, int argLineIndex) { // short argNodeID, 
 		//nodeID = argNodeID;

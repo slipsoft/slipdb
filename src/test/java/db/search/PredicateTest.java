@@ -35,7 +35,7 @@ class PredicateTest {
 	void testGetIndex() {
 		Executable exec = () -> predicate.getIndex();
 		assertThrows(StructureException.class, exec);
-		Index index = new IndexHash(new Column[] {column});
+		Index index = new IndexHash(column);
 		table.addIndex(index);
 		assertDoesNotThrow(() -> assertEquals(index, predicate.getIndex()));
 	}

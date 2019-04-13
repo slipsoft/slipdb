@@ -21,6 +21,7 @@ import db.structure.Column;
 import db.structure.Table;
 import db.structure.recherches.RuntimeIndexingEntry;
 import db.structure.recherches.RuntimeIndexingEntryList;
+import index.indexTree.IndexException;
 
 public class Loader {
 	private Table schema;
@@ -40,20 +41,22 @@ public class Loader {
 	}*/
 	
 	
+	private final boolean doRuntimeIndexing;
 	/** Avant le parsing, définir runtimeIndexingEntries.
 	 *  Au moment du parsing, runtimeIndexingEntries doit être en lecture seule, donc thread-safe.
 	 */
+	@Deprecated // replaced by the upper boolean
 	private RuntimeIndexingEntryList runtimeIndexingEntries = null;
-
-
+	
 	DateType localDateTypeThreadSafe;
 	ByteBuffer localEntryBuffer;
 	Object[] localEntriesArray;
 	
-	public Loader(Table schema, Parser parser) {
+	public Loader(Table schema, Parser parser, boolean doRuntimeIndexing) { // 
 		this.schema = schema; // <- C'est Nicolas qui a voulu appeler ça comme ça, pas moi :p
 		currentTable = schema;
 		this.parser = parser;
+		this.doRuntimeIndexing = doRuntimeIndexing;
 		this.lineByteSize = schema.getLineSize();
 
 		localDateTypeThreadSafe = new DateType();
@@ -62,6 +65,7 @@ public class Loader {
 	}
 	
 	// Pour indexer au moment du parsing
+	@Deprecated
 	public void setRuntimeIndexing(RuntimeIndexingEntryList argIndexingEntryList) {
 		runtimeIndexingEntries = argIndexingEntryList;
 	}
@@ -93,7 +97,7 @@ public class Loader {
 				TableDataHandlerWriteJob writeJob = dataHandler.createNewWriteJob();
 				//DataOutputStream bWrite = new DataOutputStream(new BufferedOutputStream(schema.tableToOutputStream(appendAtTheEndOfSave)));
 		) {
-			
+
 			
 			Timer timeTookTimer = new Timer("Temps écoulé");
 			
@@ -223,7 +227,7 @@ public class Loader {
 		DiskDataPosition dataPosition = writeJob.writeDataLine(localEntryBuffer.array());
 		
 		// Indexer au moment de parser (pour de meilleures performances)
-		if (runtimeIndexingEntries != null) {
+		/*if (runtimeIndexingEntries != null) {
 			for (int columnIndex = 0; columnIndex < columnsList.size(); columnIndex++) {
 				RuntimeIndexingEntry indexingEntry = runtimeIndexingEntries.getEntryAssociatedWithColumnIndex(columnIndex);
 				if (indexingEntry != null) {
@@ -233,6 +237,12 @@ public class Loader {
 					//Log.info("Indexer valeur = " + currentValue);
 				}
 				//Log.info("Indexer2 valeur = " + currentValue);
+				*/
+		if (doRuntimeIndexing) {
+			try {
+				schema.indexEntry(localEntriesArray, dataPosition);
+			} catch (IndexException e) {
+				Log.error(e);
 			}
 		}
 		

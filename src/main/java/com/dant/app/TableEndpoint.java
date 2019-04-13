@@ -6,6 +6,7 @@ import javax.ws.rs.core.Response;
 
 import com.dant.entity.*;
 import com.dant.utils.Log;
+import db.data.load.CsvParser;
 import db.structure.Table;
 
 import java.io.ByteArrayInputStream;
@@ -24,7 +25,7 @@ public class TableEndpoint {
             Optional<Table> tableOptional = Controller.getTableByName(tableName);
             if (tableOptional.isPresent()) {
                 InputStream is = new ByteArrayInputStream(body.getBytes("UTF-8"));
-                tableOptional.get().getTableHandler().parseCsvData(is, true);
+                tableOptional.get().loadData(new CsvParser(), is, true);
                 return com.dant.utils.Utils.generateResponse(200, "ok", "application/json", "ok");
 
             } else {
