@@ -1,4 +1,4 @@
-package db.sTreeIndex;
+package db.structure.indexTree;
 
 import java.io.IOException;
 import java.util.*;
