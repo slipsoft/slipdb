@@ -5,4 +5,4 @@
  * @author coucou cé moua
  *
  */
-package db.sTreeIndex;
+package zArchive.sj.simpleDB.treeIndexing;
