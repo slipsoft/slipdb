@@ -24,6 +24,7 @@ import com.dant.utils.MemUsage;
 import com.dant.utils.Timer;
 
 import db.data.types.DataType;
+import db.disk.dataHandler.DiskPositionList;
 import db.disk.dataHandler.DiskPositionSet;
 import db.disk.dataHandler.DiskDataPosition;
 import db.search.Operator;
@@ -90,7 +91,7 @@ public class IndexTreeDic extends Index implements Serializable {
 	protected String baseAssociatedTablePath;
 
 	// Contient tous les index des données indexées
-	transient protected TreeMap<Object/*clef, valeur indexée*/, DiskPositionSet/*valeur*/> associatedBinIndexes;// = new TreeMap<Object, DiskPositionSet>();
+	transient protected TreeMap<Object/*clef, valeur indexée*/, DiskPositionList/*valeur*/> associatedBinIndexes;// = new TreeMap<>();
 	//protected EasyFile fileStoringDataBlocks; // link between the disk and onDiskDataBlocks
 	//protected EasyFile fileSaveOnDisk = null;
 	//protected String currentSaveFilePath = null;
@@ -99,7 +100,7 @@ public class IndexTreeDic extends Index implements Serializable {
 
 	
 	private void loadSerialAndCreateCommon() {
-		associatedBinIndexes = new TreeMap<Object, DiskPositionSet>();
+		associatedBinIndexes = new TreeMap<>();
 	}
 	
 	transient private Object indexingValueLock = new Object();
@@ -417,9 +418,9 @@ public class IndexTreeDic extends Index implements Serializable {
 	public void addValue(Object argAssociatedValue, DiskDataPosition dataPosition) throws IOException { synchronized (indexingValueLock) {
 
 		// Je peux ajouter la donnée fine
-		DiskPositionSet binIndexList = associatedBinIndexes.get(argAssociatedValue);
+		DiskPositionList binIndexList = associatedBinIndexes.get(argAssociatedValue);
 		if (binIndexList == null) {
-			binIndexList = new DiskPositionSet();
+			binIndexList = new DiskPositionList();
 			associatedBinIndexes.put(argAssociatedValue, binIndexList);
 		}
 		binIndexList.add(dataPosition);
@@ -450,7 +451,7 @@ public class IndexTreeDic extends Index implements Serializable {
 	 * @return la collection contenant tous les binIndex correspondants
 	 * @throws Exception
 	 */
-	public Collection<DiskPositionSet> findMatchingBinIndexesFromMemory(Object minValueExact, Object maxValueExact, boolean isInclusive) throws IndexException {// synchronized (indexingValueLockOnlyForAddAndDiskAndMemory) { // NavigableMap<Integer, IntegerArrayList> findSubTree
+	public Collection<DiskPositionList> findMatchingBinIndexesFromMemory(Object minValueExact, Object maxValueExact, boolean isInclusive) throws IndexException {// synchronized (indexingValueLockOnlyForAddAndDiskAndMemory) { // NavigableMap<Integer, IntegerArrayList> findSubTree
 		// arbre terminal : je retourne la liste des binIndex
 		// binIndexesFromValue est non null ici, donc; et finerSubTrees est null
 		//if (checkIfCompatibleObjectType(minValueExact) == false) return new ArrayList<IntegerArrayList>();
@@ -463,10 +464,10 @@ public class IndexTreeDic extends Index implements Serializable {
 		if (minValueExact.getClass() != storedValuesClassType) throw new IndexException("findMatchingBinIndexesFromMemory : Le type d'objet recherché ne correspond pas au type d'objet indexé.");
 		if (minValueExact.getClass() != maxValueExact.getClass()) throw new IndexException("findMatchingBinIndexesFromMemory : Les types d'objets min et max ne correspondant pas.");
 
-		NavigableMap<Object, DiskPositionSet> subTree = associatedBinIndexes.subMap(minValueExact, isInclusive, maxValueExact, isInclusive);
-		Collection<DiskPositionSet> collectionValues = subTree.values();
+		NavigableMap<Object, DiskPositionList> subTree = associatedBinIndexes.subMap(minValueExact, isInclusive, maxValueExact, isInclusive);
+		Collection<DiskPositionList> collectionValues = subTree.values();
 		if (collectionValues == null) // pour ne pas renvoyer null
-			collectionValues = new ArrayList<DiskPositionSet>();
+			collectionValues = new ArrayList<DiskPositionList>();
 		return collectionValues;
 		
 	}
@@ -485,7 +486,7 @@ public class IndexTreeDic extends Index implements Serializable {
 		fileInstance.createFileIfNotExist();
 		saveOnDisk(fileInstance, false);
 		indexWrittenOnDiskFilePathsArray.add(saveFileName);
-		associatedBinIndexes = new TreeMap<Object, DiskPositionSet>(); // réinitialisation
+		associatedBinIndexes = new TreeMap<Object, DiskPositionList>(); // réinitialisation
 		currentTotalEntrySizeInMemory = 0;
 
 		if (showMemUsageAtEachFlush) MemUsage.printMemUsage("IndexTreeDic.flushOnDisk");//, baseSaveFilePath = " + baseSaveFilePath);
@@ -522,13 +523,13 @@ public class IndexTreeDic extends Index implements Serializable {
 		int currentIntegerArrayListIndex = 0;
 
 		// Ecriture de toutes les IntegerArrayList : nombre de binIndex, et pour chaque binIndex : binIndex (int)
-		for (Entry<Object, DiskPositionSet> currentEntry : associatedBinIndexes.entrySet()) {
+		for (Entry<Object, DiskPositionList> currentEntry : associatedBinIndexes.entrySet()) {
 			//Object ent.getKey()
 			debugNumberOfExactArrayListValuesWrittenOnDisk++;
 			// Position sur le disque (binIndex) de cette LongArrayList de binIndex
 			rememberedBinPosOfIntegerArrayLists[currentIntegerArrayListIndex] = writeInDataStream.size();
 
-			DiskPositionSet binIndexesList = currentEntry.getValue(); // liste des binIndex associés à la clef (Object)
+			DiskPositionList binIndexesList = currentEntry.getValue(); // liste des binIndex associés à la clef (Object)
 			int binIndexTotalCount = binIndexesList.size();
 			writeInDataStream.writeInt(binIndexTotalCount); // nombre de binIndex associés à la valeur
 
@@ -540,7 +541,7 @@ public class IndexTreeDic extends Index implements Serializable {
 			currentIntegerArrayListIndex++;
 		}
 		
-		// Ecriture de la "table de routage locale" (valeur <-> position dans ce fichier des DiskPositionSet)
+		// Ecriture de la "table de routage locale" (valeur <-> position dans ce fichier des DiskPositionList)
 		// Ecriture de toutes les valeurs de l'arbre et des binIndex (dans ce fichier) associés
 		long routingTableBinIndex = writeInDataStream.size();
 		writeInDataStream.writeInt(totalNumberOfDistinctValues); // taille de la table
@@ -881,18 +882,18 @@ public class IndexTreeDic extends Index implements Serializable {
 	public DiskPositionSet findMatchingBinIndexes(Object minValueExact, Object maxValueExact, boolean isInclusive, boolean justEvaluateResultNumber) throws IndexException, IOException {
 		synchronized (indexingValueLock) { // NavigableMap<Integer, IntegerArrayList> findSubTree
 			this.flushOnDisk();
-			Collection<DiskPositionSet> fromDisk = findMatchingBinIndexesFromDisk(minValueExact, maxValueExact, isInclusive, justEvaluateResultNumber);
-			Collection<DiskPositionSet> fromMemory = findMatchingBinIndexesFromMemory(minValueExact, maxValueExact, isInclusive); // new ArrayList<DiskPositionSet>();//
+			Collection<DiskPositionList> fromDisk = findMatchingBinIndexesFromDisk(minValueExact, maxValueExact, isInclusive, justEvaluateResultNumber);
+			Collection<DiskPositionList> fromMemory = findMatchingBinIndexesFromMemory(minValueExact, maxValueExact, isInclusive); // new ArrayList<DiskPositionList>();//
 
-			Collection<DiskPositionSet> allResults = fromDisk;
+			Collection<DiskPositionList> allResults = fromDisk;
 			allResults.addAll(fromMemory);
 
-			DiskPositionSet simpleResultList = new DiskPositionSet();
-			for (DiskPositionSet subList : allResults) {
-				simpleResultList.addAll(subList);
+			DiskPositionSet simpleResultSet = new DiskPositionSet();
+			for (DiskPositionList subList : allResults) {
+				simpleResultSet.addAll(subList);
 			}
 
-			return simpleResultList;
+			return simpleResultSet;
 	} }
 
 	/** Gets the matching results from disk !
@@ -903,7 +904,7 @@ public class IndexTreeDic extends Index implements Serializable {
 	 *  @return la collection contenant tous les binIndex correspondants
 	 * @throws Exception
 	 */
-	public Collection<DiskPositionSet> findMatchingBinIndexesFromDisk(Object argMinValueExact, Object argMaxValueExact, boolean isInclusive, boolean justEvaluateResultNumber) throws IndexException, IOException { //synchronized (indexingValueLockOnlyForAddAndDiskAndMemory) { // NavigableMap<Integer, IntegerArrayList> findSubTree
+	public Collection<DiskPositionList> findMatchingBinIndexesFromDisk(Object argMinValueExact, Object argMaxValueExact, boolean isInclusive, boolean justEvaluateResultNumber) throws IndexException, IOException { //synchronized (indexingValueLockOnlyForAddAndDiskAndMemory) { // NavigableMap<Integer, IntegerArrayList> findSubTree
 		
 		debugDiskNumberOfIntegerArrayList = 0;
 		debugDiskNumberOfExactValuesEvaluated = 0;
@@ -929,7 +930,7 @@ public class IndexTreeDic extends Index implements Serializable {
 
 			private final String filePath;
 
-			public ArrayList<DiskPositionSet> listOfLocalMatchingArraysOfBinIndexes = new ArrayList<DiskPositionSet>();
+			public ArrayList<DiskPositionList> listOfLocalMatchingArraysOfBinIndexes = new ArrayList<>();
 
 			public SearchInFile(String argFilePath) throws IOException {
 				filePath = argFilePath;
@@ -1017,8 +1018,8 @@ public class IndexTreeDic extends Index implements Serializable {
 					for (int integerArrayListCount = 0; integerArrayListCount < integerArrayListTotalCount; integerArrayListCount++) {
 						int binIndexTotalCount = randFile.readInt(); // nombre de binIndex stockés
 
-						DiskPositionSet binIndexesList = new DiskPositionSet();
-						//binIndexesList.ensureCapacity(binIndexTotalCount);
+						DiskPositionList binIndexesList = new DiskPositionList();
+						binIndexesList.ensureCapacity(binIndexTotalCount);
 						for (long binIndexCout = 0; binIndexCout < binIndexTotalCount; binIndexCout++) {
 							DiskDataPosition dataPos = DiskDataPosition.readFromRandFile(randFile);
 							//long binIndex = randFile.readLong();
@@ -1062,7 +1063,7 @@ public class IndexTreeDic extends Index implements Serializable {
 		// Ouvre tous les fichiers où les index sont sauvegardés (threads séparés),
 
 		Timer tempsPrisPourRecherchesSurFichiers = new Timer("tempsPrisPourRecherchesSurFichiers");
-		ArrayList<DiskPositionSet> listOfMatchingArraysOfBinIndexes = new ArrayList<DiskPositionSet>();
+		ArrayList<DiskPositionList> listOfMatchingArraysOfBinIndexes = new ArrayList<>();
 
 		//Runnable searchInF
 		ArrayList<SearchInFile> runnableSearchesList = new ArrayList<SearchInFile>();

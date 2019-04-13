@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -145,7 +146,7 @@ public class TableDataHandler implements Serializable {
 	 * @throws IOException
 	 */
 	@SuppressWarnings("unchecked")
-	public ResultSet getValuesOfLinesListById(DiskPositionSet argDiskPositionSet, boolean waitForAllResults, int waitTimeLimitMs, ArrayList<Integer> neededColumnsIndexList) { // or getRowById
+	public ResultSet getValuesOfLinesListById(Collection<DiskDataPosition> argDiskPositionSet, boolean waitForAllResults, int waitTimeLimitMs, ArrayList<Integer> neededColumnsIndexList) { // or getRowById
 		
 		ResultSet resultsArraySortedByColumns = new ResultSet(); // ArrayList<ArrayList<Object>>
 		ArrayList<Integer> neededColumnsIndexListSorted = null;
@@ -154,10 +155,10 @@ public class TableDataHandler implements Serializable {
 			Collections.sort(neededColumnsIndexListSorted);
 		}
 		
-		DiskPositionSet diskPositionSet = (DiskPositionSet) argDiskPositionSet.clone(); // copie de la liste
+		ArrayList<DiskDataPosition> diskPositionList = new ArrayList<>(argDiskPositionSet); // copie de la liste
 		// Je classe par fichiers
 		// Je classe par position dans le fichier
-		//Collections.sort(diskPositionSet); // pas super opti pour un très grand nombre de résultats (100 000+)
+		Collections.sort(diskPositionList); // pas super opti pour un très grand nombre de résultats (100 000+)
 		// Regrouper par fichier
 		short oldNodeID = -1;
 		short oldFileID = -1;
@@ -168,9 +169,9 @@ public class TableDataHandler implements Serializable {
 		ArrayList<DiskDataPosition> a1CurrentDataPosArray = null;
 		
 		
-		for (DiskDataPosition dataPosition : diskPositionSet) {
+		for (DiskDataPosition dataPosition : diskPositionList) {
 			if (dataPosition.nodeID != oldNodeID || dataPosition.fileID != oldFileID) {
-				a1CurrentDataPosArray = new ArrayList<DiskDataPosition>();
+				a1CurrentDataPosArray = new ArrayList<>();
 				a2OrderedByFileList.add(a1CurrentDataPosArray);
 				oldNodeID = dataPosition.nodeID;
 				oldFileID = dataPosition.fileID;
@@ -269,7 +270,7 @@ public class TableDataHandler implements Serializable {
 		}
 		
 		//argDiskPositionSet.toArray()
-		//diskPositionSet.set(index, element)
+		//diskPositionList.set(index, element)
 		
 		/*
 		// puis réordoner les résultats dans l'ordre demandé : neededColumnsIndexList

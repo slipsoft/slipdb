@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.util.*;
 
 import db.data.load.Loader;
-import db.disk.dataHandler.DiskPositionSet;
+import db.disk.dataHandler.DiskDataPosition;
+import db.disk.dataHandler.DiskPositionList;
 import db.search.*;
 import db.serial.SerialStructure;
 import db.structure.*;
@@ -306,7 +307,7 @@ class IndexTreeMessyTest {
 
 			Column column = table.getColumns().get(1);
 			Predicate predicate = new Predicate(table, column, Operator.between, new Object[] {searchFromValue, searchToValue});
-			DiskPositionSet result = indexPickupDate.getPositionsFromPredicate(predicate);
+			Collection<DiskDataPosition> result = indexPickupDate.getPositionsFromPredicate(predicate);
 			
 			
 			searchQueryTimer.log();
@@ -399,7 +400,7 @@ class IndexTreeMessyTest {
 			Log.info("OBJECT RESULT :");
 			
 			// Get the query result
-			Collection<DiskPositionSet> result;
+			Collection<DiskPositionList> result;
 			MemUsage.printMemUsage();
 			
 			String stringDateFrom = "2015-04-04 00:00:00";//"2015-04-04 00:01:00";//
@@ -439,7 +440,7 @@ class IndexTreeMessyTest {
 			
 			// Iterates over all the results
 			int numberOfResults = 0, numberOfLines = 0;
-			for (DiskPositionSet list : result) {
+			for (DiskPositionList list : result) {
 				//Log.info("list size = " + list.size());
 				numberOfResults += list.size();
 				numberOfLines++;
@@ -472,7 +473,7 @@ class IndexTreeMessyTest {
 			// Iterates over all the results
 			numberOfResults = 0;
 			numberOfLines = 0;
-			for (DiskPositionSet list : result) {
+			for (DiskPositionList list : result) {
 				//Log.info("list size = " + list.size());
 				numberOfResults += list.size();
 				numberOfLines++;
@@ -660,9 +661,9 @@ class IndexTreeMessyTest {
 		View view4 = new View(table, filter2, listFields, new ArrayList<>(), new Group());
 		View view5 = new View(table, filter3, listFields, new ArrayList<>(), new Group());
 		View view6 = new View(table, filter4, listFields, new ArrayList<>(), new Group());
-		ResultSet result;
 
-		try {
+		assertDoesNotThrow(() -> {
+			ResultSet result;
 			result = view1.execute();
 			assertEquals(140, result.size());
 			result = view2.execute();
@@ -675,9 +676,7 @@ class IndexTreeMessyTest {
 			assertEquals(24, result.size());
 			result = view6.execute();
 			assertEquals(816, result.size());
-		} catch (SearchException e) {
-			Log.error(e);
-		}
+		});
 
 	}
 	
