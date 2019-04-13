@@ -1,4 +1,4 @@
-package db.sTreeIndex;
+package zArchive.sj.simpleDB.treeIndexing;
 
 import java.io.IOException;
 
