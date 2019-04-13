@@ -3,7 +3,7 @@ package db.structure;
 import java.io.IOException;
 import java.util.HashMap;
 
-import db.data.types.DataPositionList;
+import db.disk.dataHandler.DiskPositionSet;
 import db.disk.dataHandler.DiskDataPosition;
 import db.search.Predicate;
 import db.structure.indexTree.IndexException;
@@ -19,7 +19,7 @@ public class IndexHash extends Index {
 	}
 
 	@Override
-	public DataPositionList getPositionsFromPredicate(Predicate predicate) throws IndexException {
+	public DiskPositionSet getPositionsFromPredicate(Predicate predicate) throws IndexException {
 		// TODO make this func
 		return null;
 	}

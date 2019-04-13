@@ -1,7 +1,6 @@
 package db.search;
 
-import db.data.types.DataPositionList;
-import org.apache.commons.collections4.ListUtils;
+import db.disk.dataHandler.DiskPositionSet;
 
 public class FilterGroup implements FilterTerm {
 	protected JoinMethod join = JoinMethod.and;
@@ -14,17 +13,19 @@ public class FilterGroup implements FilterTerm {
 	}
 
 	@Override
-	public DataPositionList execute() throws SearchException {
-		DataPositionList positions = null;
+	public DiskPositionSet execute() throws SearchException {
+		DiskPositionSet positions = null;
 		for (FilterTerm filterTerm : terms) {
 			if (positions == null) {
 				positions = filterTerm.execute();
 			} else {
 				switch (join) {
 					case and:
-						positions = (DataPositionList) ListUtils.intersection(positions, filterTerm.execute());
+						positions.retainAll(filterTerm.execute());
+						break;
 					case or:
-						positions = (DataPositionList) ListUtils.union(positions, filterTerm.execute());
+						positions.addAll(filterTerm.execute());
+						break;
 				}
 			}
 		}

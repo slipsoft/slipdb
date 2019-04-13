@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import db.data.types.*;
+import db.disk.dataHandler.DiskPositionSet;
 import db.disk.dataHandler.DiskDataPosition;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -90,7 +91,7 @@ class CsvParserTest {
 		expected.add((float) 0.3);
 		expected.add((float) 9.96);
 
-		DataPositionList positions = new DataPositionList();
+		DiskPositionSet positions = new DiskPositionSet();
 		positions.add(new DiskDataPosition((short) 1, (short)1, 70));
 		List<Object> result = table.getFullResultsFromBinIndexes(positions).get(0);
 		Log.debug(result, "line/70");

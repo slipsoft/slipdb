@@ -5,10 +5,9 @@ import java.util.Map;
 import java.io.IOException;
 
 import db.disk.dataHandler.DiskDataPosition;
+import db.disk.dataHandler.DiskPositionSet;
 import db.search.Operator;
-import db.data.types.DataPositionList;
 import db.structure.indexTree.IndexException;
-import org.apache.commons.lang3.ArrayUtils;
 
 import db.search.Operable;
 import db.search.Predicate;
@@ -72,6 +71,6 @@ public abstract class Index implements Operable {
 	}
 
 	public abstract boolean isOperatorCompatible(Operator op);
-	public abstract DataPositionList getPositionsFromPredicate(Predicate predicate) throws IndexException;
+	public abstract DiskPositionSet getPositionsFromPredicate(Predicate predicate) throws IndexException;
 	public abstract void addValue(Object value, DiskDataPosition position) throws IOException;
 }

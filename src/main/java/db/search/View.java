@@ -1,6 +1,6 @@
 package db.search;
 
-import db.data.types.DataPositionList;
+import db.disk.dataHandler.DiskPositionSet;
 import db.structure.Column;
 import db.structure.Table;
 
@@ -49,7 +49,7 @@ public class View {
 	 */
 	public ResultSet execute() throws SearchException {
 		Column[] columns = getListColumns();
-		DataPositionList positions = this.filter.execute();
+		DiskPositionSet positions = this.filter.execute();
 		try {
 		return table.getFullResultsFromBinIndexes(positions);
 		} catch (Exception e) {

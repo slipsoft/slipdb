@@ -7,19 +7,17 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 import com.dant.utils.Log;
 
 import db.data.load.Loader;
 import db.data.types.DataType;
 import db.disk.dataHandler.DiskDataPosition;
+import db.disk.dataHandler.DiskPositionSet;
 import db.disk.dataHandler.TableDataHandler;
-import db.data.types.DataPositionList;
 import db.data.load.CsvParser;
 import db.search.ResultSet;
 import db.structure.Column;
-import db.structure.Database;
 import db.structure.StructureException;
 import db.structure.Table;
 import db.structure.indexTree.IndexException;
@@ -295,7 +293,7 @@ public class TableHandler implements Serializable {
 	}*/
 	
 	
-	public DataPositionList findIndexedResultsOfColumn(String columnName, Object exactValue) throws Exception {
+	public DiskPositionSet findIndexedResultsOfColumn(String columnName, Object exactValue) throws Exception {
 		return findIndexedResultsOfColumn(columnName, exactValue, null, true);
 	}
 	
@@ -309,11 +307,11 @@ public class TableHandler implements Serializable {
 	 * @throws Exception
 	 */
 	@Deprecated // TODO in favor to Index.getPositionsFromPredicate
-	public DataPositionList findIndexedResultsOfColumn(String columnName, Object minValue, Object maxValue, boolean inclusive) throws Exception {
+	public DiskPositionSet findIndexedResultsOfColumn(String columnName, Object minValue, Object maxValue, boolean inclusive) throws Exception {
 		int columnIndex = getColumnIndex(columnName);
 		if (columnIndex == -1) throw new Exception("Colonne introuvable, impossible de faire une recherche sur ses index.");
 		if (IndexTreeDic.firstValueIsHigherThatSecondValue(minValue, maxValue) > 0) {
-			return new DataPositionList(); // aucun résultat
+			return new DiskPositionSet(); // aucun résultat
 		}
 		//return findIndexedResultsOfColumn();
 		
@@ -325,16 +323,16 @@ public class TableHandler implements Serializable {
 			}
 		}*/
 		if (makeRequestOnThisTree == null) {
-			return new DataPositionList();
+			return new DiskPositionSet();
 		}
 		return makeRequestOnThisTree.findMatchingBinIndexes(minValue, maxValue, inclusive, false);
 	}
 	
 	
-	public int evaluateNumberOfResults(Collection<DataPositionList> resultsCollection) {
+	public int evaluateNumberOfResults(Collection<DiskPositionSet> resultsCollection) {
 		// Iterates over all the results
 		int numberOfResults = 0;
-		for (DataPositionList longList : resultsCollection) {
+		for (DiskPositionSet longList : resultsCollection) {
 			//Log.info("list size = " + list.size());
 			numberOfResults += longList.size();
 			//numberOfLines++;
@@ -354,7 +352,7 @@ public class TableHandler implements Serializable {
 
 	//trip_distance
 	@Deprecated
-	public int evaluateNumberOfArrayListLines(Collection<DataPositionList> resultsCollection) {
+	public int evaluateNumberOfArrayListLines(Collection<DiskPositionSet> resultsCollection) {
 		return resultsCollection.size();
 	}
 
@@ -362,7 +360,7 @@ public class TableHandler implements Serializable {
 	private static boolean debugUseOldDeprecatedSearch = false; // bench : la nouvelle manière va environ 80x plus vite ^^
 
 	@Deprecated
-	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection) throws StructureException, IOException { // table connue ! , Table fromTable) {
+	public ResultSet getFullResultsFromBinIndexes(DiskPositionSet resultsCollection) throws StructureException, IOException { // table connue ! , Table fromTable) {
 		return getFullResultsFromBinIndexes(resultsCollection, true, -1);
 	}
 	/**
@@ -373,7 +371,7 @@ public class TableHandler implements Serializable {
 	 *  @throws Exception
 	 */
 	@Deprecated
-	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection, boolean waitForAllResults, int waitTimeLimitMs) throws StructureException, IOException{ // table connue ! , Table fromTable) {
+	public ResultSet getFullResultsFromBinIndexes(DiskPositionSet resultsCollection, boolean waitForAllResults, int waitTimeLimitMs) throws StructureException, IOException{ // table connue ! , Table fromTable) {
 		return getFullResultsFromBinIndexes(resultsCollection, waitForAllResults, waitTimeLimitMs, null);
 	}
 	//trip_distance
@@ -387,8 +385,8 @@ public class TableHandler implements Serializable {
 	 *  @throws Exception
 	 */
 	@Deprecated
-	//public ArrayList<ArrayList<Object>> getFullResultsFromBinIndexes(DataPositionList resultsCollection) throws Exception { // table connue ! , Table fromTable) {
-	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection, boolean waitForAllResults, int waitTimeLimitMs, ArrayList<Integer> onlyGetThoseColumnsIndex) throws StructureException, IOException { // table connue ! , Table fromTable) {
+	//public ArrayList<ArrayList<Object>> getFullResultsFromBinIndexes(DiskPositionSet resultsCollection) throws Exception { // table connue ! , Table fromTable) {
+	public ResultSet getFullResultsFromBinIndexes(DiskPositionSet resultsCollection, boolean waitForAllResults, int waitTimeLimitMs, ArrayList<Integer> onlyGetThoseColumnsIndex) throws StructureException, IOException { // table connue ! , Table fromTable) {
 		if (associatedTable == null) throw new StructureException("Aucune table crée, indexation impossible.");
 
 		ResultSet resultArrayList = new ResultSet();

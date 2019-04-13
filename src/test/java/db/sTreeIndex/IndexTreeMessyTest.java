@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.*;
 
 import db.data.load.Loader;
+import db.disk.dataHandler.DiskPositionSet;
 import db.search.*;
 import db.serial.SerialStructure;
 import db.structure.*;
@@ -21,7 +22,6 @@ import db.data.types.DateType;
 import db.data.types.DoubleType;
 import db.data.types.FloatType;
 import db.data.types.IntegerArrayList;
-import db.data.types.DataPositionList;
 import db.data.types.StringType;
 import db.structure.indexTree.IndexTreeCeption;
 import db.structure.indexTree.IndexTreeDic;
@@ -306,7 +306,7 @@ class IndexTreeMessyTest {
 
 			Column column = table.getColumns().get(1);
 			Predicate predicate = new Predicate(table, column, Operator.between, new Object[] {searchFromValue, searchToValue});
-			DataPositionList result = indexPickupDate.getPositionsFromPredicate(predicate);
+			DiskPositionSet result = indexPickupDate.getPositionsFromPredicate(predicate);
 			
 			
 			searchQueryTimer.log();
@@ -399,7 +399,7 @@ class IndexTreeMessyTest {
 			Log.info("OBJECT RESULT :");
 			
 			// Get the query result
-			Collection<DataPositionList> result;
+			Collection<DiskPositionSet> result;
 			MemUsage.printMemUsage();
 			
 			String stringDateFrom = "2015-04-04 00:00:00";//"2015-04-04 00:01:00";//
@@ -439,7 +439,7 @@ class IndexTreeMessyTest {
 			
 			// Iterates over all the results
 			int numberOfResults = 0, numberOfLines = 0;
-			for (DataPositionList list : result) {
+			for (DiskPositionSet list : result) {
 				//Log.info("list size = " + list.size());
 				numberOfResults += list.size();
 				numberOfLines++;
@@ -472,7 +472,7 @@ class IndexTreeMessyTest {
 			// Iterates over all the results
 			numberOfResults = 0;
 			numberOfLines = 0;
-			for (DataPositionList list : result) {
+			for (DiskPositionSet list : result) {
 				//Log.info("list size = " + list.size());
 				numberOfResults += list.size();
 				numberOfLines++;
@@ -633,21 +633,48 @@ class IndexTreeMessyTest {
 
 	@Test
 	void executeView() {
-		Column column = table.getColumns().get(4);
-		Field field = new Field(column.getName());
+		Column column1 = table.getColumns().get(1);
+		Column column4 = table.getColumns().get(4);
+		Field field = new Field(column4.getName());
 		ArrayList<Field> listFields = new ArrayList<>();
 		listFields.add(field);
-		Predicate predicate1 = new Predicate(table, column, Operator.equals, new Float("17.78"));
-		Predicate predicate2 = new Predicate(table, column, Operator.between, new Float[] {17.78f, 18f});
+		String stringDateFrom = "2015-04-05 00:00:00";//"2015-04-04 00:01:00";//
+		String stringDateTo = "2015-04-06 00:00:00";//"2015-04-04 00:18:57";//
+		Date dateFrom = currentlyUsedUils.dateFromString(stringDateFrom);
+		Date dateTo = currentlyUsedUils.dateFromString(stringDateTo);
+		int intDateFrom = Utils.dateToSecInt(dateFrom);
+		int intDateTo = Utils.dateToSecInt(dateTo);
+
+		Predicate predicate1 = new Predicate(table, column4, Operator.equals, new Float("17.80"));
+		Predicate predicate2 = new Predicate(table, column4, Operator.between, new Float[] {17.78f, 18f});
+		Predicate predicate3 = new Predicate(table, column4, Operator.equals, new Float("17"));
+		Predicate predicate4 = new Predicate(table, column1, Operator.between, new Object[] {intDateFrom, intDateTo});
+
+		FilterTerm filter1 = new FilterGroup(JoinMethod.or, new Predicate[] {predicate1, predicate2});
+		FilterTerm filter2 = new FilterGroup(JoinMethod.and, new Predicate[] {predicate2, predicate3});
+		FilterTerm filter3 = new FilterGroup(JoinMethod.and, new Predicate[] {predicate2, predicate4});
+		FilterTerm filter4 = new FilterGroup(JoinMethod.or, new Predicate[] {predicate2, predicate3});
 		View view1 = new View(table, predicate1, listFields, new ArrayList<>(), new Group());
 		View view2 = new View(table, predicate2, listFields, new ArrayList<>(), new Group());
-		ResultSet result = null;
+		View view3 = new View(table, filter1, listFields, new ArrayList<>(), new Group());
+		View view4 = new View(table, filter2, listFields, new ArrayList<>(), new Group());
+		View view5 = new View(table, filter3, listFields, new ArrayList<>(), new Group());
+		View view6 = new View(table, filter4, listFields, new ArrayList<>(), new Group());
+		ResultSet result;
 
 		try {
 			result = view1.execute();
-			assertEquals(20, result.size());
+			assertEquals(140, result.size());
 			result = view2.execute();
 			assertEquals(700, result.size());
+			result = view3.execute();
+			assertEquals(700, result.size());
+			result = view4.execute();
+			assertEquals(0, result.size());
+			result = view5.execute();
+			assertEquals(24, result.size());
+			result = view6.execute();
+			assertEquals(816, result.size());
 		} catch (SearchException e) {
 			Log.error(e);
 		}

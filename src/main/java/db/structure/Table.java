@@ -17,7 +17,7 @@ import com.dant.utils.Log;
 import db.data.load.CsvParser;
 import db.data.load.Loader;
 import db.data.load.Parser;
-import db.data.types.DataPositionList;
+import db.disk.dataHandler.DiskPositionSet;
 import db.data.types.DataType;
 import db.disk.dataHandler.DiskDataPosition;
 import db.disk.dataHandler.TableDataHandler;
@@ -298,7 +298,7 @@ public class Table implements Serializable {
 		return lineValues;
 	}
 
-	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection) { // table connue ! , Table fromTable) {
+	public ResultSet getFullResultsFromBinIndexes(DiskPositionSet resultsCollection) { // table connue ! , Table fromTable) {
 		return getFullResultsFromBinIndexes(resultsCollection, true, -1);
 	}
 
@@ -308,7 +308,7 @@ public class Table implements Serializable {
 	 * @param waitTimeLimitMs - time limit
 	 * @return a full resultset
 	 */
-	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection, boolean waitForAllResults, int waitTimeLimitMs) { // table connue ! , Table fromTable) {
+	public ResultSet getFullResultsFromBinIndexes(DiskPositionSet resultsCollection, boolean waitForAllResults, int waitTimeLimitMs) { // table connue ! , Table fromTable) {
 		return getFullResultsFromBinIndexes(resultsCollection, waitForAllResults, waitTimeLimitMs, null);
 	}
 
@@ -319,7 +319,7 @@ public class Table implements Serializable {
 	 * @param onlyGetThoseColumnsIndex null si renvoyer tout les champs
 	 * @return a full resultset
 	 */
-	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection, boolean waitForAllResults, int waitTimeLimitMs, ArrayList<Integer> onlyGetThoseColumnsIndex) { // table connue ! , Table fromTable) {
+	public ResultSet getFullResultsFromBinIndexes(DiskPositionSet resultsCollection, boolean waitForAllResults, int waitTimeLimitMs, ArrayList<Integer> onlyGetThoseColumnsIndex) { // table connue ! , Table fromTable) {
 		return getDataHandler().getValuesOfLinesListById(resultsCollection, waitForAllResults, waitTimeLimitMs, onlyGetThoseColumnsIndex);
 	}
 

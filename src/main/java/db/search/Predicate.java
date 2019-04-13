@@ -1,6 +1,6 @@
 package db.search;
 
-import db.data.types.DataPositionList;
+import db.disk.dataHandler.DiskPositionSet;
 import db.structure.Column;
 import db.structure.Index;
 import db.structure.StructureException;
@@ -49,7 +49,7 @@ public class Predicate implements FilterTerm {
 	public Object getValue() { return this.value; }
 
 	@Override
-	public DataPositionList execute() throws SearchException {
+	public DiskPositionSet execute() throws SearchException {
 		try {
 			return getIndex().getPositionsFromPredicate(this);
 		} catch (StructureException e) {
