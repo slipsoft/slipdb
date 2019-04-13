@@ -5,9 +5,14 @@ package db.structure;
 // objets du type Key entre eux : soit on lui met des variables pour implémenter son type (au risque de voir les performances chuter grandement)
 // 
 
+/** 
+ *  
+ *  
+ */
 public abstract class Key {
 	
 	protected Object value; // liste des valeurs contenues dans cette clef
+	
 	
 	public Key(Object value) { // possible de créer une clef via un KeyMaker, pas super optimisé mais pratique !
 		this.value = value;
