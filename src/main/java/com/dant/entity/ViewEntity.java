@@ -1,14 +1,11 @@
 package com.dant.entity;
 
 import com.dant.app.Controller;
-import com.dant.utils.Log;
 import com.google.gson.Gson;
 import db.search.*;
 import db.structure.Database;
 import db.structure.Table;
-import db.structure.recherches.TableHandler;
 
-import javax.xml.crypto.Data;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -66,9 +63,8 @@ public class ViewEntity {
 
     public View convertToView() {
         Table table = Controller.getTableByName(tableName).get();
-        TableHandler handler = table.getTableHandler();
         FilterTerm concreteFilterTerm = filterTerm.convertToFilterTerm(table);
 
-        return new View(handler, concreteFilterTerm, this.fieldList, this.sortList, this.groupBy);
+        return new View(table, concreteFilterTerm, this.fieldList, this.sortList, this.groupBy);
     }
 }

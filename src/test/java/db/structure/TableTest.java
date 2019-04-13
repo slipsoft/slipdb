@@ -13,24 +13,24 @@ import db.data.types.IntegerType;
 import db.data.types.StringType;
 
 class TableTest {
-	protected Table table;
-	protected List<Column> columns = new ArrayList<>();
-	protected List<Index> indexes = new ArrayList<>();
+	private Table table;
+	private List<Column> columns = new ArrayList<>();
+	private List<Index> indexes = new ArrayList<>();
 
 	@BeforeEach
 	void setUp() throws Exception {
 
 		columns.add(new Column("col1", new StringType(10)));
 		columns.add(new Column("col2", new IntegerType()));
-		Column[] cols = {columns.get(0)};
-		Index index = new IndexHash(cols);
+		Column column = columns.get(0);
+		Index index = new IndexHash(column);
 		indexes.add(index);
-		table = new Table("test", columns, null);
+		table = new Table("test", columns);
 		table.addIndex(index);
 	}
 
 	@AfterEach
-	void tearDown() throws Exception {
+	void tearDown() {
 	}
 
 	@Test
@@ -50,8 +50,8 @@ class TableTest {
 
 	@Test
 	final void testAddIndex() {
-		Column[] cols = {columns.get(1)};
-		Index index = new IndexHash(cols);
+		Column column = columns.get(1);
+		Index index = new IndexHash(column);
 		table.addIndex(index);
 		assertEquals(index, table.getIndexes().get(1));
 	}

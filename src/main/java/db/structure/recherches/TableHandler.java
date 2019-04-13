@@ -25,6 +25,7 @@ import db.structure.Table;
 import db.structure.indexTree.IndexException;
 import db.structure.indexTree.IndexTreeDic;
 
+@Deprecated
 public class TableHandler implements Serializable {
 	/* Ordre de serialization :
 	
@@ -80,7 +81,7 @@ public class TableHandler implements Serializable {
 	}
 	
 	
-	
+
 	public TableHandler() {
 		loadSerialAndCreateCommon();
 	}
@@ -97,7 +98,7 @@ public class TableHandler implements Serializable {
 	public Table getAssociatedTable() {
 		return this.associatedTable;
 	}
-	
+
 	public TableHandler(String argTableName) {
 		this();
 		tableName = argTableName;
@@ -124,7 +125,7 @@ public class TableHandler implements Serializable {
 	}
 	
 	public Table createTable() throws IOException {
-		associatedTable = new Table(tableName, columnsListForCreatingTableOnly, this);
+		associatedTable = new Table(tableName, columnsListForCreatingTableOnly);
 		return associatedTable;
 	}
 
@@ -133,6 +134,7 @@ public class TableHandler implements Serializable {
 	 * @param doRuntimeIndexing
 	 * @throws Exception
 	 */
+	@Deprecated
 	public void parseCsvData(String csvPath, boolean doRuntimeIndexing) throws Exception {
 		InputStream is = new FileInputStream(csvPath);
 		try {
@@ -144,7 +146,8 @@ public class TableHandler implements Serializable {
 		}
 	}
 
-	public void parseCsvData (InputStream is, boolean doRuntimeIndexing) throws Exception {
+	@Deprecated
+	public void parseCsvData(InputStream is, boolean doRuntimeIndexing) throws Exception {
 		try {
             parseCsvData(is, doRuntimeIndexing, false);
 			is.close();
@@ -161,11 +164,12 @@ public class TableHandler implements Serializable {
 	 * @param closeStreamAfterUsage Fermer le stream après usage (true ou false)
 	 * @throws Exception
 	 */
+	@Deprecated
 	public void parseCsvData(InputStream csvStream, boolean doRuntimeIndexing, boolean closeStreamAfterUsage) throws Exception {
 		if (associatedTable == null) throw new Exception("La table associée est null, elle doit être crée via createTable avant tout parsing.");
 		//if (csvParser == null)
 		// Thread-safe
-		Loader csvLoader = new Loader(associatedTable, new CsvParser());
+		Loader csvLoader = new Loader(associatedTable, new CsvParser(), doRuntimeIndexing);
 		
 		if (doRuntimeIndexing)
 			csvLoader.setRuntimeIndexing(runtimeIndexingList);
@@ -179,7 +183,7 @@ public class TableHandler implements Serializable {
 		firstTimeParsingData = false;
 		
 	}
-	
+
 	protected int getColumnIndex(String columnName) throws StructureException {
 		if (associatedTable == null) throw new StructureException("Aucune table crée, indexation impossible.");
 		List<Column> columnList = associatedTable.getColumns();
@@ -349,13 +353,15 @@ public class TableHandler implements Serializable {
 	}
 
 	//trip_distance
+	@Deprecated
 	public int evaluateNumberOfArrayListLines(Collection<DataPositionList> resultsCollection) {
 		return resultsCollection.size();
 	}
-	
+
+	@Deprecated
 	private static boolean debugUseOldDeprecatedSearch = false; // bench : la nouvelle manière va environ 80x plus vite ^^
-	
-	
+
+	@Deprecated
 	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection) throws StructureException, IOException { // table connue ! , Table fromTable) {
 		return getFullResultsFromBinIndexes(resultsCollection, true, -1);
 	}
@@ -366,12 +372,13 @@ public class TableHandler implements Serializable {
 	 *  @return
 	 *  @throws Exception
 	 */
+	@Deprecated
 	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection, boolean waitForAllResults, int waitTimeLimitMs) throws StructureException, IOException{ // table connue ! , Table fromTable) {
 		return getFullResultsFromBinIndexes(resultsCollection, waitForAllResults, waitTimeLimitMs, null);
 	}
 	//trip_distance
-	
-	/** 
+
+	/**
 	 *  @param resultsCollection
 	 *  @param waitForAllResults
 	 *  @param waitTimeLimitMs
@@ -379,37 +386,38 @@ public class TableHandler implements Serializable {
 	 *  @return
 	 *  @throws Exception
 	 */
+	@Deprecated
 	//public ArrayList<ArrayList<Object>> getFullResultsFromBinIndexes(DataPositionList resultsCollection) throws Exception { // table connue ! , Table fromTable) {
 	public ResultSet getFullResultsFromBinIndexes(DataPositionList resultsCollection, boolean waitForAllResults, int waitTimeLimitMs, ArrayList<Integer> onlyGetThoseColumnsIndex) throws StructureException, IOException { // table connue ! , Table fromTable) {
 		if (associatedTable == null) throw new StructureException("Aucune table crée, indexation impossible.");
-		
+
 		ResultSet resultArrayList = new ResultSet();
-		
+
 		TableDataHandler dataHandler = associatedTable.getDataHandler();
-		
+
 		if (debugUseOldDeprecatedSearch == false) {
 			return dataHandler.getValuesOfLinesListById(resultsCollection, waitForAllResults, waitTimeLimitMs, onlyGetThoseColumnsIndex);
 		} else {
-			
+
 			// Pour toutes les listes de valeurs identiques
 			// (il peut y avoir des listes distinctes associés à une même valeur indexée, du fait du multi-fichiers / multi-thread)
 			for (DiskDataPosition dataPos : resultsCollection) {
 				//Log.info("list size = " + list.size());
 				//for (DiskDataPosition dataPos : dataPosList) {
-					// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
-					ArrayList<Object> objList = dataHandler.getValuesOfLineByIdForSignleQuery(dataPos);
-					resultArrayList.add(objList);
-					//Log.info("  objList = " + objList);
-					
-					//Log.info("  index = " + index);
-					// TO DO Résultats à lire depuis les fichiers binaires -> OK !!!
-					//ArrayList<Object> objList = associatedTable.getValuesOfLineById(binIndex);
-					//resultArrayList.add(objList);
-					
-					//Object indexedValue = objList.get(indexingColumnIndex);
-					//indexingColumn.getDataType().
-					//Log.info("  valeur indexée = " + indexedValue);
-					//Log.info("  objList = " + objList);
+				// un-comment those lines if you want to get the full info on lines : List<Object> objList = table.getValuesOfLineById(index);
+				ArrayList<Object> objList = dataHandler.getValuesOfLineByIdForSignleQuery(dataPos);
+				resultArrayList.add(objList);
+				//Log.info("  objList = " + objList);
+
+				//Log.info("  index = " + index);
+				// TO DO Résultats à lire depuis les fichiers binaires -> OK !!!
+				//ArrayList<Object> objList = associatedTable.getValuesOfLineById(binIndex);
+				//resultArrayList.add(objList);
+
+				//Object indexedValue = objList.get(indexingColumnIndex);
+				//indexingColumn.getDataType().
+				//Log.info("  valeur indexée = " + indexedValue);
+				//Log.info("  objList = " + objList);
 				//}
 			}
 			return resultArrayList;
@@ -429,6 +437,7 @@ public class TableHandler implements Serializable {
 		
 	}
 	
+	@Deprecated
 	public void multiThreadParsingAddAndStartCsv(String csvPath, boolean doRuntimeIndexing) { synchronized(multiThreadParsingListLock) {
 		Thread newParsingThread = new Thread(() -> {
 			try {
@@ -442,7 +451,7 @@ public class TableHandler implements Serializable {
 		newParsingThread.start();
 	} }
 	
-	
+	@Deprecated
 	public void multiThreadParsingAddAndStartCsv(InputStream csvStream, boolean doRuntimeIndexing, boolean closeStreamAfterUsage) { synchronized(multiThreadParsingListLock) {
 		Thread newParsingThread = new Thread(() -> {
 			try {
@@ -456,6 +465,7 @@ public class TableHandler implements Serializable {
 		newParsingThread.start();
 	} }
 	
+	@Deprecated
 	public void multiThreadParsingWaitForAllThreads() {
 		multiThreadParsingJoinAllThreads();
 	}
@@ -463,6 +473,7 @@ public class TableHandler implements Serializable {
 	/** Attendre que tous les threads soient finis.
 	 *  Si un thread a rencontré une erreur et ne peut pas être arrêté, il est gardé dans la liste et je passe au suivant.
 	 */
+	@Deprecated
 	public void multiThreadParsingJoinAllThreads() { synchronized(multiThreadParsingListLock) {
 		
 		int invalidThreadNumber = 0;

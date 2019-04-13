@@ -241,9 +241,8 @@ public class IndexTreeDic extends Index implements Serializable {
 
 
 		associatedTableColumnIndex = columnIndex;
-		Column indexThisColumn = columnsList.get(associatedTableColumnIndex);
-		indexedColumnsList = new Column[]{indexThisColumn}; // added here for now but will maybe move
-		DataType columnDataType = indexThisColumn.getDataType();
+		indexedColumn = columnsList.get(associatedTableColumnIndex);
+		DataType columnDataType = indexedColumn.getDataType();
 
 		storedValuesClassType = columnDataType.getAssociatedClassType();
 		int dataSizeInBytes = columnDataType.getSize();

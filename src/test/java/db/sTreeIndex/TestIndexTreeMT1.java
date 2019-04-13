@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
+import db.structure.StructureException;
 import db.data.load.Loader;
 import db.structure.recherches.TableHandler;
 import org.apache.commons.io.FileUtils;
@@ -38,12 +39,11 @@ import db.structure.indexTree.IndexTreeCeption;
 
 public class TestIndexTreeMT1 {
 
-	protected static CsvParser parser;
-	protected static Table table;
+	private static Table table;
 	
 	
 	static ArrayList<Column> initializeColumnsForNYData() {
-		ArrayList<Column> columns = new ArrayList<Column>();
+		ArrayList<Column> columns = new ArrayList<>();
 		try {
 			columns.add(new Column("VendorID", new ByteType()));
 			columns.add(new Column("tpep_pickup_datetime", new DateType()));
@@ -69,19 +69,20 @@ public class TestIndexTreeMT1 {
 		}
 		return columns;
 	}
-	
-	static Table loadNewTableFromDisk(String tableName, String filePathOnDisk) throws IOException {
+
+	static Table loadNewTableFromDisk(String tableName, String filePathOnDisk) throws IOException, StructureException {
 		ArrayList<Column> columns = initializeColumnsForNYData();
-		TableHandler table = new TableHandler(tableName);
-		columns.stream().forEach(c -> table.addColumn(c));
-		Table newTable = table.createTable();
-		Loader loader = new Loader(newTable, new CsvParser());
+		table = new Table(tableName);
+		for (Column column : columns) {
+			table.addColumn(column);
+		}
+		Loader loader = new Loader(table, new CsvParser(), false);
 		FileInputStream is = new FileInputStream(filePathOnDisk);
 		//Timer parseTimer = new Timer("Temps pris par le parsing de " + tableName);
 		loader.parse(is, false); // Supprimer les données déjà écrites
 		is.close();
 		//parseTimer.log();
-		return newTable;
+		return table;
 	}
 	
 	static int globalTableId = 0;
@@ -109,8 +110,8 @@ public class TestIndexTreeMT1 {
 		// Attendre que tout se termine
 		// Comparer chargement linaire et multi-trhead (même fichier vs fichiers différents)
 		
-		ArrayList<TestIndexTreeMT1Runnable> runnableList = new ArrayList<TestIndexTreeMT1Runnable>();
-		ArrayList<Thread> threadList = new ArrayList<Thread>();
+		ArrayList<TestIndexTreeMT1Runnable> runnableList = new ArrayList<>();
+		ArrayList<Thread> threadList = new ArrayList<>();
 		
 		int maxRunCount = 10;
 		
@@ -170,7 +171,7 @@ public class TestIndexTreeMT1 {
 		
 	}*/
 	
-	@Test
+	//@Test
 	void testIndexingTreeInt() throws IOException {
 		if (true) return;
 		/**

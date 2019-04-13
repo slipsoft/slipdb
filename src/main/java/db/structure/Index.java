@@ -2,7 +2,10 @@ package db.structure;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.io.IOException;
 
+import db.disk.dataHandler.DiskDataPosition;
+import db.search.Operator;
 import db.data.types.DataPositionList;
 import db.structure.indexTree.IndexException;
 import org.apache.commons.lang3.ArrayUtils;
@@ -26,16 +29,16 @@ public abstract class Index implements Operable {
 	 * ArrayList<Integer>
 	 */
 	protected Map<Key, ArrayList<Integer>> indexedValuesMap;
-	protected Column[] indexedColumnsList; // Liste des colonnes indexées dans cet Index
+	protected Column indexedColumn; // colonne indexée dans cet Index
 
 	/**
 	 * Constructor, not always used. The simple constructor with no arguments is
 	 * used by the TreeMap indexing class.
 	 *
-	 * @param columnsToIndex la liste des colonnes à indexer
+	 * @param indexedColumn - la colonne à indexer
 	 */
-	public Index(Column[] columnsToIndex) {
-		this.indexedColumnsList = columnsToIndex;
+	public Index(Column indexedColumn) {
+		this.indexedColumn = indexedColumn;
 	}
 
 	/**
@@ -50,15 +53,25 @@ public abstract class Index implements Operable {
 	/**
 	 * @return la liste des colonnes indexées dans cet Index
 	 */
-	public Column[] getColumnList() {
-		return indexedColumnsList;
+	public Column getIndexedColumn() {
+		return indexedColumn;
 	}
 	
 	public boolean canBeUsedWithPredicate(Predicate predicate) {
-		boolean containsColumn = ArrayUtils.contains(indexedColumnsList, predicate.getColumn());
+		boolean containsColumn = indexedColumn.equals(predicate.getColumn());
 		boolean isOperatorCompatible = this.isOperatorCompatible(predicate.getOperator());
 		return containsColumn && isOperatorCompatible;
 	}
 
+	public void indexEntry(Object[] entry, DiskDataPosition position) throws IndexException{
+		try {
+			this.addValue(entry[this.indexedColumn.getNumber()], position);
+		} catch (IOException e) {
+			throw new IndexException(e);
+		}
+	}
+
+	public abstract boolean isOperatorCompatible(Operator op);
 	public abstract DataPositionList getPositionsFromPredicate(Predicate predicate) throws IndexException;
+	public abstract void addValue(Object value, DiskDataPosition position) throws IOException;
 }
