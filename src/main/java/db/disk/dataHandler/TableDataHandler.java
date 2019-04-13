@@ -196,7 +196,7 @@ public class TableDataHandler implements Serializable {
 		synchronized (allFilesListLock) {
 			int checkIndex = 0;
 			while (a2OrderedByFileList.size() > 0) {
-				Log.info("checkIndex = " + checkIndex);
+				//Log.info("checkIndex = " + checkIndex);
 				if (checkIndex >= a1CurrentDataPosArray.size()) {
 					checkIndex = 0; // boucle, revenir au premier fichier
 				}
@@ -258,7 +258,7 @@ public class TableDataHandler implements Serializable {
 					}
 					try {
 						fondUsableDataFile.stopFileUse();
-						Log.infoOnly("STOP FILE USE");
+						//Log.infoOnly("STOP FILE USE");
 					} catch (IOException e) {
 						Log.error(e);
 						e.printStackTrace();

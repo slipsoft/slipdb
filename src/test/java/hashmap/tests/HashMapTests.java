@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import com.dant.utils.Log;
 
 /**
+ *  TEST COLLISONS (ça se passe bien !)
  *  Test des collisions de hash, c'est OK pour une HashMap, il faut juste avoir le moins de collisons possibles
  *  pour que la HashMap soit optimisée et ait un sens.
  *  
@@ -31,6 +32,10 @@ public class HashMapTests {
 	/*
 	public static void main(String[] args) {
 	}*/
+	
+	
+	
+	
 	
 }
 
