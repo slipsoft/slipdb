@@ -155,6 +155,19 @@ class IndexTreeMessyTest {
 		indexTripDistance = new IndexTreeDic(table, 4);
 		table.addIndex(indexPickupDate);
 		table.addIndex(indexTripDistance);
+		table.addIndex(new IndexTreeDic(table, 2));
+		table.addIndex(new IndexTreeDic(table, 3));
+		table.addIndex(new IndexTreeDic(table, 5));
+		table.addIndex(new IndexTreeDic(table, 6));
+		table.addIndex(new IndexTreeDic(table, 7));
+		table.addIndex(new IndexTreeDic(table, 8));
+		table.addIndex(new IndexTreeDic(table, 9));
+		table.addIndex(new IndexTreeDic(table, 10));
+		table.addIndex(new IndexTreeDic(table, 11));
+		table.addIndex(new IndexTreeDic(table, 12));
+		table.addIndex(new IndexTreeDic(table, 13));
+		table.addIndex(new IndexTreeDic(table, 14));
+		table.addIndex(new IndexTreeDic(table, 15));
 		//tableHandler.createRuntimeIndexingColumn("trip_distance"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
 		//tableHandler.createRuntimeIndexingColumn("tpep_dropoff_datetime"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
 		//tableHandler.createRuntimeIndexingColumn("dropoff_longitude"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
@@ -244,10 +257,10 @@ class IndexTreeMessyTest {
 			// Loader de la donnée en multi-thread
 			//for (int i = 0; i < 20; i++)
 			
+			table.multiThreadParsingAddAndStartCsv("E:/L3 DANT disque E/csv/yellow_tripdata_2015-07.csv", true);
+			/*table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);*/
 
 			/*table.multiThreadParsingAddAndStartCsv("E:/L3 DANT disque E/csv/yellow_tripdata_2015-07.csv", true);
 			table.multiThreadParsingAddAndStartCsv("E:/L3 DANT disque E/csv/yellow_tripdata_2015-08.csv", true);
