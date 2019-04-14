@@ -73,4 +73,5 @@ public abstract class Index implements Operable {
 	public abstract boolean isOperatorCompatible(Operator op);
 	public abstract Collection<DiskDataPosition> getPositionsFromPredicate(Predicate predicate) throws IndexException;
 	public abstract void addValue(Object value, DiskDataPosition position) throws IOException;
+	public abstract void flushOnDisk() throws IOException;
 }

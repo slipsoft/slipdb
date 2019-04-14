@@ -64,11 +64,9 @@ public class Table implements Serializable {
 	 */
 	
 	public void doBeforeSerialWrite() {
-		if (tableHandler != null) {
-			tableHandler.flushAllIndexTreesOnDisk();
-		}
+		this.flushAllIndexOnDisk();
 	}
-	
+
 	public void debugSerialShowVariables() {
 		Log.info("TableDataHandler : ");
 		dataHandler.debugSerialShowVariables();
@@ -264,6 +262,29 @@ public class Table implements Serializable {
 
 	} }
 
+	/**
+	 * Save all indexes to disk
+	 */
+	private void flushAllIndexOnDisk() {
+		Log.debug("TableHandler.flushAllIndexOnDisk : size = " + indexesList.size());
+		for (Index index : indexesList) {
+			try {
+				index.flushOnDisk();
+				Log.error("TableHandler.flushAllIndexOnDisk : flush de l'arbre !" + index);
+			} catch (IOException e) {
+				Log.error("TableHandler.flushAllIndexOnDisk : l'arbre n'a pas pu être écrit sur le disque, IOException.");
+				Log.error(e);
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
+	 * Add an entry in every index of the table
+	 * @param entry - an array of object representing an entry
+	 * @param position - the Disk position of this entry
+	 * @throws IndexException - if one of the indexes couldn't index this entry
+	 */
 	public void indexEntry(Object[] entry, DiskDataPosition position) throws IndexException {
 		for (Index index: indexesList) {
 			index.indexEntry(entry, position);

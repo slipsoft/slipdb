@@ -31,6 +31,11 @@ public class IndexHash extends Index {
 	}
 
 	@Override
+	public void flushOnDisk() throws IOException {
+		// TODO
+	}
+
+	@Override
 	public boolean isOperatorCompatible(Operator op) {
 		if(!ArrayUtils.contains(new Operator[] {
 				Operator.equals

@@ -15,6 +15,7 @@ import db.structure.Table;
  *
  *
  */
+@Deprecated
 public class SGlobalHandler {
 	
 	

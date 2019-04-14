@@ -53,7 +53,8 @@ public class TableHandler implements Serializable {
 	transient public RuntimeIndexingEntryList runtimeIndexingList;//ArrayList<SRuntimeIndexingEntry>();
 	// TODO
 	protected ArrayList<IndexTreeDic> indexTreeList = new ArrayList<IndexTreeDic>(); // Liste des IndexTree associés à cette table
-	
+
+	@Deprecated
 	public void flushAllIndexTreesOnDisk() {
 		//Log.error("TableHandler.flushAllIndexTreesOnDisk : size = " + indexTreeList.size());
 		for (IndexTreeDic indexTree : indexTreeList) {
