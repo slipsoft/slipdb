@@ -27,8 +27,6 @@ import db.data.types.StringType;
 import db.structure.Column;
 import db.structure.Database;
 import db.structure.Table;
-import db.structure.recherches.SGlobalHandler;
-import db.structure.recherches.TableHandler;
 import index.indexTree.IndexTreeCeption;
 import index.indexTree.IndexTreeDic;
 
@@ -47,6 +45,8 @@ class IndexTreeMessyTest {
 	
 	private static boolean parseAgain = true;
 	private boolean doItWithTableHandler = true;
+	
+	public static final boolean enableCsvRelatedTests = true; // <- à true si faie tous les tests, false si c'est juste charger des CSV sans faire de test !)
 	
 	/** Pour la déserialisation
 	 * @param in
@@ -258,10 +258,11 @@ class IndexTreeMessyTest {
 			// Loader de la donnée en multi-thread
 			//for (int i = 0; i < 20; i++)
 			
-			table.multiThreadParsingAddAndStartCsv("E:/L3 DANT disque E/csv/yellow_tripdata_2015-07.csv", true);
-			/*table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			//table.multiThreadParsingAddAndStartCsv("E:/L3 DANT disque E/csv/yellow_tripdata_2015-07.csv", true);
 			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);*/
+			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 
 			/*table.multiThreadParsingAddAndStartCsv("E:/L3 DANT disque E/csv/yellow_tripdata_2015-07.csv", true);
 			table.multiThreadParsingAddAndStartCsv("E:/L3 DANT disque E/csv/yellow_tripdata_2015-08.csv", true);
@@ -407,7 +408,7 @@ class IndexTreeMessyTest {
 			
 			Timer searchQueryFullTimer = new Timer("Temps parcours des résultats");
 			int numberOfResults = result.size();
-			// ce test est vraiment chiant : assertEquals(3116, numberOfResults);
+			if (enableCsvRelatedTests) assertEquals(3116, numberOfResults);
 			//int numberOfResults = tableHandler.evaluateNumberOfResults(result);
 			//int numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
 			searchQueryFullTimer.log();
@@ -424,7 +425,7 @@ class IndexTreeMessyTest {
 			
 			searchQueryFullTimer = new Timer("1Temps d'acquisition des résultats (chargement du disque de tous les champs)");
 			numberOfResults = result.size();// tableHandler.evaluateNumberOfResults(result);
-			// ce test est vraiment chiant : assertEquals(700, numberOfResults);
+			if (enableCsvRelatedTests) assertEquals(700, numberOfResults);
 			//numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
 			
 			//ArrayList<ArrayList<Object>>
@@ -449,7 +450,7 @@ class IndexTreeMessyTest {
 			predicate = new Predicate(table, column, Operator.equals, 18f);
 			result = indexTripDistance.getPositionsFromPredicate(predicate);
 			numberOfResults = result.size();
-			//assertEquals(116, numberOfResults);
+			if (enableCsvRelatedTests) assertEquals(116, numberOfResults);
 			Log.info("Nombre de résultats (pour 18 exact) = " + numberOfResults);
 			
 			
@@ -724,8 +725,9 @@ class IndexTreeMessyTest {
 		
 	}
 
-	//@Test
+	@Test
 	void executeView() {
+		if (enableCsvRelatedTests == false) return;
 		Column column1 = table.getColumns().get(1);
 		Column column4 = table.getColumns().get(4);
 		Field field = new Field(column4.getName());
