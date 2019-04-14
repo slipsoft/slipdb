@@ -54,9 +54,9 @@ public class SLoaderTests {
 		
 		Timer parseTimer = new Timer("TEMPS TOTAL pris par le parsing");
 		
-		//String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
+		String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
 		
-		String csvPath = "E:/L3 DANT disque E/csv/yellow_tripdata_2015-07.csv";
+		//String csvPath = "E:/L3 DANT disque E/csv/yellow_tripdata_2015-07.csv";
 		InputStream csvStream = new FileInputStream(csvPath);
 		SCsvLoader csvLoader = new SCsvLoader(table, new CsvParser());
 		csvLoader.parse(csvStream, true);
