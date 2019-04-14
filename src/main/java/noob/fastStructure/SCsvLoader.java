@@ -20,8 +20,8 @@ import db.structure.Table;
  */
 public class SCsvLoader {
 	
-	private final int threadCount = 4 + 1;
-	private SCsvLoaderThread[] threadArray;// = new SLoaderThread[threadCount];
+	private final int threadCount = 6;//+8;
+	private SCsvLoaderRunnable[] runnableArray;// = new SLoaderThread[threadCount];
 	
 	private Table currentTable;
 	//private int lineByteSize; // number of bytes used to store information
@@ -43,9 +43,9 @@ public class SCsvLoader {
 	public SCsvLoader(Table argTable, Parser argParser) {
 		loaderParser = argParser;
 		// Création des threads
-		threadArray = new SCsvLoaderThread[threadCount];
+		runnableArray = new SCsvLoaderRunnable[threadCount];
 		for (int iThread = 0; iThread < threadCount; iThread++) {
-			threadArray[iThread] = new SCsvLoaderThread(argTable, loaderParser, loaderWriteInMemoryLock);
+			runnableArray[iThread] = new SCsvLoaderRunnable(argTable, loaderParser, loaderWriteInMemoryLock);
 		}
 		
 		currentTable = argTable;
@@ -61,18 +61,18 @@ public class SCsvLoader {
 	/** Bloquant jusqu'à ce qu'un nouveau thread prêt soit trouvé
 	 *  @return un thread prêt à être utilisé
 	 */
-	private SCsvLoaderThread getReadyThread() {
-		SCsvLoaderThread foundReadyThread = null;
+	private SCsvLoaderRunnable getReadyThread() {
+		SCsvLoaderRunnable foundReadyThread = null;
 		do {
 			for (int iThread = 0; iThread < threadCount; iThread++) {
-				if (threadArray[iThread].tryUseThisThreadForNewDataCollection()) {
-					foundReadyThread = threadArray[iThread];
+				if (runnableArray[iThread].tryUseForNewDataCollection()) {
+					foundReadyThread = runnableArray[iThread];
 					break;
 				}
 			}
 			if (foundReadyThread == null) {
 				try {
-					Thread.sleep(1); // attente mi-active
+					Thread.sleep(2); // attente mi-active
 				} catch (Exception e) {
 					Log.error(e);
 				}
@@ -97,13 +97,13 @@ public class SCsvLoader {
 		boolean needNewThread = false;
 		String entryAsString;
 		
-		SCsvLoaderThread currentThreadCollectingData = getReadyThread();
+		SCsvLoaderRunnable currentThreadCollectingData = getReadyThread();
+		Timer timeTookTimer = new Timer("Temps écoulé");
 		
 		try ( 
 				BufferedReader bRead = new BufferedReader(new InputStreamReader(input));
 				) {
 			
-			Timer timeTookTimer = new Timer("Temps écoulé");
 			
 			
 			
@@ -113,6 +113,7 @@ public class SCsvLoader {
 				
 				// Lecture d'une nouvelle ligne / entrée
 				entryAsString = bRead.readLine(); // "entrée", ligne lue
+				
 				if (entryAsString == null) break; // fin de la lecture
 				
 				needNewThread = currentThreadCollectingData.addNewLine(entryAsString);
@@ -121,10 +122,12 @@ public class SCsvLoader {
 					currentThreadCollectingData = getReadyThread();
 				}
 				
+				localReadEntryNb++;
+				
 				// Affichage d'une entrée toutes les showInfoEveryParsedLines entrées lues
 				if (showInfoEveryParsedLines != -1 && localReadEntryNb % showInfoEveryParsedLines == 0) {
 					Log.info("Loader : nombre de résultats (local) lus = " + localReadEntryNb + "   temps écoulé = " + timeTookTimer.pretty());
-					MemUsage.printMemUsage();
+					//MemUsage.printMemUsage();
 				}
 				
 				if (localReadEntryNbToAddToTotalCount >= updateTotalReadEntryNbEach) {
@@ -142,20 +145,16 @@ public class SCsvLoader {
 		}
 		
 		currentThreadCollectingData.startIfNeeded(); // exécuter le dernier thread si besoin
-
-		Log.info("PARSE : FINAL USAGE");
-		System.gc();
-		MemUsage.printMemUsage();
 		
-
+		//Log.info("PARSE : FINAL USAGE");
+		//System.gc();
+		//MemUsage.printMemUsage();
+		
 		for (int iThread = 0; iThread < threadCount; iThread++) {
-			try {
-				threadArray[iThread].join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			runnableArray[iThread].waitTerminaison();
 		}
-		Log.info("Parsing terminé !!");
+		Log.info("Parsing terminé !! temps écoulé = " + timeTookTimer.pretty());
+		Log.info("PARSE : Nombre de lignes = " + localReadEntryNb);
 		
 	}
 	

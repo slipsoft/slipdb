@@ -248,6 +248,14 @@ public class Table implements Serializable {
 			newParsingThread.start();
 		}
 	}
+	
+	public void monoThreadParsing(String csvPath, boolean doRuntimeIndexing) {
+		try (InputStream is = new FileInputStream(csvPath)) {
+			this.loadData(new CsvParser(), is, doRuntimeIndexing);
+		} catch (Exception e) {
+			Log.error(e);
+		}
+	}
 
 	public void multiThreadParsingWaitForAllThreads() {
 		multiThreadParsingJoinAllThreads();
@@ -282,9 +290,9 @@ public class Table implements Serializable {
 		for (Index index : indexesList) {
 			try {
 				index.flushOnDisk();
-				Log.error("TableHandler.flushAllIndexOnDisk : flush de l'arbre !" + index);
+				Log.info("Table.flushAllIndexOnDisk : flush de l'arbre !" + index);
 			} catch (IOException e) {
-				Log.error("TableHandler.flushAllIndexOnDisk : l'arbre n'a pas pu être écrit sur le disque, IOException.");
+				Log.error("Table.flushAllIndexOnDisk : l'arbre n'a pas pu être écrit sur le disque, IOException.");
 				Log.error(e);
 				e.printStackTrace();
 			}

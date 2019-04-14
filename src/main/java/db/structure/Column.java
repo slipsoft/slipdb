@@ -251,7 +251,7 @@ public class Column implements Serializable {
 	
 	public void writeDataInMemory(Object dataAsPrimitiveObject)  {
 		//synchronized(writeInMemoryLock) <- RISQUE de perte de la cohrérence des données, le lock est mis dans Loader.writeInMemoryLock
-		//Log.info("Write in memory !");
+		//Log.info("Write in memory ! " + dataAsPrimitiveObject);
 		if (a2DataChunk.size() == 0) {
 			ColumnDataChunk newDataChunk = new ColumnDataChunk(dataType, chunkDataTypeAllocationSize);
 			Log.info("Initialisation chunk");
@@ -290,7 +290,7 @@ public class Column implements Serializable {
 			needAnotherChunk = dataChunk.writeStringData( ((String)dataAsPrimitiveObject) );
 		
 		if (needAnotherChunk) {
-			Log.info("Nouveau chunk");
+			//Log.info("Nouveau chunk");
 			ColumnDataChunk newDataChunk = new ColumnDataChunk(dataType, chunkDataTypeAllocationSize);
 			a2DataChunk.add(newDataChunk);
 		}

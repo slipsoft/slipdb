@@ -257,10 +257,14 @@ class IndexTreeMessyTest {
 			//for (int i = 0; i < 20; i++)
 			
 			//table.multiThreadParsingAddAndStartCsv("E:/L3 DANT disque E/csv/yellow_tripdata_2015-07.csv", true);
+			
+			for (int i = 0; i < 4; i++)
+				table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			
+			/*table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);*/
 
 			/*table.multiThreadParsingAddAndStartCsv("E:/L3 DANT disque E/csv/yellow_tripdata_2015-07.csv", true);
 			table.multiThreadParsingAddAndStartCsv("E:/L3 DANT disque E/csv/yellow_tripdata_2015-08.csv", true);
