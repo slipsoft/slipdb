@@ -10,8 +10,13 @@ import com.dant.utils.MemUsage;
 import com.dant.utils.Timer;
 
 public class MemoryTests {
+	
+	// Pour ne pas alourdir Tarvis
+	private boolean ignoreThoseHeavyTests = true;
+	
 	@Test
 	public void memArrayListTest() {
+		if (ignoreThoseHeavyTests) return;
 		
 		MemUsage.printMemUsage();
 		long memUsage = MemUsage.getMemUsage();
@@ -36,6 +41,7 @@ public class MemoryTests {
 
 	@Test
 	public void memSimpleArrayTest() {
+		if (ignoreThoseHeavyTests) return;
 		
 		MemUsage.printMemUsage();
 		long memUsage = MemUsage.getMemUsage();
@@ -72,6 +78,7 @@ public class MemoryTests {
 	
 	@Test
 	public void treeSetVsArrayList() {
+		if (ignoreThoseHeavyTests) return;
 		
 		//MemUsage.printMemUsage();
 		long memUsage = MemUsage.getMemUsage();

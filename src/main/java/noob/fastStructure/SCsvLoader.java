@@ -21,7 +21,7 @@ import db.structure.Table;
  */
 public class SCsvLoader {
 	
-	private final int threadCount = 2;//+8;
+	private final int threadCount = 6;//+8;
 	private SCsvLoaderRunnable[] runnableArray;// = new SLoaderThread[threadCount];
 	
 	private Table currentTable;
@@ -76,7 +76,7 @@ public class SCsvLoader {
 				}
 			}
 			if (foundReadyThread == null) {
-				Log.info("Attente d'un thread dispo...");
+				//Log.info("Attente d'un thread dispo...");
 				try {
 					Thread.sleep(20); // attente mi-active
 				} catch (Exception e) {
