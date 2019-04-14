@@ -80,7 +80,7 @@ public class DiskDataPosition implements Comparable<DiskDataPosition>, Serializa
 
 	@Override
 	public int hashCode() {
-		return (int) this.fileID + this.lineIndex; // Math.pow(31, nodeID) * 
+		return (int) 31 * this.fileID + this.lineIndex;
 	}
 	
 }
