@@ -1,8 +1,6 @@
-package db.structure.recherches;
+package zArchive.sj.recherches;
 
 import java.util.ArrayList;
-
-import db.structure.Table;
 
 /**
  *  Classe pour la recherche d'information dans les IndexTree

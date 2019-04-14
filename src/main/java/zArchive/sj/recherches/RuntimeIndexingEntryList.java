@@ -1,4 +1,4 @@
-package db.structure.recherches;
+package zArchive.sj.recherches;
 
 import java.util.ArrayList;
 import java.util.Collections;

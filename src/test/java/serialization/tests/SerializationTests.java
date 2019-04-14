@@ -22,7 +22,6 @@ import db.data.types.StringType;
 import db.serial.SerialStructure;
 import db.structure.Database;
 import db.structure.Table;
-import db.structure.recherches.TableHandler;
 
 public class SerializationTests {
 	private static Table table;

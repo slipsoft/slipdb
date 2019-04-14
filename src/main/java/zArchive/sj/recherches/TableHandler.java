@@ -1,4 +1,4 @@
-package db.structure.recherches;
+package zArchive.sj.recherches;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -7,7 +7,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 import com.dant.utils.Log;
 
@@ -19,7 +18,6 @@ import db.data.types.DataPositionList;
 import db.data.load.CsvParser;
 import db.search.ResultSet;
 import db.structure.Column;
-import db.structure.Database;
 import db.structure.StructureException;
 import db.structure.Table;
 import index.indexTree.IndexException;
@@ -68,7 +66,8 @@ public class TableHandler implements Serializable {
 			}
 		}
 	}
-	
+
+	@Deprecated
 	private void loadSerialAndCreateCommon() {
 		columnsListForCreatingTableOnly = new ArrayList<Column>(); // juste au cas où
 		indexTreeListLock = new Object();
@@ -89,7 +88,7 @@ public class TableHandler implements Serializable {
 		loadSerialAndCreateCommon();
 	}
 	
-	
+	@Deprecated
 	public void forceAppendNotFirstParsing() {
 		firstTimeParsingData = false; // si à vrai, supprimer tous les fichiers connus
 	}
@@ -204,6 +203,7 @@ public class TableHandler implements Serializable {
 		
 	}
 
+	@Deprecated
 	protected int getColumnIndex(String columnName) throws StructureException {
 		if (associatedTable == null) throw new StructureException("Aucune table crée, indexation impossible.");
 		List<Column> columnList = associatedTable.getColumns();
@@ -316,7 +316,7 @@ public class TableHandler implements Serializable {
 		return null;
 	}*/
 	
-	
+	@Deprecated
 	public DataPositionList findIndexedResultsOfColumn(String columnName, Object exactValue) throws Exception {
 		return findIndexedResultsOfColumn(columnName, exactValue, null, true);
 	}
@@ -354,7 +354,7 @@ public class TableHandler implements Serializable {
 		return makeRequestOnThisTree.findMatchingBinIndexes(minValue, maxValue, inclusive, false);
 	}
 	
-	
+	@Deprecated
 	public int evaluateNumberOfResults(Collection<DataPositionList> resultsCollection) {
 		// Iterates over all the results
 		int numberOfResults = 0;
@@ -447,13 +447,15 @@ public class TableHandler implements Serializable {
 			return resultArrayList;
 		}
 	}
-	
+
+	@Deprecated
 	public void displayOnLogResults(ResultSet resultArrayList) {
 		for (List<Object> objList : resultArrayList) {
 			Log.info("  objList = " + objList);
 		}
 	}
-	
+
+	@Deprecated
 	public void flushEveryIndexOnDisk() throws IOException {
 		for (IndexTreeDic indexTree : indexTreeList) {
 			indexTree.flushOnDisk();
@@ -515,11 +517,13 @@ public class TableHandler implements Serializable {
 		}
 		
 	} }
-	
+
+	@Deprecated
 	public void multiThreadParsingInit() {
 		
 	}
-	
+
+	@Deprecated
 	public void multiThreadParsingAddFile() {
 
 	}
