@@ -14,8 +14,8 @@ import db.search.Operator;
 
 public class IndexHash extends Index {
 
-	public IndexHash(Column column) {
-		super(column);
+	public IndexHash(Table table, Column column) {
+		super(table, column);
 		this.indexedValuesMap = new HashMap<>();
 	}
 

@@ -29,14 +29,17 @@ public abstract class Index implements Operable {
 	 */
 	protected Map<Key, ArrayList<Integer>> indexedValuesMap;
 	protected Column indexedColumn; // colonne indexée dans cet Index
+	protected Table table;
 
 	/**
 	 * Constructor, not always used. The simple constructor with no arguments is
 	 * used by the TreeMap indexing class.
 	 *
-	 * @param indexedColumn - la colonne à indexer
+	 * @param table - table of the index
+	 * @param indexedColumn - column to index
 	 */
-	public Index(Column indexedColumn) {
+	public Index(Table table, Column indexedColumn) {
+		this.table = table;
 		this.indexedColumn = indexedColumn;
 	}
 
@@ -45,6 +48,7 @@ public abstract class Index implements Operable {
 	 * IndexTree only knows which column to index when calling
 	 * IndexTree.indexColumnFromDisk(...)
 	 */
+	@Deprecated
 	public Index() {
 
 	}

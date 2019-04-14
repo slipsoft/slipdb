@@ -121,16 +121,19 @@ public class TableHandler implements Serializable {
 		addColumn(argColumnName, argColumnDataType, false, false);
 	}
 
+	@Deprecated
 	public void addColumn(String argColumnName, DataType argColumnDataType, boolean argKeepDataInMemory) throws Exception {
 		addColumn(argColumnName, argColumnDataType, argKeepDataInMemory, false);
 	}
-	
+
+	@Deprecated
 	public void addColumn(String argColumnName, DataType argColumnDataType, boolean argKeepDataInMemory, boolean argWriteDataOnDisk) throws Exception {
 		if (this.columnExist(argColumnName)) throw new Exception("Ajout de la colonne impossibe, il en exie déjà une du même nom : " + argColumnName);
 		Column newColumn = new Column(argColumnName, argColumnDataType, argKeepDataInMemory, argWriteDataOnDisk);
 		columnsListForCreatingTableOnly.add(newColumn);
 	}
 
+	@Deprecated
 	public boolean columnExist(String name) {
 		return this.columnsListForCreatingTableOnly.stream().anyMatch(col -> col.getName() == name);
 	}
@@ -213,6 +216,7 @@ public class TableHandler implements Serializable {
 		throw new StructureException("Colonne introuvable, impossible de l'indexer.");
 	}
 	
+	@Deprecated
 	public void indexColumnWithTreeFromDisk(String columnName) throws StructureException {
 		int colIndex = getColumnIndex(columnName);
 		indexColumnWithTreeFromDisk(colIndex);
@@ -220,7 +224,7 @@ public class TableHandler implements Serializable {
 	
 	
 	
-	
+	@Deprecated
 	protected IndexTreeDic findOrCreateAssociatedIndexTree(int columnIndex, boolean createTreeIfDoesNotExists) throws IndexException {
 		synchronized(indexTreeListLock) {
 		
@@ -244,6 +248,7 @@ public class TableHandler implements Serializable {
 	 *  @param columnIndex
 	 *  @throws StructureException
 	 */
+	@Deprecated
 	public void indexColumnWithTreeFromDisk(int columnIndex) throws StructureException {
 		if (associatedTable == null) throw new StructureException("Aucune table crée, indexation impossible.");
 		List<Column> columnList = associatedTable.getColumns();

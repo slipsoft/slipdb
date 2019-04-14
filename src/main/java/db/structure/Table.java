@@ -4,6 +4,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -127,6 +129,18 @@ public class Table implements Serializable {
 		return fileLinesOnDisk;
 	}
 
+	public Index createIndex(String columnName, Class<? extends Index> indexClass) throws StructureException {
+		try {
+			Constructor<? extends Index> ct = indexClass.getConstructor(Table.class, Column.class);
+			Column column = this.getColumnByNameNoCheck(columnName).orElseThrow(() -> new StructureException("column " + columnName + " doesn't exist"));
+			Index newIndex = ct.newInstance(this, column);
+			this.addIndex(newIndex);
+			return newIndex;
+		} catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+			throw new StructureException(e);
+		}
+	}
+
 	public void addIndex(Index index) {
 		this.indexesList.add(index);
 		index.getIndexedColumn().addIndex(index);
@@ -153,6 +167,11 @@ public class Table implements Serializable {
 		return this.columnsList.stream().anyMatch(col -> col.getName().equals(name));
 	}
 
+	public void addColumn(String colName, DataType dataType, boolean argKeepDataInMemory, boolean argWriteDataOnDisk) throws StructureException {
+		Column newColumn = new Column(colName, dataType, argKeepDataInMemory, argWriteDataOnDisk);
+		this.addColumn(newColumn);
+	}
+
 	/**
 	 * Add a column
 	 *
@@ -161,7 +180,7 @@ public class Table implements Serializable {
 	 * @throws StructureException - if column allready exists
 	 */
 	public void addColumn(String colName, DataType dataType) throws StructureException {
-		Column newColumn = new Column(colName, dataType).setNumber(columnsList.size());
+		Column newColumn = new Column(colName, dataType);
 		this.addColumn(newColumn);
 	}
 
@@ -173,6 +192,7 @@ public class Table implements Serializable {
 	 */
 	public void addColumn(Column column) throws StructureException {
 		if (columnExist(column.getName())) throw new StructureException("Column already exists, colName = " + column.getName());
+		column.setNumber(columnsList.size());
 		columnsList.add(column);
 		computeLineDataSize();
 	}
@@ -257,7 +277,7 @@ public class Table implements Serializable {
 	/**
 	 * Save all indexes to disk
 	 */
-	private void flushAllIndexOnDisk() {
+	public void flushAllIndexOnDisk() {
 		Log.debug("TableHandler.flushAllIndexOnDisk : size = " + indexesList.size());
 		for (Index index : indexesList) {
 			try {
