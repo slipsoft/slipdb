@@ -254,7 +254,7 @@ public class Column implements Serializable {
 		//Log.info("Write in memory ! " + dataAsPrimitiveObject);
 		if (a2DataChunk.size() == 0) {
 			ColumnDataChunk newDataChunk = new ColumnDataChunk(dataType, chunkDataTypeAllocationSize);
-			Log.info("Initialisation chunk");
+			//Log.info("Initialisation chunk");
 			a2DataChunk.add(newDataChunk);
 		}
 		int dataChunkListSize = a2DataChunk.size();

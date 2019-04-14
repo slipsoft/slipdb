@@ -4,12 +4,14 @@ package newLoader.tests;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.junit.jupiter.api.Test;
 
 import com.dant.utils.Log;
+import com.dant.utils.MemUsage;
 import com.dant.utils.Timer;
 
 import db.data.load.CsvParser;
@@ -33,7 +35,8 @@ public class SLoaderTests {
 		
 		Table table = new Table("NYtest");
 		
-		table.addColumn("VendorID", new ByteType());table.addColumn("tpep_pickup_datetime", new DateType()); //new StringType(19));//
+		table.addColumn("VendorID", new ByteType());
+		table.addColumn("tpep_pickup_datetime", new DateType()); //new StringType(19));//
 		table.addColumn("tpep_dropoff_datetime", new DateType());//new StringType(19)); //
 		table.addColumn("passenger_count", new ByteType());
 		table.addColumn("trip_distance", new FloatType());
@@ -52,16 +55,33 @@ public class SLoaderTests {
 		table.addColumn("improvement_surcharge", new FloatType());
 		table.addColumn("total_amount", new FloatType());
 		
-		Timer parseTimer = new Timer("TEMPS TOTAL pris par le parsing");
+		Timer parseTimer = new Timer("TEMPS TOTAL PRIS PAR TOUS LES PARSINGS");
 		
-		String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
 		
-		//String csvPath = "E:/L3 DANT disque E/csv/yellow_tripdata_2015-07.csv";
-		InputStream csvStream = new FileInputStream(csvPath);
+		System.gc();
+		MemUsage.printMemUsage("Mem usage  début - ");
 		SCsvLoader csvLoader = new SCsvLoader(table, new CsvParser());
+		
+		for (int iCsv = 1; iCsv <= 12; iCsv++) {
+			String colNumber = String.format("%02d" , iCsv);
+			String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
+			//String csvPath = "E:/L3 DANT disque E/csv/yellow_tripdata_2015-" + colNumber + ".csv";
+			Log.info("Parsing de csvName = " + csvPath);
+			parseThisCsv(table, csvLoader, csvPath);
+		}
+		
+		
+		System.gc();
+		MemUsage.printMemUsage("Mem usage  fin - ");
+		parseTimer.log();
+		
+		
+	}
+	
+	private void parseThisCsv(Table table, SCsvLoader csvLoader, String csvPath) throws IOException {
+		InputStream csvStream = new FileInputStream(csvPath);
 		csvLoader.parse(csvStream, true);
-		
-		
+		csvStream.close();
 	}
 	
 	
