@@ -152,14 +152,26 @@ class DataTypeTest {
 		for (int count = 0; count < maxCountOperation; count++) {
 			bBuff.rewind();
 			bBuff.put(Byte.parseByte("78"));
+			//Byte.parseByte("78");
 		}
 		localTimer.log();
+		//System.gc();
 
 		localTimer = new Timer("Parsing de IntegerType ");
 		for (int count = 0; count < maxCountOperation; count++) {
 			bBuff.rewind();
 			integerType.parseAndWriteToBuffer("454689586", bBuff);
 		}
+		//System.gc();
+		localTimer.log();
+
+		localTimer = new Timer("Parsing de IntegerType -> plus rapide ??? ");
+		for (int count = 0; count < maxCountOperation; count++) {
+			bBuff.rewind();
+			bBuff.putInt(Integer.parseInt("454689586"));
+			/*integerType.parseAndWriteToBuffer("454689586", bBuff);*/
+		}
+		//System.gc();
 		localTimer.log();
 
 		localTimer = new Timer("Parsing de LongType ");

@@ -18,7 +18,7 @@ import java.io.IOException;
 
 public class CsvParser extends Parser {
 
-	protected final static String csvSeparator = ","; // the CSV separator used to delimit fields
+	public final static String csvSeparator = ","; // the CSV separator used to delimit fields
 
 	/** Lecture du CSV depuis un InputStream (peu importe la provenance)
 	 *  Exécution mono-thread, en l'état, faire du multi-thread serait super super compliqué

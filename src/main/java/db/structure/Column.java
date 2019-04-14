@@ -46,7 +46,6 @@ public class Column implements Serializable {
 	public final boolean writeDataOnDisk;
 	public final boolean keepDataInMemory;
 	
-	
 	public final static int chunkDataTypeAllocationSize = 1_000_000;
 	
 	public int getTotalDataLength() {
