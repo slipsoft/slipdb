@@ -19,8 +19,6 @@ import db.data.types.DateType;
 import db.disk.dataHandler.DiskDataPosition;
 import db.structure.Column;
 import db.structure.Table;
-import db.structure.recherches.RuntimeIndexingEntry;
-import db.structure.recherches.RuntimeIndexingEntryList;
 import index.indexTree.IndexException;
 
 public class Loader {
@@ -35,18 +33,7 @@ public class Loader {
 	protected long addToTotalReadEntryCountBuffered = 0;
 	
 	public static AtomicLong debugNumberOfEntriesWritten = new AtomicLong(0);
-	
-	/* Thread-safe
-	protected void updateTotalResultCount(long addToTotal) {
-	}*/
-	
-	
 	private final boolean doRuntimeIndexing;
-	/** Avant le parsing, définir runtimeIndexingEntries.
-	 *  Au moment du parsing, runtimeIndexingEntries doit être en lecture seule, donc thread-safe.
-	 */
-	@Deprecated // replaced by the upper boolean
-	private RuntimeIndexingEntryList runtimeIndexingEntries = null;
 	
 	DateType localDateTypeThreadSafe;
 	ByteBuffer localEntryBuffer;
@@ -64,10 +51,9 @@ public class Loader {
 		localEntriesArray = new Object[schema.getColumns().size()];
 	}
 	
-	// Pour indexer au moment du parsing
 	@Deprecated
-	public void setRuntimeIndexing(RuntimeIndexingEntryList argIndexingEntryList) {
-		runtimeIndexingEntries = argIndexingEntryList;
+	public void setRuntimeIndexing(Object argIndexingEntryList) {
+		// ciao bye
 	}
 	
 	public final void parse(InputStream input, boolean appendAtTheEndOfSave) {

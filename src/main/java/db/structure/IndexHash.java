@@ -14,8 +14,8 @@ import db.search.Operator;
 
 public class IndexHash extends Index {
 
-	public IndexHash(Column column) {
-		super(column);
+	public IndexHash(Table table, Column column) {
+		super(table, column);
 		this.indexedValuesMap = new HashMap<>();
 	}
 
@@ -27,6 +27,11 @@ public class IndexHash extends Index {
 
 	@Override
 	public void addValue(Object value, DiskDataPosition position) throws IOException {
+		// TODO
+	}
+
+	@Override
+	public void flushOnDisk() throws IOException {
 		// TODO
 	}
 

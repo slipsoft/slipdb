@@ -152,10 +152,8 @@ class IndexTreeMessyTest {
 		
 		//table.clearDataDirectory();
 
-		indexPickupDate = new IndexTreeDic(table, 1);
-		indexTripDistance = new IndexTreeDic(table, 4);
-		table.addIndex(indexPickupDate);
-		table.addIndex(indexTripDistance);
+		indexPickupDate = table.createIndex("tpep_pickup_datetime", IndexTreeDic.class);
+		indexTripDistance = table.createIndex("trip_distance", IndexTreeDic.class);
 		table.addIndex(new IndexTreeDic(table, 2));
 		table.addIndex(new IndexTreeDic(table, 3));
 		table.addIndex(new IndexTreeDic(table, 5));
@@ -730,9 +728,6 @@ class IndexTreeMessyTest {
 		if (enableCsvRelatedTests == false) return;
 		Column column1 = table.getColumns().get(1);
 		Column column4 = table.getColumns().get(4);
-		Field field = new Field(column4.getName());
-		ArrayList<Field> listFields = new ArrayList<>();
-		listFields.add(field);
 		String stringDateFrom = "2015-04-05 00:00:00";//"2015-04-04 00:01:00";//
 		String stringDateTo = "2015-04-06 00:00:00";//"2015-04-04 00:18:57";//
 		Date dateFrom = currentlyUsedUils.dateFromString(stringDateFrom);
@@ -749,12 +744,12 @@ class IndexTreeMessyTest {
 		FilterTerm filter2 = new FilterGroup(JoinMethod.and, new Predicate[] {predicate2, predicate3});
 		FilterTerm filter3 = new FilterGroup(JoinMethod.and, new Predicate[] {predicate2, predicate4});
 		FilterTerm filter4 = new FilterGroup(JoinMethod.or, new Predicate[] {predicate2, predicate3});
-		View view1 = new View(table, predicate1, listFields, new ArrayList<>(), new Group());
-		View view2 = new View(table, predicate2, listFields, new ArrayList<>(), new Group());
-		View view3 = new View(table, filter1, listFields, new ArrayList<>(), new Group());
-		View view4 = new View(table, filter2, listFields, new ArrayList<>(), new Group());
-		View view5 = new View(table, filter3, listFields, new ArrayList<>(), new Group());
-		View view6 = new View(table, filter4, listFields, new ArrayList<>(), new Group());
+		View view1 = new View(table, predicate1);
+		View view2 = new View(table, predicate2);
+		View view3 = new View(table, filter1);
+		View view4 = new View(table, filter2);
+		View view5 = new View(table, filter3);
+		View view6 = new View(table, filter4);
 
 		try {
 			ResultSet result;
