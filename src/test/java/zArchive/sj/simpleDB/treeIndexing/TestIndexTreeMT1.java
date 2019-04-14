@@ -9,12 +9,6 @@ import java.util.Date;
 
 import db.structure.StructureException;
 import db.data.load.Loader;
-<<<<<<< HEAD:src/test/java/db/sTreeIndex/TestIndexTreeMT1.java
-import db.structure.recherches.TableHandler;
-import index.indexTree.IndexTreeCeption;
-
-=======
->>>>>>> master:src/test/java/zArchive/sj/simpleDB/treeIndexing/TestIndexTreeMT1.java
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -33,12 +27,12 @@ import db.data.types.StringType;
 import db.data.load.CsvParser;
 import db.structure.Column;
 import db.structure.Table;
+import index.indexTree.IndexTreeCeption;
 
 /***
  * Premier test de multi-thread simple
  *
  */
-
 
 public class TestIndexTreeMT1 {
 
