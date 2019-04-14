@@ -20,7 +20,8 @@ public class SGlobalHandler {
 	
 	
 	protected static ArrayList<TableHandler> tableHandlersList = new ArrayList<TableHandler>();
-	
+
+	@Deprecated
 	public static TableHandler initializeTable(String tableName) {
 		if (tableName == null) return null;
 		

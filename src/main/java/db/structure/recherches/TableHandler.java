@@ -76,14 +76,15 @@ public class TableHandler implements Serializable {
 		multiThreadParsingListLock = new Object();
 		runtimeIndexingList = new RuntimeIndexingEntryList();
 	}
-	
+
+	@Deprecated
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		in.defaultReadObject();
 		loadSerialAndCreateCommon();
 	}
 	
 	
-
+	@Deprecated
 	public TableHandler() {
 		loadSerialAndCreateCommon();
 	}
@@ -92,15 +93,18 @@ public class TableHandler implements Serializable {
 	public void forceAppendNotFirstParsing() {
 		firstTimeParsingData = false; // si à vrai, supprimer tous les fichiers connus
 	}
-	
+
+	@Deprecated
 	public String getTableName() {
 		return tableName;
 	}
 
+	@Deprecated
 	public Table getAssociatedTable() {
 		return this.associatedTable;
 	}
 
+	@Deprecated
 	public TableHandler(String argTableName) {
 		this();
 		tableName = argTableName;
@@ -112,6 +116,7 @@ public class TableHandler implements Serializable {
 	 *  @param argColumnDataType
 	 * @throws Exception 
 	 */
+	@Deprecated
 	public void addColumn(String argColumnName, DataType argColumnDataType) throws Exception {
 		addColumn(argColumnName, argColumnDataType, false, false);
 	}
@@ -130,10 +135,12 @@ public class TableHandler implements Serializable {
 		return this.columnsListForCreatingTableOnly.stream().anyMatch(col -> col.getName() == name);
 	}
 
+	@Deprecated
 	public void addColumn(Column column) {
 		columnsListForCreatingTableOnly.add(column);
 	}
-	
+
+	@Deprecated
 	public Table createTable() throws IOException {
 		associatedTable = new Table(tableName, columnsListForCreatingTableOnly);
 		return associatedTable;
@@ -264,7 +271,7 @@ public class TableHandler implements Serializable {
 	// Pour l'instant, il n'y a que le spport des index mono-colonne.
 	// Faire une recherche sur une colonne équivaut à trouver l'index qui traîte de la colonne, et à faire la recherche dessus.
 	
-	
+	@Deprecated
 	public void createRuntimeIndexingColumn(int columnIndex) throws Exception { // addInitialColumnAndCreateAssociatedIndex
 		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");
 		List<Column> columnList = associatedTable.getColumns();
@@ -281,7 +288,7 @@ public class TableHandler implements Serializable {
 		indexEntry.associatedIndexTree.initialiseWithTableAndColumn(associatedTable, columnIndex); // Pour pouvoir indexer au runtime (lors du parsing)
 	}
 	
-	
+	@Deprecated
 	public void createRuntimeIndexingColumn(String columnName) throws Exception {
 		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");
 		int colIndex = getColumnIndex(columnName);
@@ -509,11 +516,12 @@ public class TableHandler implements Serializable {
 	}
 	
 	public void multiThreadParsingAddFile() {
-		
+
 	}
-	
+
+	@Deprecated
 	public void clearDataDirectory() throws IOException {
 		associatedTable.getDataHandler().clearDataDirectory();
 	}
-	
+
 }

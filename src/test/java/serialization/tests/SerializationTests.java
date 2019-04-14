@@ -25,42 +25,40 @@ import db.structure.Table;
 import db.structure.recherches.TableHandler;
 
 public class SerializationTests {
+	private static Table table;
 	
 	
-	
-	public void createNewTable() throws Exception {
-		Table table;
+	public static void createNewTable() throws Exception {
+		table = new Table("NYtest");
 		Utils currentlyUsedUils = new Utils(); // For thread-safety ! (but, here, it's static so thread unsafe... ^^')
-		
-		TableHandler tableHandler = new TableHandler("NYtest");
-		assertEquals(true, tableHandler != null);
+
+		assertEquals(true, table != null);
 		
 		//getValuesOfLineByIdForSignleQuery
 
-		tableHandler.addColumn("VendorID", new ByteType());
+		table.addColumn("VendorID", new ByteType());
 		// -> On a bien les mêmes résultats en castant la date et en la traîtant comme une string
-		tableHandler.addColumn("tpep_pickup_datetime", new DateType()); //new StringType(19));//
-		tableHandler.addColumn("tpep_dropoff_datetime", new DateType());//new StringType(19)); // 
-		tableHandler.addColumn("passenger_count", new ByteType());
-		tableHandler.addColumn("trip_distance", new FloatType());
-		tableHandler.addColumn("pickup_longitude", new DoubleType());
-		tableHandler.addColumn("pickup_latitude", new DoubleType());
-		tableHandler.addColumn("RateCodeID", new ByteType());
-		tableHandler.addColumn("store_and_fwd_flag", new StringType(1));
-		tableHandler.addColumn("dropoff_longitude", new DoubleType());
-		tableHandler.addColumn("dropoff_latitude", new DoubleType());
-		tableHandler.addColumn("payment_type",  new ByteType());
-		tableHandler.addColumn("fare_amount", new FloatType());
-		tableHandler.addColumn("extra", new FloatType());
-		tableHandler.addColumn("mta_tax", new FloatType());
-		tableHandler.addColumn("tip_amount", new FloatType());
-		tableHandler.addColumn("tolls_amount", new FloatType());
-		tableHandler.addColumn("improvement_surcharge", new FloatType());
-		tableHandler.addColumn("total_amount", new FloatType());
+		table.addColumn("tpep_pickup_datetime", new DateType()); //new StringType(19));//
+		table.addColumn("tpep_dropoff_datetime", new DateType());//new StringType(19)); //
+		table.addColumn("passenger_count", new ByteType());
+		table.addColumn("trip_distance", new FloatType());
+		table.addColumn("pickup_longitude", new DoubleType());
+		table.addColumn("pickup_latitude", new DoubleType());
+		table.addColumn("RateCodeID", new ByteType());
+		table.addColumn("store_and_fwd_flag", new StringType(1));
+		table.addColumn("dropoff_longitude", new DoubleType());
+		table.addColumn("dropoff_latitude", new DoubleType());
+		table.addColumn("payment_type",  new ByteType());
+		table.addColumn("fare_amount", new FloatType());
+		table.addColumn("extra", new FloatType());
+		table.addColumn("mta_tax", new FloatType());
+		table.addColumn("tip_amount", new FloatType());
+		table.addColumn("tolls_amount", new FloatType());
+		table.addColumn("improvement_surcharge", new FloatType());
+		table.addColumn("total_amount", new FloatType());
+
 		
-		table = tableHandler.createTable();
-		
-		tableHandler.clearDataDirectory();
+		table.clearDataDirectory();
 		
 		Database.getInstance().getAllTables().add(table);
 	}

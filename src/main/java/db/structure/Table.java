@@ -23,7 +23,6 @@ import db.disk.dataHandler.DiskDataPosition;
 import db.disk.dataHandler.TableDataHandler;
 import db.search.Predicate;
 import db.search.ResultSet;
-import db.structure.recherches.TableHandler;
 import index.indexTree.IndexException;
 
 /**
@@ -45,7 +44,6 @@ public class Table implements Serializable {
 	
 	//protected final String dataFilesOnDiskBasePath; devenu baseTablePath
 	protected final TableDataHandler dataHandler;
-	@Deprecated protected TableHandler tableHandler;
 	
 	protected final String name; // table name
 	
@@ -89,7 +87,6 @@ public class Table implements Serializable {
 	public Table(String argName, List<Column> argColumnsList, short argNodeID, int argTableID) throws IOException {
 		name = argName;
 		columnsList.addAll(argColumnsList);
-		tableHandler = new TableHandler(argName);
 		
 		baseTablePath = baseAllTablesDirPath + name + "/";
 		dataHandler = new TableDataHandler(this, baseTablePath);
@@ -119,11 +116,6 @@ public class Table implements Serializable {
 
 	public TableDataHandler getDataHandler() {
 		return dataHandler;
-	}
-
-	@Deprecated
-	public TableHandler getTableHandler() {
-		return tableHandler;
 	}
 
 	public int getLineSize() {
@@ -364,6 +356,10 @@ public class Table implements Serializable {
 		ArrayList<ColumnEntity> allColumns = this.columnsList.stream().map(Column::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
 		// ArrayList<IndexEntity> allIndexes = this.indexesList.stream().map(Index::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
 		return new TableEntity(name, allColumns);
+	}
+
+	public void clearDataDirectory() throws IOException {
+		this.dataHandler.clearDataDirectory();
 	}
 
 }
