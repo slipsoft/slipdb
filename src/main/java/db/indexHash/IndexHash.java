@@ -18,24 +18,25 @@ import db.search.Operator;
 public class IndexHash extends Index {
 	
 	
-	protected HashMap<KeyHash, ArrayList<Integer>> indexedValues;
+	// Hash map associant une clef à une liste de positions (index des lignes parsées des csv)
+	protected HashMap<KeyHash, ArrayList<Integer>> indexMap;
 	
 	public IndexHash(Column column) {
 		super(column);
-		this.indexedValues = new HashMap<>();
+		this.indexMap = new HashMap<>();
 	}
-
+	
 	@Override
 	public DataPositionList getPositionsFromPredicate(Predicate predicate) throws IndexException {
 		// TODO make this func
 		return null;
 	}
-
+	
 	@Override
 	public void addValue(Object value, DiskDataPosition position) throws IOException {
 		// TODO
 	}
-
+	
 	@Override
 	public boolean isOperatorCompatible(Operator op) {
 		if(!ArrayUtils.contains(new Operator[] {
@@ -48,5 +49,5 @@ public class IndexHash extends Index {
 		}
 		return true;
 	}
-
+	
 }

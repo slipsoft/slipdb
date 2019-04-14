@@ -32,7 +32,6 @@ public class TableHandler implements Serializable {
 	TableHandler -> Table -> Colonnes
 						  -> TableDataHandler
 				 -> IndexTree
-				 
 	*/
 	private static final long serialVersionUID = -4180065130691064979L;
 	protected String tableName;
