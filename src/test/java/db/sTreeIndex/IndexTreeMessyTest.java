@@ -171,7 +171,7 @@ class IndexTreeMessyTest {
 		//tableHandler.createRuntimeIndexingColumn("trip_distance"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
 		//tableHandler.createRuntimeIndexingColumn("tpep_dropoff_datetime"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
 		//tableHandler.createRuntimeIndexingColumn("dropoff_longitude"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
-
+		
 		//tableHandler.createRuntimeIndexingColumn(1);
 		/*tableHandler.createRuntimeIndexingColumn(2);
 		tableHandler.createRuntimeIndexingColumn(3);
