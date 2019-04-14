@@ -34,11 +34,13 @@ public class Column implements Serializable {
 	protected DataType dataType;
 	@Deprecated /* @CurrentlyUnused */ transient protected List<Index> relatedIndexesList = new ArrayList<>();
 	//inutile désormais -> private transient Object writeInMemoryLock = new Object();
-
+	
+	
 	protected DataType storedDataType; // <- type de la donnée stockée
-	// Stockage de la donnée à garder en mémoire ici
+	// Stockage des données à garder en mémoire ici
 	// -> Il n'est pas possible d'utiliser l'héritage ici, il faut un truc qui prenne le moins de mémoire possible, donc pas des objets.
 	protected ArrayList<ColumnDataChunk> a2DataChunk = new ArrayList<ColumnDataChunk>();
+	
 	// Les données seront écrites dans la mémoire et/ou sur le disque. Version simple : un seul fichier par colonne
 	transient protected EasyFile dataOnDiskFile;// = new EasyFile(); TODO
 	public final boolean writeDataOnDisk;

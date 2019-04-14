@@ -24,7 +24,6 @@ import db.structure.recherches.RuntimeIndexingEntryList;
 import index.indexTree.IndexException;
 
 public class Loader {
-	private Table schema;
 	private Table currentTable;
 	private Parser parser;
 	private int lineByteSize; // number of bytes used to store information
@@ -53,7 +52,7 @@ public class Loader {
 	Object[] localEntriesArray;
 	
 	public Loader(Table schema, Parser parser, boolean doRuntimeIndexing) { // 
-		this.schema = schema; // <- C'est Nicolas qui a voulu appeler ça comme ça, pas moi :p
+		//this.schema = schema; // <- C'est Nicolas qui a voulu appeler ça comme ça, pas moi :p
 		currentTable = schema;
 		this.parser = parser;
 		this.doRuntimeIndexing = doRuntimeIndexing;
@@ -86,9 +85,9 @@ public class Loader {
 	 * @param limit
 	 */
 	public final void parse(InputStream input, int limit, boolean appendAtTheEndOfSave) {
-		Log.info("PARSE : memusage init = ");
-		System.gc();
-		MemUsage.printMemUsage();
+		//Log.info("PARSE : memusage init = ");
+		//System.gc();
+		//MemUsage.printMemUsage();
 		int localReadEntryNb = 0;
 		int localReadEntryNbToAddToTotalCount = 0;
 		TableDataHandler dataHandler = currentTable.getDataHandler();
@@ -240,7 +239,7 @@ public class Loader {
 				*/
 		if (doRuntimeIndexing) {
 			try {
-				schema.indexEntry(localEntriesArray, dataPosition);
+				currentTable.indexEntry(localEntriesArray, dataPosition);
 			} catch (IndexException e) {
 				Log.error(e);
 			}
@@ -256,6 +255,6 @@ public class Loader {
 	 * @return
 	 */
 	private final boolean isCorrectSize(String[] valuesArray) {
-		return valuesArray.length == schema.getColumns().size();
+		return valuesArray.length == currentTable.getColumns().size();
 	}
 }
