@@ -3,6 +3,7 @@ package noob.fastStructure;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.dant.utils.Log;
 
@@ -15,9 +16,9 @@ import db.structure.Table;
 public class SCsvLoaderRunnable implements Runnable {
 	
 	private boolean hasToBeExecuted = false; // vrai si doit être exécuté
-	private AtomicBoolean readyForNewTask = new AtomicBoolean(true);
+	public AtomicBoolean readyForNewTask = new AtomicBoolean(true);
 	//private AtomicBoolean collectingData = new AtomicBoolean(false);
-	private AtomicBoolean running = new AtomicBoolean(false);
+	public AtomicBoolean running = new AtomicBoolean(false);
 	private final int linesBufferCount = 200_000; // mise en buffer de 200_000 lignes avant la création d'un nouveau thread
 	
 	private String[] linesBuffer = new String[linesBufferCount];
@@ -34,6 +35,8 @@ public class SCsvLoaderRunnable implements Runnable {
 	private Object criticalLock = new Object();
 	
 	private Thread runningWithThread = null;
+	
+	public static AtomicInteger activeThreadNb = new AtomicInteger(0);
 	
 	/*
 	public Thread getRunningThread() {
@@ -86,6 +89,7 @@ public class SCsvLoaderRunnable implements Runnable {
 		running.set(true);
 		runningWithThread = new Thread(this);
 		runningWithThread.start();
+		activeThreadNb.addAndGet(1);
 	}
 	
 	
@@ -100,7 +104,8 @@ public class SCsvLoaderRunnable implements Runnable {
 		running.set(false);
 		hasToBeExecuted = false;
 		readyForNewTask.set(true);
-		Log.info("RUNNABLE executionTerminated");
+		activeThreadNb.addAndGet(-1);
+		Log.info("RUNNABLE executionTerminated - activeThreadNb = " + activeThreadNb.get());
 	}
 	
 	@Override

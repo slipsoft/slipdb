@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.IntBuffer;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.dant.utils.Log;
@@ -20,7 +21,7 @@ import db.structure.Table;
  */
 public class SCsvLoader {
 	
-	private final int threadCount = 8;//+8;
+	private final int threadCount = 2;//+8;
 	private SCsvLoaderRunnable[] runnableArray;// = new SLoaderThread[threadCount];
 	
 	private Table currentTable;
@@ -37,10 +38,11 @@ public class SCsvLoader {
 	private Parser loaderParser;
 	private Object loaderWriteInMemoryLock = new Object();
 	
-	
+	IntBuffer buff;
 	
 	
 	public SCsvLoader(Table argTable, Parser argParser) {
+		
 		loaderParser = argParser;
 		// Création des threads
 		runnableArray = new SCsvLoaderRunnable[threadCount];
@@ -67,12 +69,16 @@ public class SCsvLoader {
 			for (int iThread = 0; iThread < threadCount; iThread++) {
 				if (runnableArray[iThread].tryUseForNewDataCollection()) {
 					foundReadyThread = runnableArray[iThread];
+					Timer t = new Timer("GC temps pris");
+					System.gc();
+					t.log();
 					break;
 				}
 			}
 			if (foundReadyThread == null) {
+				Log.info("Attente d'un thread dispo...");
 				try {
-					Thread.sleep(2); // attente mi-active
+					Thread.sleep(20); // attente mi-active
 				} catch (Exception e) {
 					Log.error(e);
 				}
@@ -126,8 +132,14 @@ public class SCsvLoader {
 				
 				// Affichage d'une entrée toutes les showInfoEveryParsedLines entrées lues
 				if (showInfoEveryParsedLines != -1 && localReadEntryNb % showInfoEveryParsedLines == 0) {
-					Log.info("Loader : nombre de résultats (local) lus = " + localReadEntryNb + "   temps écoulé = " + timeTookTimer.pretty());
+					Log.info("Loader : nombre de résultats (local) lus = " + localReadEntryNb + "   temps écoulé = " + timeTookTimer.pretty() + "activeThreadNb = " + SCsvLoaderRunnable.activeThreadNb.get());
 					//MemUsage.printMemUsage();
+					if (SCsvLoaderRunnable.activeThreadNb.get() < 3) {
+						debugShowRunnablesState();
+						
+						
+					}
+					
 				}
 				
 				if (localReadEntryNbToAddToTotalCount >= updateTotalReadEntryNbEach) {
@@ -158,6 +170,16 @@ public class SCsvLoader {
 		
 	}
 	
+	
+	private void debugShowRunnablesState() {
+		for (int iThread = 0; iThread < threadCount; iThread++) {
+			boolean readyForNewTask = runnableArray[iThread].readyForNewTask.get();
+			boolean running = runnableArray[iThread].running.get();
+			Log.info("Thread " + iThread + " ready=" + readyForNewTask + " running=" + running);
+			
+		}
+		
+	}
 	
 	
 }
