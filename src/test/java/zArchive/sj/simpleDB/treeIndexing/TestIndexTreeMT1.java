@@ -1,4 +1,4 @@
-package db.sTreeIndex;
+package zArchive.sj.simpleDB.treeIndexing;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,13 +9,15 @@ import java.util.Date;
 
 import db.structure.StructureException;
 import db.data.load.Loader;
+<<<<<<< HEAD:src/test/java/db/sTreeIndex/TestIndexTreeMT1.java
 import db.structure.recherches.TableHandler;
 import index.indexTree.IndexTreeCeption;
 
+=======
+>>>>>>> master:src/test/java/zArchive/sj/simpleDB/treeIndexing/TestIndexTreeMT1.java
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 
 import com.dant.utils.Log;
 import com.dant.utils.MemUsage;

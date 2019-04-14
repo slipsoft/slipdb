@@ -71,5 +71,16 @@ public class DiskDataPosition implements Comparable<DiskDataPosition>, Serializa
 		if (lineIndex < otherObject.lineIndex) return -1;
 		return 0;
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		DiskDataPosition pos = (DiskDataPosition) o;
+		return pos.fileID == this.fileID && pos.lineIndex == this.lineIndex; // pos.nodeID == this.nodeID && 
+	}
+
+	@Override
+	public int hashCode() {
+		return (int) this.fileID + this.lineIndex; // Math.pow(31, nodeID) * 
+	}
 	
 }

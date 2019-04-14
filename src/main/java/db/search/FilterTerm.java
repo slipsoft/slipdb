@@ -1,7 +1,9 @@
 package db.search;
 
-import db.data.types.DataPositionList;
+import db.disk.dataHandler.DiskDataPosition;
+
+import java.util.Set;
 
 public interface FilterTerm {
-    DataPositionList execute() throws SearchException;
+    Set<DiskDataPosition> execute() throws SearchException;
 }

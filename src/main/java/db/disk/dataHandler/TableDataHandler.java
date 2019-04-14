@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -138,12 +139,12 @@ public class TableDataHandler implements Serializable {
 	 *  et garantit que tous les résultats seront bien lus, si waitForAllResults == true
 	 *  
 	 *  Une optimisation de plus serait de rendre la lecture sur fichiers multi-thread (à faire, plus tard)
-	 * @param dataPosition
+	 * @param argDataPositionList
 	 * @return
 	 * @throws IOException
 	 */
 	@SuppressWarnings("unchecked")
-	public ResultSet getValuesOfLinesListById(DataPositionList argDataPositionList, boolean waitForAllResults, int waitTimeLimitMs, ArrayList<Integer> neededColumnsIndexList) { // or getRowById
+	public ResultSet getValuesOfLinesListById(Collection<DiskDataPosition> argDataPositionList, boolean waitForAllResults, int waitTimeLimitMs, ArrayList<Integer> neededColumnsIndexList) { // or getRowById
 		
 		ResultSet resultsArraySortedByColumns = new ResultSet(); // ArrayList<ArrayList<Object>>
 		ArrayList<Integer> neededColumnsIndexListSorted = null;
@@ -152,7 +153,7 @@ public class TableDataHandler implements Serializable {
 			Collections.sort(neededColumnsIndexListSorted);
 		}
 		
-		DataPositionList dataPositionList = (DataPositionList) argDataPositionList.clone(); // copie de la liste
+		ArrayList<DiskDataPosition> dataPositionList = new ArrayList<>(argDataPositionList); // copie de la liste
 		// Je classe par fichiers
 		// Je classe par position dans le fichier
 		Collections.sort(dataPositionList); // pas super opti pour un très grand nombre de résultats (100 000+)

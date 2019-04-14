@@ -1,11 +1,12 @@
 package db.search;
 
-import db.data.types.DataPositionList;
+import db.disk.dataHandler.DiskDataPosition;
 import db.structure.Column;
 import db.structure.Table;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class View {
 
@@ -49,7 +50,7 @@ public class View {
 	 */
 	public ResultSet execute() throws SearchException {
 		Column[] columns = getListColumns();
-		DataPositionList positions = this.filter.execute();
+		Set<DiskDataPosition> positions = this.filter.execute();
 		try {
 		return table.getFullResultsFromBinIndexes(positions);
 		} catch (Exception e) {

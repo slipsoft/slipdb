@@ -1,14 +1,12 @@
 package db.structure;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.io.IOException;
 
 import db.disk.dataHandler.DiskDataPosition;
 import db.search.Operator;
-import db.data.types.DataPositionList;
-
-import org.apache.commons.lang3.ArrayUtils;
 
 import db.search.Operable;
 import db.search.Predicate;
@@ -73,6 +71,6 @@ public abstract class Index implements Operable {
 	}
 
 	public abstract boolean isOperatorCompatible(Operator op);
-	public abstract DataPositionList getPositionsFromPredicate(Predicate predicate) throws IndexException;
+	public abstract Collection<DiskDataPosition> getPositionsFromPredicate(Predicate predicate) throws IndexException;
 	public abstract void addValue(Object value, DiskDataPosition position) throws IOException;
 }
