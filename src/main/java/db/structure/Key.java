@@ -5,6 +5,7 @@ package db.structure;
 // objets du type Key entre eux : soit on lui met des variables pour implémenter son type (au risque de voir les performances chuter grandement)
 // 
 
+@Deprecated
 public abstract class Key {
 	
 	protected Object value; // liste des valeurs contenues dans cette clef

@@ -1,11 +1,14 @@
-package db.structure;
+package db.indexHash;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import db.data.types.DataPositionList;
 import db.disk.dataHandler.DiskDataPosition;
 import db.search.Predicate;
+import db.structure.Column;
+import db.structure.Index;
 import index.indexTree.IndexException;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -13,10 +16,13 @@ import org.apache.commons.lang3.ArrayUtils;
 import db.search.Operator;
 
 public class IndexHash extends Index {
-
+	
+	
+	protected HashMap<KeyHash, ArrayList<Integer>> indexedValues;
+	
 	public IndexHash(Column column) {
 		super(column);
-		this.indexedValuesMap = new HashMap<>();
+		this.indexedValues = new HashMap<>();
 	}
 
 	@Override
