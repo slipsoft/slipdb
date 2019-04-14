@@ -1,11 +1,13 @@
 package db.search;
 
-import db.data.types.DataPositionList;
+import db.disk.dataHandler.DiskDataPosition;
 import db.structure.Column;
 import db.structure.Index;
 import db.structure.StructureException;
 import db.structure.Table;
 
+import java.util.HashSet;
+import java.util.Set;
 
 public class Predicate implements FilterTerm {
 	protected Table table;
@@ -49,9 +51,9 @@ public class Predicate implements FilterTerm {
 	public Object getValue() { return this.value; }
 
 	@Override
-	public DataPositionList execute() throws SearchException {
+	public Set<DiskDataPosition> execute() throws SearchException {
 		try {
-			return getIndex().getPositionsFromPredicate(this);
+			return new HashSet<>(getIndex().getPositionsFromPredicate(this));
 		} catch (StructureException e) {
 			throw new SearchException(e);
 		}
