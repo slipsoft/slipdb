@@ -158,7 +158,7 @@ public class TableDataHandler implements Serializable {
 		// Je classe par position dans le fichier
 		Collections.sort(dataPositionList); // pas super opti pour un très grand nombre de résultats (100 000+)
 		// Regrouper par fichier
-		short oldNodeID = -1;
+		//short oldNodeID = -1;
 		short oldFileID = -1;
 		//int oldSingleID = (oldNodeID << 16) + (oldFileID << 0);
 		
@@ -168,10 +168,11 @@ public class TableDataHandler implements Serializable {
 		
 		
 		for (DiskDataPosition dataPosition : dataPositionList) {
-			if (dataPosition.nodeID != oldNodeID || dataPosition.fileID != oldFileID) {
+			//Log.infoOnly("dataPosition = fid=" + dataPosition.fileID + "  line=" + dataPosition.lineIndex);
+			if (dataPosition.fileID != oldFileID) { // dataPosition.nodeID != oldNodeID || 
 				a1CurrentDataPosArray = new ArrayList<DiskDataPosition>();
 				a2OrderedByFileList.add(a1CurrentDataPosArray);
-				oldNodeID = dataPosition.nodeID;
+				//oldNodeID = dataPosition.nodeID;
 				oldFileID = dataPosition.fileID;
 			}
 			a1CurrentDataPosArray.add(dataPosition); // pas opti de les ajouter un par un mais bon... C'est déjà opti de faire fichier par fichier !
@@ -196,6 +197,7 @@ public class TableDataHandler implements Serializable {
 		synchronized (allFilesListLock) {
 			int checkIndex = 0;
 			while (a2OrderedByFileList.size() > 0) {
+				//Log.info("checkIndex = " + checkIndex);
 				if (checkIndex >= a1CurrentDataPosArray.size()) {
 					checkIndex = 0; // boucle, revenir au premier fichier
 				}
@@ -219,6 +221,7 @@ public class TableDataHandler implements Serializable {
 							if (dataFile.tryToUseThisFile(true, true)) {
 								fondUsableDataFile = dataFile;
 							} else {
+								//Log.error("En cours d'utilisation : fichier = " + fileID);
 								break; // puis checkIndex++ si waitForAllResults
 								//throw new IOException("Impossible de lire du fichier : il est occupé.");
 							}
@@ -239,17 +242,24 @@ public class TableDataHandler implements Serializable {
 					//Log.info("Fichier trouvé " + fileID);
 					// Pour chaque donnée à lire, je la lis
 					for (DiskDataPosition dataPos : a1CurrentDataPosArray) {
+						//Log.infoOnly("LU : fid=" + dataPos.fileID + "  line=" + dataPos.lineIndex);
 						ArrayList<Object> entryAsArray;
 						try {
-							entryAsArray = fondUsableDataFile.orderedReadGetValuesOfLineById(dataPos, myTable, neededColumnsIndexListSorted, neededColumnsIndexList);
+
+							//Log.infoOnly("LU 1");
+							entryAsArray = fondUsableDataFile.orderedReadGetValuesOfLineById(dataPos, myTable, null, neededColumnsIndexList); //  neededColumnsIndexListSorted
+							//Log.infoOnly("LU 2");
 							resultsArraySortedByColumns.add(entryAsArray);
+							//Log.infoOnly("LU 3");
 						} catch (IOException e) {
 							Log.error(e);
 							e.printStackTrace();
 						}
+						//Log.infoOnly("LU OK !!");
 					}
 					try {
 						fondUsableDataFile.stopFileUse();
+						//Log.infoOnly("STOP FILE USE");
 					} catch (IOException e) {
 						Log.error(e);
 						e.printStackTrace();
@@ -320,7 +330,7 @@ public class TableDataHandler implements Serializable {
 			if (foundDataFile == null) {
 				short fileID = (short)nextFileID.getAndIncrement();
 				String fullFilePath = baseTablePath + saveFileBaseName + fileID + fileExtension;// getFileNameFromDataPosition(); //
-				foundDataFile = new TableDataHandlerFile(currentNodeID, fileID, fullFilePath);
+				foundDataFile = new TableDataHandlerFile(fileID, fullFilePath);
 				boolean canUseFile = foundDataFile.tryToUseThisFile(false, true);
 				//Log.info("TableDataHandler.findOrCreateWriteFile : créé   foundDataFile == " + foundDataFile);
 				if (canUseFile == false) {

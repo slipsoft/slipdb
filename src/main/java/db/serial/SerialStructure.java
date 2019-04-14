@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import com.dant.utils.EasyFile;
 import com.dant.utils.Log;
 
 import db.structure.Database;
@@ -40,6 +41,9 @@ public class SerialStructure {
 	public static void writeStructureTo(String filePath) {
 		
 		try {
+			EasyFile createDirFile = new EasyFile(filePath);
+			createDirFile.createFileIfNotExist();
+			
 			FileOutputStream fileOutputStream = new FileOutputStream(filePath);
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(new BufferedOutputStream(fileOutputStream));
 			
@@ -55,7 +59,8 @@ public class SerialStructure {
 		
 	}
 	
-
+	
+	
 	public static void loadStructureFrom(String filePath) {
 		try {
 			FileInputStream fileInputStream = new FileInputStream(filePath);

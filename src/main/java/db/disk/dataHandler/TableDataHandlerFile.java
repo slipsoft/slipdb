@@ -37,7 +37,11 @@ public class TableDataHandlerFile implements Serializable {
 	private int currentFileSize = 0;
 	private int currentFileEntriesNumber = 0;
 	private final short fileID;
-	private final short nodeID;
+	//private final short nodeID;
+	/* MAJ 01-04-2019
+	 * Suppression de nodeID, il faudra explicitement importer les données d'un autre noeud pour pouvoir les utiliser.
+	 * */
+	
 	
 	// Nonthread-safe, seulement utilisé par quelques fonctions spécifiques, et dans des cas bien précis
 	private DataOutputStream streamWriter = null;
@@ -46,13 +50,13 @@ public class TableDataHandlerFile implements Serializable {
 	private boolean isReadOnlyMode;
 	private int positionInReadOnlyFile = 0;
 	
-	static public final int maxFileSizeOnDisk = 150_000_000; // 500_000_000 Max 500 mo sur disque (grosse marge de sécurité)
+	static public final int maxFileSizeOnDisk = 450_000_000; // 500_000_000 Max 500 mo sur disque (grosse marge de sécurité)
 	
 	public void debugSerialShowVariables() {
 		Log.info("filePath = " + filePath);
 		Log.info("currentFileSize = " + currentFileSize);
 		Log.info("fileID = " + fileID);
-		Log.info("nodeID = " + nodeID);
+		//Log.info("nodeID = " + nodeID);
 	}
 	
 	private void initOrLoadCommon() throws IOException {
@@ -72,8 +76,8 @@ public class TableDataHandlerFile implements Serializable {
 	}
 	
 	
-	public TableDataHandlerFile(short argNodeID, short argFileID, String argFilePath) throws IOException {
-		nodeID = argNodeID;
+	public TableDataHandlerFile(short argFileID, String argFilePath) throws IOException { // short argNodeID, 
+		//nodeID = argNodeID;
 		fileID = argFileID;
 		filePath = argFilePath;
 		initOrLoadCommon();
@@ -177,7 +181,7 @@ public class TableDataHandlerFile implements Serializable {
 			fileIsFull.set(true);
 			stopFileUse();
 		}
-		TableDataPositionResult dataPositionResult = new TableDataPositionResult(nodeID, fileID, currentFileEntriesNumber - 1, canStillUseThisFile);
+		TableDataPositionResult dataPositionResult = new TableDataPositionResult(fileID, currentFileEntriesNumber - 1, canStillUseThisFile);
 		return dataPositionResult;
 	}
 	
@@ -225,18 +229,27 @@ public class TableDataHandlerFile implements Serializable {
 	 *  @throws IOException
 	 */
 	public ArrayList<Object> orderedReadGetValuesOfLineById(DiskDataPosition dataPosition, Table inTable, ArrayList<Integer> sortedWantedColumnsIndex, ArrayList<Integer> wantedColumnsIndexList) throws IOException {
+		//Log.infoOnly("readLineBa 0 ");
 		if (isReadOnlyMode == false) throw new IOException("Le fichier doit être ouvert en lecture."); // erreur, le fichier DOIT être ouvert en lecture
+		//Log.infoOnly("readLineBa 0.1 ");
 		int binPosInFile = dataPosition.lineIndex * inTable.getLineSize();
+		//Log.infoOnly("readLineBa 0.2 ");
 		int skipSize = binPosInFile - positionInReadOnlyFile; // skip de la bonne valeur, forcément positif car orderedReadSeekFirst
+		//Log.infoOnly("readLineBa 0.3 ");
 		if (skipSize < 0) {
-			 throw new IOException("orderedReadSeekFirst DOIT être utilisé pour lire dans l'ordre, il DOIT y avoir skipSize > 0 alors que skipSize = " + skipSize); // erreur,
+			String errorMessage = "orderedReadSeekFirst DOIT être utilisé pour lire dans l'ordre, il DOIT y avoir skipSize > 0 alors que skipSize = " + skipSize;
+			Log.error(errorMessage);
+			 throw new IOException(errorMessage); // erreur,
 		}
+		//Log.infoOnly("readLineBa 0.4 ");
 		streamReader.skipForce(skipSize);
+		//Log.infoOnly("readLineBa 0.5 ");
 		positionInReadOnlyFile = binPosInFile;
 		
 		ArrayList<Object> lineValues = new ArrayList<>(); // rowValues
 		// Renvoyer toutes les colonnes
 		if (sortedWantedColumnsIndex == null) {
+			//Log.infoOnly("readLineBa 1 ");
 			// For each column, reads the associated value
 			for (Column column : inTable.getColumns()) {
 				byte[] columnValueAsByteArray = new byte[column.getSize()];
@@ -244,6 +257,7 @@ public class TableDataHandlerFile implements Serializable {
 				//Log.debug(b); for debug purposes only
 				lineValues.add(column.getDataType().readTrueValue(columnValueAsByteArray));
 			}
+			//Log.infoOnly("readLineBa 2 ");
 		} else {
 			// Renvoyer seulement certaines colonnes
 			//int currentColumnIndex = 0;

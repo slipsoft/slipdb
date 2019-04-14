@@ -24,8 +24,11 @@ import db.data.types.FloatType;
 import db.data.types.IntegerArrayList;
 import db.data.types.DataPositionList;
 import db.data.types.StringType;
-import db.structure.indexTree.IndexTreeCeption;
-import db.structure.indexTree.IndexTreeDic;
+import db.structure.Column;
+import db.structure.Database;
+import db.structure.Table;
+import index.indexTree.IndexTreeCeption;
+import index.indexTree.IndexTreeDic;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -42,6 +45,8 @@ class IndexTreeMessyTest {
 	
 	private static boolean parseAgain = true;
 	private boolean doItWithTableHandler = true;
+	
+	public static final boolean enableCsvRelatedTests = true; // <- à true si faie tous les tests, false si c'est juste charger des CSV sans faire de test !)
 	
 	/** Pour la déserialisation
 	 * @param in
@@ -76,6 +81,54 @@ class IndexTreeMessyTest {
 
 		table.addColumn("VendorID", new ByteType());
 		// -> On a bien les mêmes résultats en castant la date et en la traîtant comme une string
+		
+		/*
+		tableHandler.addColumn("tpep_pickup_datetime", new DateType(), false); //new StringType(19));//
+		tableHandler.addColumn("tpep_dropoff_datetime", new DateType(), false);//new StringType(19)); // 
+		tableHandler.addColumn("passenger_count", new ByteType(), false);
+		tableHandler.addColumn("trip_distance", new FloatType(), true);
+		tableHandler.addColumn("pickup_longitude", new DoubleType(), false);
+		tableHandler.addColumn("pickup_latitude", new DoubleType(), false);
+		tableHandler.addColumn("RateCodeID", new ByteType(), false);
+		tableHandler.addColumn("store_and_fwd_flag", new StringType(1), false);
+		tableHandler.addColumn("dropoff_longitude", new DoubleType(), false);
+		tableHandler.addColumn("dropoff_latitude", new DoubleType(), false);
+		tableHandler.addColumn("payment_type",  new ByteType(), false);
+		tableHandler.addColumn("fare_amount", new FloatType(), false);
+		tableHandler.addColumn("extra", new FloatType(), false);
+		tableHandler.addColumn("mta_tax", new FloatType(), false);
+		tableHandler.addColumn("tip_amount", new FloatType(), false);
+		tableHandler.addColumn("tolls_amount", new FloatType(), false);
+		tableHandler.addColumn("improvement_surcharge", new FloatType(), false);
+		tableHandler.addColumn("total_amount", new FloatType(), false);
+		*/
+		/*
+		 Sauvegarde : 
+		tableHandler.addColumn("VendorID", new ByteType());
+		// -> On a bien les mêmes résultats en castant la date et en la traîtant comme une string
+		tableHandler.addColumn("tpep_pickup_datetime", new DateType()); //new StringType(19));//
+		tableHandler.addColumn("tpep_dropoff_datetime", new DateType());//new StringType(19)); // 
+		tableHandler.addColumn("passenger_count", new ByteType());
+		tableHandler.addColumn("trip_distance", new FloatType());
+		tableHandler.addColumn("pickup_longitude", new DoubleType());
+		tableHandler.addColumn("pickup_latitude", new DoubleType());
+		tableHandler.addColumn("RateCodeID", new ByteType());
+		tableHandler.addColumn("store_and_fwd_flag", new StringType(1));
+		tableHandler.addColumn("dropoff_longitude", new DoubleType());
+		tableHandler.addColumn("dropoff_latitude", new DoubleType());
+		tableHandler.addColumn("payment_type",  new ByteType());
+		tableHandler.addColumn("fare_amount", new FloatType());
+		tableHandler.addColumn("extra", new FloatType());
+		tableHandler.addColumn("mta_tax", new FloatType());
+		tableHandler.addColumn("tip_amount", new FloatType());
+		tableHandler.addColumn("tolls_amount", new FloatType());
+		tableHandler.addColumn("improvement_surcharge", new FloatType());
+		tableHandler.addColumn("total_amount", new FloatType());*/
+		
+		
+		//table = tableHandler.createTable();
+		//tableHandler.clearDataDirectory();
+		
 		table.addColumn("tpep_pickup_datetime", new DateType()); //new StringType(19));//
 		table.addColumn("tpep_dropoff_datetime", new DateType());//new StringType(19)); //
 		table.addColumn("passenger_count", new ByteType());
@@ -94,6 +147,7 @@ class IndexTreeMessyTest {
 		table.addColumn("tolls_amount", new FloatType());
 		table.addColumn("improvement_surcharge", new FloatType());
 		table.addColumn("total_amount", new FloatType());
+		
 
 		
 		//table.clearDataDirectory();
@@ -102,10 +156,23 @@ class IndexTreeMessyTest {
 		indexTripDistance = new IndexTreeDic(table, 4);
 		table.addIndex(indexPickupDate);
 		table.addIndex(indexTripDistance);
+		table.addIndex(new IndexTreeDic(table, 2));
+		table.addIndex(new IndexTreeDic(table, 3));
+		table.addIndex(new IndexTreeDic(table, 5));
+		table.addIndex(new IndexTreeDic(table, 6));
+		table.addIndex(new IndexTreeDic(table, 7));
+		table.addIndex(new IndexTreeDic(table, 8));
+		table.addIndex(new IndexTreeDic(table, 9));
+		table.addIndex(new IndexTreeDic(table, 10));
+		table.addIndex(new IndexTreeDic(table, 11));
+		table.addIndex(new IndexTreeDic(table, 12));
+		table.addIndex(new IndexTreeDic(table, 13));
+		table.addIndex(new IndexTreeDic(table, 14));
+		table.addIndex(new IndexTreeDic(table, 15));
 		//tableHandler.createRuntimeIndexingColumn("trip_distance"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
 		//tableHandler.createRuntimeIndexingColumn("tpep_dropoff_datetime"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
 		//tableHandler.createRuntimeIndexingColumn("dropoff_longitude"); // indexer au moment du parse, et non via indexColumnWithTreeFromDisk("trip_distance");
-
+		
 		//tableHandler.createRuntimeIndexingColumn(1);
 		/*tableHandler.createRuntimeIndexingColumn(2);
 		tableHandler.createRuntimeIndexingColumn(3);
@@ -169,11 +236,38 @@ class IndexTreeMessyTest {
 			tPars2.join();
 			tPars3.join();
 			tPars4.join();*/
+			
+			
+			String basePath = "E:/L3 DANT disque E/csv/";
+			
+			//tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-01.csv", true);
+			//tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-02.csv", true);
+			/*tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-03.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-04.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-05.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-06.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-07.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-08.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-09.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-10.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-11.csv", true);
+			tableHandler.multiThreadParsingAddAndStartCsv(basePath + "yellow_tripdata_2015-12.csv", true);
+			*/
+			
+			
 			// Loader de la donnée en multi-thread
+			//for (int i = 0; i < 20; i++)
+			
+			//table.multiThreadParsingAddAndStartCsv("E:/L3 DANT disque E/csv/yellow_tripdata_2015-07.csv", true);
 			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+
+			/*table.multiThreadParsingAddAndStartCsv("E:/L3 DANT disque E/csv/yellow_tripdata_2015-07.csv", true);
+			table.multiThreadParsingAddAndStartCsv("E:/L3 DANT disque E/csv/yellow_tripdata_2015-08.csv", true);
+			table.multiThreadParsingAddAndStartCsv("E:/L3 DANT disque E/csv/yellow_tripdata_2015-09.csv", true);*/
+			
 			// Attendre que toute la donnée soit parsée
 			table.multiThreadParsingJoinAllThreads();
 			
@@ -183,16 +277,16 @@ class IndexTreeMessyTest {
 			 */
 			
 			
+			//for (int i = 0; i < 6; i++)
+			//tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			/*tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);*/
 
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-07.csv", true);
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-08.csv", true);
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-09.csv", true);
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-10.csv", true);
-			Log.info("Nombre de résultats/entrées parsés FINAL : " + Loader.debugNumberOfEntriesWritten.get());
+			//Log.info("Nombre de résultats/entrées parsés FINAL : " + Loader.debugNumberOfEntriesWritten.get());
 			
 			
 			/**/
@@ -297,14 +391,13 @@ class IndexTreeMessyTest {
 			
 			/*Object searchFromValue = new Float(12.78641);
 			Object searchToValue = new Float(14.748621);*/
-	
+			
 			
 			Object searchFromValue = intDateFrom;//stringDateFrom;//
 			Object searchToValue = intDateTo;//stringDateTo;//
-
-
+			
 			Timer searchQueryTimer = new Timer("Temps total recherche"); // "Time took to return the matching elements" : flemme d'écrire en anglais
-
+			
 			Column column = table.getColumns().get(1);
 			Predicate predicate = new Predicate(table, column, Operator.between, new Object[] {searchFromValue, searchToValue});
 			Collection<DiskDataPosition> result = indexPickupDate.getPositionsFromPredicate(predicate);
@@ -315,7 +408,7 @@ class IndexTreeMessyTest {
 			
 			Timer searchQueryFullTimer = new Timer("Temps parcours des résultats");
 			int numberOfResults = result.size();
-			assertEquals(3116, numberOfResults);
+			if (enableCsvRelatedTests) assertEquals(3116, numberOfResults);
 			//int numberOfResults = tableHandler.evaluateNumberOfResults(result);
 			//int numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
 			searchQueryFullTimer.log();
@@ -332,7 +425,7 @@ class IndexTreeMessyTest {
 			
 			searchQueryFullTimer = new Timer("1Temps d'acquisition des résultats (chargement du disque de tous les champs)");
 			numberOfResults = result.size();// tableHandler.evaluateNumberOfResults(result);
-			assertEquals(700, numberOfResults);
+			if (enableCsvRelatedTests) assertEquals(700, numberOfResults);
 			//numberOfLines = tableHandler.evaluateNumberOfArrayListLines(result);
 			
 			//ArrayList<ArrayList<Object>>
@@ -357,7 +450,7 @@ class IndexTreeMessyTest {
 			predicate = new Predicate(table, column, Operator.equals, 18f);
 			result = indexTripDistance.getPositionsFromPredicate(predicate);
 			numberOfResults = result.size();
-			assertEquals(116, numberOfResults);
+			if (enableCsvRelatedTests) assertEquals(116, numberOfResults);
 			Log.info("Nombre de résultats (pour 18 exact) = " + numberOfResults);
 			
 			
@@ -634,6 +727,7 @@ class IndexTreeMessyTest {
 
 	@Test
 	void executeView() {
+		if (enableCsvRelatedTests == false) return;
 		Column column1 = table.getColumns().get(1);
 		Column column4 = table.getColumns().get(4);
 		Field field = new Field(column4.getName());

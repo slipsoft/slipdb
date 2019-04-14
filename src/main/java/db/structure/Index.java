@@ -7,11 +7,10 @@ import java.io.IOException;
 
 import db.disk.dataHandler.DiskDataPosition;
 import db.search.Operator;
-import db.structure.indexTree.IndexException;
-import org.apache.commons.lang3.ArrayUtils;
 
 import db.search.Operable;
 import db.search.Predicate;
+import index.indexTree.IndexException;
 
 /**
  * Classe Index, permettant d'indexer une ou plusieurs colonnes Exemple :

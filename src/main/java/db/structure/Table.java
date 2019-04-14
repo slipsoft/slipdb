@@ -21,10 +21,10 @@ import db.data.load.Parser;
 import db.data.types.DataType;
 import db.disk.dataHandler.DiskDataPosition;
 import db.disk.dataHandler.TableDataHandler;
-import db.structure.indexTree.IndexException;
 import db.search.Predicate;
 import db.search.ResultSet;
 import db.structure.recherches.TableHandler;
+import index.indexTree.IndexException;
 
 /**
  * A simple SQL-like table, consisting of

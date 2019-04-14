@@ -6,7 +6,8 @@ import java.util.HashMap;
 import db.data.types.DataPositionList;
 import db.disk.dataHandler.DiskDataPosition;
 import db.search.Predicate;
-import db.structure.indexTree.IndexException;
+import index.indexTree.IndexException;
+
 import org.apache.commons.lang3.ArrayUtils;
 
 import db.search.Operator;

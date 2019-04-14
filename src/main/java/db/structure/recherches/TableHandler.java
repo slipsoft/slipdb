@@ -22,8 +22,8 @@ import db.structure.Column;
 import db.structure.Database;
 import db.structure.StructureException;
 import db.structure.Table;
-import db.structure.indexTree.IndexException;
-import db.structure.indexTree.IndexTreeDic;
+import index.indexTree.IndexException;
+import index.indexTree.IndexTreeDic;
 
 @Deprecated
 public class TableHandler implements Serializable {
@@ -50,20 +50,20 @@ public class TableHandler implements Serializable {
 	transient protected ArrayList<Thread> parsingThreadList;
 	
 	// indexColumnList est la liste des colonnes à indexer
-	transient public RuntimeIndexingEntryList runtimeIndexingList = new RuntimeIndexingEntryList();//ArrayList<SRuntimeIndexingEntry>();
+	transient public RuntimeIndexingEntryList runtimeIndexingList;//ArrayList<SRuntimeIndexingEntry>();
 	// TODO
 	protected ArrayList<IndexTreeDic> indexTreeList = new ArrayList<IndexTreeDic>(); // Liste des IndexTree associés à cette table
 	
 	public void flushAllIndexTreesOnDisk() {
-		Log.error("TableHandler.flushAllIndexTreesOnDisk : size = " + indexTreeList.size());
+		//Log.error("TableHandler.flushAllIndexTreesOnDisk : size = " + indexTreeList.size());
 		for (IndexTreeDic indexTree : indexTreeList) {
 			try {
 				indexTree.flushOnDisk();
-				Log.error("TableHandler.flushAllIndexTreesOnDisk : flush de l'arbre !" + indexTree);
+				//Log.error("TableHandler.flushAllIndexTreesOnDisk : flush de l'arbre !" + indexTree);
 			} catch (IOException e) {
-				Log.error("TableHandler.flushAllIndexTreesOnDisk : l'arbre n'a pas pu être écrit sur le disque, IOException.");
+				//Log.error("TableHandler.flushAllIndexTreesOnDisk : l'arbre n'a pas pu être écrit sur le disque, IOException.");
 				Log.error(e);
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 		}
 	}
@@ -73,6 +73,7 @@ public class TableHandler implements Serializable {
 		indexTreeListLock = new Object();
 		parsingThreadList = new ArrayList<Thread>();
 		multiThreadParsingListLock = new Object();
+		runtimeIndexingList = new RuntimeIndexingEntryList();
 	}
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -111,8 +112,16 @@ public class TableHandler implements Serializable {
 	 * @throws Exception 
 	 */
 	public void addColumn(String argColumnName, DataType argColumnDataType) throws Exception {
+		addColumn(argColumnName, argColumnDataType, false, false);
+	}
+
+	public void addColumn(String argColumnName, DataType argColumnDataType, boolean argKeepDataInMemory) throws Exception {
+		addColumn(argColumnName, argColumnDataType, argKeepDataInMemory, false);
+	}
+	
+	public void addColumn(String argColumnName, DataType argColumnDataType, boolean argKeepDataInMemory, boolean argWriteDataOnDisk) throws Exception {
 		if (this.columnExist(argColumnName)) throw new Exception("Ajout de la colonne impossibe, il en exie déjà une du même nom : " + argColumnName);
-		Column newColumn = new Column(argColumnName, argColumnDataType);
+		Column newColumn = new Column(argColumnName, argColumnDataType, argKeepDataInMemory, argWriteDataOnDisk);
 		columnsListForCreatingTableOnly.add(newColumn);
 	}
 
@@ -145,7 +154,7 @@ public class TableHandler implements Serializable {
 			throw e;
 		}
 	}
-
+	
 	@Deprecated
 	public void parseCsvData(InputStream is, boolean doRuntimeIndexing) throws Exception {
 		try {
@@ -313,6 +322,7 @@ public class TableHandler implements Serializable {
 		int columnIndex = getColumnIndex(columnName);
 		if (columnIndex == -1) throw new Exception("Colonne introuvable, impossible de faire une recherche sur ses index.");
 		if (IndexTreeDic.firstValueIsHigherThatSecondValue(minValue, maxValue) > 0) {
+			Log.error("Mauvais intervalle de valeurs");
 			return new DataPositionList(); // aucun résultat
 		}
 		//return findIndexedResultsOfColumn();
@@ -325,6 +335,7 @@ public class TableHandler implements Serializable {
 			}
 		}*/
 		if (makeRequestOnThisTree == null) {
+			Log.error("Aucun arbre IndexTreeDic associé");
 			return new DataPositionList();
 		}
 		return makeRequestOnThisTree.findMatchingBinIndexes(minValue, maxValue, inclusive, false);

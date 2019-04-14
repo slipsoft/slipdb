@@ -60,5 +60,9 @@ public class LongType extends DataType {
 			return false;
 		}
 	}
+	
+	public Object getDefaultValue() {
+		return new Long(0);
+	}
 
 }

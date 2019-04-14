@@ -60,5 +60,10 @@ public class DoubleType extends DataType {
 			return false;
 		}
 	}
+	
+
+	public Object getDefaultValue() {
+		return new Double(0);
+	}
 
 }

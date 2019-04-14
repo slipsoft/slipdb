@@ -60,4 +60,7 @@ public class IntegerType extends DataType {
 			return false;
 		}
 	}
+	public Object getDefaultValue() {
+		return new Integer(0);
+	}
 }

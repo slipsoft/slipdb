@@ -59,5 +59,9 @@ public class FloatType extends DataType {
 			return false;
 		}
 	}
+	
+	public Object getDefaultValue() {
+		return new Float(0);
+	}
 
 }

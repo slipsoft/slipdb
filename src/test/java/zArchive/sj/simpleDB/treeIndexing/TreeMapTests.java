@@ -1,5 +1,6 @@
 package zArchive.sj.simpleDB.treeIndexing;
 
+import java.util.BitSet;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -10,8 +11,12 @@ public class TreeMapTests {
 	
 	public TreeMap<String, Integer> theTreeMap = new TreeMap<String, Integer>();
 	
+	//public BitSet bMap = new BitSet();
+	
+	
 	@Test
 	public void mainTest() {
+		
 		theTreeMap.put("salut", 10);
 		theTreeMap.put("savmr", 11);
 		theTreeMap.put("samtaupe", 12);

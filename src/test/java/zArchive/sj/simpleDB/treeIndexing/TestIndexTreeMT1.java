@@ -27,13 +27,12 @@ import db.data.types.StringType;
 import db.data.load.CsvParser;
 import db.structure.Column;
 import db.structure.Table;
-import db.structure.indexTree.IndexTreeCeption;
+import index.indexTree.IndexTreeCeption;
 
 /***
  * Premier test de multi-thread simple
  *
  */
-
 
 public class TestIndexTreeMT1 {
 

@@ -1,4 +1,4 @@
-package db.structure.indexTree;
+package index.indexTree;
 
 import java.io.BufferedOutputStream;
 import java.io.DataInput;
@@ -66,6 +66,9 @@ import sj.network.tcpAndBuffers.NetBuffer;
  * Il faut un score pour classer les colonnes/index, prendre, pour la première requete, l'Index associé ayant le score le plus élevé :
  * -> nombre de valeurs différentes dans l'arbre, pour tenter de limiter un maximum les résultats.
  *
+ *	  -> Justification de la redondance de l'information pour l'IndexTreeDic : ne pas avoir un aute fichier d'ouvert,
+ *       ne pas faire de seek supplémentaire, améliore grandement les performances et ne prend pas beaucoup plus d'espace disque.
+ *
  */
 
 public class IndexTreeDic extends Index implements Serializable {
@@ -76,19 +79,19 @@ public class IndexTreeDic extends Index implements Serializable {
 	 *
 	 *
 	 */
-
+	
 	// Pour la recherche multi-thread, ce nombre est multiplié autant de fois qu'il y a d'arbre !
 	static public int maxResultCountPerIndexInstance = 20_000_000_00;
 	static public int maxResultCountInTotal = 20_000_000_00; // new AtomicInteger(lent, mais pour peu de résultats, ça passera !
 	
-	public int flushOnDiskOnceReachedThisTotalEntrySize = 40_000_000; // <- Globalement, la taille des fichiers mis sur le disque     ancien : EntryNumber
+	public int flushOnDiskOnceReachedThisTotalEntrySize = 120_000_000; // <- Globalement, la taille des fichiers mis sur le disque     ancien : EntryNumber
 	protected int currentTotalEntrySizeInMemory = 0; // nombre actuel de résultats en mémoire vive, multiplié par la taille de chaque résultat (en octets) (utile pour le flush sur le disque)
 	public boolean useMultithreadSearch = true;
 	public boolean showMemUsageAtEachFlush = true;
-	public boolean forceGarbageCollectorAtEachFlush = true;
-
+	public boolean forceGarbageCollectorAtEachFlush = false;
+	
 	protected String baseAssociatedTablePath;
-
+	
 	// Contient tous les index des données indexées
 	transient protected TreeMap<Object/*clef, valeur indexée*/, DataPositionList/*valeur*/> associatedBinIndexes;// = new TreeMap<Object, DataPositionList>();
 	//protected EasyFile fileStoringDataBlocks; // link between the disk and onDiskDataBlocks
@@ -96,7 +99,7 @@ public class IndexTreeDic extends Index implements Serializable {
 	//protected String currentSaveFilePath = null;
 	protected String basePath; // initialisé via initialiseWithTableAndColumn    ancien : = "data_save/IndexTreeDic_DiskMemory/";//"target/IndexTreeDic_DiskMemory/";
 	//protected static int rootIndexTreeCount = 0;
-
+	
 	
 	private void loadSerialAndCreateCommon() {
 		associatedBinIndexes = new TreeMap<Object, DataPositionList>();
@@ -108,7 +111,7 @@ public class IndexTreeDic extends Index implements Serializable {
 		in.defaultReadObject();
 		loadSerialAndCreateCommon();
 		indexingValueLock = new Object();
-		Log.info("READ READ READ readObject IndexTreeDic");
+		//Log.info("READ READ READ readObject IndexTreeDic");
 	}
 	
 	
@@ -149,7 +152,7 @@ public class IndexTreeDic extends Index implements Serializable {
 	protected final byte binIndexStorageSize = DiskDataPosition.diskDataPositionSizeOnDisk;//8;
 	protected long diskEntryTotalSize; // = storedValueSizeInBytes + binIndexStorageSize; // nombre d'octets pris par chaque entrée (valeur + binIndex)
 	protected int associatedTableColumnIndex;
-
+	
 	/** Ce constructeur : Lors de la création d'un nouvel index uniquement
 	 * @throws IndexException erreur lors de la création
 	 */
@@ -172,7 +175,7 @@ public class IndexTreeDic extends Index implements Serializable {
 		//storedValuesClassType = argStoredValuesClassType;
 		//rootIndexTreeCount++;
 	}
-
+	
 	/**
 	 * Constructeur : Pour le chargement du disque (index sauvegardé)
 	 * @param inTable la table associée à cet index
@@ -248,7 +251,7 @@ public class IndexTreeDic extends Index implements Serializable {
 		int dataSizeInBytes = columnDataType.getSize();
 		storedValueSizeInBytes = dataSizeInBytes;
 		diskEntryTotalSize = storedValueSizeInBytes + binIndexStorageSize; // nombre d'octets pris par chaque entrée (valeur + binIndex)
-
+		
 	}
 	
 	/** Sera bientôt remplacée par une fonction supportant le nouveau système de fichiers
@@ -415,7 +418,7 @@ public class IndexTreeDic extends Index implements Serializable {
 	 * @throws IOException problème d'I/O
 	 */
 	public void addValue(Object argAssociatedValue, DiskDataPosition dataPosition) throws IOException { synchronized (indexingValueLock) {
-
+		
 		// Je peux ajouter la donnée fine
 		DataPositionList binIndexList = associatedBinIndexes.get(argAssociatedValue);
 		if (binIndexList == null) {
@@ -424,8 +427,8 @@ public class IndexTreeDic extends Index implements Serializable {
 		}
 		binIndexList.add(dataPosition);
 		currentTotalEntrySizeInMemory += storedValueSizeInBytes + binIndexStorageSize;
-		//Log.info(" currentTotalEntrySizeInMemory = " + currentTotalEntrySizeInMemory + "  /  " + flushOnDiskOnceReachedThisTotalEntrySize + "  (storedValueDataByteSize = "+storedValueDataByteSize+")");
-
+		//Log.info(" currentTotalEntrySizeInMemory = " + currentTotalEntrySizeInMemory + "  /  " + flushOnDiskOnceReachedThisTotalEntrySize + "  (storedValueDataByteSize = "+storedValueSizeInBytes+")"  + "  (binIndexStorageSize = "+binIndexStorageSize+")");
+		
 		// S'il y a trop de valeurs mises en mémoire, j'écris l'index sur le disque et je retiens le nom du fichier écrit.
 		if (currentTotalEntrySizeInMemory > flushOnDiskOnceReachedThisTotalEntrySize) {
 			flushOnDisk();
@@ -477,7 +480,7 @@ public class IndexTreeDic extends Index implements Serializable {
 	
 	public void flushOnDisk() throws IOException { synchronized (indexingValueLock) {
 		if (associatedBinIndexes.size() == 0) return;
-
+		
 		String saveFileName = baseSaveFilePath + uniqueFileIdForThisTree + suffixSaveFilePath;
 		uniqueFileIdForThisTree++;
 		// -> TRES IMPORTANT : évaluer la distance moyenne entre deux éléments de l'index, pour savoir quel index donnera le moins de résultats !
@@ -487,10 +490,20 @@ public class IndexTreeDic extends Index implements Serializable {
 		indexWrittenOnDiskFilePathsArray.add(saveFileName);
 		associatedBinIndexes = new TreeMap<Object, DataPositionList>(); // réinitialisation
 		currentTotalEntrySizeInMemory = 0;
-
+		
 		if (showMemUsageAtEachFlush) MemUsage.printMemUsage("IndexTreeDic.flushOnDisk");//, baseSaveFilePath = " + baseSaveFilePath);
-	}  }
-
+		//SimpleTCPDemoCreateTable.saveSerialData03(); // TODO
+		// TODO
+		// TODO
+		// TODO
+		// TODO
+		// TODO
+		// TODO
+		// TODO
+		// TODO
+		// TODO
+		}  }
+	
 	/** Ecrire l'index sur le disque
 	 *  @param appendAtTheEnd   mettre à true pour écrire les données sur le disque
 	 *  @throws IOException
@@ -504,8 +517,8 @@ public class IndexTreeDic extends Index implements Serializable {
 		//System.out.println("IndexTreeCeption.saveOnDisk : debugNumberOfExactValuesWrittenOnDisk=" + debugNumberOfExactValuesWrittenOnDisk);
 
 	}
-
-
+	
+	
 	/** Ecrire les données sur le disque, d'une manière facile à retrouver
 	 * 1) Ecrire toutes les IntegerArrayList sur le disque, en sauvegarder le binIndex
 	 * 2) Ecrire le tableau des associations valeur - binIndex, retenir le binIndex de ce tableau (table de routage, si on veut)
@@ -599,7 +612,8 @@ public class IndexTreeDic extends Index implements Serializable {
 	 */
 	protected IndexTreeDic_localDichotomyResult findValueIndexByDichotomy(Object searchValue, RandomAccessFile randFile, long routingTableBinIndex, boolean findLeftValue) throws IOException {
 		IndexTreeDic_localDichotomyResult localResultAsFalse = new IndexTreeDic_localDichotomyResult();
-
+		//Log.info("searchValue = " + searchValue + " routingTableBinIndex = " + routingTableBinIndex);
+		
 		final byte routingTableLengthIndicationSize = 4; // nombre d'octets nécessaire pour écrire
 
 		randFile.seek(routingTableBinIndex);
@@ -611,7 +625,9 @@ public class IndexTreeDic extends Index implements Serializable {
 		long intervalStartIndex = 0;
 		long intervalStopIndex = totalNumberOfDistinctValues - 1;
 		long intervalLength = totalNumberOfDistinctValues; //intervalStopIndex - intervalStartIndex + 1;
-
+		//Log.info("totalNumberOfDistinctValues = " + totalNumberOfDistinctValues);
+		
+		
 		// Je recherche la valeur la plus proche
 		Object lastApprochingValue = null;
 		while (intervalLength > 1) {
