@@ -33,12 +33,12 @@ class PredicateTest {
 	}
 
 	@Test
-	void testGetIndex() {
+	void testGetIndex() throws Exception {
 		Executable exec = () -> predicate.getIndex();
 		assertThrows(StructureException.class, exec);
-		Index index = new IndexHash(column);
-		table.addIndex(index);
-		assertDoesNotThrow(() -> assertEquals(index, predicate.getIndex()));
+		Index index = table.createIndex("testcolumn", IndexHash.class);
+		assertDoesNotThrow(predicate::getIndex);
+		assertEquals(index, predicate.getIndex());
 	}
 
 	@Test

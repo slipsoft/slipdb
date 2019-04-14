@@ -4,6 +4,7 @@ import db.disk.dataHandler.DiskDataPosition;
 import db.structure.Column;
 import db.structure.Table;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -16,12 +17,16 @@ public class View {
 	protected List<Sort> sorts;
 	protected Group groupBy;
 
-	public View(Table table, FilterTerm filter, List<Field> fields, List<Sort> sorts, Group groupBy){
+	public View(Table table, FilterTerm filter, List<Field> fields, List<Sort> sorts, Group groupBy) {
 		this.table = table;
 		this.filter = filter;
 		this.fields = fields;
 		this.sorts = sorts;
 		this.groupBy = groupBy;
+	}
+
+	public View(Table table, FilterTerm filter) {
+		this(table, filter, new ArrayList<>(), new ArrayList<>(), new Group());
 	}
 
 	/**

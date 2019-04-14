@@ -1,8 +1,6 @@
-package db.structure.recherches;
+package zArchive.sj.recherches;
 
 import java.util.ArrayList;
-
-import db.structure.Table;
 
 /**
  *  Classe pour la recherche d'information dans les IndexTree
@@ -15,11 +13,13 @@ import db.structure.Table;
  *
  *
  */
+@Deprecated
 public class SGlobalHandler {
 	
 	
 	protected static ArrayList<TableHandler> tableHandlersList = new ArrayList<TableHandler>();
-	
+
+	@Deprecated
 	public static TableHandler initializeTable(String tableName) {
 		if (tableName == null) return null;
 		

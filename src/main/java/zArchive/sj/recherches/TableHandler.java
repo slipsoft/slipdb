@@ -1,4 +1,4 @@
-package db.structure.recherches;
+package zArchive.sj.recherches;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -7,7 +7,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 import com.dant.utils.Log;
 
@@ -19,7 +18,6 @@ import db.data.types.DataPositionList;
 import db.data.load.CsvParser;
 import db.search.ResultSet;
 import db.structure.Column;
-import db.structure.Database;
 import db.structure.StructureException;
 import db.structure.Table;
 import index.indexTree.IndexException;
@@ -52,7 +50,8 @@ public class TableHandler implements Serializable {
 	transient public RuntimeIndexingEntryList runtimeIndexingList;//ArrayList<SRuntimeIndexingEntry>();
 	// TODO
 	protected ArrayList<IndexTreeDic> indexTreeList = new ArrayList<IndexTreeDic>(); // Liste des IndexTree associés à cette table
-	
+
+	@Deprecated
 	public void flushAllIndexTreesOnDisk() {
 		//Log.error("TableHandler.flushAllIndexTreesOnDisk : size = " + indexTreeList.size());
 		for (IndexTreeDic indexTree : indexTreeList) {
@@ -66,7 +65,8 @@ public class TableHandler implements Serializable {
 			}
 		}
 	}
-	
+
+	@Deprecated
 	private void loadSerialAndCreateCommon() {
 		columnsListForCreatingTableOnly = new ArrayList<Column>(); // juste au cas où
 		indexTreeListLock = new Object();
@@ -74,31 +74,35 @@ public class TableHandler implements Serializable {
 		multiThreadParsingListLock = new Object();
 		runtimeIndexingList = new RuntimeIndexingEntryList();
 	}
-	
+
+	@Deprecated
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		in.defaultReadObject();
 		loadSerialAndCreateCommon();
 	}
 	
 	
-
+	@Deprecated
 	public TableHandler() {
 		loadSerialAndCreateCommon();
 	}
 	
-	
+	@Deprecated
 	public void forceAppendNotFirstParsing() {
 		firstTimeParsingData = false; // si à vrai, supprimer tous les fichiers connus
 	}
-	
+
+	@Deprecated
 	public String getTableName() {
 		return tableName;
 	}
 
+	@Deprecated
 	public Table getAssociatedTable() {
 		return this.associatedTable;
 	}
 
+	@Deprecated
 	public TableHandler(String argTableName) {
 		this();
 		tableName = argTableName;
@@ -110,28 +114,34 @@ public class TableHandler implements Serializable {
 	 *  @param argColumnDataType
 	 * @throws Exception 
 	 */
+	@Deprecated
 	public void addColumn(String argColumnName, DataType argColumnDataType) throws Exception {
 		addColumn(argColumnName, argColumnDataType, false, false);
 	}
 
+	@Deprecated
 	public void addColumn(String argColumnName, DataType argColumnDataType, boolean argKeepDataInMemory) throws Exception {
 		addColumn(argColumnName, argColumnDataType, argKeepDataInMemory, false);
 	}
-	
+
+	@Deprecated
 	public void addColumn(String argColumnName, DataType argColumnDataType, boolean argKeepDataInMemory, boolean argWriteDataOnDisk) throws Exception {
 		if (this.columnExist(argColumnName)) throw new Exception("Ajout de la colonne impossibe, il en exie déjà une du même nom : " + argColumnName);
 		Column newColumn = new Column(argColumnName, argColumnDataType, argKeepDataInMemory, argWriteDataOnDisk);
 		columnsListForCreatingTableOnly.add(newColumn);
 	}
 
+	@Deprecated
 	public boolean columnExist(String name) {
 		return this.columnsListForCreatingTableOnly.stream().anyMatch(col -> col.getName() == name);
 	}
 
+	@Deprecated
 	public void addColumn(Column column) {
 		columnsListForCreatingTableOnly.add(column);
 	}
-	
+
+	@Deprecated
 	public Table createTable() throws IOException {
 		associatedTable = new Table(tableName, columnsListForCreatingTableOnly);
 		return associatedTable;
@@ -192,6 +202,7 @@ public class TableHandler implements Serializable {
 		
 	}
 
+	@Deprecated
 	protected int getColumnIndex(String columnName) throws StructureException {
 		if (associatedTable == null) throw new StructureException("Aucune table crée, indexation impossible.");
 		List<Column> columnList = associatedTable.getColumns();
@@ -204,6 +215,7 @@ public class TableHandler implements Serializable {
 		throw new StructureException("Colonne introuvable, impossible de l'indexer.");
 	}
 	
+	@Deprecated
 	public void indexColumnWithTreeFromDisk(String columnName) throws StructureException {
 		int colIndex = getColumnIndex(columnName);
 		indexColumnWithTreeFromDisk(colIndex);
@@ -211,7 +223,7 @@ public class TableHandler implements Serializable {
 	
 	
 	
-	
+	@Deprecated
 	protected IndexTreeDic findOrCreateAssociatedIndexTree(int columnIndex, boolean createTreeIfDoesNotExists) throws IndexException {
 		synchronized(indexTreeListLock) {
 		
@@ -235,6 +247,7 @@ public class TableHandler implements Serializable {
 	 *  @param columnIndex
 	 *  @throws StructureException
 	 */
+	@Deprecated
 	public void indexColumnWithTreeFromDisk(int columnIndex) throws StructureException {
 		if (associatedTable == null) throw new StructureException("Aucune table crée, indexation impossible.");
 		List<Column> columnList = associatedTable.getColumns();
@@ -262,7 +275,7 @@ public class TableHandler implements Serializable {
 	// Pour l'instant, il n'y a que le spport des index mono-colonne.
 	// Faire une recherche sur une colonne équivaut à trouver l'index qui traîte de la colonne, et à faire la recherche dessus.
 	
-	
+	@Deprecated
 	public void createRuntimeIndexingColumn(int columnIndex) throws Exception { // addInitialColumnAndCreateAssociatedIndex
 		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");
 		List<Column> columnList = associatedTable.getColumns();
@@ -279,7 +292,7 @@ public class TableHandler implements Serializable {
 		indexEntry.associatedIndexTree.initialiseWithTableAndColumn(associatedTable, columnIndex); // Pour pouvoir indexer au runtime (lors du parsing)
 	}
 	
-	
+	@Deprecated
 	public void createRuntimeIndexingColumn(String columnName) throws Exception {
 		if (associatedTable == null) throw new Exception("Aucune table crée, indexation impossible.");
 		int colIndex = getColumnIndex(columnName);
@@ -302,7 +315,7 @@ public class TableHandler implements Serializable {
 		return null;
 	}*/
 	
-	
+	@Deprecated
 	public DataPositionList findIndexedResultsOfColumn(String columnName, Object exactValue) throws Exception {
 		return findIndexedResultsOfColumn(columnName, exactValue, null, true);
 	}
@@ -340,7 +353,7 @@ public class TableHandler implements Serializable {
 		return makeRequestOnThisTree.findMatchingBinIndexes(minValue, maxValue, inclusive, false);
 	}
 	
-	
+	@Deprecated
 	public int evaluateNumberOfResults(Collection<DataPositionList> resultsCollection) {
 		// Iterates over all the results
 		int numberOfResults = 0;
@@ -433,13 +446,15 @@ public class TableHandler implements Serializable {
 			return resultArrayList;
 		}
 	}
-	
+
+	@Deprecated
 	public void displayOnLogResults(ResultSet resultArrayList) {
 		for (List<Object> objList : resultArrayList) {
 			Log.info("  objList = " + objList);
 		}
 	}
-	
+
+	@Deprecated
 	public void flushEveryIndexOnDisk() throws IOException {
 		for (IndexTreeDic indexTree : indexTreeList) {
 			indexTree.flushOnDisk();
@@ -501,17 +516,20 @@ public class TableHandler implements Serializable {
 		}
 		
 	} }
-	
+
+	@Deprecated
 	public void multiThreadParsingInit() {
 		
 	}
-	
+
+	@Deprecated
 	public void multiThreadParsingAddFile() {
-		
+
 	}
-	
+
+	@Deprecated
 	public void clearDataDirectory() throws IOException {
 		associatedTable.getDataHandler().clearDataDirectory();
 	}
-	
+
 }

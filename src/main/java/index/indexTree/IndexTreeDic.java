@@ -151,11 +151,12 @@ public class IndexTreeDic extends Index implements Serializable {
 
 	protected final byte binIndexStorageSize = DiskDataPosition.diskDataPositionSizeOnDisk;//8;
 	protected long diskEntryTotalSize; // = storedValueSizeInBytes + binIndexStorageSize; // nombre d'octets pris par chaque entrée (valeur + binIndex)
-	protected int associatedTableColumnIndex;
+	@Deprecated protected int associatedTableColumnIndex;
 	
 	/** Ce constructeur : Lors de la création d'un nouvel index uniquement
 	 * @throws IndexException erreur lors de la création
 	 */
+	@Deprecated
 	public IndexTreeDic(Table inTable, int columnIndex) throws IndexException {//(Class argStoredValuesClassType) {
 
 		initialiseWithTableAndColumn(inTable, columnIndex);
@@ -183,6 +184,7 @@ public class IndexTreeDic extends Index implements Serializable {
 	 * @param argUniqueID un id unique ?
 	 * @throws IndexException erreur lors de la création
 	 */
+	@Deprecated
 	public IndexTreeDic(Table inTable, int columnIndex, int argUniqueID) throws IndexException {//(Class argStoredValuesClassType) {
 
 		initialiseWithTableAndColumn(inTable, columnIndex);
@@ -201,6 +203,24 @@ public class IndexTreeDic extends Index implements Serializable {
 		}*/
 		//storedValuesClassType = argStoredValuesClassType;
 		// n'incrémte pas : rootIndexTreeCount++;
+	}
+	
+	/**
+	 * Nouveau constructeur qui prend direct une column
+	 */
+	public IndexTreeDic(Table table, Column indexedColumn) throws IndexException{
+		super(table, indexedColumn);
+		loadSerialAndCreateCommon();
+		DataType columnDataType = indexedColumn.getDataType();
+		storedValuesClassType = columnDataType.getAssociatedClassType();
+		storedValueSizeInBytes = columnDataType.getSize();
+		diskEntryTotalSize = storedValueSizeInBytes + binIndexStorageSize; // nombre d'octets pris par chaque entrée (valeur + binIndex)
+		baseAssociatedTablePath = table.getBaseTablePath();
+		basePath = baseAssociatedTablePath + "IndexTreeDic_DiskMemory/";
+		indexTreeDicUniqueId = Database.getInstance().getAndIncrementNextIndexTreeDicID();
+		baseSaveFilePath = basePath + "IndexTreeDic_" + indexTreeDicUniqueId + "_"; // id arbre _ id(nombre) fichier
+		suffixSaveFilePath = ".idc_bin";
+		
 	}
 	
 	/*
@@ -233,6 +253,7 @@ public class IndexTreeDic extends Index implements Serializable {
 	/** Utile pour le RuntimeIndexing
 	 * @throws IndexException
 	 */
+	@Deprecated
 	public void initialiseWithTableAndColumn(Table inTable, int columnIndex) throws IndexException {
 		loadSerialAndCreateCommon();
 		if (inTable == null) throw new IndexException("Impossible d'initialiser cet index avec une Table null.");
@@ -477,7 +498,7 @@ public class IndexTreeDic extends Index implements Serializable {
 	int debugNumberOfExactArrayListValuesWrittenOnDisk = 0;
 	int debugNumberOfExactValuesWrittenOnDisk = 0;
 	
-	
+	@Override
 	public void flushOnDisk() throws IOException { synchronized (indexingValueLock) {
 		if (associatedBinIndexes.size() == 0) return;
 		

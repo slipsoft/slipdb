@@ -9,6 +9,7 @@ import db.disk.dataHandler.DiskDataPosition;
 import db.search.Predicate;
 import db.structure.Column;
 import db.structure.Index;
+import db.structure.Table;
 import index.indexTree.IndexException;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -17,13 +18,12 @@ import db.search.Operator;
 
 public class IndexHash extends Index {
 	
-	
 	// Hash map associant une clef à une liste de positions (index des lignes parsées des csv)
-	protected HashMap<KeyHash, ArrayList<Integer>> indexMap;
+	protected HashMap<KeyHash, ArrayList<Integer>> indexedValuesMap;
 	
-	public IndexHash(Column column) {
-		super(column);
-		this.indexMap = new HashMap<>();
+	public IndexHash(Table table, Column column) {
+		super(table, column);
+		this.indexedValuesMap = new HashMap<>();
 	}
 	
 	@Override
@@ -37,6 +37,11 @@ public class IndexHash extends Index {
 		// TODO
 	}
 	
+	@Override
+	public void flushOnDisk() throws IOException {
+		// TODO
+	}
+
 	@Override
 	public boolean isOperatorCompatible(Operator op) {
 		if(!ArrayUtils.contains(new Operator[] {

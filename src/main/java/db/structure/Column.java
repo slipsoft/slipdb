@@ -236,7 +236,7 @@ public class Column implements Serializable {
 	}
 	
 	
-	@Deprecated public void addIndex(Index index) { // TODO
+	public void addIndex(Index index) {
 		this.relatedIndexesList.add(index);
 	}
 

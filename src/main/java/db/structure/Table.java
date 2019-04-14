@@ -4,6 +4,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -23,7 +25,6 @@ import db.disk.dataHandler.DiskDataPosition;
 import db.disk.dataHandler.TableDataHandler;
 import db.search.Predicate;
 import db.search.ResultSet;
-import db.structure.recherches.TableHandler;
 import index.indexTree.IndexException;
 
 /**
@@ -45,7 +46,6 @@ public class Table implements Serializable {
 	
 	//protected final String dataFilesOnDiskBasePath; devenu baseTablePath
 	protected final TableDataHandler dataHandler;
-	@Deprecated protected TableHandler tableHandler;
 	
 	protected final String name; // table name
 	
@@ -64,11 +64,9 @@ public class Table implements Serializable {
 	 */
 	
 	public void doBeforeSerialWrite() {
-		if (tableHandler != null) {
-			tableHandler.flushAllIndexTreesOnDisk();
-		}
+		this.flushAllIndexOnDisk();
 	}
-	
+
 	public void debugSerialShowVariables() {
 		Log.info("TableDataHandler : ");
 		dataHandler.debugSerialShowVariables();
@@ -91,7 +89,6 @@ public class Table implements Serializable {
 	public Table(String argName, List<Column> argColumnsList, short argNodeID, int argTableID) throws IOException {
 		name = argName;
 		columnsList.addAll(argColumnsList);
-		tableHandler = new TableHandler(argName);
 		
 		baseTablePath = baseAllTablesDirPath + name + "/";
 		dataHandler = new TableDataHandler(this, baseTablePath);
@@ -123,11 +120,6 @@ public class Table implements Serializable {
 		return dataHandler;
 	}
 
-	@Deprecated
-	public TableHandler getTableHandler() {
-		return tableHandler;
-	}
-
 	public int getLineSize() {
 		return lineDataSize;
 	}
@@ -135,6 +127,18 @@ public class Table implements Serializable {
 	@Deprecated
 	public EasyFile getFileLinesOnDisk() {
 		return fileLinesOnDisk;
+	}
+
+	public Index createIndex(String columnName, Class<? extends Index> indexClass) throws StructureException {
+		try {
+			Constructor<? extends Index> ct = indexClass.getConstructor(Table.class, Column.class);
+			Column column = this.getColumnByNameNoCheck(columnName).orElseThrow(() -> new StructureException("column " + columnName + " doesn't exist"));
+			Index newIndex = ct.newInstance(this, column);
+			this.addIndex(newIndex);
+			return newIndex;
+		} catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+			throw new StructureException(e);
+		}
 	}
 
 	public void addIndex(Index index) {
@@ -163,6 +167,11 @@ public class Table implements Serializable {
 		return this.columnsList.stream().anyMatch(col -> col.getName().equals(name));
 	}
 
+	public void addColumn(String colName, DataType dataType, boolean argKeepDataInMemory, boolean argWriteDataOnDisk) throws StructureException {
+		Column newColumn = new Column(colName, dataType, argKeepDataInMemory, argWriteDataOnDisk);
+		this.addColumn(newColumn);
+	}
+
 	/**
 	 * Add a column
 	 *
@@ -171,7 +180,7 @@ public class Table implements Serializable {
 	 * @throws StructureException - if column allready exists
 	 */
 	public void addColumn(String colName, DataType dataType) throws StructureException {
-		Column newColumn = new Column(colName, dataType).setNumber(columnsList.size());
+		Column newColumn = new Column(colName, dataType);
 		this.addColumn(newColumn);
 	}
 
@@ -183,6 +192,7 @@ public class Table implements Serializable {
 	 */
 	public void addColumn(Column column) throws StructureException {
 		if (columnExist(column.getName())) throw new StructureException("Column already exists, colName = " + column.getName());
+		column.setNumber(columnsList.size());
 		columnsList.add(column);
 		computeLineDataSize();
 	}
@@ -264,6 +274,29 @@ public class Table implements Serializable {
 
 	} }
 
+	/**
+	 * Save all indexes to disk
+	 */
+	public void flushAllIndexOnDisk() {
+		Log.debug("TableHandler.flushAllIndexOnDisk : size = " + indexesList.size());
+		for (Index index : indexesList) {
+			try {
+				index.flushOnDisk();
+				Log.error("TableHandler.flushAllIndexOnDisk : flush de l'arbre !" + index);
+			} catch (IOException e) {
+				Log.error("TableHandler.flushAllIndexOnDisk : l'arbre n'a pas pu être écrit sur le disque, IOException.");
+				Log.error(e);
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
+	 * Add an entry in every index of the table
+	 * @param entry - an array of object representing an entry
+	 * @param position - the Disk position of this entry
+	 * @throws IndexException - if one of the indexes couldn't index this entry
+	 */
 	public void indexEntry(Object[] entry, DiskDataPosition position) throws IndexException {
 		for (Index index: indexesList) {
 			index.indexEntry(entry, position);
@@ -343,6 +376,10 @@ public class Table implements Serializable {
 		ArrayList<ColumnEntity> allColumns = this.columnsList.stream().map(Column::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
 		// ArrayList<IndexEntity> allIndexes = this.indexesList.stream().map(Index::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
 		return new TableEntity(name, allColumns);
+	}
+
+	public void clearDataDirectory() throws IOException {
+		this.dataHandler.clearDataDirectory();
 	}
 
 }
