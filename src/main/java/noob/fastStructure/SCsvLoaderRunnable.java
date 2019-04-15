@@ -14,6 +14,7 @@ import db.data.load.Parser;
 import db.data.types.ByteType;
 import db.data.types.DataType;
 import db.data.types.DateType;
+import db.data.types.StringType;
 import db.structure.Column;
 import db.structure.Table;
 
@@ -144,7 +145,8 @@ public class SCsvLoaderRunnable implements Runnable {
 		
 		// -> Voir si c'est plus opti de parser et de mettre dans les colonnes
 		
-		boolean parseWithNativeFormat = false;
+		boolean parseWithNativeFormat = true;
+		//boolean stupidBenchmark = true;
 		
 		
 		for (int iLine = 0; iLine < linesBufferPosition; iLine++) {
@@ -179,6 +181,38 @@ public class SCsvLoaderRunnable implements Runnable {
 					if (parseWithNativeFormat) {
 						String valueAsString = valuesAsStringArray[columnIndex];
 						
+						/*if (stupidBenchmark) {
+							switch (currentColumn.dataTypeEnum) {
+							case UNKNOWN :
+								Log.error("Colonne au type inconnu");
+								break;
+							case BYTE :
+								Byte.parseByte(valueAsString);
+								break;
+							case INTEGER :
+								Integer.parseInt(valueAsString);
+								break;
+							case LONG :
+								Long.parseLong(valueAsString);
+								break;
+							case DATE :
+								//int dateAsInt = utilsInstance.intDateFromString(valueAsString);
+								break;
+							case FLOAT :
+								Float.parseFloat(valueAsString);
+								break;
+							case DOUBLE :
+								Double.parseDouble(valueAsString);
+								break;
+							case STRING :
+								byte[] strAsByteArray = StringType.stringToAjustedByteArray(valueAsString, currentColumn.getDataSize());
+								break;
+							default : break;
+							}
+							continue;
+						}*/
+						
+						//if (skipAllData) continue;
 						switch (currentColumn.dataTypeEnum) {
 						case UNKNOWN :
 							Log.error("Colonne au type inconnu");
@@ -203,12 +237,13 @@ public class SCsvLoaderRunnable implements Runnable {
 							lineAsByteBuffer.putDouble(Double.parseDouble(valueAsString));
 							break;
 						case STRING :
-							
-							
+							byte[] strAsByteArray = StringType.stringToAjustedByteArray(valueAsString, currentColumn.getDataSize());
+							lineAsByteBuffer.put(strAsByteArray);
 							break;
 						default : break;
 						}
-						Class<? extends DataType> objectClass = currentColumn.getDataType().getClass();
+						
+						/*Class<? extends DataType> objectClass = currentColumn.getDataType().getClass();
 						
 						try {
 							if (objectClass == DateType.class) {
@@ -218,7 +253,7 @@ public class SCsvLoaderRunnable implements Runnable {
 							} else if (objectClass == ByteType.class) {
 								// Byte
 								lineAsByteBuffer.put(Byte.parseByte(valueAsString));
-							}/* else if (objectClass == IntegerType.class) {
+							} else if (objectClass == IntegerType.class) {
 								// Byte
 								lineAsByteBuffer.put(Byte.parseByte(valueAsString));
 							} else if (objectClass == ByteType.class) {
@@ -230,14 +265,12 @@ public class SCsvLoaderRunnable implements Runnable {
 							} else if (objectClass == ByteType.class) {
 								// Byte
 								lineAsByteBuffer.put(Byte.parseByte(valueAsString));
-							}*/
+							}
 						} catch (Exception e) {
 							Log.warning(e);
-						}
+						}*/
 					} else {
 						
-						
-						if (skipAllData) continue;
 						
 						if (ignoreThisDataArray[columnIndex] == false) {
 							
@@ -310,7 +343,7 @@ public class SCsvLoaderRunnable implements Runnable {
 		}
 		
 		//bBuff.clear();
-		
+		//System.gc();
 	}
 	
 	

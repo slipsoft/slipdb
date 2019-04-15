@@ -39,7 +39,7 @@ public class StringType extends DataType {
 		return input;
 	}
 
-	public static byte[] stringToRightSizeByteArray(String input, int sizeInBytes) {
+	public static byte[] stringToAjustedByteArray(String input, int sizeInBytes) {
 		byte[] bytes;
 		if (input.length() != sizeInBytes)
 			bytes = Arrays.copyOf(input.getBytes(), sizeInBytes);
