@@ -6,9 +6,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.dant.utils.Log;
+import com.dant.utils.MemUsage;
 
 import db.data.load.IncorrectEntryException;
 import db.data.load.Parser;
+import db.data.types.ByteType;
+import db.data.types.DataType;
 import db.data.types.DateType;
 import db.structure.Column;
 import db.structure.Table;
@@ -105,7 +108,7 @@ public class SCsvLoaderRunnable implements Runnable {
 		hasToBeExecuted = false;
 		readyForNewTask.set(true);
 		activeThreadNb.addAndGet(-1);
-		Log.info("RUNNABLE executionTerminated - activeThreadNb = " + activeThreadNb.get());
+		//Log.info("RUNNABLE executionTerminated - activeThreadNb = " + activeThreadNb.get());
 	}
 	
 	@Override
@@ -125,13 +128,28 @@ public class SCsvLoaderRunnable implements Runnable {
 		String entryString;
 		String[] valuesAsStringArray;
 		Object currentValue = null;
-		Column currentColumn;
+		//Column currentColumn;
+		int entCount = 0;
+		ByteBuffer bBuff = ByteBuffer.allocateDirect(lineByteSize);
+		
+		Column[] localColumnArray = new Column[columnsList.size()];
+		boolean[] ignoreThisDataArray = new boolean[columnsList.size()];
+		for (int iColumn = 0; iColumn < columnsList.size(); iColumn++) {
+			Column col = columnsList.get(iColumn);
+			localColumnArray[iColumn] = col;
+			ignoreThisDataArray[iColumn] = ((col.keepDataInMemory == false) && (col.writeDataOnDisk == false));
+		}
 		
 		// -> Voir si c'est plus opti de parser et de mettre dans les colonnes
 		
 		
 		for (int iLine = 0; iLine < linesBufferPosition; iLine++) {
 			entryString = linesBuffer[iLine];
+			
+
+			boolean skipAllData = true;
+			//if (skipAllData) continue;
+			
 			valuesAsStringArray = entryString.split(","); //loaderParser.processEntry(entryString);
 			
 			//if (true == true) continue;
@@ -141,6 +159,8 @@ public class SCsvLoaderRunnable implements Runnable {
 				continue;
 			}
 			
+			
+			
 			localEntryBuffer.rewind();
 			
 			
@@ -148,11 +168,24 @@ public class SCsvLoaderRunnable implements Runnable {
 			try {
 				// for each column, parse and write data into entryBuffer
 				for (int columnIndex = 0; columnIndex < fieldsNumberInLine; columnIndex++) {
-					currentColumn = columnsList.get(columnIndex);
-					boolean ignoreThisData = ((currentColumn.keepDataInMemory == false) && (currentColumn.writeDataOnDisk == false));
-					//ignoreThisData = true;
+					Column currentColumn = localColumnArray[columnIndex];
+					//boolean totallyIgnoreThisData = true;
 					
-					if (ignoreThisData == false) {
+					Class<? extends DataType> objectClass = currentColumn.getDataType().getClass();
+					
+					
+					
+					if (objectClass == DateType.class) {
+						currentValue = localDateTypeThreadSafe.parseAndWriteToBuffer(valuesAsStringArray[columnIndex], localEntryBuffer);
+					} else if (objectClass == ByteType.class) {
+						currentValue = currentColumn.parseAndWriteToBuffer(valuesAsStringArray[columnIndex], localEntryBuffer);
+					}
+					
+					
+					
+					if (skipAllData) continue;
+					
+					if (ignoreThisDataArray[columnIndex] == false) {
 						
 						//Log.info("parseAndWriteEntry : valuesAsStringArray["+columnIndex+"] = " + valuesAsStringArray[columnIndex]);
 						// Converts the string value into an array of bytes representing the same data
@@ -163,10 +196,14 @@ public class SCsvLoaderRunnable implements Runnable {
 						}
 					} else {
 						currentValue = currentColumn.getDataType().getDefaultValue();
+						Log.error("IGNORE DATA !");
 					}
+					
 					
 					// TEMPORAIREMENT désactivé (rush) currentColumn.evaluateMinMax(currentValue); // <- Indispensable pour le IndexTreeCeption (non utile pour le IndexTreeDic)
 					localEntriesArray[columnIndex] = currentValue;
+					
+					
 				}
 			} catch (IllegalArgumentException e) {
 				//e.printStackTrace();
@@ -176,9 +213,10 @@ public class SCsvLoaderRunnable implements Runnable {
 			
 			
 			// Ecriture de la donnée en mémoire, en un seul bloc atomique, pour garantir la cohérence de la donnée (pas un lock par colonne donc !)
+			if (skipAllData == false)
 			synchronized(loaderWriteInMemoryLock) {
 				for (int columnIndex = 0; columnIndex < fieldsNumberInLine; columnIndex++) {
-					currentColumn = columnsList.get(columnIndex);
+					Column currentColumn = columnsList.get(columnIndex);
 					currentValue = localEntriesArray[columnIndex];
 					
 					// Si je dois garder la donnée en mémoire, je la stocke dans la colonne
@@ -217,6 +255,11 @@ public class SCsvLoaderRunnable implements Runnable {
 			//}// catch (IOException e)             { if (enableErrorLog) Log.error(e); }
 		}
 		
+		//bBuff.clear();
+		
 	}
+	
+	
+	
 	
 }

@@ -62,7 +62,7 @@ public class SLoaderTests {
 		MemUsage.printMemUsage("Mem usage  début - ");
 		SCsvLoader csvLoader = new SCsvLoader(table, new CsvParser());
 		
-		int mounthFinalCount = 2;
+		int mounthFinalCount = 6;
 		for (int iCsv = 1; iCsv <= mounthFinalCount; iCsv++) {
 			String colNumber = String.format("%02d" , iCsv);
 			String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";

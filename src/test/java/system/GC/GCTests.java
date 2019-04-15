@@ -25,7 +25,7 @@ class FinalSave {
 public class GCTests {
 	
 	// Pour ne pas alourdir Tarvis
-	private boolean ignoreThoseHeavyTests = false;
+	private boolean ignoreThoseHeavyTests = true;
 	
 	
 	
@@ -57,7 +57,7 @@ public class GCTests {
 	}*/
 	
 	
-	@Test
+	//@Test
 	public void memArrayListTest() {
 		if (ignoreThoseHeavyTests) return;
 		
@@ -113,6 +113,51 @@ public class GCTests {
 		MemUsage.printMemUsage();
 		gcTimer.log();
 
+		long usedMemoryTotal = MemUsage.getMemUsage() - memUsage;
+		String formattedMem = MemUsage.formatMemUsage(usedMemoryTotal);
+		Log.info("Mémoire création : " + formattedMem);
+
+		
+		memUsage = MemUsage.getMemUsage();
+		Timer t2 = new Timer("Temps pris GET SimpleArray");
+		for (int i = 0; i < arraySize; i++) {
+			int v = ar[i];
+		}
+		t2.log();
+		usedMemoryTotal = MemUsage.getMemUsage() - memUsage;
+		formattedMem = MemUsage.formatMemUsage(usedMemoryTotal);
+		Log.info("Mémoire récupération : " + formattedMem);
+		
+	}
+	
+	//@Test
+	public void test4() {
+		byte[] strArr = "This is a test !".getBytes();
+		Log.info("len = " + strArr.length); 
+	}// keur keur crash japout
+	
+	//@Test
+	public void memTest3() {
+		if (ignoreThoseHeavyTests) return;
+		
+		MemUsage.printMemUsage();
+		long memUsage = MemUsage.getMemUsage();
+		Timer t = new Timer("Temps pris CREATE SimpleArray");
+		// Test mémoire
+		int arraySize = 10_000_000;
+		Integer[] ar = new Integer[arraySize];
+		
+		for (int i = 0; i < arraySize; i++) {
+			ar[i] = i;
+		}
+		t.log();
+		
+		MemUsage.printMemUsage();
+		Timer gcTimer = new Timer("Temps pris par le GC");
+		System.gc();
+		gcTimer.log();
+		MemUsage.printMemUsage();
+		
 		long usedMemoryTotal = MemUsage.getMemUsage() - memUsage;
 		String formattedMem = MemUsage.formatMemUsage(usedMemoryTotal);
 		Log.info("Mémoire création : " + formattedMem);

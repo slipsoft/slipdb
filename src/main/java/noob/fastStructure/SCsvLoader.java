@@ -21,7 +21,7 @@ import db.structure.Table;
  */
 public class SCsvLoader {
 	
-	private final int threadCount = 6;//+8;
+	private final int threadCount = 30;//+8;
 	private SCsvLoaderRunnable[] runnableArray;// = new SLoaderThread[threadCount];
 	
 	private Table currentTable;
@@ -69,16 +69,17 @@ public class SCsvLoader {
 			for (int iThread = 0; iThread < threadCount; iThread++) {
 				if (runnableArray[iThread].tryUseForNewDataCollection()) {
 					foundReadyThread = runnableArray[iThread];
-					Timer t = new Timer("GC temps pris");
-					System.gc();
-					t.log();
+					//Timer t = new Timer("GC temps pris");
+					//System.gc();
+					//t.log();
+					//Log.error("Thread trouvé !!");
 					break;
 				}
 			}
 			if (foundReadyThread == null) {
-				//Log.info("Attente d'un thread dispo...");
+				Log.error("Attente d'un thread dispo...");
 				try {
-					Thread.sleep(20); // attente mi-active
+					Thread.sleep(2); // attente mi-active
 				} catch (Exception e) {
 					Log.error(e);
 				}
@@ -119,28 +120,34 @@ public class SCsvLoader {
 				
 				// Lecture d'une nouvelle ligne / entrée
 				entryAsString = bRead.readLine(); // "entrée", ligne lue
-				
 				if (entryAsString == null) break; // fin de la lecture
 				
-				needNewThread = currentThreadCollectingData.addNewLine(entryAsString);
 				
-				if (needNewThread) {
-					currentThreadCollectingData = getReadyThread();
-				}
-				
+
 				localReadEntryNb++;
-				
 				// Affichage d'une entrée toutes les showInfoEveryParsedLines entrées lues
 				if (showInfoEveryParsedLines != -1 && localReadEntryNb % showInfoEveryParsedLines == 0) {
 					Log.info("Loader : nombre de résultats (local) lus = " + localReadEntryNb + "   temps écoulé = " + timeTookTimer.pretty() + "activeThreadNb = " + SCsvLoaderRunnable.activeThreadNb.get());
 					//MemUsage.printMemUsage();
-					if (SCsvLoaderRunnable.activeThreadNb.get() < 3) {
-						debugShowRunnablesState();
+					if (SCsvLoaderRunnable.activeThreadNb.get() < 3 && localReadEntryNb > 1_000_000) {
+						//debugShowRunnablesState();
 						
 						
 					}
 					
 				}
+				
+				
+				needNewThread = currentThreadCollectingData.addNewLine(entryAsString);
+				
+				if (needNewThread) {
+					currentThreadCollectingData = getReadyThread();
+					//MemUsage.printMemUsage();
+					//System.gc();
+				}
+				
+				
+				
 				
 				if (localReadEntryNbToAddToTotalCount >= updateTotalReadEntryNbEach) {
 					totalReadEntryNb.addAndGet(localReadEntryNbToAddToTotalCount);
