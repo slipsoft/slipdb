@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.dant.utils.Log;
 import com.dant.utils.MemUsage;
+import com.dant.utils.Utils;
 
 import db.data.load.IncorrectEntryException;
 import db.data.load.Parser;
@@ -130,7 +131,8 @@ public class SCsvLoaderRunnable implements Runnable {
 		Object currentValue = null;
 		//Column currentColumn;
 		int entCount = 0;
-		ByteBuffer bBuff = ByteBuffer.allocateDirect(lineByteSize);
+		ByteBuffer lineAsByteBuffer = ByteBuffer.allocateDirect(lineByteSize);
+		Utils utilsInstance = new Utils();
 		
 		Column[] localColumnArray = new Column[columnsList.size()];
 		boolean[] ignoreThisDataArray = new boolean[columnsList.size()];
@@ -142,10 +144,12 @@ public class SCsvLoaderRunnable implements Runnable {
 		
 		// -> Voir si c'est plus opti de parser et de mettre dans les colonnes
 		
+		boolean parseWithNativeFormat = false;
+		
 		
 		for (int iLine = 0; iLine < linesBufferPosition; iLine++) {
 			entryString = linesBuffer[iLine];
-			
+			lineAsByteBuffer.rewind();
 
 			boolean skipAllData = true;
 			//if (skipAllData) continue;
@@ -171,37 +175,87 @@ public class SCsvLoaderRunnable implements Runnable {
 					Column currentColumn = localColumnArray[columnIndex];
 					//boolean totallyIgnoreThisData = true;
 					
-					Class<? extends DataType> objectClass = currentColumn.getDataType().getClass();
-					
-					
-					
-					if (objectClass == DateType.class) {
-						currentValue = localDateTypeThreadSafe.parseAndWriteToBuffer(valuesAsStringArray[columnIndex], localEntryBuffer);
-					} else if (objectClass == ByteType.class) {
-						currentValue = currentColumn.parseAndWriteToBuffer(valuesAsStringArray[columnIndex], localEntryBuffer);
-					}
-					
-					
-					
-					if (skipAllData) continue;
-					
-					if (ignoreThisDataArray[columnIndex] == false) {
+					// Benchmark du parsing pas fait par Nicolas
+					if (parseWithNativeFormat) {
+						String valueAsString = valuesAsStringArray[columnIndex];
 						
-						//Log.info("parseAndWriteEntry : valuesAsStringArray["+columnIndex+"] = " + valuesAsStringArray[columnIndex]);
-						// Converts the string value into an array of bytes representing the same data
-						if (currentColumn.getDataType().getClass() == DateType.class) {
-							currentValue = localDateTypeThreadSafe.parseAndWriteToBuffer(valuesAsStringArray[columnIndex], localEntryBuffer);
-						} else {
-							currentValue = currentColumn.parseAndWriteToBuffer(valuesAsStringArray[columnIndex], localEntryBuffer);
+						switch (currentColumn.dataTypeEnum) {
+						case UNKNOWN :
+							Log.error("Colonne au type inconnu");
+							break;
+						case BYTE :
+							lineAsByteBuffer.put(Byte.parseByte(valueAsString));
+							break;
+						case INTEGER :
+							lineAsByteBuffer.putInt(Integer.parseInt(valueAsString));
+							break;
+						case LONG :
+							lineAsByteBuffer.putLong(Long.parseLong(valueAsString));
+							break;
+						case DATE :
+							int dateAsInt = utilsInstance.intDateFromString(valueAsString);
+							lineAsByteBuffer.putInt(dateAsInt);
+							break;
+						case FLOAT :
+							lineAsByteBuffer.putFloat(Float.parseFloat(valueAsString));
+							break;
+						case DOUBLE :
+							lineAsByteBuffer.putDouble(Double.parseDouble(valueAsString));
+							break;
+						case STRING :
+							
+							
+							break;
+						default : break;
+						}
+						Class<? extends DataType> objectClass = currentColumn.getDataType().getClass();
+						
+						try {
+							if (objectClass == DateType.class) {
+								// Date
+								int dateAsInt = utilsInstance.intDateFromString(valueAsString);
+								lineAsByteBuffer.putInt(dateAsInt);
+							} else if (objectClass == ByteType.class) {
+								// Byte
+								lineAsByteBuffer.put(Byte.parseByte(valueAsString));
+							}/* else if (objectClass == IntegerType.class) {
+								// Byte
+								lineAsByteBuffer.put(Byte.parseByte(valueAsString));
+							} else if (objectClass == ByteType.class) {
+								// Byte
+								lineAsByteBuffer.put(Byte.parseByte(valueAsString));
+							} else if (objectClass == ByteType.class) {
+								// Byte
+								lineAsByteBuffer.put(Byte.parseByte(valueAsString));
+							} else if (objectClass == ByteType.class) {
+								// Byte
+								lineAsByteBuffer.put(Byte.parseByte(valueAsString));
+							}*/
+						} catch (Exception e) {
+							Log.warning(e);
 						}
 					} else {
-						currentValue = currentColumn.getDataType().getDefaultValue();
-						Log.error("IGNORE DATA !");
+						
+						
+						if (skipAllData) continue;
+						
+						if (ignoreThisDataArray[columnIndex] == false) {
+							
+							//Log.info("parseAndWriteEntry : valuesAsStringArray["+columnIndex+"] = " + valuesAsStringArray[columnIndex]);
+							// Converts the string value into an array of bytes representing the same data
+							if (currentColumn.getDataType().getClass() == DateType.class) {
+								currentValue = localDateTypeThreadSafe.parseAndWriteToBuffer(valuesAsStringArray[columnIndex], localEntryBuffer);
+							} else {
+								currentValue = currentColumn.parseAndWriteToBuffer(valuesAsStringArray[columnIndex], localEntryBuffer);
+							}
+						} else {
+							currentValue = currentColumn.getDataType().getDefaultValue();
+							Log.error("IGNORE DATA !");
+						}
+						
+						// TEMPORAIREMENT désactivé (rush) currentColumn.evaluateMinMax(currentValue); // <- Indispensable pour le IndexTreeCeption (non utile pour le IndexTreeDic)
+						localEntriesArray[columnIndex] = currentValue;
 					}
-					
-					
-					// TEMPORAIREMENT désactivé (rush) currentColumn.evaluateMinMax(currentValue); // <- Indispensable pour le IndexTreeCeption (non utile pour le IndexTreeDic)
-					localEntriesArray[columnIndex] = currentValue;
 					
 					
 				}

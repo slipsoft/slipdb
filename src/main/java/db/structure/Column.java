@@ -14,6 +14,7 @@ import com.dant.utils.Log;
 
 import db.data.types.ByteType;
 import db.data.types.DataType;
+import db.data.types.DataTypeEnum;
 import db.data.types.DateType;
 import db.data.types.DoubleType;
 import db.data.types.FloatType;
@@ -35,6 +36,7 @@ public class Column implements Serializable {
 	@Deprecated /* @CurrentlyUnused */ transient protected List<Index> relatedIndexesList = new ArrayList<>();
 	//inutile désormais -> private transient Object writeInMemoryLock = new Object();
 	
+	public final DataTypeEnum dataTypeEnum;
 	
 	protected DataType storedDataType; // <- type de la donnée stockée
 	// Stockage des données à garder en mémoire ici
@@ -95,9 +97,9 @@ public class Column implements Serializable {
 	public Column(String name, DataType dataType, boolean argKeepDataInMemory, boolean argWriteDataOnDisk) {
 		this.name = name;
 		this.dataType = dataType;
+		this.dataTypeEnum = DataTypeEnum.instanciate(dataType);
 		this.keepDataInMemory = argKeepDataInMemory;//true;//
 		this.writeDataOnDisk = argWriteDataOnDisk;//true;//
-		
 	}
 	
 	

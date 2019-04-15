@@ -39,6 +39,7 @@ public class StringType extends DataType {
 		return input;
 	}
 	
+	
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Class getAssociatedClassType() {

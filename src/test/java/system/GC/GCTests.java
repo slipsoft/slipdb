@@ -1,6 +1,7 @@
 package system.GC;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
@@ -91,7 +92,7 @@ public class GCTests {
 		finalSave = null;
 	}
 	
-	//@Test
+	@Test
 	public void memSimpleArrayTest() {
 		if (ignoreThoseHeavyTests) return;
 		
@@ -130,13 +131,13 @@ public class GCTests {
 		
 	}
 	
-	//@Test
+	@Test
 	public void test4() {
 		byte[] strArr = "This is a test !".getBytes();
-		Log.info("len = " + strArr.length); 
+		Log.info("len = " + strArr.length + " str = " + new String(strArr));
 	}// keur keur crash japout
 	
-	//@Test
+	@Test
 	public void memTest3() {
 		if (ignoreThoseHeavyTests) return;
 		

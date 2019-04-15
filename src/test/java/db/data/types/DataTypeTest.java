@@ -202,6 +202,18 @@ class DataTypeTest {
 		}
 		localTimer.log();
 		
+		
+		localTimer = new Timer("String <-> array");
+		String myString = "This is a test !";
+		byte[] bArr;
+		for (int count = 0; count < maxCountOperation; count++) {
+			bArr = myString.getBytes();
+			myString = new String(bArr);
+			//bBuff.rewind();
+			//dateType.parseAndWriteToBuffer("2015-04-27 15:45:38", bBuff);
+		}
+		localTimer.log();
+		
 		/* Gain vraiment minime, pas la peine de s'embêter
 		Utils utilsInstance = new Utils();
 		int dateAsInt;
