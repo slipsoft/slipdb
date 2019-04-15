@@ -22,7 +22,8 @@ public class ColumnDataChunk implements Serializable {
 	public long[] valuesArrayLong = null;
 	public float[] valuesArrayFloat = null;
 	public double[] valuesArrayDouble = null;
-	public String[] valuesArrayString = null;
+	public String[] valuesArrayString = null; // stocker des objets ralentir grandement le GC (garbage collector)
+	//public byte[] valuesArrayStringAsBytes = null;
 	//public int[] valuesArray = null;
 	
 	public int currentSizePosition = 0;
@@ -93,6 +94,11 @@ public class ColumnDataChunk implements Serializable {
 		valuesArrayString[currentSizePosition] = data;
 		return incPosition();
 	}
+	/* devra être supporté (gestion des strings)
+	public boolean writeByteArrayData(byte[] data) {
+		valuesArrayFloat[currentSizePosition] = data;
+		return incPosition();
+	}*/
 	
 	
 	

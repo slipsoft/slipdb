@@ -1,10 +1,6 @@
 package newLoader.tests;
 
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 

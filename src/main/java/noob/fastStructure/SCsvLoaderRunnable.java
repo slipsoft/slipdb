@@ -153,7 +153,7 @@ public class SCsvLoaderRunnable implements Runnable {
 			entryString = linesBuffer[iLine];
 			lineAsByteBuffer.rewind();
 
-			boolean skipAllData = true;
+			//boolean skipAllData = true;
 			//if (skipAllData) continue;
 			
 			valuesAsStringArray = entryString.split(","); //loaderParser.processEntry(entryString);
@@ -283,7 +283,7 @@ public class SCsvLoaderRunnable implements Runnable {
 							}
 						} else {
 							currentValue = currentColumn.getDataType().getDefaultValue();
-							Log.error("IGNORE DATA !");
+							//Log.error("IGNORE DATA !");
 						}
 						
 						// TEMPORAIREMENT désactivé (rush) currentColumn.evaluateMinMax(currentValue); // <- Indispensable pour le IndexTreeCeption (non utile pour le IndexTreeDic)
@@ -300,14 +300,55 @@ public class SCsvLoaderRunnable implements Runnable {
 			
 			
 			// Ecriture de la donnée en mémoire, en un seul bloc atomique, pour garantir la cohérence de la donnée (pas un lock par colonne donc !)
-			if (skipAllData == false)
+			//if (skipAllData == false)
 			synchronized(loaderWriteInMemoryLock) {
+				
+				
 				for (int columnIndex = 0; columnIndex < fieldsNumberInLine; columnIndex++) {
-					Column currentColumn = columnsList.get(columnIndex);
-					currentValue = localEntriesArray[columnIndex];
+					Column currentColumn = localColumnArray[columnIndex];
+					if (currentColumn.keepDataInMemory == false) continue; // Si je dois garder la donnée en mémoire, je la stocke dans la colonne
 					
-					// Si je dois garder la donnée en mémoire, je la stocke dans la colonne
-					if (currentColumn.keepDataInMemory) {
+					if (parseWithNativeFormat) {
+						
+						
+						/*
+						switch (currentColumn.dataTypeEnum) {
+						case UNKNOWN :
+							Log.error("Colonne au type inconnu");
+							break;
+						case BYTE :
+							
+							lineAsByteBuffer.put(Byte.parseByte(valueAsString));
+							break;
+						case INTEGER :
+							lineAsByteBuffer.putInt(Integer.parseInt(valueAsString));
+							break;
+						case LONG :
+							lineAsByteBuffer.putLong(Long.parseLong(valueAsString));
+							break;
+						case DATE :
+							int dateAsInt = utilsInstance.intDateFromString(valueAsString);
+							lineAsByteBuffer.putInt(dateAsInt);
+							break;
+						case FLOAT :
+							lineAsByteBuffer.putFloat(Float.parseFloat(valueAsString));
+							break;
+						case DOUBLE :
+							lineAsByteBuffer.putDouble(Double.parseDouble(valueAsString));
+							break;
+						case STRING :
+							byte[] strAsByteArray = StringType.stringToAjustedByteArray(valueAsString, currentColumn.getDataSize());
+							lineAsByteBuffer.put(strAsByteArray);
+							break;
+						default : break;
+						}
+						
+						*/
+						
+						
+						
+					} else {
+						currentValue = localEntriesArray[columnIndex];
 						currentColumn.writeDataInMemory(currentValue); // <- C'est vraiment pas super opti de faire data -> cast en objet -> cast en data mais rush et c'est la "Structure" de Nico
 					}
 				}

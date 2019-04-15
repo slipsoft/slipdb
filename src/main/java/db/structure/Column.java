@@ -251,9 +251,7 @@ public class Column implements Serializable {
 	}
 	
 	
-	public void writeDataInMemory(Object dataAsPrimitiveObject)  {
-		//synchronized(writeInMemoryLock) <- RISQUE de perte de la cohrérence des données, le lock est mis dans Loader.writeInMemoryLock
-		//Log.info("Write in memory ! " + dataAsPrimitiveObject);
+	private ColumnDataChunk dataMemoryGetWriteChunk() {
 		if (a2DataChunk.size() == 0) {
 			ColumnDataChunk newDataChunk = new ColumnDataChunk(dataType, chunkDataTypeAllocationSize);
 			//Log.info("Initialisation chunk");
@@ -261,6 +259,55 @@ public class Column implements Serializable {
 		}
 		int dataChunkListSize = a2DataChunk.size();
 		ColumnDataChunk dataChunk = a2DataChunk.get(dataChunkListSize - 1);
+		return dataChunk;
+	}
+	
+	private void addAnotherChunkIfNecessary(boolean needAnotherChunk) {
+		if (needAnotherChunk) {
+			//Log.info("Nouveau chunk");
+			ColumnDataChunk newDataChunk = new ColumnDataChunk(dataType, chunkDataTypeAllocationSize);
+			a2DataChunk.add(newDataChunk);
+		}
+	}
+
+	public void writeByteInMemory(byte value)  {
+		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
+		addAnotherChunkIfNecessary(dataChunk.writeByteData(value));
+	}
+	public void writeIntegerInMemory(int value)  {
+		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
+		addAnotherChunkIfNecessary(dataChunk.writeIntData(value));
+	}
+	public void writeLongInMemory(long value)  {
+		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
+		addAnotherChunkIfNecessary(dataChunk.writeLongData(value));
+	}
+	public void writeFloatInMemory(float value)  {
+		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
+		addAnotherChunkIfNecessary(dataChunk.writeFloatData(value));
+	}
+	public void writeDoubleInMemory(double value)  {
+		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
+		addAnotherChunkIfNecessary(dataChunk.writeDoubleData(value));
+	}
+	public void writeDateInMemory(int value)  {
+		writeIntegerInMemory(value);
+	}
+	public void writeStringInMemory(String value)  {
+		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
+		addAnotherChunkIfNecessary(dataChunk.writeStringData(value));
+	}
+	/*public void writeByteArrayInMemory(byte[] value)  {
+		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
+		addAnotherChunkIfNecessary(dataChunk.writeStringData(value));
+	}*/
+	
+	
+	
+	public void writeDataInMemory(Object dataAsPrimitiveObject) {
+		//synchronized(writeInMemoryLock) <- RISQUE de perte de la cohrérence des données, le lock est mis dans Loader.writeInMemoryLock
+		//Log.info("Write in memory ! " + dataAsPrimitiveObject);
+		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
 		
 		/** TODO
 		 * TODO
