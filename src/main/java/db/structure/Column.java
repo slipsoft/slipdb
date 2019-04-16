@@ -346,4 +346,8 @@ public class Column implements Serializable {
 		
 	}
 	
+	public void clearAllMemoryData() {
+		a2DataChunk = new ArrayList<ColumnDataChunk>();
+	}
+	
 }

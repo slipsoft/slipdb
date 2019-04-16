@@ -303,48 +303,42 @@ public class SCsvLoaderRunnable implements Runnable {
 			//if (skipAllData == false)
 			synchronized(loaderWriteInMemoryLock) {
 				
-				
+				lineAsByteBuffer.rewind();
 				for (int columnIndex = 0; columnIndex < fieldsNumberInLine; columnIndex++) {
 					Column currentColumn = localColumnArray[columnIndex];
 					if (currentColumn.keepDataInMemory == false) continue; // Si je dois garder la donnée en mémoire, je la stocke dans la colonne
 					
 					if (parseWithNativeFormat) {
 						
-						
-						/*
 						switch (currentColumn.dataTypeEnum) {
 						case UNKNOWN :
 							Log.error("Colonne au type inconnu");
 							break;
 						case BYTE :
-							
-							lineAsByteBuffer.put(Byte.parseByte(valueAsString));
+							currentColumn.writeByteInMemory(lineAsByteBuffer.get());
 							break;
 						case INTEGER :
-							lineAsByteBuffer.putInt(Integer.parseInt(valueAsString));
+							currentColumn.writeIntegerInMemory(lineAsByteBuffer.getInt());
 							break;
 						case LONG :
-							lineAsByteBuffer.putLong(Long.parseLong(valueAsString));
+							currentColumn.writeLongInMemory(lineAsByteBuffer.getLong());
 							break;
 						case DATE :
-							int dateAsInt = utilsInstance.intDateFromString(valueAsString);
-							lineAsByteBuffer.putInt(dateAsInt);
+							currentColumn.writeDateInMemory(lineAsByteBuffer.getInt());
 							break;
 						case FLOAT :
-							lineAsByteBuffer.putFloat(Float.parseFloat(valueAsString));
+							currentColumn.writeFloatInMemory(lineAsByteBuffer.getFloat());
 							break;
 						case DOUBLE :
-							lineAsByteBuffer.putDouble(Double.parseDouble(valueAsString));
+							currentColumn.writeDoubleInMemory(lineAsByteBuffer.getDouble());
 							break;
 						case STRING :
-							byte[] strAsByteArray = StringType.stringToAjustedByteArray(valueAsString, currentColumn.getDataSize());
-							lineAsByteBuffer.put(strAsByteArray);
+							byte[] strAsByteArray = new byte[currentColumn.getDataSize()];
+							lineAsByteBuffer.get(strAsByteArray);
+							currentColumn.writeStringInMemory(new String(strAsByteArray));
 							break;
 						default : break;
 						}
-						
-						*/
-						
 						
 						
 					} else {

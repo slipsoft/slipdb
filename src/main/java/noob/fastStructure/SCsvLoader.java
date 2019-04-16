@@ -4,14 +4,18 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.dant.utils.Log;
 import com.dant.utils.MemUsage;
 import com.dant.utils.Timer;
+import com.dant.utils.Utils;
 
 import db.data.load.Parser;
+import db.structure.Column;
 import db.structure.Table;
 
 /**
@@ -21,7 +25,7 @@ import db.structure.Table;
  */
 public class SCsvLoader {
 	
-	private final int threadCount = 30;//+8;
+	private final int threadCount = 6;//+8;
 	private SCsvLoaderRunnable[] runnableArray;// = new SLoaderThread[threadCount];
 	
 	private Table currentTable;
@@ -77,7 +81,7 @@ public class SCsvLoader {
 				}
 			}
 			if (foundReadyThread == null) {
-				Log.error("Attente d'un thread dispo...");
+				//Log.error("Attente d'un thread dispo...");
 				try {
 					Thread.sleep(2); // attente mi-active
 				} catch (Exception e) {
@@ -95,9 +99,9 @@ public class SCsvLoader {
 	 * @param limit
 	 */
 	public final void parse(InputStream input, int limit, boolean appendAtTheEndOfSave) {
-		//Log.info("PARSE : memusage init = ");
-		//System.gc();
-		//MemUsage.printMemUsage();
+		Log.info("PARSE : memusage init = ");
+		System.gc();
+		MemUsage.printMemUsage();
 		int localReadEntryNb = 0;
 		int localReadEntryNbToAddToTotalCount = 0;
 		//int choosenThreadIndex = 0;
@@ -107,11 +111,9 @@ public class SCsvLoader {
 		SCsvLoaderRunnable currentThreadCollectingData = getReadyThread();
 		Timer timeTookTimer = new Timer("Temps écoulé");
 		
-		try ( 
+		try (
 				BufferedReader bRead = new BufferedReader(new InputStreamReader(input));
 				) {
-			
-			
 			
 			
 			//while ((entryString = processReader(bRead)) != null && totalEntryCount != limit) {
@@ -132,7 +134,6 @@ public class SCsvLoader {
 					if (SCsvLoaderRunnable.activeThreadNb.get() < 3 && localReadEntryNb > 1_000_000) {
 						//debugShowRunnablesState();
 						
-						
 					}
 					
 				}
@@ -145,8 +146,6 @@ public class SCsvLoader {
 					//MemUsage.printMemUsage();
 					//System.gc();
 				}
-				
-				
 				
 				
 				if (localReadEntryNbToAddToTotalCount >= updateTotalReadEntryNbEach) {
@@ -165,15 +164,23 @@ public class SCsvLoader {
 		
 		currentThreadCollectingData.startIfNeeded(); // exécuter le dernier thread si besoin
 		
-		//Log.info("PARSE : FINAL USAGE");
-		//System.gc();
-		//MemUsage.printMemUsage();
 		
 		for (int iThread = 0; iThread < threadCount; iThread++) {
 			runnableArray[iThread].waitTerminaison();
 		}
+		
+		List<Column> columnsList = currentTable.getColumns();
+		
+		/*for (int iColumn = 0; iColumn < columnsList.size(); iColumn++) {
+			Column col = columnsList.get(iColumn);
+			col.clearAllMemoryData();
+		}*/
+		
 		Log.info("Parsing terminé !! temps écoulé = " + timeTookTimer.pretty());
 		Log.info("PARSE : Nombre de lignes = " + localReadEntryNb);
+		/*Log.info("PARSE : FINAL USAGE");
+		System.gc();
+		MemUsage.printMemUsage();*/
 		
 	}
 	
