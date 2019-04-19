@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -124,8 +125,11 @@ class DataTypeTest {
 	}
 	
 	
-	@Test
+	//@Test
 	void testWriteToBuffer() {
+		
+		Random rand = new Random();
+		
 		
 		int maxCountOperation = 1_000_000;
 		String maxCountOperationStr = "1_000_000";
@@ -245,8 +249,30 @@ class DataTypeTest {
 		
 		
 	}
+	
+	//@Test
+	public void testMemDoubleParsing() {
+		
+		Random rand = new Random();
+		
+		int maxCountOperation = 10_000_000;
+		String maxCountOperationStr = "10_000_000";
+		Timer localTimer;
+		ByteBuffer bBuff = ByteBuffer.allocate(20);
+		
+		Log.info("Cout en millisecondes, pour " + maxCountOperationStr + " itérations --- :");
+		
+		String parseStr;
+		localTimer = new Timer("Parsing de DoubleType ");
+		for (int count = 0; count < maxCountOperation; count++) {
+			bBuff.rewind();
+			parseStr = Double.toString(rand.nextDouble());
+			doubleType.parseAndWriteToBuffer(parseStr, bBuff); // "454689586.2132152"
+		}
+		localTimer.log();
+	}
 
-	@Test
+	//@Test
 	void testReadTrueValue() {
 		ByteBuffer bBuff = ByteBuffer.allocate(20);
 		Object expected;
@@ -293,7 +319,7 @@ class DataTypeTest {
 		assertEquals(expected, actual);
 	}
 
-	@Test
+	//@Test
 	void testReadIndexValue() {
 		ByteBuffer bBuff = ByteBuffer.allocate(20);
 		Object expected;

@@ -33,9 +33,9 @@ public class SCsvLoader {
 	private int totalEntryCount = 0;
 	
 	static public AtomicLong totalReadEntryNb = new AtomicLong(0);
-	static public long updateTotalReadEntryNbEach = 100_000;
+	static public long updateTotalReadEntryNbEach = 500_000;
 	protected long addToTotalReadEntryCountBuffered = 0;
-	protected int showInfoEveryParsedLines = 100_000; // mettre -1 pour désactiver l'affichage
+	protected int showInfoEveryParsedLines = 500_000; // mettre -1 pour désactiver l'affichage
 	protected boolean enableErrorLog = false;
 	
 	public static AtomicLong debugNumberOfEntriesWritten = new AtomicLong(0);
@@ -73,6 +73,7 @@ public class SCsvLoader {
 			for (int iThread = 0; iThread < threadCount; iThread++) {
 				if (runnableArray[iThread].tryUseForNewDataCollection()) {
 					foundReadyThread = runnableArray[iThread];
+					Log.error("trouvé - iThread=" + iThread);
 					//Timer t = new Timer("GC temps pris");
 					//System.gc();
 					//t.log();
@@ -81,9 +82,9 @@ public class SCsvLoader {
 				}
 			}
 			if (foundReadyThread == null) {
-				//Log.error("Attente d'un thread dispo...");
+				Log.error("Attente d'un thread dispo...");
 				try {
-					Thread.sleep(2); // attente mi-active
+					Thread.sleep(80); // attente mi-active
 				} catch (Exception e) {
 					Log.error(e);
 				}
@@ -123,25 +124,26 @@ public class SCsvLoader {
 				// Lecture d'une nouvelle ligne / entrée
 				entryAsString = bRead.readLine(); // "entrée", ligne lue
 				if (entryAsString == null) break; // fin de la lecture
-				
-				
+				//Log.infoOnly(entryAsString);
 
 				localReadEntryNb++;
 				// Affichage d'une entrée toutes les showInfoEveryParsedLines entrées lues
 				if (showInfoEveryParsedLines != -1 && localReadEntryNb % showInfoEveryParsedLines == 0) {
 					Log.info("Loader : nombre de résultats (local) lus = " + localReadEntryNb + "   temps écoulé = " + timeTookTimer.pretty() + "activeThreadNb = " + SCsvLoaderRunnable.activeThreadNb.get());
 					//MemUsage.printMemUsage();
-					if (SCsvLoaderRunnable.activeThreadNb.get() < 3 && localReadEntryNb > 1_000_000) {
+					if (SCsvLoaderRunnable.activeThreadNb.get() <= 1 /*&& localReadEntryNb > 1_000_000*/) {
 						//debugShowRunnablesState();
 						
 					}
 					
 				}
+				if (true) continue;
 				
 				
 				needNewThread = currentThreadCollectingData.addNewLine(entryAsString);
 				
 				if (needNewThread) {
+					Log.error("needNewThread...");
 					currentThreadCollectingData = getReadyThread();
 					//MemUsage.printMemUsage();
 					//System.gc();

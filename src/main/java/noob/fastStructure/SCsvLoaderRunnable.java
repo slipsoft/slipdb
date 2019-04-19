@@ -24,7 +24,7 @@ public class SCsvLoaderRunnable implements Runnable {
 	public AtomicBoolean readyForNewTask = new AtomicBoolean(true);
 	//private AtomicBoolean collectingData = new AtomicBoolean(false);
 	public AtomicBoolean running = new AtomicBoolean(false);
-	private final int linesBufferCount = 200_000; // mise en buffer de 200_000 lignes avant la création d'un nouveau thread
+	private final int linesBufferCount = 200_000; // mise en buffer de 200_000 lignes avant la mise en route d'un thread de parsing
 	
 	private String[] linesBuffer = new String[linesBufferCount];
 	private int linesBufferPosition = 0;
@@ -254,15 +254,6 @@ public class SCsvLoaderRunnable implements Runnable {
 								// Byte
 								lineAsByteBuffer.put(Byte.parseByte(valueAsString));
 							} else if (objectClass == IntegerType.class) {
-								// Byte
-								lineAsByteBuffer.put(Byte.parseByte(valueAsString));
-							} else if (objectClass == ByteType.class) {
-								// Byte
-								lineAsByteBuffer.put(Byte.parseByte(valueAsString));
-							} else if (objectClass == ByteType.class) {
-								// Byte
-								lineAsByteBuffer.put(Byte.parseByte(valueAsString));
-							} else if (objectClass == ByteType.class) {
 								// Byte
 								lineAsByteBuffer.put(Byte.parseByte(valueAsString));
 							}
