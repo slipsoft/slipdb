@@ -32,13 +32,14 @@ public class Column implements Serializable {
 	protected Object minValue = null;
 	protected Object maxValue = null;
 	protected transient Object minMaxLock = new Object();
-	protected DataType dataType;
+	protected DataType dataType; // <- type de la donnée stockée
 	@Deprecated /* @CurrentlyUnused */ transient protected List<Index> relatedIndexesList = new ArrayList<>();
 	//inutile désormais -> private transient Object writeInMemoryLock = new Object();
 	
 	public final DataTypeEnum dataTypeEnum;
+	public final int dataSizeInBytes;
 	
-	protected DataType storedDataType; // <- type de la donnée stockée
+	//protected DataType storedDataType;
 	// Stockage des données à garder en mémoire ici
 	// -> Il n'est pas possible d'utiliser l'héritage ici, il faut un truc qui prenne le moins de mémoire possible, donc pas des objets.
 	protected ArrayList<ColumnDataChunk> a2DataChunk = new ArrayList<ColumnDataChunk>();
@@ -53,7 +54,7 @@ public class Column implements Serializable {
 	public int getTotalDataLength() {
 		int totalSize = 0;
 		for (ColumnDataChunk dataChunk : a2DataChunk) {
-			totalSize += dataChunk.currentSizePosition;
+			totalSize += dataChunk.getCurrentItemPosition();
 		}
 		return totalSize;
 	}
@@ -98,6 +99,7 @@ public class Column implements Serializable {
 		this.name = name;
 		this.dataType = dataType;
 		this.dataTypeEnum = DataTypeEnum.instanciate(dataType);
+		this.dataSizeInBytes = dataType.getSize();
 		this.keepDataInMemory = argKeepDataInMemory;//true;//
 		this.writeDataOnDisk = argWriteDataOnDisk;//true;//
 	}

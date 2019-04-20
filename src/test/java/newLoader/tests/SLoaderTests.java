@@ -57,6 +57,21 @@ public class SLoaderTests {
 		System.gc();
 		MemUsage.printMemUsage("Mem usage  début - ");
 		SCsvLoader csvLoader = new SCsvLoader(table, new CsvParser());
+		
+		int mounthFinalCount = 2;
+		for (int iCsv = 1; iCsv <= mounthFinalCount; iCsv++) {
+			String colNumber = String.format("%02d" , iCsv);
+			String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
+			//String csvPath = "F:/csv/yellow_tripdata_2015-" + colNumber + ".csv"; // E:/L3 DANT disque E
+			Log.info("Parsing de csvName = " + csvPath);
+			parseThisCsv(table, csvLoader, csvPath);
+		}
+		
+		// Gros test et multi-thread
+		// Ne pas supprimer, exemple de multi-fichiers !
+		/*
+		MemUsage.printMemUsage("Mem usage  début - ");
+		SCsvLoader csvLoader = new SCsvLoader(table, new CsvParser());
 		SCsvLoader csvLoader2 = new SCsvLoader(table, new CsvParser());
 		
 		
@@ -94,7 +109,7 @@ public class SLoaderTests {
 				e.printStackTrace();
 			}
 		}
-		
+		*/
 		
 		System.gc();
 		MemUsage.printMemUsage("Mem usage  fin - ");

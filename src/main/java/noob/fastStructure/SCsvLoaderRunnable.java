@@ -147,6 +147,10 @@ public class SCsvLoaderRunnable implements Runnable {
 		
 		boolean parseWithNativeFormat = true;
 		//boolean stupidBenchmark = true;
+		byte[] strAsByteArray;
+		int dateAsInt;
+		
+		
 		
 		
 		for (int iLine = 0; iLine < linesBufferPosition; iLine++) {
@@ -227,7 +231,7 @@ public class SCsvLoaderRunnable implements Runnable {
 							lineAsByteBuffer.putLong(Long.parseLong(valueAsString));
 							break;
 						case DATE :
-							int dateAsInt = utilsInstance.intDateFromString(valueAsString);
+							dateAsInt = utilsInstance.intDateFromString(valueAsString);
 							lineAsByteBuffer.putInt(dateAsInt);
 							break;
 						case FLOAT :
@@ -237,7 +241,7 @@ public class SCsvLoaderRunnable implements Runnable {
 							lineAsByteBuffer.putDouble(Double.parseDouble(valueAsString));
 							break;
 						case STRING :
-							byte[] strAsByteArray = StringType.stringToAjustedByteArray(valueAsString, currentColumn.getDataSize());
+							strAsByteArray = StringType.stringToAjustedByteArray(valueAsString, currentColumn.getDataSize());
 							lineAsByteBuffer.put(strAsByteArray);
 							break;
 						default : break;
@@ -291,7 +295,7 @@ public class SCsvLoaderRunnable implements Runnable {
 			
 			
 			// Ecriture de la donnée en mémoire, en un seul bloc atomique, pour garantir la cohérence de la donnée (pas un lock par colonne donc !)
-			//if (skipAllData == false)
+			//if (false)
 			synchronized(loaderWriteInMemoryLock) {
 				
 				lineAsByteBuffer.rewind();
@@ -324,7 +328,7 @@ public class SCsvLoaderRunnable implements Runnable {
 							currentColumn.writeDoubleInMemory(lineAsByteBuffer.getDouble());
 							break;
 						case STRING :
-							byte[] strAsByteArray = new byte[currentColumn.getDataSize()];
+							strAsByteArray = new byte[currentColumn.getDataSize()];
 							lineAsByteBuffer.get(strAsByteArray);
 							currentColumn.writeStringInMemory(new String(strAsByteArray));
 							break;

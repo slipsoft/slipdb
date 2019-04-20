@@ -35,7 +35,7 @@ public class SCsvLoader {
 	static public AtomicLong totalReadEntryNb = new AtomicLong(0);
 	static public long updateTotalReadEntryNbEach = 500_000;
 	protected long addToTotalReadEntryCountBuffered = 0;
-	protected int showInfoEveryParsedLines = 500_000; // mettre -1 pour désactiver l'affichage
+	protected int showInfoEveryParsedLines = 100_000; // mettre -1 pour désactiver l'affichage
 	protected boolean enableErrorLog = false;
 	
 	public static AtomicLong debugNumberOfEntriesWritten = new AtomicLong(0);
@@ -73,7 +73,7 @@ public class SCsvLoader {
 			for (int iThread = 0; iThread < threadCount; iThread++) {
 				if (runnableArray[iThread].tryUseForNewDataCollection()) {
 					foundReadyThread = runnableArray[iThread];
-					Log.error("trouvé - iThread=" + iThread);
+					//Log.error("trouvé - iThread=" + iThread);
 					//Timer t = new Timer("GC temps pris");
 					//System.gc();
 					//t.log();
@@ -82,9 +82,9 @@ public class SCsvLoader {
 				}
 			}
 			if (foundReadyThread == null) {
-				Log.error("Attente d'un thread dispo...");
+				//Log.error("Attente d'un thread dispo...");
 				try {
-					Thread.sleep(80); // attente mi-active
+					Thread.sleep(5); // attente mi-active
 				} catch (Exception e) {
 					Log.error(e);
 				}
@@ -101,7 +101,7 @@ public class SCsvLoader {
 	 */
 	public final void parse(InputStream input, int limit, boolean appendAtTheEndOfSave) {
 		Log.info("PARSE : memusage init = ");
-		System.gc();
+		//System.gc(); pour ne pas ralentir inutilement
 		MemUsage.printMemUsage();
 		int localReadEntryNb = 0;
 		int localReadEntryNbToAddToTotalCount = 0;
@@ -131,24 +131,28 @@ public class SCsvLoader {
 				if (showInfoEveryParsedLines != -1 && localReadEntryNb % showInfoEveryParsedLines == 0) {
 					Log.info("Loader : nombre de résultats (local) lus = " + localReadEntryNb + "   temps écoulé = " + timeTookTimer.pretty() + "activeThreadNb = " + SCsvLoaderRunnable.activeThreadNb.get());
 					//MemUsage.printMemUsage();
+					if (localReadEntryNb == 10_000_000) {
+						Log.error("10_000_000 résultats - GC");
+						MemUsage.printMemUsage();
+						System.gc();
+						MemUsage.printMemUsage();
+					}
 					if (SCsvLoaderRunnable.activeThreadNb.get() <= 1 /*&& localReadEntryNb > 1_000_000*/) {
 						//debugShowRunnablesState();
 						
 					}
 					
 				}
-				if (true) continue;
-				
+				//if (true) continue;
 				
 				needNewThread = currentThreadCollectingData.addNewLine(entryAsString);
 				
 				if (needNewThread) {
-					Log.error("needNewThread...");
+					//Log.error("needNewThread...");
 					currentThreadCollectingData = getReadyThread();
 					//MemUsage.printMemUsage();
 					//System.gc();
 				}
-				
 				
 				if (localReadEntryNbToAddToTotalCount >= updateTotalReadEntryNbEach) {
 					totalReadEntryNb.addAndGet(localReadEntryNbToAddToTotalCount);
