@@ -42,7 +42,7 @@ public class Column implements Serializable {
 	//protected DataType storedDataType;
 	// Stockage des données à garder en mémoire ici
 	// -> Il n'est pas possible d'utiliser l'héritage ici, il faut un truc qui prenne le moins de mémoire possible, donc pas des objets.
-	protected ArrayList<ColumnDataChunk> a2DataChunk = new ArrayList<ColumnDataChunk>();
+	protected ArrayList<ColumnDataChunkV1> a2DataChunk = new ArrayList<ColumnDataChunkV1>();
 	
 	// Les données seront écrites dans la mémoire et/ou sur le disque. Version simple : un seul fichier par colonne
 	transient protected EasyFile dataOnDiskFile;// = new EasyFile(); TODO
@@ -51,9 +51,9 @@ public class Column implements Serializable {
 	
 	public final static int chunkDataTypeAllocationSize = 1_000_000;
 	
-	public int getTotalDataLength() {
+	public int getTotalLinesNumber() {
 		int totalSize = 0;
-		for (ColumnDataChunk dataChunk : a2DataChunk) {
+		for (ColumnDataChunkV1 dataChunk : a2DataChunk) {
 			totalSize += dataChunk.getCurrentItemPosition();
 		}
 		return totalSize;
@@ -253,51 +253,51 @@ public class Column implements Serializable {
 	}
 	
 	
-	private ColumnDataChunk dataMemoryGetWriteChunk() {
+	private ColumnDataChunkV1 dataMemoryGetWriteChunk() {
 		if (a2DataChunk.size() == 0) {
-			ColumnDataChunk newDataChunk = new ColumnDataChunk(dataType, chunkDataTypeAllocationSize);
+			ColumnDataChunkV1 newDataChunk = new ColumnDataChunkV1(dataType, chunkDataTypeAllocationSize);
 			//Log.info("Initialisation chunk");
 			a2DataChunk.add(newDataChunk);
 		}
 		int dataChunkListSize = a2DataChunk.size();
-		ColumnDataChunk dataChunk = a2DataChunk.get(dataChunkListSize - 1);
+		ColumnDataChunkV1 dataChunk = a2DataChunk.get(dataChunkListSize - 1);
 		return dataChunk;
 	}
 	
 	private void addAnotherChunkIfNecessary(boolean needAnotherChunk) {
 		if (needAnotherChunk) {
 			//Log.info("Nouveau chunk");
-			ColumnDataChunk newDataChunk = new ColumnDataChunk(dataType, chunkDataTypeAllocationSize);
+			ColumnDataChunkV1 newDataChunk = new ColumnDataChunkV1(dataType, chunkDataTypeAllocationSize);
 			a2DataChunk.add(newDataChunk);
 		}
 	}
 
 	public void writeByteInMemory(byte value)  {
-		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
-		addAnotherChunkIfNecessary(dataChunk.writeByteData(value));
+		ColumnDataChunkV1 dataChunk = dataMemoryGetWriteChunk();
+		addAnotherChunkIfNecessary(dataChunk.writeByte(value));
 	}
 	public void writeIntegerInMemory(int value)  {
-		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
-		addAnotherChunkIfNecessary(dataChunk.writeIntData(value));
+		ColumnDataChunkV1 dataChunk = dataMemoryGetWriteChunk();
+		addAnotherChunkIfNecessary(dataChunk.writeInt(value));
 	}
 	public void writeLongInMemory(long value)  {
-		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
-		addAnotherChunkIfNecessary(dataChunk.writeLongData(value));
+		ColumnDataChunkV1 dataChunk = dataMemoryGetWriteChunk();
+		addAnotherChunkIfNecessary(dataChunk.writeLong(value));
 	}
 	public void writeFloatInMemory(float value)  {
-		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
-		addAnotherChunkIfNecessary(dataChunk.writeFloatData(value));
+		ColumnDataChunkV1 dataChunk = dataMemoryGetWriteChunk();
+		addAnotherChunkIfNecessary(dataChunk.writeFloat(value));
 	}
 	public void writeDoubleInMemory(double value)  {
-		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
-		addAnotherChunkIfNecessary(dataChunk.writeDoubleData(value));
+		ColumnDataChunkV1 dataChunk = dataMemoryGetWriteChunk();
+		addAnotherChunkIfNecessary(dataChunk.writeDouble(value));
 	}
 	public void writeDateInMemory(int value)  {
 		writeIntegerInMemory(value);
 	}
 	public void writeStringInMemory(String value)  {
-		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
-		addAnotherChunkIfNecessary(dataChunk.writeStringData(value));
+		ColumnDataChunkV1 dataChunk = dataMemoryGetWriteChunk();
+		addAnotherChunkIfNecessary(dataChunk.writeString(value));
 	}
 	/*public void writeByteArrayInMemory(byte[] value)  {
 		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
@@ -309,7 +309,7 @@ public class Column implements Serializable {
 	public void writeDataInMemory(Object dataAsPrimitiveObject) {
 		//synchronized(writeInMemoryLock) <- RISQUE de perte de la cohrérence des données, le lock est mis dans Loader.writeInMemoryLock
 		//Log.info("Write in memory ! " + dataAsPrimitiveObject);
-		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
+		ColumnDataChunkV1 dataChunk = dataMemoryGetWriteChunk();
 		
 		/** TODO
 		 * TODO
@@ -323,33 +323,33 @@ public class Column implements Serializable {
 		 */
 		boolean needAnotherChunk = false;
 		if (dataAsPrimitiveObject.getClass() == Byte.class)
-			needAnotherChunk = dataChunk.writeByteData( ((Byte)dataAsPrimitiveObject).byteValue() );
+			needAnotherChunk = dataChunk.writeByte( ((Byte)dataAsPrimitiveObject).byteValue() );
 		
 		if ((dataAsPrimitiveObject.getClass() == Integer.class))
-			needAnotherChunk = dataChunk.writeIntData( ((Integer)dataAsPrimitiveObject).intValue() );
+			needAnotherChunk = dataChunk.writeInt( ((Integer)dataAsPrimitiveObject).intValue() );
 		
 		if (dataAsPrimitiveObject.getClass() == Long.class)
-			needAnotherChunk = dataChunk.writeLongData( ((Long)dataAsPrimitiveObject).longValue() );
+			needAnotherChunk = dataChunk.writeLong( ((Long)dataAsPrimitiveObject).longValue() );
 		
 		if (dataAsPrimitiveObject.getClass() == Float.class)
-			needAnotherChunk = dataChunk.writeFloatData( ((Float)dataAsPrimitiveObject).floatValue() );
+			needAnotherChunk = dataChunk.writeFloat( ((Float)dataAsPrimitiveObject).floatValue() );
 		
 		if (dataAsPrimitiveObject.getClass() == Double.class)
-			needAnotherChunk = dataChunk.writeDoubleData( ((Double)dataAsPrimitiveObject).doubleValue() );
+			needAnotherChunk = dataChunk.writeDouble( ((Double)dataAsPrimitiveObject).doubleValue() );
 		
 		if (dataAsPrimitiveObject.getClass() == String.class)
-			needAnotherChunk = dataChunk.writeStringData( ((String)dataAsPrimitiveObject) );
+			needAnotherChunk = dataChunk.writeString( ((String)dataAsPrimitiveObject) );
 		
 		if (needAnotherChunk) {
 			//Log.info("Nouveau chunk");
-			ColumnDataChunk newDataChunk = new ColumnDataChunk(dataType, chunkDataTypeAllocationSize);
+			ColumnDataChunkV1 newDataChunk = new ColumnDataChunkV1(dataType, chunkDataTypeAllocationSize);
 			a2DataChunk.add(newDataChunk);
 		}
 		
 	}
 	
 	public void clearAllMemoryData() {
-		a2DataChunk = new ArrayList<ColumnDataChunk>();
+		a2DataChunk = new ArrayList<ColumnDataChunkV1>();
 	}
 	
 }

@@ -1,7 +1,6 @@
 package db.structure;
 
 import java.io.Serializable;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import db.data.types.ByteType;
@@ -13,9 +12,7 @@ import db.data.types.IntegerType;
 import db.data.types.LongType;
 import db.data.types.StringType;
 
-// Version simplifiée
-
-public class ColumnDataChunk implements Serializable {
+public class ColumnDataChunkV1 implements Serializable {
 	private static final long serialVersionUID = -3035163829243851789L;
 	
 	// Stockage de la donnée à garder en mémoire ici
@@ -29,32 +26,43 @@ public class ColumnDataChunk implements Serializable {
 	public String[] valuesArrayString = null; // stocker des objets ralentir grandement le GC (garbage collector)
 	// Un seul tableau stockant toutes les chaînes de caractères, pour ne pas avoir trop d'objets créés
 	// et ne pas surcharger le GC
-	public byte[] valuesByteArray = null;
+	public byte[] valuesArrayStringAsBytes = null;
+	//public int[] valuesArray = null;
 	
+	static public final boolean useByteStringStorage = true; // stocker les strings sous forme d'octets
+	// -> Stocker sous forme d'octets est BEAUCOUP plus optimisé (que sous forme d'objets)
 	
-
 	private int currentItemPosition = 0;
-	private int currentPositionInByteArray = 0;
-	private final int maxNumberOfItems;
-	private final int byteArrayLength;
+	private final int allocationSize;
 	
 	protected final DataType dataType;
 	protected final int dataTypeSize; // taille en octets
 	
 	/** 
 	 *  @param argDataType     type de la donnée sauvegardée
-	 *  @param maxNumberOfItems  taille de l'allocation (ne sera pas ré-alloué, pour des raisons de performance)
+	 *  @param allocationSize  taille de l'allocation (ne sera pas ré-alloué, pour des raisons de performance)
 	 */
-	public ColumnDataChunk(DataType argDataType, int argMaxNumberOfItems) {
+	public ColumnDataChunkV1(DataType argDataType, int argAllocationSize) {
 		dataType = argDataType;
 		dataTypeSize = dataType.getSize();
-		maxNumberOfItems = argMaxNumberOfItems;
-		byteArrayLength = maxNumberOfItems * dataTypeSize;
-		valuesByteArray = new byte[byteArrayLength]; // données stockées sous forme d'un tableau d'octets
+		allocationSize = argAllocationSize;
+		
+		if (dataType.getClass() == ByteType.class)    valuesArrayByte = new byte[allocationSize];
+		if (dataType.getClass() == DateType.class)    valuesArrayInteger = new int[allocationSize];
+		if (dataType.getClass() == IntegerType.class) valuesArrayInteger = new int[allocationSize];
+		if (dataType.getClass() == LongType.class)    valuesArrayLong = new long[allocationSize];
+		if (dataType.getClass() == FloatType.class)   valuesArrayFloat = new float[allocationSize];
+		if (dataType.getClass() == DoubleType.class)  valuesArrayDouble = new double[allocationSize];
+		if (dataType.getClass() == StringType.class) { // Type String
+			if (useByteStringStorage) // ne pas utisier d'objets, juste des octets
+				valuesArrayStringAsBytes = new byte[allocationSize * dataType.getSize()];
+			else // utiliser des objets (pas opti)
+				valuesArrayString = new String[allocationSize];
+		}
+		//if (dataType.getClass() == StringType.class)  valuesArrayString = new String[allocationSize];
+		
 		currentItemPosition = 0;
-		currentPositionInByteArray = 0;
-		ByteBuffer b = ByteBuffer.allocateDirect(10);
-		//b.getDouble()
+		
 	}
 	
 	/** 
@@ -62,8 +70,7 @@ public class ColumnDataChunk implements Serializable {
 	 */
 	private boolean incPosition() {
 		currentItemPosition++;
-		currentPositionInByteArray += dataTypeSize;
-		if (currentItemPosition >= maxNumberOfItems) return true;
+		if (currentItemPosition >= allocationSize) return true;
 		return false;
 	}
 	
@@ -100,11 +107,11 @@ public class ColumnDataChunk implements Serializable {
 	// En entrée : le String de taille ajustée
 	public boolean writeString(String data) {
 		
-		/*if (useByteStringStorage) { // ne pas utisier d'objets, juste des octets
+		if (useByteStringStorage) { // ne pas utisier d'objets, juste des octets
 			byte[] strAsBytes = data.getBytes();
 			System.arraycopy(strAsBytes, 0, valuesArrayStringAsBytes, currentItemPosition * dataTypeSize, dataTypeSize);
 		} else // utiliser des objets (pas opti)
-			valuesArrayString[currentItemPosition] = data;*/
+			valuesArrayString[currentItemPosition] = data;
 		return incPosition();
 	}
 	
@@ -117,14 +124,13 @@ public class ColumnDataChunk implements Serializable {
 	 *  @param indexInChunk
 	 */
 	public String getString(int indexInChunk) {
-		/*if (useByteStringStorage) { // ne pas utisier d'objets, juste des octets (beaucoup plus optimisé)
+		if (useByteStringStorage) { // ne pas utisier d'objets, juste des octets (beaucoup plus optimisé)
 			byte[] strAsBytes = new byte[dataTypeSize];
 			System.arraycopy(valuesArrayStringAsBytes, indexInChunk * dataTypeSize, strAsBytes, 0, dataTypeSize);
 			return new String(strAsBytes);
 		} else {
 			return valuesArrayString[indexInChunk];
-		}*/
-		return null;
+		}
 	}
 	
 	//public 

@@ -1,4 +1,4 @@
-package newLoader.tests;
+package db.index;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -11,24 +11,60 @@ import com.dant.utils.MemUsage;
 import com.dant.utils.Timer;
 
 import db.data.load.CsvParser;
-import db.data.load.Loader;
 import db.data.types.ByteType;
 import db.data.types.DateType;
 import db.data.types.DoubleType;
 import db.data.types.FloatType;
 import db.data.types.StringType;
-import db.structure.StructureException;
+import db.structure.Column;
 import db.structure.Table;
 import noob.fastStructure.SCsvLoader;
 
-public class SLoaderTests {
+public class SIndexBench {
+
+	private int limitResultNb = 20_000;
+	Table table;
 	
 	
 	@Test
-	public void test() throws IOException, StructureException {
+	public void mainTest() throws Exception {
+		
+		// Chargement des CSV
+		loadFirst();
+		
+		// Ajout à l'index
+		indexColumns(new int[] {3, 4}); // trip_distance et passenger_count
+		indexColumns(new int[] {3}); // trip_distance
+		
+		
+	}
+	
+	
+	private void indexColumns(int[] colIndexList) {
+		if (colIndexList.length == 0) return;
+		
+		Column[] choosenColArray = new Column[colIndexList.length];
+		for (int i = 0; i < colIndexList.length; i++) {
+			choosenColArray[i] = table.getColumns().get(i);
+		}
+		
+		// Nombre de lignes au total
+		int linesNumber = choosenColArray[0].getTotalLinesNumber();
+		
+		for (int iLine = 0; iLine < linesNumber; iLine++) {
+			// Pour indexer, je n'ai besoin que d'un tableau d'octets
+			
+			
+		}
+		
+	}
+	
+	
+	
+	public void loadFirst() throws Exception {
 		Log.start("indexingTreeTest", 3);
 		
-		Table table = new Table("NYtest");
+		table = new Table("NYtest");
 		
 		table.addColumn("VendorID", new ByteType());
 		table.addColumn("tpep_pickup_datetime", new DateType()); //new StringType(19));//
@@ -52,7 +88,6 @@ public class SLoaderTests {
 		
 		Timer parseTimer = new Timer("TEMPS TOTAL PRIS PAR TOUS LES PARSINGS");
 		
-		
 		System.gc();
 		MemUsage.printMemUsage("Mem usage  début - ");
 		SCsvLoader csvLoader = new SCsvLoader(table, new CsvParser());
@@ -66,50 +101,6 @@ public class SLoaderTests {
 			parseThisCsv(table, csvLoader, csvPath);
 		}
 		
-		// Gros test et multi-thread
-		// Ne pas supprimer, exemple de multi-fichiers !
-		/*
-		MemUsage.printMemUsage("Mem usage  début - ");
-		SCsvLoader csvLoader = new SCsvLoader(table, new CsvParser());
-		SCsvLoader csvLoader2 = new SCsvLoader(table, new CsvParser());
-		
-		
-		
-		int mounthFinalCount = 12;
-		for (int iCsv = 1; iCsv <= mounthFinalCount; iCsv += 2) {
-			String colNumber = String.format("%02d" , iCsv);
-			String colNumber2 = String.format("%02d" , iCsv + 1);
-			//String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
-			String csvPath1 = "F:/csv/yellow_tripdata_2015-" + colNumber + ".csv"; // E:/L3 DANT disque E/
-			String csvPath2 = "F:/csv/yellow_tripdata_2015-" + colNumber2 + ".csv";
-			Log.info("Parsing de csvName = " + csvPath1 + " et " + csvPath2);
-			//Log.info("Parsing de csvName = " + csvPath);
-			Thread th1 = new Thread(() -> {
-				try {
-					parseThisCsv(table, csvLoader, csvPath1);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			});
-			Thread th2 = new Thread(() -> {
-				try {
-					parseThisCsv(table, csvLoader2, csvPath2);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			});
-			th1.start();
-			th2.start();
-			try {
-				th1.join();
-				th2.join();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		*/
-		
 		System.gc();
 		MemUsage.printMemUsage("Mem usage  fin - ");
 		parseTimer.log();
@@ -122,6 +113,4 @@ public class SLoaderTests {
 		csvLoader.parse(csvStream, true);
 		csvStream.close();
 	}
-	
-	
 }

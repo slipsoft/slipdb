@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.dant.utils.Log;
+import com.dant.utils.MemUsage;
 import com.dant.utils.Timer;
 import com.dant.utils.Utils;
 
@@ -255,7 +256,7 @@ class DataTypeTest {
 	private int getAtArrayPos(int posIndex) {
 		return intArray[posIndex];
 	}
-	
+
 	//@Test
 	public void testAccessSpeed() {
 		for (int i = 0; i < intArray.length; i++) {
@@ -278,6 +279,62 @@ class DataTypeTest {
 		}
 		t1.log();
 		Log.info("res = " + res);
+	}
+
+	//@Test
+	public void testAccessSpeedByteBuffer() {
+		ByteBuffer bBuff = ByteBuffer.allocate(60);
+		int val = 875465274;
+		bBuff.putInt(76532);
+		bBuff.putInt(86854);
+		bBuff.putInt(val);
+		bBuff.putInt(3545);
+		bBuff.rewind();
+		
+		int iteNb = 1_000_000_000;
+		int res = 0;
+		Timer t1 = new Timer("Test accès direct");
+		for (int i = 0; i < iteNb; i++) {
+			res += val;
+		}
+		t1.log();
+		Log.info("res = " + res);
+		
+		res = 0;
+		t1 = new Timer("Test accès par fonction");
+		for (int i = 0; i < iteNb; i++) {
+			res += bBuff.getInt(1); // super super rapide
+			res += bBuff.getInt(2);
+			res += bBuff.getInt(3);
+			res += bBuff.getInt(4);
+			res += bBuff.getInt(5);
+		}
+		t1.log();
+		Log.info("res = " + res);
+	}
+	
+	//@Test
+	public void testB() {
+		Log.info("Salut, test !");
+		int allocationSize = 1_000_000_000;
+		Timer t;
+		System.gc();
+		MemUsage.printMemUsage();
+		t = new Timer("Allocation array simple");
+		byte[] bibi = new byte[allocationSize];
+		t.log();
+		System.gc();
+		MemUsage.printMemUsage();
+		Log.info("Ouais, salut !");
+
+		t = new Timer("Allocation ByteBuffer");
+		ByteBuffer bibiBubu = ByteBuffer.allocate(allocationSize);
+		t.log();
+		System.gc();
+		MemUsage.printMemUsage();
+		Log.info("Ouais, salut !");
+		
+		
 	}
 	
 	//@Test
