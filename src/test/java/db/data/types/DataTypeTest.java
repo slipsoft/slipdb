@@ -250,6 +250,36 @@ class DataTypeTest {
 		
 	}
 	
+	private int[] intArray = new int[100000];
+	
+	private int getAtArrayPos(int posIndex) {
+		return intArray[posIndex];
+	}
+	
+	//@Test
+	public void testAccessSpeed() {
+		for (int i = 0; i < intArray.length; i++) {
+			intArray[i] = i;
+		}
+		
+		int iteNb = 1_000_000_000;
+		int res = 0;
+		Timer t1 = new Timer("Test accès direct");
+		for (int i = 0; i < iteNb; i++) {
+			res += intArray[18875];
+		}
+		t1.log();
+		Log.info("res = " + res);
+		
+		res = 0;
+		t1 = new Timer("Test accès par fonction");
+		for (int i = 0; i < iteNb; i++) {
+			res += getAtArrayPos(18875);
+		}
+		t1.log();
+		Log.info("res = " + res);
+	}
+	
 	//@Test
 	public void testMemDoubleParsing() {
 		

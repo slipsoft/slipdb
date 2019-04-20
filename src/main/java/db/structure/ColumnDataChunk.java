@@ -133,9 +133,9 @@ public class ColumnDataChunk implements Serializable {
 		}
 	}
 	
-	/* devra être supporté (gestion des strings)
+	/* peut-être supporté un jour
 	public boolean writeByteArrayData(byte[] data) {
-		valuesArrayFloat[currentSizePosition] = data;
+		???
 		return incPosition();
 	}*/
 	
