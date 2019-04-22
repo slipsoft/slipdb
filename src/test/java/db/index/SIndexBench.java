@@ -44,8 +44,8 @@ public class SIndexBench {
 		ByteBuffer searchQuery = ByteBuffer.allocate(100);
 		byte[] rightSizedQuery;
 		searchQuery.rewind();
-		searchQuery.put((byte)2);
-		searchQuery.putFloat(4);
+		searchQuery.put((byte)4);
+		searchQuery.putFloat(6);
 		rightSizedQuery = new byte[searchQuery.position()];
 		System.arraycopy(searchQuery.array(), 0, rightSizedQuery, 0, searchQuery.position());
 		Timer timerQuery = new Timer("Temps pris testIndexHash QUERY ONLY");
@@ -60,6 +60,8 @@ public class SIndexBench {
 		System.gc();
 		Log.info("Mémoire utilisée : " + memUsedStr);
 		
+
+		//showResults(resultsPositionsArray);
 		
 		if (indHash.indexedColumns == null) {
 			Log.info("Inutile, mais force le GC à garder la réf en mémoire");
@@ -83,12 +85,12 @@ public class SIndexBench {
 		// Il doit y avoir 54 résultats
 		ByteBuffer searchQuery = ByteBuffer.allocate(100);
 		searchQuery.rewind();
-		searchQuery.put((byte)2);
-		searchQuery.putFloat(4);
+		searchQuery.put((byte)1);
+		searchQuery.putFloat(8);
 		Timer timerQuery = new Timer("Temps pris testIndexMemDic QUERY ONLY");
 		int[] resultsPositionsArray = ind3.findMatchingLinePositions(searchQuery);
-		timer.log();
 		timerQuery.log();
+		timer.log();
 		
 		Log.info("resultsPositionsArray.length = " + resultsPositionsArray.length);
 		
@@ -97,6 +99,7 @@ public class SIndexBench {
 		System.gc();
 		Log.info("Mémoire utilisée : " + memUsedStr);
 		
+		//showResults(resultsPositionsArray);
 		
 		if (ind3.totalLength == 18) {
 			Log.info("Inutile, mais force le GC à garder la réf en mémoire");
@@ -122,10 +125,29 @@ public class SIndexBench {
 			//Log.info(lineAsReadableString);
 		}*/
 		
+
+		long memInit, memFinal;
+		String memUsedStr;
 		
-		
+
+		System.gc();
+		memInit = MemUsage.getMemUsage();
 		testIndexHash();
+		memFinal = MemUsage.getMemUsage();
+		memUsedStr = MemUsage.formatMemUsage(memFinal - memInit);
+		System.gc();
+		Log.info("Mémoire utilisée IndexHash : " + memUsedStr);
+		
+		
+		// ----------- Avec IndexMemDic ----------- 
+		
+		memInit = MemUsage.getMemUsage();
 		testIndexMemDic();
+		memFinal = MemUsage.getMemUsage();
+		memUsedStr = MemUsage.formatMemUsage(memFinal - memInit);
+		System.gc();
+		Log.info("Mémoire utilisée IndexMemDic : " + memUsedStr);
+		
 		
 		
 		
@@ -228,7 +250,7 @@ public class SIndexBench {
 				Log.info("" + linePosition);
 				resCount++;
 			}*/
-			String lineAsReadableString = table.getLineAsReadableString(resultsPositionsArray[resultIndex]); // i);//
+			String lineAsReadableString = table.getLineAsReadableString(linePosition); // i);//
 			Log.info(lineAsReadableString);
 		}
 		
@@ -269,7 +291,6 @@ public class SIndexBench {
 				System.arraycopy(columnDataAsBytes, 0, wholeLineDataAsBytes, destPos, currentColumn.dataSizeInBytes);
 				destPos += currentColumn.dataSizeInBytes;
 			}
-			
 			
 			//resultMemDic.setPosition(iLine, iLine);
 			result.put(wholeLineDataAsBytes, iLine);
@@ -315,6 +336,7 @@ public class SIndexBench {
 		table.addColumn("tolls_amount", new FloatType());
 		table.addColumn("improvement_surcharge", new FloatType());
 		table.addColumn("total_amount", new FloatType());
+		//table.debugInitTheStringColumn();
 		
 		Timer parseTimer = new Timer("TEMPS TOTAL PRIS PAR TOUS LES PARSINGS");
 		
@@ -327,6 +349,7 @@ public class SIndexBench {
 			String colNumber = String.format("%02d" , iCsv);
 			String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
 			//String csvPath = "F:/csv/yellow_tripdata_2015-" + colNumber + ".csv"; // E:/L3 DANT disque E
+			//String csvPath = "F:/csv/SMALL_1_000_000_yellow_tripdata_2015-04.csv";
 			Log.info("Parsing de csvName = " + csvPath);
 			parseThisCsv(table, csvLoader, csvPath);
 		}

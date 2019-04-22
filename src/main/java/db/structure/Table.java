@@ -21,6 +21,7 @@ import db.data.load.CsvParser;
 import db.data.load.Loader;
 import db.data.load.Parser;
 import db.data.types.DataType;
+import db.data.types.DataTypeEnum;
 import db.disk.dataHandler.DiskDataPosition;
 import db.disk.dataHandler.TableDataHandler;
 import db.search.Predicate;
@@ -417,5 +418,20 @@ public class Table implements Serializable {
 		Column col = columnsList.get(0);
 		return col.getTotalLinesNumber();
 	}
+	
+	/*public Column debugTheStringColumn;
+	
+	public void debugInitTheStringColumn() {
+		Column fuDebug = null;
+		
+		for (int i = 0; i < columnsList.size(); i++) {
+			if (columnsList.get(i).dataTypeEnum == DataTypeEnum.STRING) {
+				fuDebug = columnsList.get(i);
+				break;
+			}
+		}
+		debugTheStringColumn = fuDebug;
+	}*/
+	
 
 }

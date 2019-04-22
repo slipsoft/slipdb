@@ -147,7 +147,7 @@ public class SCsvLoaderRunnable implements Runnable {
 		
 		boolean parseWithNativeFormat = true;
 		//boolean stupidBenchmark = true;
-		byte[] strAsByteArray;
+		//byte[] strAsByteArray;
 		int dateAsInt;
 		
 		
@@ -172,7 +172,6 @@ public class SCsvLoaderRunnable implements Runnable {
 			
 			
 			localEntryBuffer.rewind();
-			
 			
 			//localEntryBuffer.rewind();
 			try {
@@ -241,7 +240,7 @@ public class SCsvLoaderRunnable implements Runnable {
 							lineAsByteBuffer.putDouble(Double.parseDouble(valueAsString));
 							break;
 						case STRING :
-							strAsByteArray = StringType.stringToAjustedByteArray(valueAsString, currentColumn.getDataSize());
+							byte[] strAsByteArray = StringType.stringToAjustedByteArray(valueAsString, currentColumn.getDataSize());
 							lineAsByteBuffer.put(strAsByteArray);
 							break;
 						default : break;
@@ -294,14 +293,25 @@ public class SCsvLoaderRunnable implements Runnable {
 			}
 			
 			
+			
+			int newLineIndex = -1;
+			
 			// Ecriture de la donnée en mémoire, en un seul bloc atomique, pour garantir la cohérence de la donnée (pas un lock par colonne donc !)
 			//if (false)
 			synchronized(loaderWriteInMemoryLock) {
+				
+				
 				
 				lineAsByteBuffer.rewind();
 				for (int columnIndex = 0; columnIndex < fieldsNumberInLine; columnIndex++) {
 					Column currentColumn = localColumnArray[columnIndex];
 					if (currentColumn.keepDataInMemory == false) continue; // Si je dois garder la donnée en mémoire, je la stocke dans la colonne
+					
+					if (newLineIndex == -1) newLineIndex = currentColumn.getTotalLinesNumber();
+					
+					/*if (currentColumn == currentTable.debugTheStringColumn) {
+						Log.info("Write once.");
+					}*/
 					
 					if (parseWithNativeFormat) {
 						
@@ -328,9 +338,15 @@ public class SCsvLoaderRunnable implements Runnable {
 							currentColumn.writeDoubleInMemory(lineAsByteBuffer.getDouble());
 							break;
 						case STRING :
-							strAsByteArray = new byte[currentColumn.getDataSize()];
+							//Log.info("DEBUT ");
+							//if (currentColumn == currentTable.debugTheStringColumn)
+							//Log.info(currentColumn.getChunkPositionsVariables());
+							//Log.info("" + currentTable.debugTheStringColumn);
+							byte[] strAsByteArray = new byte[currentColumn.getDataSize()];
 							lineAsByteBuffer.get(strAsByteArray);
 							currentColumn.writeStringInMemory(new String(strAsByteArray));
+							//Log.info(currentColumn.getChunkPositionsVariables());
+							//Log.info("FIN ");
 							break;
 						default : break;
 						}
@@ -342,6 +358,18 @@ public class SCsvLoaderRunnable implements Runnable {
 					}
 				}
 			}
+			if (newLineIndex == -1) {
+				Log.error("X------------X *dead*");
+			}
+			/*try {
+				String lineAsStr = currentTable.getLineAsReadableString(newLineIndex);
+			} catch (Exception e) {
+				Log.error("ERREUR à l'index " + newLineIndex);
+				e.printStackTrace();
+				throw e;
+				
+			}*/
+			//Log.info(lineAsStr);
 			
 			localReadEntryNb++;
 			

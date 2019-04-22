@@ -25,7 +25,7 @@ import db.structure.Table;
  */
 public class SCsvLoader {
 	
-	private final int threadCount = 6;//+8;
+	private final int threadCount = 3;//+8;
 	private SCsvLoaderRunnable[] runnableArray;// = new SLoaderThread[threadCount];
 	
 	private Table currentTable;
@@ -125,10 +125,11 @@ public class SCsvLoader {
 				entryAsString = bRead.readLine(); // "entrée", ligne lue
 				if (entryAsString == null) break; // fin de la lecture
 				//Log.infoOnly(entryAsString);
-
+				
 				localReadEntryNb++;
 				// Affichage d'une entrée toutes les showInfoEveryParsedLines entrées lues
 				if (showInfoEveryParsedLines != -1 && localReadEntryNb % showInfoEveryParsedLines == 0) {
+					
 					Log.info("Loader : nombre de résultats (local) lus = " + localReadEntryNb + "   temps écoulé = " + timeTookTimer.pretty() + "activeThreadNb = " + SCsvLoaderRunnable.activeThreadNb.get());
 					//MemUsage.printMemUsage();
 					if (localReadEntryNb == 10_000_000) {

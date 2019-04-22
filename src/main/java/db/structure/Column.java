@@ -30,10 +30,10 @@ public class Column implements Serializable {
 	protected int number;
 	
 	
-	protected Object minValue = null;
-	protected Object maxValue = null;
-	protected transient Object minMaxLock = new Object();
-	protected DataType dataType; // <- type de la donnée stockée
+	private Object minValue = null;
+	private Object maxValue = null;
+	private transient Object minMaxLock = new Object();
+	private DataType dataType; // <- type de la donnée stockée
 	@Deprecated /* @CurrentlyUnused */ transient protected List<Index> relatedIndexesList = new ArrayList<>();
 	//inutile désormais -> private transient Object writeInMemoryLock = new Object();
 	
@@ -43,7 +43,7 @@ public class Column implements Serializable {
 	//protected DataType storedDataType;
 	// Stockage des données à garder en mémoire ici
 	// -> Il n'est pas possible d'utiliser l'héritage ici, il faut un truc qui prenne le moins de mémoire possible, donc pas des objets.
-	protected ArrayList<ColumnDataChunk> a2DataChunk = new ArrayList<ColumnDataChunk>();
+	private ArrayList<ColumnDataChunk> a2DataChunk = new ArrayList<ColumnDataChunk>();
 	
 	// Les données seront écrites dans la mémoire et/ou sur le disque. Version simple : un seul fichier par colonne
 	transient protected EasyFile dataOnDiskFile;// = new EasyFile(); TODO
@@ -288,8 +288,11 @@ public class Column implements Serializable {
 		writeIntegerInMemory(value);
 	}
 	public void writeStringInMemory(String value)  {
+		//if (dataTypeEnum == DataTypeEnum.STRING) Log.info("ECRITURE COLONNE STRING");
+		//Log.info("BEGIN ------------ writeStringInMemory -------------");
 		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
 		addAnotherChunkIfNecessary(dataChunk.writeString(value));
+		//Log.info("END ------------ writeStringInMemory -------------");
 	}
 	/*public void writeByteArrayInMemory(byte[] value)  {
 		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
@@ -462,6 +465,12 @@ public class Column implements Serializable {
 		
 		switch (dataTypeEnum) {
 		case BYTE    : return readByte(mainLinePosition) - valueAsByteBuffer.get();
+		/*case BYTE    : // garder pour débug !
+			byte mainByte  = readByte(mainLinePosition);
+			byte otherByte = valueAsByteBuffer.get();
+			byte byteComp = (byte) (mainByte - otherByte);
+			Log.info("byteComp byteComp = " + byteComp + " m1(" + mainByte + ")  b2(" + otherByte + ")");
+			return byteComp;*/
 		case INTEGER : return readInteger(mainLinePosition) - valueAsByteBuffer.getInt();
 		case LONG    :
 			long longComp = readLong(mainLinePosition) - valueAsByteBuffer.getLong();
@@ -469,7 +478,11 @@ public class Column implements Serializable {
 			if (longComp > 0) return 1;
 			return -1;
 		case DATE    : return (readInteger(mainLinePosition) - valueAsByteBuffer.getInt());
-		case FLOAT   : 
+		case FLOAT   : // garder pour débug !
+			/*float mainFloat = readFloat(mainLinePosition);
+			float otherFloat = valueAsByteBuffer.getFloat();
+			float floatComp = mainFloat - otherFloat;
+			Log.info("floatComp floatComp = " + floatComp + " m1(" + mainFloat + ")  b2(" + otherFloat + ")");*/
 			float floatComp = readFloat(mainLinePosition) - valueAsByteBuffer.getFloat();
 			if (floatComp == 0) return 0;
 			if (floatComp > 0) return 1;
@@ -488,6 +501,11 @@ public class Column implements Serializable {
 		case UNKNOWN : return 0;
 		default      : return 0;
 		}
+	}
+	
+	public String getChunkPositionsVariables() {
+		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
+		return dataChunk.getPositionsVariablesAsString();
 	}
 	
 	/*

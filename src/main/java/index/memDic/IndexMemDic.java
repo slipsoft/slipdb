@@ -26,6 +26,9 @@ public class IndexMemDic {
 	public static int[] colIndexArray; // dans l'ordre
 	public static Column[] indexOnThisColArray;
 	
+	public static boolean enableVerboseDichotomy = false;
+	public static boolean useSafeSlowComparaisonsNotDichotomy = false;
+	
 	public IndexMemDic(Table argTable, int[] argColIndexArray) { // int argTotalLength,
 		colIndexArray = argColIndexArray;
 		table = argTable;
@@ -59,6 +62,9 @@ public class IndexMemDic {
 			//String displayValues = table.getLineAsReadableString(sortedPositions[i]);
 			//Log.info(displayValues);
 		}
+		for (int i = 0; i < totalLength; i++) {
+			tempSortArray[i] = null;
+		}
 		tempSortArray = null;
 		//t.log();
 		
@@ -77,40 +83,67 @@ public class IndexMemDic {
 		int intervalLength = dicStopIndex - dicStartIndex + 1;
 		int dicCurrentIndex = (dicStopIndex - dicStartIndex) / 2;
 		
-		for (int i = 0; i < sortedPositions.length; i++) {
-			int delta = compareLineValuesAndQuery(sortedPositions[i], searchQuery);
-			if (delta == 0) {
-				dicCurrentIndex = i;//sortedPositions[i];
-				Log.info("Trouvé !!");
-				break;
-			} else if (delta >= 0)
-				Log.info("delta = " + delta);
-		}
 		/*
-		while (intervalLength > 1) {
-			dicCurrentIndex = (dicStopIndex - dicStartIndex) / 2;
-			
-			int delta = compareLineValuesAndQuery(dicCurrentIndex, searchQuery);
-			
-			if (delta > 0) { // valeur trop grande, je prends l'intervalle de gauche
-				dicStopIndex = dicCurrentIndex - 1;
-			} else if (delta < 0) { // valeur trop petite, je prends l'intervalle de droite
-				dicStartIndex = dicCurrentIndex + 1;
-			} else { // égalité
-				Log.info("EGALITE !! dicCurrentIndex = " + dicCurrentIndex);
-				break;
-			}
-
-			if (dicStopIndex >= sortedPositions.length) Log.error("dicStopIndex trop grand");
-			if (dicStopIndex < 0) Log.error("dicStopIndex trop petit");
-			if (dicStartIndex >= sortedPositions.length) Log.error("dicStartIndex trop grand");
-			if (dicStartIndex < 0) Log.error("dicStartIndex trop petit");
-			Log.info("dic boenes OK currentIndex = " + dicCurrentIndex);
-			
-			intervalLength = dicStopIndex - dicStartIndex + 1;
+		for (int i = 0; i < sortedPositions.length; i++) {
+			String line = table.getLineAsReadableString(sortedPositions[i]);
+			Log.info(line);
 		}*/
 		
-		Log.info("------> dicCurrentIndex = " + dicCurrentIndex + " posRéelle = " + sortedPositions[dicCurrentIndex]);
+		if (useSafeSlowComparaisonsNotDichotomy) {
+			for (int i = 0; i < sortedPositions.length; i++) {
+				int delta = compareLineValuesAndQuery(sortedPositions[i], searchQuery);
+				if (delta == 0) {
+					dicCurrentIndex = i;//sortedPositions[i];
+					//Log.info("Trouvé !!");
+					break;
+				}// else if (delta >= 0)
+					//Log.info("delta = " + delta);
+			}
+		} else {
+			
+			while (intervalLength > 1) {
+				//Log.info("BBIGFIX currentIndex = " + dicCurrentIndex + " dicStartIndex=" + dicStartIndex + " dicStopIndex=" + dicStopIndex + " normal new value = " + ((dicStopIndex - dicStartIndex) / 2));
+				dicCurrentIndex = dicStartIndex + intervalLength / 2;
+				//Log.info("BBIGFIX currentIndex = " + dicCurrentIndex + " dicStartIndex=" + dicStartIndex + " dicStopIndex=" + dicStopIndex + " ");
+				//Log.info("nouveau dicCurrentIndex = " + dicCurrentIndex + " et diff = " + (dicStopIndex - dicStartIndex));
+				
+				int realLinePosition = sortedPositions[dicCurrentIndex];
+				
+				int delta = compareLineValuesAndQuery(realLinePosition, searchQuery);
+				
+				if (enableVerboseDichotomy) {
+					Log.infoOnlySimple("");
+					String line = table.getLineAsReadableString(realLinePosition);
+					Log.info(line);
+					String humanVerbose = "";
+					if (delta < 0) humanVerbose = "-> Trop petit ->";
+					if (delta > 0) humanVerbose = "<- Trop grand <-";
+					if (delta == 0) humanVerbose = "- Parfait ! -";
+					Log.info(humanVerbose + "        delta = " + delta);
+				}
+				
+				if (delta > 0) { // valeur trop grande, je prends l'intervalle de gauche
+					dicStopIndex = dicCurrentIndex - 1;
+				} else if (delta < 0) { // valeur trop petite, je prends l'intervalle de droite
+					dicStartIndex = dicCurrentIndex + 1;
+					//Log.info("modif startIndex = " + dicStartIndex);
+				} else { // égalité
+					Log.info("EGALITE !! dicCurrentIndex = " + dicCurrentIndex);
+					break;
+				}
+				
+				if (dicStopIndex >= sortedPositions.length) Log.error("dicStopIndex trop grand");
+				if (dicStopIndex < 0) Log.error("dicStopIndex trop petit");
+				if (dicStartIndex >= sortedPositions.length) Log.error("dicStartIndex trop grand");
+				if (dicStartIndex < 0) Log.error("dicStartIndex trop petit");
+				//Log.info("dic bornes OK currentIndex = " + dicCurrentIndex + " dicStartIndex=" + dicStartIndex + " dicStopIndex=" + dicStopIndex + " ");
+				
+				intervalLength = dicStopIndex - dicStartIndex + 1;
+			}
+			
+		}
+		
+		//Log.info("------> dicCurrentIndex = " + dicCurrentIndex + " posRéelle = " + sortedPositions[dicCurrentIndex]);
 		int delta = compareLineValuesAndQuery(sortedPositions[dicCurrentIndex], searchQuery);
 		
 		if (delta != 0) {
@@ -132,7 +165,7 @@ public class IndexMemDic {
 			exactValueStopIndexDic++;
 		}
 
-		Log.info("------> exactValueStartIndexDic = " + exactValueStartIndexDic + " exactValueStopIndexDic = " + exactValueStopIndexDic);
+		//Log.info("------> exactValueStartIndexDic = " + exactValueStartIndexDic + " exactValueStopIndexDic = " + exactValueStopIndexDic);
 		/*for (int i = exactValueStartIndexDic; i <= exactValueStopIndexDic; i++) {
 			String lineAsString = table.getLineAsReadableString(sortedPositions[i]);
 			Log.info(lineAsString);

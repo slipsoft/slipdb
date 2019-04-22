@@ -11,6 +11,7 @@ import org.apache.commons.lang3.ArrayUtils;
 public class Log {
 	protected static volatile int level = 3;
 	protected static EasyFile file;
+	private static final boolean noHeader = true;
 	
 	public static int getLevel() {
 		return level;
@@ -56,6 +57,13 @@ public class Log {
 			System.out.println(msg);
 		}
 	}
+
+	public static void infoOnlySimple(String msg) {
+		//msg = prefixString("INFO/") + msg + getCaller(2);
+		if (Log.level >= 1) {
+			System.out.println(msg);
+		}
+	}
 	
 	/**
 	 * Log an info message.
@@ -69,7 +77,10 @@ public class Log {
 	}
 	
 	protected static void logInfoMessage(String msg, String prefix, int depth) {
-		msg = prefixString("INFO/" + prefix) + msg + getCaller(depth);
+		if (noHeader)
+			msg = msg + getCaller(depth);
+		else
+			msg = prefixString("INFO/" + prefix) + msg + getCaller(depth);
 		if (Log.level >= 1) {
 			System.out.println(msg);
 		}
