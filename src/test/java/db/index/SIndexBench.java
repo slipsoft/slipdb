@@ -89,7 +89,7 @@ public class SIndexBench {
 		int linesNumber = choosenColArray[0].getTotalLinesNumber();
 		
 		SIndexHashJava result = new SIndexHashJava(choosenColArray, linesNumber);
-		IndexMemDic resultMemDic = new IndexMemDic(linesNumber);
+		IndexMemDic resultMemDic = new IndexMemDic(table, linesNumber, colIndexList);
 		
 		for (int iLine = 0; iLine < linesNumber; iLine++) {
 			
@@ -109,7 +109,7 @@ public class SIndexBench {
 			}
 			
 			
-			resultMemDic.setPosition(iLine, iLine);
+			//resultMemDic.setPosition(iLine, iLine);
 			//result.put(wholeLineDataAsBytes, iLine);
 			//Log.info("put: " + debugBytes);
 			//Log.info("put: " + wholeLineDataAsBytes.hashCode());
@@ -119,7 +119,8 @@ public class SIndexBench {
 		System.gc();
 		MemUsage.printMemUsage();
 		Timer t = new Timer("tc");
-		resultMemDic.sortAll();
+		resultMemDic.sortAllv1();
+		
 		t.log();
 		MemUsage.printMemUsage();
 		

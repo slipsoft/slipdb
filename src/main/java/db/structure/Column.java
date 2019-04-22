@@ -311,6 +311,13 @@ public class Column implements Serializable {
 		addAnotherChunkIfNecessary(dataChunk.writeStringData(value));
 	}*/
 	
+	public String getDataAsReadableString(int indexAbsolute) {
+		/*TODO
+		int chunkIndex = (indexAbsolute / chunkDataTypeAllocationSize);
+		ColumnDataChunk dataChunk = a2DataChunk.get(chunkIndex);
+		int indexInChunk = indexAbsolute - (chunkIndex * chunkDataTypeAllocationSize);
+		return dataChunk.getDataAsRawBytes(indexInChunk);*/
+	}
 	
 	
 	public void writeDataInMemory(Object dataAsPrimitiveObject) {
