@@ -42,7 +42,7 @@ public class Column implements Serializable {
 	//protected DataType storedDataType;
 	// Stockage des données à garder en mémoire ici
 	// -> Il n'est pas possible d'utiliser l'héritage ici, il faut un truc qui prenne le moins de mémoire possible, donc pas des objets.
-	protected ArrayList<ColumnDataChunkV1> a2DataChunk = new ArrayList<ColumnDataChunkV1>();
+	protected ArrayList<ColumnDataChunk> a2DataChunk = new ArrayList<ColumnDataChunk>();
 	
 	// Les données seront écrites dans la mémoire et/ou sur le disque. Version simple : un seul fichier par colonne
 	transient protected EasyFile dataOnDiskFile;// = new EasyFile(); TODO
@@ -53,10 +53,17 @@ public class Column implements Serializable {
 	
 	public int getTotalLinesNumber() {
 		int totalSize = 0;
-		for (ColumnDataChunkV1 dataChunk : a2DataChunk) {
+		for (ColumnDataChunk dataChunk : a2DataChunk) {
 			totalSize += dataChunk.getCurrentItemPosition();
 		}
 		return totalSize;
+	}
+	
+	public byte[] getDataAsRawBytes(int indexAbsolute) {
+		int chunkIndex = (indexAbsolute / chunkDataTypeAllocationSize);
+		ColumnDataChunk dataChunk = a2DataChunk.get(chunkIndex);
+		int indexInChunk = indexAbsolute - (chunkIndex * chunkDataTypeAllocationSize);
+		return dataChunk.getDataAsRawBytes(indexInChunk);
 	}
 	
 	
@@ -253,50 +260,50 @@ public class Column implements Serializable {
 	}
 	
 	
-	private ColumnDataChunkV1 dataMemoryGetWriteChunk() {
+	private ColumnDataChunk dataMemoryGetWriteChunk() {
 		if (a2DataChunk.size() == 0) {
-			ColumnDataChunkV1 newDataChunk = new ColumnDataChunkV1(dataType, chunkDataTypeAllocationSize);
+			ColumnDataChunk newDataChunk = new ColumnDataChunk(dataType, chunkDataTypeAllocationSize);
 			//Log.info("Initialisation chunk");
 			a2DataChunk.add(newDataChunk);
 		}
 		int dataChunkListSize = a2DataChunk.size();
-		ColumnDataChunkV1 dataChunk = a2DataChunk.get(dataChunkListSize - 1);
+		ColumnDataChunk dataChunk = a2DataChunk.get(dataChunkListSize - 1);
 		return dataChunk;
 	}
 	
 	private void addAnotherChunkIfNecessary(boolean needAnotherChunk) {
 		if (needAnotherChunk) {
 			//Log.info("Nouveau chunk");
-			ColumnDataChunkV1 newDataChunk = new ColumnDataChunkV1(dataType, chunkDataTypeAllocationSize);
+			ColumnDataChunk newDataChunk = new ColumnDataChunk(dataType, chunkDataTypeAllocationSize);
 			a2DataChunk.add(newDataChunk);
 		}
 	}
 
 	public void writeByteInMemory(byte value)  {
-		ColumnDataChunkV1 dataChunk = dataMemoryGetWriteChunk();
+		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
 		addAnotherChunkIfNecessary(dataChunk.writeByte(value));
 	}
 	public void writeIntegerInMemory(int value)  {
-		ColumnDataChunkV1 dataChunk = dataMemoryGetWriteChunk();
+		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
 		addAnotherChunkIfNecessary(dataChunk.writeInt(value));
 	}
 	public void writeLongInMemory(long value)  {
-		ColumnDataChunkV1 dataChunk = dataMemoryGetWriteChunk();
+		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
 		addAnotherChunkIfNecessary(dataChunk.writeLong(value));
 	}
 	public void writeFloatInMemory(float value)  {
-		ColumnDataChunkV1 dataChunk = dataMemoryGetWriteChunk();
+		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
 		addAnotherChunkIfNecessary(dataChunk.writeFloat(value));
 	}
 	public void writeDoubleInMemory(double value)  {
-		ColumnDataChunkV1 dataChunk = dataMemoryGetWriteChunk();
+		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
 		addAnotherChunkIfNecessary(dataChunk.writeDouble(value));
 	}
 	public void writeDateInMemory(int value)  {
 		writeIntegerInMemory(value);
 	}
 	public void writeStringInMemory(String value)  {
-		ColumnDataChunkV1 dataChunk = dataMemoryGetWriteChunk();
+		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
 		addAnotherChunkIfNecessary(dataChunk.writeString(value));
 	}
 	/*public void writeByteArrayInMemory(byte[] value)  {
@@ -309,7 +316,7 @@ public class Column implements Serializable {
 	public void writeDataInMemory(Object dataAsPrimitiveObject) {
 		//synchronized(writeInMemoryLock) <- RISQUE de perte de la cohrérence des données, le lock est mis dans Loader.writeInMemoryLock
 		//Log.info("Write in memory ! " + dataAsPrimitiveObject);
-		ColumnDataChunkV1 dataChunk = dataMemoryGetWriteChunk();
+		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
 		
 		/** TODO
 		 * TODO
@@ -342,14 +349,14 @@ public class Column implements Serializable {
 		
 		if (needAnotherChunk) {
 			//Log.info("Nouveau chunk");
-			ColumnDataChunkV1 newDataChunk = new ColumnDataChunkV1(dataType, chunkDataTypeAllocationSize);
+			ColumnDataChunk newDataChunk = new ColumnDataChunk(dataType, chunkDataTypeAllocationSize);
 			a2DataChunk.add(newDataChunk);
 		}
 		
 	}
 	
 	public void clearAllMemoryData() {
-		a2DataChunk = new ArrayList<ColumnDataChunkV1>();
+		a2DataChunk = new ArrayList<ColumnDataChunk>();
 	}
 	
 }

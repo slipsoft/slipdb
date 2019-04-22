@@ -64,7 +64,7 @@ public class SerializationTests {
 	
 	
 	
-	@Test
+	//@Test
 	public void mainTest() throws Exception {
 		//createNewTable();
 		SerialStructure.loadStructure();

@@ -11,7 +11,7 @@ import org.apache.commons.lang3.ArrayUtils;
  * Soit un ByteBuffer avec des types primitifs, ça limite (un peu...) le nombre d'objets en mémoire
  * 
  * */
-public class SKeyHash {
+public class SKeyHashJava {
 	
 	public final byte[] values; // Plus générique et optmisé que des objets (c'est un seul objet)
 	
@@ -22,7 +22,7 @@ public class SKeyHash {
 	/** 
 	 *  @param argValues
 	 */
-	public SKeyHash(byte[] argValues) {
+	public SKeyHashJava(byte[] argValues) {
 		//ByteBuffer buff = ByteBuffer.allocateDirect(10);
 		//buff.hashCode()
 		values = argValues;
@@ -37,10 +37,10 @@ public class SKeyHash {
 	
 	@Override
 	public boolean equals(Object o) {
+		//if (true) return false;
 		if (o == null) return false;
 		if (o.getClass() != getClass()) return false;
-		if (Arrays.equals(((SKeyHash)o).values, values) == false) return false;
-		return true;
+		return Arrays.equals(((SKeyHashJava)o).values, values);
 	}
 	
 	

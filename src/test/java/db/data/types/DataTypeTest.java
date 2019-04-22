@@ -326,7 +326,7 @@ class DataTypeTest {
 		System.gc();
 		MemUsage.printMemUsage();
 		Log.info("Ouais, salut !");
-
+		
 		t = new Timer("Allocation ByteBuffer");
 		ByteBuffer bibiBubu = ByteBuffer.allocate(allocationSize);
 		t.log();
