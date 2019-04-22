@@ -45,7 +45,7 @@ public class IndexMemDic {
 	
 	public void sortAllv1() {
 		
-		Timer t = new Timer("IndexMemDic.sortAll pris :");
+		//Timer t = new Timer("IndexMemDic.sortAll pris :");
 		MemUsage.printMemUsage();
 		IndexMemDicTemporaryItem[] tempSortArray = new IndexMemDicTemporaryItem[totalLength];
 		for (int i = 0; i < totalLength; i++) {
@@ -59,9 +59,8 @@ public class IndexMemDic {
 			//String displayValues = table.getLineAsReadableString(sortedPositions[i]);
 			//Log.info(displayValues);
 		}
-		
-		t.log();
-		MemUsage.printMemUsage();
+		tempSortArray = null;
+		//t.log();
 		
 	}
 	
@@ -165,6 +164,7 @@ public class IndexMemDic {
 	}
 	
 	public int[] findMatchingLinePositions(ByteBuffer searchQuery) {
+		searchQuery.rewind();
 		int[] intervalBounds = findMatchingIntervalBounds(searchQuery);
 		int startIndex = intervalBounds[0];
 		int stopIndex = intervalBounds[1];

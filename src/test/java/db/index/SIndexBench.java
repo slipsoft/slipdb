@@ -29,6 +29,81 @@ public class SIndexBench {
 	Table table;
 	
 	
+	private void testIndexHash() {
+		System.gc();
+		
+		// ----------- Avec IndexHash ----------- 
+		long memInit, memFinal;
+		
+		memInit = MemUsage.getMemUsage();
+		
+		Timer timer = new Timer("Temps pris testIndexHash");
+		SIndexHashJava indHash = indexColumns(new int[] {3, 4}); // passenger_count et trip_distance
+		
+		// Il doit y avoir 54 résultats
+		ByteBuffer searchQuery = ByteBuffer.allocate(100);
+		byte[] rightSizedQuery;
+		searchQuery.rewind();
+		searchQuery.put((byte)2);
+		searchQuery.putFloat(4);
+		rightSizedQuery = new byte[searchQuery.position()];
+		System.arraycopy(searchQuery.array(), 0, rightSizedQuery, 0, searchQuery.position());
+		Timer timerQuery = new Timer("Temps pris testIndexHash QUERY ONLY");
+		int[] resultsPositionsArray = indHash.get(rightSizedQuery);
+		timer.log();
+		timerQuery.log();
+		
+		Log.info("resultsPositionsArray.length = " + resultsPositionsArray.length);
+		
+		memFinal = MemUsage.getMemUsage();
+		String memUsedStr = MemUsage.formatMemUsage(memFinal - memInit);
+		System.gc();
+		Log.info("Mémoire utilisée : " + memUsedStr);
+		
+		
+		if (indHash.indexedColumns == null) {
+			Log.info("Inutile, mais force le GC à garder la réf en mémoire");
+		}
+		
+	}
+	
+	private void testIndexMemDic() {
+		System.gc();
+		
+		// ----------- Avec IndexMemDic ----------- 
+		long memInit, memFinal;
+		
+		memInit = MemUsage.getMemUsage();
+
+		Timer timer = new Timer("Temps pris testIndexMemDic");
+		
+		IndexMemDic ind3 = new IndexMemDic(table, new int[]{3, 4}); // passenger_count et trip_distance
+		ind3.sortAllv1();
+		
+		// Il doit y avoir 54 résultats
+		ByteBuffer searchQuery = ByteBuffer.allocate(100);
+		searchQuery.rewind();
+		searchQuery.put((byte)2);
+		searchQuery.putFloat(4);
+		Timer timerQuery = new Timer("Temps pris testIndexMemDic QUERY ONLY");
+		int[] resultsPositionsArray = ind3.findMatchingLinePositions(searchQuery);
+		timer.log();
+		timerQuery.log();
+		
+		Log.info("resultsPositionsArray.length = " + resultsPositionsArray.length);
+		
+		memFinal = MemUsage.getMemUsage();
+		String memUsedStr = MemUsage.formatMemUsage(memFinal - memInit);
+		System.gc();
+		Log.info("Mémoire utilisée : " + memUsedStr);
+		
+		
+		if (ind3.totalLength == 18) {
+			Log.info("Inutile, mais force le GC à garder la réf en mémoire");
+		}
+		
+	}
+	
 	@Test
 	public void mainTest() throws Exception {
 		
@@ -49,15 +124,17 @@ public class SIndexBench {
 		
 		
 		
+		testIndexHash();
+		testIndexMemDic();
+		
+		
+		
+		/*
+		
 		
 		System.gc();
 		
-		/*long memInit, memFinal;
-		
-		memInit = MemUsage.getMemUsage();
-		SIndexHashJava indHash = indexColumns(new int[] {3, 4}); // passenger_count et trip_distance
-		*/
-		
+		// ----------- Avec IndexMemDic ----------- 
 		
 		
 		
@@ -72,6 +149,8 @@ public class SIndexBench {
 		
 		IndexMemDic ind3 = new IndexMemDic(table, new int[]{3, 4});
 		ind3.sortAllv1();
+		
+		
 		
 		//ind2.put(new byte[] {1}, 99);
 		
@@ -97,19 +176,10 @@ public class SIndexBench {
 		searchQuery.rewind();
 		int[] resultsPositionsArray = ind3.findMatchingLinePositions(searchQuery);//ind1.get(rightSizedQuery);
 		
-		
-		
-		/*seachQuery.rewind();
-		seachQuery.put((byte)2);
-		rightSizedQuery = new byte[seachQuery.position()];
-		System.arraycopy(seachQuery.array(), 0, rightSizedQuery, 0, seachQuery.position());
-		
-		int[] resultsPositionsArray = ind2.get(rightSizedQuery);*/
-		
 		Log.info("resultsPositionsArray.length = " + resultsPositionsArray.length + "  seachQuery.position() = " + searchQuery.position());
 		//ind2.put(rightSizedQuery, 99);
 		
-		showResults(resultsPositionsArray);
+		showResults(resultsPositionsArray);*/
 		
 		/*int linesCountTotal = table.getTotalLinesCount();
 		Column sCol = table.getColumns().get(3);
