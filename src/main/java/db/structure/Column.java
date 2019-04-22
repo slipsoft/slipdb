@@ -416,11 +416,12 @@ public class Column implements Serializable {
 	}
 	
 	/** Comparaison des valeurs, en ayant comme référence mainLinePosition.
+	 *  Comparaison à une autre ligne.
 	 *  @param mainLinePosition
 	 *  @param otherLinePosition
 	 *  @return
 	 */
-	public int compareLineValues2(int mainLinePosition, int otherLinePosition) {
+	public int compareLineValues(int mainLinePosition, int otherLinePosition) {
 		
 		switch (dataTypeEnum) {
 		case BYTE    : return readByte(mainLinePosition) - readByte(otherLinePosition);
@@ -450,6 +451,45 @@ public class Column implements Serializable {
 		}
 	}
 	
+	/** Comparaison des valeurs, en ayant comme référence mainLinePosition.
+	 *  Comparaison à partir de la position actuelle dans le ByteBuffer
+	 *  ATTENTION à l'offset du ByteBuffer !!
+	 *  @param mainLinePosition
+	 *  @param valueAsByteBuffer
+	 *  @return
+	 */
+	public int compareLineValues(int mainLinePosition, ByteBuffer valueAsByteBuffer) {
+		
+		switch (dataTypeEnum) {
+		case BYTE    : return readByte(mainLinePosition) - valueAsByteBuffer.get();
+		case INTEGER : return readInteger(mainLinePosition) - valueAsByteBuffer.getInt();
+		case LONG    :
+			long longComp = readLong(mainLinePosition) - valueAsByteBuffer.getLong();
+			if (longComp == 0) return 0;
+			if (longComp > 0) return 1;
+			return -1;
+		case DATE    : return (readInteger(mainLinePosition) - valueAsByteBuffer.getInt());
+		case FLOAT   : 
+			float floatComp = readFloat(mainLinePosition) - valueAsByteBuffer.getFloat();
+			if (floatComp == 0) return 0;
+			if (floatComp > 0) return 1;
+			return -1;
+		case DOUBLE  : 
+			double doubleComp = readDouble(mainLinePosition) - valueAsByteBuffer.getDouble();
+			if (doubleComp == 0) return 0;
+			if (doubleComp > 0) return 1;
+			return -1;//return ((readDouble(mainLinePosition) - readDouble(otherLinePosition) > 0) ? 1 : -1);
+		case STRING  : 
+			String mainStr = readString(mainLinePosition);
+			byte[] otherStringAsBytes = new byte[dataSizeInBytes];
+			valueAsByteBuffer.get(otherStringAsBytes);
+			String otherString = new String(otherStringAsBytes);
+			return mainStr.compareTo(otherString);
+		case UNKNOWN : return 0;
+		default      : return 0;
+		}
+	}
+	
 	/*
 	public int compareLineValues2(int mainLinePosition, int otherLinePosition) {
 		switch (dataTypeEnum) {
@@ -468,6 +508,7 @@ public class Column implements Serializable {
 		}
 	}*/
 
+	/* DEBUG ONLY
 	public int compareLineValues(int mainLinePosition, int otherLinePosition) {
 		int c1 = compareLineValues2(mainLinePosition, otherLinePosition);
 		int c2 = compareLineValues2(otherLinePosition, mainLinePosition);
@@ -477,7 +518,7 @@ public class Column implements Serializable {
 			//Log.info("OK - Column.compareLineValues  c1!=-c2 : " + c1 + " - " + c2);
 		}
 		return c1;
-	}
+	}*/
 	
 	
 }

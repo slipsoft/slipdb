@@ -53,7 +53,6 @@ public class IndexMemDicTemporaryItem implements Comparable<IndexMemDicTemporary
 	private int reallyCompareTo(IndexMemDicTemporaryItem other) {
 		// Ne pas comparer octet par octet ><'
 		
-		
 		Column[] indexOnThisColArray = IndexMemDic.indexOnThisColArray;
 		byte[] myValues, otherValues;
 		//if (false)
@@ -62,8 +61,6 @@ public class IndexMemDicTemporaryItem implements Comparable<IndexMemDicTemporary
 			Column col = indexOnThisColArray[iCol];
 			
 			int comparaison = col.compareLineValues(originalLinePosition, other.originalLinePosition);
-			
-			
 			
 			if (comparaison != 0) {
 				//Log.info("IndexMemDicTempItem.reallyCompareTo comparaison = " + comparaison);

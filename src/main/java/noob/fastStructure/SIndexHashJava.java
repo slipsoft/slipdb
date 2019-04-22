@@ -93,7 +93,7 @@ public class SIndexHashJava {
 	 */
 	public int[] get(byte[] argKeyValues) {
 		SKeyHashJava key = new SKeyHashJava(argKeyValues);
-		//Log.info("get : " + key.values[0]);
+		Log.info("get : " + key.values[0]);
 		return get(key);
 	}
 	

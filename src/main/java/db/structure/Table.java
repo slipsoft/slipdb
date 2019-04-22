@@ -390,6 +390,10 @@ public class Table implements Serializable {
 		this.dataHandler.clearDataDirectory();
 	}
 	
+	
+	
+	
+	
 	public String getLineAsReadableString(int linePosition) {
 		String result = "";
 		Column col;
@@ -403,6 +407,15 @@ public class Table implements Serializable {
 			}
 		}
 		return result;
+	}
+	
+	/** 
+	 * @return Le nombre total de lignes dans cette table (la même pour toutes les colonnes)
+	 */
+	public int getTotalLinesCount() {
+		if (columnsList.size() == 0) return 0;
+		Column col = columnsList.get(0);
+		return col.getTotalLinesNumber();
 	}
 
 }

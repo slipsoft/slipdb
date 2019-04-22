@@ -35,45 +35,135 @@ public class SIndexBench {
 		// Chargement des CSV
 		loadFirst();
 		
+		/*Log.info("INIT DEBUG");
+		//ind2.put(rightSizedQuery, 99);
+		int linesCountTotal = table.getTotalLinesCount();
+		Column sCol = table.getColumns().get(3);
+		for (int i = 0; i < linesCountTotal; i++) {
+			if (sCol.readByte(i) == 0) {
+				Log.error("byte == 0");
+			}
+			//String lineAsReadableString = Byte.toString(sCol.readByte(i));//table.getLineAsReadableString(resultsPositionsArray[i]); // i);//
+			//Log.info(lineAsReadableString);
+		}*/
+		
+		
+		
+		
 		System.gc();
-		Log.error("DEBUT");
+		
+		/*long memInit, memFinal;
+		
+		memInit = MemUsage.getMemUsage();
+		SIndexHashJava indHash = indexColumns(new int[] {3, 4}); // passenger_count et trip_distance
+		*/
+		
+		
+		
+		
+		
 		MemUsage.printMemUsage();
 		// Ajout à l'index
 		//Log.error("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
 		//SIndexHashJava ind2 = indexColumns(new int[] {4, 3}); // passenger_count
 		//Log.error("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
-		SIndexHashJava ind1 = indexColumns(new int[] {3, 4}); // passenger_count et trip_distance
+		
+		
+		
+		IndexMemDic ind3 = new IndexMemDic(table, new int[]{3, 4});
+		ind3.sortAllv1();
+		
 		//ind2.put(new byte[] {1}, 99);
 		
 		System.gc();
+		
+		
+		
+		
 		Log.error("FIN");
 		MemUsage.printMemUsage();
 		
 		
-		ByteBuffer seachQuery = ByteBuffer.allocate(100);
+		ByteBuffer searchQuery = ByteBuffer.allocate(100);
 		byte[] rightSizedQuery;
 		
-		seachQuery.rewind();
-		seachQuery.put((byte)1);
-		seachQuery.putFloat(2);
-		rightSizedQuery = new byte[seachQuery.position()];
-		System.arraycopy(seachQuery.array(), 0, rightSizedQuery, 0, seachQuery.position());
-		int[] resultsPositionsArray = ind1.get(rightSizedQuery);
+		// Il doit y avoir 54 résultats
+		searchQuery.rewind();
+		searchQuery.put((byte)2);
+		searchQuery.putFloat(4);
+		rightSizedQuery = new byte[searchQuery.position()];
+		System.arraycopy(searchQuery.array(), 0, rightSizedQuery, 0, searchQuery.position());
+		
+		searchQuery.rewind();
+		int[] resultsPositionsArray = ind3.findMatchingLinePositions(searchQuery);//ind1.get(rightSizedQuery);
+		
+		
 		
 		/*seachQuery.rewind();
 		seachQuery.put((byte)2);
 		rightSizedQuery = new byte[seachQuery.position()];
 		System.arraycopy(seachQuery.array(), 0, rightSizedQuery, 0, seachQuery.position());
 		
-		
 		int[] resultsPositionsArray = ind2.get(rightSizedQuery);*/
 		
-		Log.info("resultsPositionsArray.length = " + resultsPositionsArray.length + "  seachQuery.position() = " + seachQuery.position());
+		Log.info("resultsPositionsArray.length = " + resultsPositionsArray.length + "  seachQuery.position() = " + searchQuery.position());
 		//ind2.put(rightSizedQuery, 99);
 		
+		showResults(resultsPositionsArray);
+		
+		/*int linesCountTotal = table.getTotalLinesCount();
+		Column sCol = table.getColumns().get(3);
+		int resCount = 0;
+		for (int i = 0; i < linesCountTotal; i++) {
+			int delta = ind3.compareLineValuesAndQuery(i, searchQuery);
+			if (delta == 0) {
+				String lineAsReadableString = table.getLineAsReadableString(i); // i);//
+				//Log.info(lineAsReadableString);
+				Log.info("" + i);
+				resCount++;
+			}
+			//String lineAsReadableString = Byte.toString(sCol.readByte(i));//table.getLineAsReadableString(resultsPositionsArray[i]); // i);//
+			//Log.info(lineAsReadableString);
+		}*/
+		/*
+		Log.info("Par dichotomie :");
+		
+		for (int resultIndex = 0; resultIndex < resultsPositionsArray.length; resultIndex++) {
+			int linePosition = resultsPositionsArray[resultIndex];
+			
+			int delta = ind3.compareLineValuesAndQuery(linePosition, searchQuery);
+			if (delta == 0) {
+				String lineAsReadableString = table.getLineAsReadableString(linePosition); // i);//
+				//Log.info(lineAsReadableString);
+				Log.info("" + linePosition);
+				resCount++;
+			}
+			//String lineAsReadableString = Byte.toString(sCol.readByte(i));//table.getLineAsReadableString(resultsPositionsArray[i]); // i);//
+			//Log.info(lineAsReadableString);
+		}
+		//Log.info("resCount = " + resCount);
+		*/
 		
 	}
 	
+	private void showResults(int[] resultsPositionsArray) {
+		
+		for (int resultIndex = 0; resultIndex < resultsPositionsArray.length; resultIndex++) {
+			int linePosition = resultsPositionsArray[resultIndex];
+			
+			/*int delta = ind3.compareLineValuesAndQuery(linePosition, searchQuery);
+			if (delta == 0) {
+				String lineAsReadableString = table.getLineAsReadableString(linePosition); // i);//
+				//Log.info(lineAsReadableString);
+				Log.info("" + linePosition);
+				resCount++;
+			}*/
+			String lineAsReadableString = table.getLineAsReadableString(resultsPositionsArray[resultIndex]); // i);//
+			Log.info(lineAsReadableString);
+		}
+		
+		
+	}
 	
 	private SIndexHashJava indexColumns(int[] colIndexList) {
 		if (colIndexList.length == 0) return null;
@@ -91,7 +181,7 @@ public class SIndexBench {
 		int linesNumber = choosenColArray[0].getTotalLinesNumber();
 		
 		SIndexHashJava result = new SIndexHashJava(choosenColArray, linesNumber);
-		IndexMemDic resultMemDic = new IndexMemDic(table, linesNumber, colIndexList);
+		//IndexMemDic resultMemDic = new IndexMemDic(table, colIndexList);
 		
 		for (int iLine = 0; iLine < linesNumber; iLine++) {
 			
@@ -112,7 +202,7 @@ public class SIndexBench {
 			
 			
 			//resultMemDic.setPosition(iLine, iLine);
-			//result.put(wholeLineDataAsBytes, iLine);
+			result.put(wholeLineDataAsBytes, iLine);
 			//Log.info("put: " + debugBytes);
 			//Log.info("put: " + wholeLineDataAsBytes.hashCode());
 			
@@ -121,7 +211,7 @@ public class SIndexBench {
 		System.gc();
 		MemUsage.printMemUsage();
 		Timer t = new Timer("tc");
-		resultMemDic.sortAllv1();
+		//resultMemDic.sortAllv1();
 		
 		t.log();
 		MemUsage.printMemUsage();
@@ -171,8 +261,8 @@ public class SIndexBench {
 			parseThisCsv(table, csvLoader, csvPath);
 		}
 		
-		System.gc();
-		MemUsage.printMemUsage("Mem usage  fin - ");
+		//System.gc();
+		//MemUsage.printMemUsage("Mem usage  fin - ");
 		parseTimer.log();
 		
 		
