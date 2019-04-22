@@ -29,8 +29,6 @@ public class ColumnDataChunk implements Serializable {
 	// et ne pas surcharger le GC
 	private final ByteBuffer dataAsBytes;
 	
-	
-
 	private int currentItemPosition = 0;
 	//private int currentPositionInByteArray = 0;
 	private final int maxNumberOfItems;
@@ -128,22 +126,22 @@ public class ColumnDataChunk implements Serializable {
 	}
 	
 	public int getInt(int indexInChunk) {
-		return dataAsBytes.getInt(indexInChunk);
+		return dataAsBytes.getInt(indexInChunk * dataTypeSize);
 	}
 	public int getDate(int indexInChunk) {
-		return dataAsBytes.getInt(indexInChunk);
+		return dataAsBytes.getInt(indexInChunk * dataTypeSize);
 	}
 	public byte getByte(int indexInChunk) {
-		return dataAsBytes.get(indexInChunk);
+		return dataAsBytes.get(indexInChunk * dataTypeSize);
 	}
 	public long getLong(int indexInChunk) {
-		return dataAsBytes.getLong(indexInChunk);
+		return dataAsBytes.getLong(indexInChunk * dataTypeSize);
 	}
 	public double getDouble(int indexInChunk) {
-		return dataAsBytes.getDouble(indexInChunk);
+		return dataAsBytes.getDouble(indexInChunk * dataTypeSize);
 	}
 	public float getFloat(int indexInChunk) {
-		return dataAsBytes.getFloat(indexInChunk);
+		return dataAsBytes.getFloat(indexInChunk * dataTypeSize);
 	}
 	
 	/* peut-être supporté un jour

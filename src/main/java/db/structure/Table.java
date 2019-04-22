@@ -389,5 +389,20 @@ public class Table implements Serializable {
 	public void clearDataDirectory() throws IOException {
 		this.dataHandler.clearDataDirectory();
 	}
+	
+	public String getLineAsReadableString(int linePosition) {
+		String result = "";
+		Column col;
+		for (int iCol = 0; iCol < columnsList.size(); iCol++) {
+			col = columnsList.get(iCol);
+			String readableColumnValue = col.getDataAsReadableString(linePosition);
+			if (iCol != columnsList.size() - 1) {
+				result += readableColumnValue + ", ";
+			} else {
+				result += readableColumnValue;
+			}
+		}
+		return result;
+	}
 
 }

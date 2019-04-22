@@ -39,7 +39,9 @@ public class SIndexBench {
 		Log.error("DEBUT");
 		MemUsage.printMemUsage();
 		// Ajout à l'index
-		//SIndexHash ind2 = indexColumns(new int[] {3, 3}); // passenger_count
+		//Log.error("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
+		//SIndexHashJava ind2 = indexColumns(new int[] {4, 3}); // passenger_count
+		//Log.error("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
 		SIndexHashJava ind1 = indexColumns(new int[] {3, 4}); // passenger_count et trip_distance
 		//ind2.put(new byte[] {1}, 99);
 		

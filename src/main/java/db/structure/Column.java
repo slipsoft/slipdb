@@ -11,6 +11,7 @@ import java.util.Optional;
 import com.dant.entity.ColumnEntity;
 import com.dant.utils.EasyFile;
 import com.dant.utils.Log;
+import com.dant.utils.Utils;
 
 import db.data.types.ByteType;
 import db.data.types.DataType;
@@ -295,13 +296,25 @@ public class Column implements Serializable {
 		addAnotherChunkIfNecessary(dataChunk.writeStringData(value));
 	}*/
 	
+	/** Non thread-safe du fait de la transformation des int en dates
+	 * @param indexAbsolute
+	 * @return
+	 */
 	public String getDataAsReadableString(int indexAbsolute) {
-		return "";
-		/*TODO 
-		int chunkIndex = (indexAbsolute / chunkDataTypeAllocationSize);
-		ColumnDataChunk dataChunk = a2DataChunk.get(chunkIndex);
-		int indexInChunk = indexAbsolute - (chunkIndex * chunkDataTypeAllocationSize);
-		return dataChunk.getDataAsRawBytes(indexInChunk);*/
+		String result = "";
+		switch (dataTypeEnum) {
+		case BYTE    : result = Byte.toString(readByte(indexAbsolute)); break;
+		case INTEGER : result = Integer.toString(readInteger(indexAbsolute)); break;
+		case LONG    : result = Long.toString(readLong(indexAbsolute)); break;
+		case DATE    : result = Utils.dateToStringNoThreadSafe(Utils.dateFromSecInt(readInteger(indexAbsolute))); break;
+		case FLOAT   : result = Float.toString(readFloat(indexAbsolute)); break;
+		case DOUBLE  : result = Double.toString(readDouble(indexAbsolute)); break;
+		case STRING  : result = readString(indexAbsolute); break;
+		case UNKNOWN : break;
+		default      : break;
+		}
+		
+		return result;
 	}
 	
 	
@@ -358,12 +371,112 @@ public class Column implements Serializable {
 		}
 		return totalSize;
 	}
-	
+
 	public byte[] getDataAsRawBytes(int indexAbsolute) {
 		int chunkIndex = (indexAbsolute / chunkDataTypeAllocationSize);
 		ColumnDataChunk dataChunk = a2DataChunk.get(chunkIndex);
 		int indexInChunk = indexAbsolute - (chunkIndex * chunkDataTypeAllocationSize);
 		return dataChunk.getDataAsRawBytes(indexInChunk);
+	}
+	public int readInteger(int indexAbsolute) {
+		int chunkIndex = (indexAbsolute / chunkDataTypeAllocationSize);
+		ColumnDataChunk dataChunk = a2DataChunk.get(chunkIndex);
+		int indexInChunk = indexAbsolute - (chunkIndex * chunkDataTypeAllocationSize);
+		return dataChunk.getInt(indexInChunk);
+	}
+	public byte readByte(int indexAbsolute) {
+		int chunkIndex = (indexAbsolute / chunkDataTypeAllocationSize);
+		ColumnDataChunk dataChunk = a2DataChunk.get(chunkIndex);
+		int indexInChunk = indexAbsolute - (chunkIndex * chunkDataTypeAllocationSize);
+		return dataChunk.getByte(indexInChunk);
+	}
+	public long readLong(int indexAbsolute) {
+		int chunkIndex = (indexAbsolute / chunkDataTypeAllocationSize);
+		ColumnDataChunk dataChunk = a2DataChunk.get(chunkIndex);
+		int indexInChunk = indexAbsolute - (chunkIndex * chunkDataTypeAllocationSize);
+		return dataChunk.getLong(indexInChunk);
+	}
+	public float readFloat(int indexAbsolute) {
+		int chunkIndex = (indexAbsolute / chunkDataTypeAllocationSize);
+		ColumnDataChunk dataChunk = a2DataChunk.get(chunkIndex);
+		int indexInChunk = indexAbsolute - (chunkIndex * chunkDataTypeAllocationSize);
+		return dataChunk.getFloat(indexInChunk);
+	}
+	public double readDouble(int indexAbsolute) {
+		int chunkIndex = (indexAbsolute / chunkDataTypeAllocationSize);
+		ColumnDataChunk dataChunk = a2DataChunk.get(chunkIndex);
+		int indexInChunk = indexAbsolute - (chunkIndex * chunkDataTypeAllocationSize);
+		return dataChunk.getDouble(indexInChunk);
+	}
+	public String readString(int indexAbsolute) {
+		int chunkIndex = (indexAbsolute / chunkDataTypeAllocationSize);
+		ColumnDataChunk dataChunk = a2DataChunk.get(chunkIndex);
+		int indexInChunk = indexAbsolute - (chunkIndex * chunkDataTypeAllocationSize);
+		return dataChunk.getString(indexInChunk);
+	}
+	
+	/** Comparaison des valeurs, en ayant comme référence mainLinePosition.
+	 *  @param mainLinePosition
+	 *  @param otherLinePosition
+	 *  @return
+	 */
+	public int compareLineValues2(int mainLinePosition, int otherLinePosition) {
+		
+		switch (dataTypeEnum) {
+		case BYTE    : return readByte(mainLinePosition) - readByte(otherLinePosition);
+		case INTEGER : return readInteger(mainLinePosition) - readInteger(otherLinePosition);
+		case LONG    :
+			long longComp = readLong(mainLinePosition) - readLong(otherLinePosition);
+			if (longComp == 0) return 0;
+			if (longComp > 0) return 1;
+			return -1;
+		case DATE    : return (readInteger(mainLinePosition) - readInteger(otherLinePosition));
+		case FLOAT   : 
+			float floatComp = readFloat(mainLinePosition) - readFloat(otherLinePosition);
+			if (floatComp == 0) return 0;
+			if (floatComp > 0) return 1;
+			return -1;
+		case DOUBLE  : 
+			double doubleComp = readDouble(mainLinePosition) - readDouble(otherLinePosition);
+			if (doubleComp == 0) return 0;
+			if (doubleComp > 0) return 1;
+			return -1;//return ((readDouble(mainLinePosition) - readDouble(otherLinePosition) > 0) ? 1 : -1);
+		case STRING  : 
+			String mainStr = readString(mainLinePosition);
+			String otherString = readString(otherLinePosition);
+			return mainStr.compareTo(otherString);
+		case UNKNOWN : return 0;
+		default      : return 0;
+		}
+	}
+	
+	/*
+	public int compareLineValues2(int mainLinePosition, int otherLinePosition) {
+		switch (dataTypeEnum) {
+		case BYTE    : Log.info("byte"); return readByte(mainLinePosition) - readByte(otherLinePosition);
+		case INTEGER : Log.info("INTEGER"); return readInteger(mainLinePosition) - readInteger(otherLinePosition);
+		case LONG    : Log.info("long"); return (int) (readLong(mainLinePosition) - readLong(otherLinePosition));
+		case DATE    : Log.info("date"); return (int) (readInteger(mainLinePosition) - readInteger(otherLinePosition));
+		case FLOAT   : Log.info("float"); return (int) (readFloat(mainLinePosition) - readFloat(otherLinePosition));
+		case DOUBLE  : Log.info("double"); return (int) (readDouble(mainLinePosition) - readDouble(otherLinePosition));
+		case STRING  : Log.info("string"); 
+			String mainStr = readString(mainLinePosition);
+			String otherString = readString(otherLinePosition);
+			return mainStr.compareTo(otherString);
+		case UNKNOWN : return 0;
+		default      : return 0;
+		}
+	}*/
+
+	public int compareLineValues(int mainLinePosition, int otherLinePosition) {
+		int c1 = compareLineValues2(mainLinePosition, otherLinePosition);
+		int c2 = compareLineValues2(otherLinePosition, mainLinePosition);
+		if (c1 != -c2) {
+			Log.error("ERROR - Column.compareLineValues  c1!=-c2 : " + c1 + " - " + c2);
+		} else {
+			//Log.info("OK - Column.compareLineValues  c1!=-c2 : " + c1 + " - " + c2);
+		}
+		return c1;
 	}
 	
 	

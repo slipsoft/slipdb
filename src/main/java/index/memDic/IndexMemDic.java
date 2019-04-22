@@ -55,9 +55,11 @@ public class IndexMemDic {
 		}
 		
 		Arrays.sort(tempSortArray);
-		for (int i = 0; i < totalLength; i++) {
+		/*for (int i = 0; i < totalLength; i++) {
 			sortedPositions[i] = tempSortArray[i].originalLinePosition;
-		}
+			String displayValues = table.getLineAsReadableString(sortedPositions[i]);
+			Log.info(displayValues);
+		}*/
 		
 		t.log();
 		MemUsage.printMemUsage();
