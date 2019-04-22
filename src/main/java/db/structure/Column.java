@@ -51,22 +51,6 @@ public class Column implements Serializable {
 	
 	public final static int chunkDataTypeAllocationSize = 1_000_000;
 	
-	public int getTotalLinesNumber() {
-		int totalSize = 0;
-		for (ColumnDataChunk dataChunk : a2DataChunk) {
-			totalSize += dataChunk.getCurrentItemPosition();
-		}
-		return totalSize;
-	}
-	
-	public byte[] getDataAsRawBytes(int indexAbsolute) {
-		int chunkIndex = (indexAbsolute / chunkDataTypeAllocationSize);
-		ColumnDataChunk dataChunk = a2DataChunk.get(chunkIndex);
-		int indexInChunk = indexAbsolute - (chunkIndex * chunkDataTypeAllocationSize);
-		return dataChunk.getDataAsRawBytes(indexInChunk);
-	}
-	
-	
 	/** Pour la déserialisation
 	 * @param in
 	 * @throws IOException
@@ -312,7 +296,8 @@ public class Column implements Serializable {
 	}*/
 	
 	public String getDataAsReadableString(int indexAbsolute) {
-		/*TODO
+		return "";
+		/*TODO 
 		int chunkIndex = (indexAbsolute / chunkDataTypeAllocationSize);
 		ColumnDataChunk dataChunk = a2DataChunk.get(chunkIndex);
 		int indexInChunk = indexAbsolute - (chunkIndex * chunkDataTypeAllocationSize);
@@ -365,5 +350,21 @@ public class Column implements Serializable {
 	public void clearAllMemoryData() {
 		a2DataChunk = new ArrayList<ColumnDataChunk>();
 	}
+	
+	public int getTotalLinesNumber() {
+		int totalSize = 0;
+		for (ColumnDataChunk dataChunk : a2DataChunk) {
+			totalSize += dataChunk.getCurrentItemPosition();
+		}
+		return totalSize;
+	}
+	
+	public byte[] getDataAsRawBytes(int indexAbsolute) {
+		int chunkIndex = (indexAbsolute / chunkDataTypeAllocationSize);
+		ColumnDataChunk dataChunk = a2DataChunk.get(chunkIndex);
+		int indexInChunk = indexAbsolute - (chunkIndex * chunkDataTypeAllocationSize);
+		return dataChunk.getDataAsRawBytes(indexInChunk);
+	}
+	
 	
 }

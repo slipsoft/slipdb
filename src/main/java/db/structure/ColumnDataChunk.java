@@ -127,7 +127,24 @@ public class ColumnDataChunk implements Serializable {
 		return thisDataAsRawBytes;
 	}
 	
-	//public 
+	public int getInt(int indexInChunk) {
+		return dataAsBytes.getInt(indexInChunk);
+	}
+	public int getDate(int indexInChunk) {
+		return dataAsBytes.getInt(indexInChunk);
+	}
+	public byte getByte(int indexInChunk) {
+		return dataAsBytes.get(indexInChunk);
+	}
+	public long getLong(int indexInChunk) {
+		return dataAsBytes.getLong(indexInChunk);
+	}
+	public double getDouble(int indexInChunk) {
+		return dataAsBytes.getDouble(indexInChunk);
+	}
+	public float getFloat(int indexInChunk) {
+		return dataAsBytes.getFloat(indexInChunk);
+	}
 	
 	/* peut-être supporté un jour
 	public boolean writeByteArrayData(byte[] data) {
