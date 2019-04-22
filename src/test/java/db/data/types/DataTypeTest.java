@@ -2,6 +2,7 @@ package db.data.types;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -336,7 +337,7 @@ class DataTypeTest {
 		
 		
 	}
-	
+
 	//@Test
 	public void testMemDoubleParsing() {
 		
@@ -357,6 +358,43 @@ class DataTypeTest {
 			doubleType.parseAndWriteToBuffer(parseStr, bBuff); // "454689586.2132152"
 		}
 		localTimer.log();
+	}
+
+	//@Test
+	public void testMemArrayAllocation() {
+		
+		System.gc();
+		MemUsage.printMemUsage();
+		
+		int entrySize = 10;
+		int arraySize = 1_000_000;
+		//Arrays.sort(a);(a, c);
+		int totalArraySize = arraySize * entrySize;
+		Integer[] a1int = new Integer[arraySize * entrySize];
+		for (int iLine = 0; iLine < totalArraySize; iLine++) {
+			a1int[iLine] = iLine;
+		}
+		
+		
+		
+		/*byte[][] a2int = new byte[arraySize][entrySize];
+		
+		for (int iLine = 0; iLine < arraySize; iLine++) {
+			
+			//a2int[iLine] = new int[entrySize + (iLine % 8)];
+			
+			for (int iEntry = 0; iEntry < entrySize; iEntry++) {
+				a2int[iLine][iEntry] = (byte)iEntry;
+			}
+			
+		}*/
+		
+		Log.info("Working ??");
+		System.gc();
+		MemUsage.printMemUsage();
+		
+		Log.info("" + (a1int.length));
+		
 	}
 
 	//@Test

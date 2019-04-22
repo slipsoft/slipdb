@@ -61,7 +61,7 @@ public class SIndexHashJava {
 			positions = new ArrayList<Integer>();
 			storedLinesPosition.put(key, positions);
 			
-			/* DEBUG only
+			/* -- DEBUG only
 			String debugKeys = "";
 			for (int iKey = 0; iKey < key.values.length; iKey++) {
 				debugKeys += key.values[iKey];
@@ -78,7 +78,8 @@ public class SIndexHashJava {
 			}
 			if (storedLinesPosition.size() == 3) {
 				Log.info("equals : " + keyArray[0].equals(keyArray[1]) + " et " + keyArray[0].values + "  -  " + keyArray[1].values + "  -  " + keyArray[2]);
-			}*/
+			}
+			DEBUG only -- */
 			
 		}
 		positions.add(argLinePosition);

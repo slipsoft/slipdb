@@ -23,10 +23,7 @@ public class SKeyHashJava {
 	 *  @param argValues
 	 */
 	public SKeyHashJava(byte[] argValues) {
-		//ByteBuffer buff = ByteBuffer.allocateDirect(10);
-		//buff.hashCode()
 		values = argValues;
-		
 	}
 	
 	@Override

@@ -19,6 +19,7 @@ import db.data.types.FloatType;
 import db.data.types.StringType;
 import db.structure.Column;
 import db.structure.Table;
+import index.memDic.IndexMemDic;
 import noob.fastStructure.SCsvLoader;
 import noob.fastStructure.SIndexHashJava;
 
@@ -88,6 +89,7 @@ public class SIndexBench {
 		int linesNumber = choosenColArray[0].getTotalLinesNumber();
 		
 		SIndexHashJava result = new SIndexHashJava(choosenColArray, linesNumber);
+		IndexMemDic resultMemDic = new IndexMemDic(linesNumber);
 		
 		for (int iLine = 0; iLine < linesNumber; iLine++) {
 			
@@ -106,11 +108,20 @@ public class SIndexBench {
 				destPos += currentColumn.dataSizeInBytes;
 			}
 			
-			result.put(wholeLineDataAsBytes, iLine);
+			
+			resultMemDic.setPosition(iLine, iLine);
+			//result.put(wholeLineDataAsBytes, iLine);
 			//Log.info("put: " + debugBytes);
 			//Log.info("put: " + wholeLineDataAsBytes.hashCode());
 			
 		}
+		
+		System.gc();
+		MemUsage.printMemUsage();
+		Timer t = new Timer("tc");
+		resultMemDic.sortAll();
+		t.log();
+		MemUsage.printMemUsage();
 		
 		return result;
 	}
