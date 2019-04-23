@@ -29,6 +29,9 @@ public class SIndexBench {
 	Table table;
 	
 	
+	/** Préparation de la requête commune aux index (via un ByteBuffer)
+	 *  @return
+	 */
 	private ByteBuffer getBufferedQuery() {
 		ByteBuffer searchQuery = ByteBuffer.allocate(100);
 		searchQuery.rewind();
@@ -116,24 +119,11 @@ public class SIndexBench {
 		// Chargement des CSV
 		loadFirst();
 		
-		/*Log.info("INIT DEBUG");
-		//ind2.put(rightSizedQuery, 99);
-		int linesCountTotal = table.getTotalLinesCount();
-		Column sCol = table.getColumns().get(3);
-		for (int i = 0; i < linesCountTotal; i++) {
-			if (sCol.readByte(i) == 0) {
-				Log.error("byte == 0");
-			}
-			//String lineAsReadableString = Byte.toString(sCol.readByte(i));//table.getLineAsReadableString(resultsPositionsArray[i]); // i);//
-			//Log.info(lineAsReadableString);
-		}*/
-		
-
 		long memInit, memFinal;
 		String memUsedStr;
 		
 		
-
+		// ----------- Avec IndexHash ----------- 
 		System.gc();
 		memInit = MemUsage.getMemUsage();
 		testIndexHash();
@@ -141,7 +131,6 @@ public class SIndexBench {
 		memUsedStr = MemUsage.formatMemUsage(memFinal - memInit);
 		System.gc();
 		Log.info("Mémoire utilisée IndexHash : " + memUsedStr);
-		
 		
 		// ----------- Avec IndexMemDic ----------- 
 		System.gc();
@@ -152,93 +141,6 @@ public class SIndexBench {
 		System.gc();
 		Log.info("Mémoire utilisée IndexMemDic : " + memUsedStr);
 		
-		
-		
-		
-		/*
-		
-		
-		System.gc();
-		
-		// ----------- Avec IndexMemDic ----------- 
-		
-		
-		
-		
-		MemUsage.printMemUsage();
-		// Ajout à l'index
-		//Log.error("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
-		//SIndexHashJava ind2 = indexColumns(new int[] {4, 3}); // passenger_count
-		//Log.error("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
-		
-		
-		
-		IndexMemDic ind3 = new IndexMemDic(table, new int[]{3, 4});
-		ind3.sortAllv1();
-		
-		
-		
-		//ind2.put(new byte[] {1}, 99);
-		
-		System.gc();
-		
-		
-		
-		
-		Log.error("FIN");
-		MemUsage.printMemUsage();
-		
-		
-		ByteBuffer searchQuery = ByteBuffer.allocate(100);
-		byte[] rightSizedQuery;
-		
-		// Il doit y avoir 54 résultats
-		searchQuery.rewind();
-		searchQuery.put((byte)2);
-		searchQuery.putFloat(4);
-		rightSizedQuery = new byte[searchQuery.position()];
-		System.arraycopy(searchQuery.array(), 0, rightSizedQuery, 0, searchQuery.position());
-		
-		searchQuery.rewind();
-		int[] resultsPositionsArray = ind3.findMatchingLinePositions(searchQuery);//ind1.get(rightSizedQuery);
-		
-		Log.info("resultsPositionsArray.length = " + resultsPositionsArray.length + "  seachQuery.position() = " + searchQuery.position());
-		//ind2.put(rightSizedQuery, 99);
-		
-		showResults(resultsPositionsArray);*/
-		
-		/*int linesCountTotal = table.getTotalLinesCount();
-		Column sCol = table.getColumns().get(3);
-		int resCount = 0;
-		for (int i = 0; i < linesCountTotal; i++) {
-			int delta = ind3.compareLineValuesAndQuery(i, searchQuery);
-			if (delta == 0) {
-				String lineAsReadableString = table.getLineAsReadableString(i); // i);//
-				//Log.info(lineAsReadableString);
-				Log.info("" + i);
-				resCount++;
-			}
-			//String lineAsReadableString = Byte.toString(sCol.readByte(i));//table.getLineAsReadableString(resultsPositionsArray[i]); // i);//
-			//Log.info(lineAsReadableString);
-		}*/
-		/*
-		Log.info("Par dichotomie :");
-		
-		for (int resultIndex = 0; resultIndex < resultsPositionsArray.length; resultIndex++) {
-			int linePosition = resultsPositionsArray[resultIndex];
-			
-			int delta = ind3.compareLineValuesAndQuery(linePosition, searchQuery);
-			if (delta == 0) {
-				String lineAsReadableString = table.getLineAsReadableString(linePosition); // i);//
-				//Log.info(lineAsReadableString);
-				Log.info("" + linePosition);
-				resCount++;
-			}
-			//String lineAsReadableString = Byte.toString(sCol.readByte(i));//table.getLineAsReadableString(resultsPositionsArray[i]); // i);//
-			//Log.info(lineAsReadableString);
-		}
-		//Log.info("resCount = " + resCount);
-		*/
 		
 	}
 	
@@ -348,11 +250,11 @@ public class SIndexBench {
 		MemUsage.printMemUsage("Mem usage  début - ");
 		SCsvLoader csvLoader = new SCsvLoader(table, new CsvParser());
 		
-		int mounthFinalCount = 1;
+		int mounthFinalCount = 12;
 		for (int iCsv = 1; iCsv <= mounthFinalCount; iCsv++) {
 			String colNumber = String.format("%02d" , iCsv);
-			String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
-			//String csvPath = "F:/csv/yellow_tripdata_2015-" + colNumber + ".csv"; // E:/L3 DANT disque E
+			//String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
+			String csvPath = "F:/csv/yellow_tripdata_2015-" + colNumber + ".csv"; // E:/L3 DANT disque E
 			//String csvPath = "F:/csv/SMALL_1_000_000_yellow_tripdata_2015-04.csv";
 			Log.info("Parsing de csvName = " + csvPath);
 			parseThisCsv(table, csvLoader, csvPath);

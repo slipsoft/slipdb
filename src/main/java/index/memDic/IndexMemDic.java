@@ -9,6 +9,7 @@ import com.dant.utils.Timer;
 
 import db.structure.Column;
 import db.structure.Table;
+import noob.fastStructure.SCustomSort;
 
 /**
  * 
@@ -53,16 +54,22 @@ public class IndexMemDic {
 		
 		t1 = new Timer("IndexMemDic.sortAll - tout :");
 		t2 = new Timer("IndexMemDic.sortAll - création objets :");
+
+		MemUsage.printMemUsage();
 		IndexMemDicTemporaryItem[] tempSortArray = new IndexMemDicTemporaryItem[totalLength];
 		for (int i = 0; i < totalLength; i++) {
 			tempSortArray[i] = new IndexMemDicTemporaryItem(i);
 		}
+		MemUsage.printMemUsage();
 		if (enableVerboseSort) t2.log();
 		
 		t3 = new Timer("IndexMemDic.sortAll - sort :");
+		MemUsage.printMemUsage();
 		//Arrays.sort(tempSortArray);
-		Arrays.parallelSort(tempSortArray); // <- faible gain, environ 30% plus rapide
+		//SCustomSort.sort(tempSortArray);
+		Arrays.parallelSort(tempSortArray); // <- faible gain, environ 30% plus rapide, mais prend beaucoup plus de mémoire
 		if (enableVerboseSort) t3.log();
+		MemUsage.printMemUsage();
 		
 
 		t4 = new Timer("IndexMemDic.sortAll - réagencement positions :");
@@ -71,10 +78,12 @@ public class IndexMemDic {
 			//String displayValues = table.getLineAsReadableString(sortedPositions[i]);
 			//Log.info(displayValues);
 		}
+		MemUsage.printMemUsage();
 		if (enableVerboseSort) t4.log();
 		for (int i = 0; i < totalLength; i++) {
 			tempSortArray[i] = null;
 		}
+		MemUsage.printMemUsage();
 		tempSortArray = null;
 		if (enableVerboseSort) t1.log();
 		
