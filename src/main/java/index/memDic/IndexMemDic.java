@@ -25,8 +25,9 @@ public class IndexMemDic {
 	public static Table table;
 	public static int[] colIndexArray; // dans l'ordre
 	public static Column[] indexOnThisColArray;
-	
+
 	public static boolean enableVerboseDichotomy = false;
+	public static boolean enableVerboseSort = true;
 	public static boolean useSafeSlowComparaisonsNotDichotomy = false;
 	
 	public IndexMemDic(Table argTable, int[] argColIndexArray) { // int argTotalLength,
@@ -48,25 +49,34 @@ public class IndexMemDic {
 	
 	public void sortAllv1() {
 		
-		//Timer t = new Timer("IndexMemDic.sortAll pris :");
 		MemUsage.printMemUsage();
+		Timer t1, t2, t3, t4;
+		
+		t1 = new Timer("IndexMemDic.sortAll - tout :");
+		t2 = new Timer("IndexMemDic.sortAll - création objets :");
 		IndexMemDicTemporaryItem[] tempSortArray = new IndexMemDicTemporaryItem[totalLength];
 		for (int i = 0; i < totalLength; i++) {
 			tempSortArray[i] = new IndexMemDicTemporaryItem(i);
 		}
+		if (enableVerboseSort) t2.log();
 		
-		Arrays.sort(tempSortArray);
+		t3 = new Timer("IndexMemDic.sortAll - sort :");
+		Arrays.parallelSort(tempSortArray); // <- faible gain, environ 30% plus rapide
+		if (enableVerboseSort) t3.log();
 		
+
+		t4 = new Timer("IndexMemDic.sortAll - réagencement positions :");
 		for (int i = 0; i < totalLength; i++) {
 			sortedPositions[i] = tempSortArray[i].originalLinePosition;
 			//String displayValues = table.getLineAsReadableString(sortedPositions[i]);
 			//Log.info(displayValues);
 		}
+		if (enableVerboseSort) t4.log();
 		for (int i = 0; i < totalLength; i++) {
 			tempSortArray[i] = null;
 		}
 		tempSortArray = null;
-		//t.log();
+		if (enableVerboseSort) t1.log();
 		
 	}
 	
@@ -155,6 +165,7 @@ public class IndexMemDic {
 		int exactValueStartIndexDic = dicCurrentIndex;
 		int exactValueStopIndexDic = dicCurrentIndex;
 		
+		Timer growTime = new Timer("Temps pris pour trouver les bornes");
 		// Tant que je ne suis pas à l'index 0 et que la valeur précédente est égale à la valeur recherchée
 		while ( (exactValueStartIndexDic > 0) && (compareLineValuesAndQuery(sortedPositions[exactValueStartIndexDic - 1], searchQuery) == 0) ) {
 			exactValueStartIndexDic--;
@@ -164,7 +175,7 @@ public class IndexMemDic {
 		while ( (exactValueStartIndexDic <= sortedPositions.length - 2) && (compareLineValuesAndQuery(sortedPositions[exactValueStopIndexDic + 1], searchQuery) == 0) ) {
 			exactValueStopIndexDic++;
 		}
-
+		growTime.log();
 		//Log.info("------> exactValueStartIndexDic = " + exactValueStartIndexDic + " exactValueStopIndexDic = " + exactValueStopIndexDic);
 		/*for (int i = exactValueStartIndexDic; i <= exactValueStopIndexDic; i++) {
 			String lineAsString = table.getLineAsReadableString(sortedPositions[i]);

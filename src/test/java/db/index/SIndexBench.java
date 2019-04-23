@@ -85,8 +85,8 @@ public class SIndexBench {
 		// Il doit y avoir 54 résultats
 		ByteBuffer searchQuery = ByteBuffer.allocate(100);
 		searchQuery.rewind();
-		searchQuery.put((byte)1);
-		searchQuery.putFloat(8);
+		searchQuery.put((byte)1); // 1, 21
+		searchQuery.putFloat(2);
 		Timer timerQuery = new Timer("Temps pris testIndexMemDic QUERY ONLY");
 		int[] resultsPositionsArray = ind3.findMatchingLinePositions(searchQuery);
 		timerQuery.log();
@@ -129,6 +129,7 @@ public class SIndexBench {
 		long memInit, memFinal;
 		String memUsedStr;
 		
+		/*
 
 		System.gc();
 		memInit = MemUsage.getMemUsage();
@@ -136,11 +137,11 @@ public class SIndexBench {
 		memFinal = MemUsage.getMemUsage();
 		memUsedStr = MemUsage.formatMemUsage(memFinal - memInit);
 		System.gc();
-		Log.info("Mémoire utilisée IndexHash : " + memUsedStr);
+		Log.info("Mémoire utilisée IndexHash : " + memUsedStr);*/
 		
 		
 		// ----------- Avec IndexMemDic ----------- 
-		
+		System.gc();
 		memInit = MemUsage.getMemUsage();
 		testIndexMemDic();
 		memFinal = MemUsage.getMemUsage();
