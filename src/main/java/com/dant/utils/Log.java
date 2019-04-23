@@ -11,7 +11,7 @@ import org.apache.commons.lang3.ArrayUtils;
 public class Log {
 	protected static volatile int level = 3;
 	protected static EasyFile file;
-	private static final boolean noHeader = true;
+	private static final boolean noHeader = false;
 	
 	public static int getLevel() {
 		return level;

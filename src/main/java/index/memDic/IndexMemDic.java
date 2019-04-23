@@ -2,9 +2,6 @@ package index.memDic;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.HashMap;
-
-import org.apache.commons.lang3.ArrayUtils;
 
 import com.dant.utils.Log;
 import com.dant.utils.MemUsage;
@@ -28,7 +25,9 @@ public class IndexMemDic {
 
 	public static boolean enableVerboseDichotomy = false;
 	public static boolean enableVerboseSort = true;
-	public static boolean useSafeSlowComparaisonsNotDichotomy = false;
+	
+	public static final boolean useSafeSlowComparaisonsNotDichotomy = false;
+	public static final boolean enableDoubleDichotomyVerif = false;
 	
 	public IndexMemDic(Table argTable, int[] argColIndexArray) { // int argTotalLength,
 		colIndexArray = argColIndexArray;
@@ -61,6 +60,7 @@ public class IndexMemDic {
 		if (enableVerboseSort) t2.log();
 		
 		t3 = new Timer("IndexMemDic.sortAll - sort :");
+		//Arrays.sort(tempSortArray);
 		Arrays.parallelSort(tempSortArray); // <- faible gain, environ 30% plus rapide
 		if (enableVerboseSort) t3.log();
 		
@@ -80,13 +80,23 @@ public class IndexMemDic {
 		
 	}
 	
+	//findMatchingIndex
+	
+
+	private int[] findMatchingIntervalBounds(ByteBuffer searchQuery) { //findClosestLinePosition
+		int startIndex = findMatchingIndex(searchQuery, true);
+		if (startIndex == -1) return new int[] {-1, -1};
+		int stopIndex = findMatchingIndex(searchQuery, false);
+		return new int[] {startIndex, stopIndex};
+	}
+	
 	/**
 	 *  Trouver par dichotomie LA valeur exacte (sans support des inférieur et supérieur)
 	 *  Cette fonction est bien plus simple qu'une dichotomie supportant les inférieur et supérieur,
 	 *  car seule l'égalité est recherchée ici.
 	 *  @return
 	 */
-	private int[] findMatchingIntervalBounds(ByteBuffer searchQuery) { //findClosestLinePosition
+	private int[] findMatchingIntervalBoundsOldWay(ByteBuffer searchQuery) { //findClosestLinePosition
 		
 		int dicStartIndex = 0;
 		int dicStopIndex = sortedPositions.length - 1;
@@ -138,7 +148,7 @@ public class IndexMemDic {
 					dicStartIndex = dicCurrentIndex + 1;
 					//Log.info("modif startIndex = " + dicStartIndex);
 				} else { // égalité
-					Log.info("EGALITE !! dicCurrentIndex = " + dicCurrentIndex);
+					//Log.info("EGALITE !! dicCurrentIndex = " + dicCurrentIndex);
 					break;
 				}
 				
@@ -186,6 +196,118 @@ public class IndexMemDic {
 	}
 	
 	
+	
+	/** Par dichotomie, trouver le nombre à gauche ou à droite correspondant
+	 *  @param searchQuery
+	 *  @param findLeftValue
+	 *  @return  -1 si aucun élèment ne correspondait
+	 */
+	private int findMatchingIndex(ByteBuffer searchQuery, boolean findLeftValue) { // <- findLeftValue <-  ou  -> findRightValue ->  toujours en valeur exacte (inclusive)
+		
+		int dicStartIndex = 0;
+		int dicStopIndex = sortedPositions.length - 1;
+		int intervalLength = dicStopIndex - dicStartIndex + 1;
+		int dicCurrentIndex = dicStartIndex + intervalLength / 2;
+		
+		while (intervalLength > 1) {
+			//Log.info("BBUGFIX currentIndex = " + dicCurrentIndex + " dicStartIndex=" + dicStartIndex + " dicStopIndex=" + dicStopIndex + " normal new value = " + ((dicStopIndex - dicStartIndex) / 2));
+			//mis à la fin dicCurrentIndex = dicStartIndex + intervalLength / 2;
+			//Log.info("BBIGFIX currentIndex = " + dicCurrentIndex + " dicStartIndex=" + dicStartIndex + " dicStopIndex=" + dicStopIndex + " ");
+			//Log.info("nouveau dicCurrentIndex = " + dicCurrentIndex + " et diff = " + (dicStopIndex - dicStartIndex));
+			
+			if (enableVerboseDichotomy) Log.info("intervalLength = " + intervalLength);
+			/*if (intervalLength == 2) {
+				Log.info(table.getLineAsReadableString(sortedPositions[dicStartIndex]));
+				Log.info(table.getLineAsReadableString(sortedPositions[dicStopIndex]));
+				Log.info(table.getLineAsReadableString(sortedPositions[dicCurrentIndex]));
+			}*/
+			
+			int realLinePosition = sortedPositions[dicCurrentIndex];
+			
+			int delta = compareLineValuesAndQuery(realLinePosition, searchQuery);
+			
+			if (enableVerboseDichotomy) {
+				Log.infoOnlySimple("");
+				String line = table.getLineAsReadableString(realLinePosition);
+				Log.info(line);
+				String humanVerbose = "";
+				if (delta < 0) humanVerbose = "-> Trop petit ->";
+				if (delta > 0) humanVerbose = "<- Trop grand <-";
+				if (delta == 0) humanVerbose = "- Parfait ! -";
+				Log.info(humanVerbose + "        delta = " + delta);
+			}
+			
+			if (delta > 0) { // valeur trop grande, je prends l'intervalle de gauche
+				dicStopIndex = dicCurrentIndex - 1;
+			} else if (delta < 0) { // valeur trop petite, je prends l'intervalle de droite
+				dicStartIndex = dicCurrentIndex + 1;
+				//Log.info("modif startIndex = " + dicStartIndex);
+			} else { // égalité
+				
+				//Log.info("EGALITE !! " + findLeftValue + " dicCurrentIndex = " + dicCurrentIndex);
+				//Log.info(table.getLineAsReadableString(realLinePosition));
+				
+				
+				if (findLeftValue) {
+					// Trouver la valeur de gauche
+					// Je ne m'arrête que lorsque la valeur de gauche est soit différente (plus petite) soit l'index -1
+					if (dicCurrentIndex == 0) break;
+					int leftRealLinePosition = sortedPositions[dicCurrentIndex - 1];
+					int leftDelta = compareLineValuesAndQuery(leftRealLinePosition, searchQuery);
+					
+					// Toujours la même valeur à gauche, mon index actuel est donc trop grand
+					if (leftDelta == 0) {
+						dicStopIndex = dicCurrentIndex - 1;
+					} else { // valeur différente à gauche, je suis donc à la position minimale
+						break;
+					}
+				} else {
+					// Trouver la valeur de droite
+					// Je ne m'arrête que lorsque la valeur de droite est soit différente (plus grande) soit l'index maximal
+					
+					if (dicCurrentIndex == (sortedPositions.length - 1)) break;
+					int rightRealLinePosition = sortedPositions[dicCurrentIndex + 1];
+					int rightDelta = compareLineValuesAndQuery(rightRealLinePosition, searchQuery);
+					
+					// Toujours la même valeur à droite, mon index actuel est donc trop petit
+					if (rightDelta == 0) {
+						dicStartIndex = dicCurrentIndex + 1;
+					} else { // valeur différente à droite, je suis donc à la position maximale
+						break;
+					}
+				}
+				//break;
+			}
+			
+			if (dicStopIndex >= sortedPositions.length) Log.error("dicStopIndex trop grand");
+			if (dicStopIndex < 0) Log.error("dicStopIndex trop petit");
+			if (dicStartIndex >= sortedPositions.length) Log.error("dicStartIndex trop grand");
+			if (dicStartIndex < 0) Log.error("dicStartIndex trop petit");
+			//Log.info("dic bornes OK currentIndex = " + dicCurrentIndex + " dicStartIndex=" + dicStartIndex + " dicStopIndex=" + dicStopIndex + " ");
+			
+			intervalLength = dicStopIndex - dicStartIndex + 1;
+			dicCurrentIndex = dicStartIndex + intervalLength / 2;
+		}
+		
+		//if (dicStopIndex != dicStartIndex) Log.error("ERREUR IndexMemDic.findMatchingIndex : dicStopIndex != dicStartIndex   --   " + dicStopIndex + " != " + dicStartIndex);
+		//dicCurrentIndex = dicStartIndex;
+		
+		
+		//Log.info("------> dicCurrentIndex = " + dicCurrentIndex + " posRéelle = " + sortedPositions[dicCurrentIndex]);
+		int delta = compareLineValuesAndQuery(sortedPositions[dicCurrentIndex], searchQuery);
+		
+		if (delta != 0) {
+			Log.error("delta != 0   " + delta + " dicCurrentIndex=" + dicCurrentIndex + " realLinePos=" + sortedPositions[dicCurrentIndex]);
+			return -1;
+		}
+		
+		return dicCurrentIndex;
+	}
+	
+	
+	
+	
+	
 	/** 
 	 *  @param linePosition
 	 *  @param seachQuery
@@ -209,7 +331,32 @@ public class IndexMemDic {
 	
 	public int[] findMatchingLinePositions(ByteBuffer searchQuery) {
 		searchQuery.rewind();
-		int[] intervalBounds = findMatchingIntervalBounds(searchQuery);
+		int[] intervalBounds;
+		if (enableDoubleDichotomyVerif) {
+			Timer t1 = new Timer("Temps pris 2 dichotomies (bornes)");
+			intervalBounds = findMatchingIntervalBounds(searchQuery);
+			t1.log();
+			Timer t2 = new Timer("Temps pris 1 dichotomie + grow");
+			int[] intervalBoundsVerif = findMatchingIntervalBoundsOldWay(searchQuery);
+			t2.log();
+			
+			if (Arrays.equals(intervalBounds, intervalBoundsVerif) == false) {
+				String debugInfo = "";
+				for (int i = 0; i < intervalBounds.length; i++) {
+					debugInfo += intervalBounds[i] + " ";
+				}
+				
+				debugInfo += " vs  ";
+				for (int i = 0; i < intervalBoundsVerif.length; i++) {
+					debugInfo += intervalBoundsVerif[i] + " ";
+				}
+				
+				Log.error("Mauvaises valeurs d'intervalles pour la dichotomie : " + debugInfo);
+			}
+		} else {
+			intervalBounds = findMatchingIntervalBounds(searchQuery);
+		}
+		
 		int startIndex = intervalBounds[0];
 		int stopIndex = intervalBounds[1];
 		if (startIndex == -1 || (stopIndex - startIndex <= 0))

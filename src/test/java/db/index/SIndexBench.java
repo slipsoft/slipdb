@@ -29,6 +29,14 @@ public class SIndexBench {
 	Table table;
 	
 	
+	private ByteBuffer getBufferedQuery() {
+		ByteBuffer searchQuery = ByteBuffer.allocate(100);
+		searchQuery.rewind();
+		searchQuery.put((byte)1);
+		searchQuery.putFloat(4);
+		return searchQuery;
+	}
+	
 	private void testIndexHash() {
 		System.gc();
 		
@@ -41,11 +49,9 @@ public class SIndexBench {
 		SIndexHashJava indHash = indexColumns(new int[] {3, 4}); // passenger_count et trip_distance
 		
 		// Il doit y avoir 54 résultats
-		ByteBuffer searchQuery = ByteBuffer.allocate(100);
+		
 		byte[] rightSizedQuery;
-		searchQuery.rewind();
-		searchQuery.put((byte)1);
-		searchQuery.putFloat(2);
+		ByteBuffer searchQuery = getBufferedQuery();
 		rightSizedQuery = new byte[searchQuery.position()];
 		System.arraycopy(searchQuery.array(), 0, rightSizedQuery, 0, searchQuery.position());
 		Timer timerQuery = new Timer("Temps pris testIndexHash QUERY ONLY");
@@ -83,10 +89,7 @@ public class SIndexBench {
 		ind3.sortAllv1();
 		
 		// Il doit y avoir 54 résultats
-		ByteBuffer searchQuery = ByteBuffer.allocate(100);
-		searchQuery.rewind();
-		searchQuery.put((byte)1); // 1, 21
-		searchQuery.putFloat(2);
+		ByteBuffer searchQuery = getBufferedQuery();
 		Timer timerQuery = new Timer("Temps pris testIndexMemDic QUERY ONLY");
 		int[] resultsPositionsArray = ind3.findMatchingLinePositions(searchQuery);
 		timerQuery.log();
