@@ -146,7 +146,7 @@ public class ColumnDataChunk implements Serializable {
 	
 	public byte[] getDataAsRawBytes(int indexInChunk) {
 		byte[] thisDataAsRawBytes = new byte[dataTypeSize];
-		dataAsBytes.position(indexInChunk);
+		dataAsBytes.position(indexInChunk * dataTypeSize);
 		dataAsBytes.get(thisDataAsRawBytes);
 		return thisDataAsRawBytes;
 	}
