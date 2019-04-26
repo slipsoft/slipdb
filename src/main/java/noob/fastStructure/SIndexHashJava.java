@@ -19,6 +19,7 @@ public class SIndexHashJava {
 	// Une ou plusieurs colonnes indexées ici
 	public final Column[] indexedColumns; 
 	private HashMap<SKeyHashJava, ArrayList<Integer>> storedLinesPosition;
+	public int myNumberToKeepRef;
 	/*
 	
 	*/
@@ -30,6 +31,7 @@ public class SIndexHashJava {
 	public SIndexHashJava(Column[] argIndexedColumns, int argTotalCapacity) {
 		indexedColumns = argIndexedColumns;
 		storedLinesPosition = new HashMap<>(argTotalCapacity);
+		myNumberToKeepRef = storedLinesPosition.size() + storedLinesPosition.hashCode();
 	}
 	
 	/** 

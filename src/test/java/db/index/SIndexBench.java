@@ -40,6 +40,8 @@ public class SIndexBench {
 		return searchQuery;
 	}
 	
+	SIndexHashJava theIndexHash;
+	
 	private void testIndexHash() {
 		System.gc();
 		
@@ -50,6 +52,7 @@ public class SIndexBench {
 		
 		Timer timer = new Timer("Temps pris testIndexHash");
 		SIndexHashJava indHash = indexColumns(new int[] {3, 4}); // passenger_count et trip_distance
+		theIndexHash = indHash;
 		
 		// Il doit y avoir 54 résultats
 		
@@ -78,6 +81,8 @@ public class SIndexBench {
 		
 	}
 	
+	IndexMemDic theIndexMemDic;
+	
 	private void testIndexMemDic() {
 		System.gc();
 		
@@ -90,6 +95,7 @@ public class SIndexBench {
 		
 		IndexMemDic ind3 = new IndexMemDic(table, new int[]{3, 4}); // passenger_count et trip_distance
 		ind3.sortAllv1();
+		theIndexMemDic = ind3;
 		
 		// Il doit y avoir 54 résultats
 		ByteBuffer searchQuery = getBufferedQuery();
@@ -116,30 +122,71 @@ public class SIndexBench {
 	@Test
 	public void mainTest() throws Exception {
 		
-		// Chargement des CSV
-		loadFirst();
-		
 		long memInit, memFinal;
-		String memUsedStr;
+		String memUsedStr1, memUsedStr2, memUsedStr3;
+		String info1, info2, info3;
+		Timer tim1, tim2, tim3;
+		
+		// Chargement des CSV
+		System.gc();
+		memInit = MemUsage.getMemUsage();
+		tim1 = new Timer("Temps pris loadFirst");
+		
+		loadFirst();
+		System.gc();
+		
+		memFinal = MemUsage.getMemUsage();
+		memUsedStr1 = MemUsage.formatMemUsage(memFinal - memInit);
+		info1 = "MEM MEM MEM Mémoire utilisée LoadFirst : " + memUsedStr1 + "  en  " + tim1.pretty();
+		
+		Log.error(info1);
+		System.gc();
+		
+		// ----------- Avec IndexMemDic ----------- 
+		System.gc();
+		memInit = MemUsage.getMemUsage();
+		tim2 = new Timer("Temps pris testIndexMemDic");
+		
+		testIndexMemDic();
+		System.gc();
+		
+		memFinal = MemUsage.getMemUsage();
+		memUsedStr2 = MemUsage.formatMemUsage(memFinal - memInit);
+		info2 = "MEM MEM MEM Mémoire utilisée IndexMemDic : " + memUsedStr2 + "  en  " + tim2.pretty();
+		
+		Log.error(info2);
+
+		if (theIndexMemDic.totalLength == 78) // garder la réf
+			Log.info("Hey !");
+		
+		
 		
 		
 		// ----------- Avec IndexHash ----------- 
 		System.gc();
 		memInit = MemUsage.getMemUsage();
-		testIndexHash();
-		memFinal = MemUsage.getMemUsage();
-		memUsedStr = MemUsage.formatMemUsage(memFinal - memInit);
-		System.gc();
-		Log.info("Mémoire utilisée IndexHash : " + memUsedStr);
+		tim3 = new Timer("Temps pris testIndexHash");
 		
-		// ----------- Avec IndexMemDic ----------- 
+		testIndexHash();
 		System.gc();
-		memInit = MemUsage.getMemUsage();
-		testIndexMemDic();
+		
 		memFinal = MemUsage.getMemUsage();
-		memUsedStr = MemUsage.formatMemUsage(memFinal - memInit);
-		System.gc();
-		Log.info("Mémoire utilisée IndexMemDic : " + memUsedStr);
+		memUsedStr3 = MemUsage.formatMemUsage(memFinal - memInit);
+		info3 = "MEM MEM MEM Mémoire utilisée IndexHash : " + memUsedStr3 + "  en  " + tim3.pretty();
+		
+		Log.error(info3);
+		
+		if (theIndexHash.myNumberToKeepRef == 7865241) { // get(new byte[] {0}) == null
+			Log.info("Houyy !");
+		}
+		
+		Log.info("");
+		Log.error(info1);
+		Log.error(info2);
+		Log.error(info3);
+		
+		
+		
 		
 		
 	}
@@ -250,11 +297,11 @@ public class SIndexBench {
 		MemUsage.printMemUsage("Mem usage  début - ");
 		SCsvLoader csvLoader = new SCsvLoader(table, new CsvParser());
 		
-		int mounthFinalCount = 12;
+		int mounthFinalCount = 1;
 		for (int iCsv = 1; iCsv <= mounthFinalCount; iCsv++) {
 			String colNumber = String.format("%02d" , iCsv);
-			//String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
-			String csvPath = "F:/csv/yellow_tripdata_2015-" + colNumber + ".csv"; // E:/L3 DANT disque E
+			String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
+			//String csvPath = "F:/csv/yellow_tripdata_2015-" + colNumber + ".csv"; // E:/L3 DANT disque E
 			//String csvPath = "F:/csv/SMALL_1_000_000_yellow_tripdata_2015-04.csv";
 			Log.info("Parsing de csvName = " + csvPath);
 			parseThisCsv(table, csvLoader, csvPath);
