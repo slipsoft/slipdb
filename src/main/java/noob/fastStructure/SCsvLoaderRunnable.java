@@ -38,6 +38,7 @@ public class SCsvLoaderRunnable implements Runnable {
 	private int fieldsNumberInLine;
 	private Object loaderWriteInMemoryLock;
 	private Object criticalLock = new Object();
+	private int parsedLinesCount = 0;
 	
 	private Thread runningWithThread = null;
 	
@@ -372,6 +373,9 @@ public class SCsvLoaderRunnable implements Runnable {
 			//Log.info(lineAsStr);
 			
 			localReadEntryNb++;
+			/*if (localReadEntryNb %  SCsvLoader.updateTotalParsedLinesEvery == 0 && localReadEntryNb != 0) {
+				
+			}*/
 			
 			/*
 			if (doRuntimeIndexing) {
@@ -399,6 +403,8 @@ public class SCsvLoaderRunnable implements Runnable {
 			
 			//}// catch (IOException e)             { if (enableErrorLog) Log.error(e); }
 		}
+		
+		SCsvLoader.totalParsedLines.addAndGet(localReadEntryNb);
 		
 		//bBuff.clear();
 		//System.gc();

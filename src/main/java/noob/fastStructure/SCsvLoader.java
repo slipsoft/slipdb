@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.dant.utils.Log;
@@ -28,11 +29,14 @@ public class SCsvLoader {
 	private final int threadCount = 6;//+8;
 	private SCsvLoaderRunnable[] runnableArray;// = new SLoaderThread[threadCount];
 	
+	public static AtomicInteger totalParsedLines = new AtomicInteger(0); // Mis à jour des threads
+	//public static final int updateTotalParsedLinesEvery = 1000; // à chaque fois que X lignes sont parsées, update de totalParsedLines.
+	
 	private Table currentTable;
 	//private int lineByteSize; // number of bytes used to store information
 	private int totalEntryCount = 0;
 	
-	static public AtomicLong totalReadEntryNb = new AtomicLong(0);
+	static public AtomicInteger totalReadEntryNb = new AtomicInteger(0); // Mis à jour de cette classe
 	static public long updateTotalReadEntryNbEach = 500_000;
 	protected long addToTotalReadEntryCountBuffered = 0;
 	protected int showInfoEveryParsedLines = 100_000; // mettre -1 pour désactiver l'affichage
@@ -41,6 +45,7 @@ public class SCsvLoader {
 	public static AtomicLong debugNumberOfEntriesWritten = new AtomicLong(0);
 	private Parser loaderParser;
 	private Object loaderWriteInMemoryLock = new Object();
+	
 	
 	IntBuffer buff;
 	
@@ -59,9 +64,13 @@ public class SCsvLoader {
 		
 	}
 	
-	
+
 	public final void parse(InputStream input, boolean appendAtTheEndOfSave) {
-		parse(input, -1, appendAtTheEndOfSave);
+		parse(input, -1, appendAtTheEndOfSave, null, -1);
+	}
+	
+	public final void parse(InputStream input, boolean appendAtTheEndOfSave, Timer limitParsingTimeTimer, int maxParsingTimeSec) {
+		parse(input, -1, appendAtTheEndOfSave, limitParsingTimeTimer, maxParsingTimeSec);
 	}
 	
 	/** Bloquant jusqu'à ce qu'un nouveau thread prêt soit trouvé
@@ -99,7 +108,7 @@ public class SCsvLoader {
 	 * @param input
 	 * @param limit
 	 */
-	public final void parse(InputStream input, int limit, boolean appendAtTheEndOfSave) {
+	public final void parse(InputStream input, int limit, boolean appendAtTheEndOfSave, Timer limitParsingTimeTimer, int maxParsingTimeSec) {
 		Log.info("PARSE : memusage init = ");
 		//System.gc(); pour ne pas ralentir inutilement
 		MemUsage.printMemUsage();
@@ -109,6 +118,8 @@ public class SCsvLoader {
 		boolean needNewThread = false;
 		String entryAsString;
 		
+		
+		
 		SCsvLoaderRunnable currentThreadCollectingData = getReadyThread();
 		Timer timeTookTimer = new Timer("Temps écoulé");
 		
@@ -116,10 +127,8 @@ public class SCsvLoader {
 				BufferedReader bRead = new BufferedReader(new InputStreamReader(input));
 				) {
 			
-			
 			//while ((entryString = processReader(bRead)) != null && totalEntryCount != limit) {
 			while (localReadEntryNb != limit) {
-				
 				
 				// Lecture d'une nouvelle ligne / entrée
 				entryAsString = bRead.readLine(); // "entrée", ligne lue
@@ -127,20 +136,31 @@ public class SCsvLoader {
 				//Log.infoOnly(entryAsString);
 				
 				localReadEntryNb++;
+				localReadEntryNbToAddToTotalCount++;
 				// Affichage d'une entrée toutes les showInfoEveryParsedLines entrées lues
 				if (showInfoEveryParsedLines != -1 && localReadEntryNb % showInfoEveryParsedLines == 0) {
+					// localReadEntryNb
+					Log.info("Loader : nombre de résultats (total) lus = " + localReadEntryNb + "   temps écoulé = " + timeTookTimer.pretty() + "activeThreadNb = " + SCsvLoaderRunnable.activeThreadNb.get());
 					
-					Log.info("Loader : nombre de résultats (local) lus = " + localReadEntryNb + "   temps écoulé = " + timeTookTimer.pretty() + "activeThreadNb = " + SCsvLoaderRunnable.activeThreadNb.get());
+					totalReadEntryNb.addAndGet(localReadEntryNbToAddToTotalCount);
+					localReadEntryNbToAddToTotalCount = 0;
+					
+					if (maxParsingTimeSec != -1)
+					if (limitParsingTimeTimer.getseconds() >= maxParsingTimeSec) {
+						Log.error("PARSING STOPPE - TEMPS ECOULE : " + limitParsingTimeTimer.pretty());
+						break; // arrêt des lectures, le temps est dépassé, va directement au threads.join();
+					}
+					
 					//MemUsage.printMemUsage();
-					if (localReadEntryNb == 10_000_000) {
+					/*if (localReadEntryNb == 10_000_000) {
 						Log.error("10_000_000 résultats - GC");
 						MemUsage.printMemUsage();
 						System.gc();
 						MemUsage.printMemUsage();
-					}
+					}*/
+					/// Un débug -> En fait, c'était pas unbug mais le disque qui était limitant ^^'
 					if (SCsvLoaderRunnable.activeThreadNb.get() <= 1 /*&& localReadEntryNb > 1_000_000*/) {
 						//debugShowRunnablesState();
-						
 					}
 					
 				}
@@ -156,12 +176,15 @@ public class SCsvLoader {
 				}
 				
 				if (localReadEntryNbToAddToTotalCount >= updateTotalReadEntryNbEach) {
-					totalReadEntryNb.addAndGet(localReadEntryNbToAddToTotalCount);
-					localReadEntryNbToAddToTotalCount = 0;
+					
+					
+					
 				}
 				
 				
 			}
+			totalParsedLines.addAndGet(localReadEntryNbToAddToTotalCount);
+			localReadEntryNbToAddToTotalCount = 0; // <- ne sera plus utilisé
 			debugNumberOfEntriesWritten.addAndGet(localReadEntryNb);
 		}/* catch (FileNotFoundException e) {
 			Log.error(e);
@@ -184,7 +207,7 @@ public class SCsvLoader {
 		}*/
 		
 		Log.info("Parsing terminé !! temps écoulé = " + timeTookTimer.pretty());
-		Log.info("PARSE : Nombre de lignes = " + localReadEntryNb);
+		Log.info("PARSE : Nombre de lignes (local) = " + localReadEntryNb);
 		/*Log.info("PARSE : FINAL USAGE");
 		System.gc();
 		MemUsage.printMemUsage();*/

@@ -25,8 +25,11 @@ import noob.fastStructure.SIndexHashJava;
 
 public class SIndexBench {
 
-	private int limitResultNb = 20_000;
+	//private int limitResultNb = 20_000;
 	Table table;
+	
+	private int parsingTimeLimitSec = 8;
+	private Timer limitParsingTimeTimer;
 	
 	
 	/** Préparation de la requête commune aux index (via un ByteBuffer)
@@ -297,6 +300,8 @@ public class SIndexBench {
 		MemUsage.printMemUsage("Mem usage  début - ");
 		SCsvLoader csvLoader = new SCsvLoader(table, new CsvParser());
 		
+		limitParsingTimeTimer = new Timer("");
+		
 		int mounthFinalCount = 1;
 		for (int iCsv = 1; iCsv <= mounthFinalCount; iCsv++) {
 			String colNumber = String.format("%02d" , iCsv);
@@ -316,7 +321,7 @@ public class SIndexBench {
 	
 	private void parseThisCsv(Table table, SCsvLoader csvLoader, String csvPath) throws IOException {
 		InputStream csvStream = new FileInputStream(csvPath);
-		csvLoader.parse(csvStream, true);
+		csvLoader.parse(csvStream, true, limitParsingTimeTimer, parsingTimeLimitSec);
 		csvStream.close();
 	}
 }
