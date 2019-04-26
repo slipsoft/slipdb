@@ -109,6 +109,11 @@ public class SCsvLoader {
 	 * @param limit
 	 */
 	public final void parse(InputStream input, int limit, boolean appendAtTheEndOfSave, Timer limitParsingTimeTimer, int maxParsingTimeSec) {
+		if (limitParsingTimeTimer.getseconds() >= maxParsingTimeSec) {
+			Log.warning("PARSING IMPOSSIBLE : TEMPS ECOULE " + limitParsingTimeTimer.pretty());
+			return; // arrêt des lectures, le temps est dépassé, va directement au threads.join();
+		}
+		
 		Log.info("PARSE : memusage init = ");
 		//System.gc(); pour ne pas ralentir inutilement
 		MemUsage.printMemUsage();

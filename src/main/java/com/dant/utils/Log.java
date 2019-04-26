@@ -135,6 +135,15 @@ public class Log {
 	 * Log & Print a warning message from an exception.
 	 *
 	 * @param e - the error to log
+	 */
+	public static void warning(String warningMessage) {
+		logWarningMessage(warningMessage, "", 3);
+	}
+
+	/**
+	 * Log & Print a warning message from an exception.
+	 *
+	 * @param e - the error to log
 	 * @param prefix - prefix of the error
 	 */
 	public static void warning(Exception e, String prefix) {
