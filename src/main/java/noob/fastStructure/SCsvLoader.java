@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -13,7 +11,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.dant.utils.Log;
 import com.dant.utils.MemUsage;
 import com.dant.utils.Timer;
-import com.dant.utils.Utils;
 
 import db.data.load.Parser;
 import db.structure.Column;
@@ -32,11 +29,12 @@ public class SCsvLoader {
 	public static AtomicInteger totalParsedLines = new AtomicInteger(0); // Mis à jour des threads
 	//public static final int updateTotalParsedLinesEvery = 1000; // à chaque fois que X lignes sont parsées, update de totalParsedLines.
 	
-	private Table currentTable;
+	//private Table currentTable;
 	//private int lineByteSize; // number of bytes used to store information
-	private int totalEntryCount = 0;
+	//private int totalEntryCount = 0;
 	
 	static public AtomicInteger totalReadEntryNb = new AtomicInteger(0); // Mis à jour de cette classe
+	static public int totalReadEntryNbNoThreadSafe = 0; // parsing non thread-safe
 	static public long updateTotalReadEntryNbEach = 500_000;
 	protected long addToTotalReadEntryCountBuffered = 0;
 	protected int showInfoEveryParsedLines = 100_000; // mettre -1 pour désactiver l'affichage
@@ -45,10 +43,6 @@ public class SCsvLoader {
 	public static AtomicLong debugNumberOfEntriesWritten = new AtomicLong(0);
 	private Parser loaderParser;
 	private Object loaderWriteInMemoryLock = new Object();
-	
-	
-	IntBuffer buff;
-	
 	
 	public SCsvLoader(Table argTable, Parser argParser) {
 		
@@ -59,12 +53,12 @@ public class SCsvLoader {
 			runnableArray[iThread] = new SCsvLoaderRunnable(argTable, loaderParser, loaderWriteInMemoryLock);
 		}
 		
-		currentTable = argTable;
+		//currentTable = argTable;
 		//lineByteSize = currentTable.getLineSize();
 		
 	}
 	
-
+	
 	public final void parse(InputStream input, boolean appendAtTheEndOfSave) {
 		parse(input, -1, appendAtTheEndOfSave, null, -1);
 	}
@@ -101,6 +95,8 @@ public class SCsvLoader {
 		} while (foundReadyThread == null);
 		return foundReadyThread;
 	}
+
+	private int debugCount = 0;
 	
 	/**
 	 * Parse an input stream into an output stream according to a schema with a
@@ -109,6 +105,7 @@ public class SCsvLoader {
 	 * @param limit
 	 */
 	public final void parse(InputStream input, int limit, boolean appendAtTheEndOfSave, Timer limitParsingTimeTimer, int maxParsingTimeSec) {
+		if (maxParsingTimeSec != -1)
 		if (limitParsingTimeTimer.getseconds() >= maxParsingTimeSec) {
 			Log.warning("PARSING IMPOSSIBLE : TEMPS ECOULE " + limitParsingTimeTimer.pretty());
 			return; // arrêt des lectures, le temps est dépassé, va directement au threads.join();
@@ -138,14 +135,21 @@ public class SCsvLoader {
 				// Lecture d'une nouvelle ligne / entrée
 				entryAsString = bRead.readLine(); // "entrée", ligne lue
 				if (entryAsString == null) break; // fin de la lecture
+				/* Pour juste compter rapidement les lignes :
+				debugCount++;
+				if (debugCount % 1_00_000 == 0) {
+					Log.error("debugCount = " + debugCount);
+				}
+				if (true) continue;*/
 				//Log.infoOnly(entryAsString);
 				
 				localReadEntryNb++;
 				localReadEntryNbToAddToTotalCount++;
+				totalReadEntryNbNoThreadSafe++;
 				// Affichage d'une entrée toutes les showInfoEveryParsedLines entrées lues
-				if (showInfoEveryParsedLines != -1 && localReadEntryNb % showInfoEveryParsedLines == 0) {
+				if (showInfoEveryParsedLines != -1 && (totalReadEntryNbNoThreadSafe % showInfoEveryParsedLines == 0)) { // localReadEntryNb % showInfoEveryParsedLines == 0
 					// localReadEntryNb
-					Log.info("Loader : nombre de résultats (total) lus = " + localReadEntryNb + "   temps écoulé = " + timeTookTimer.pretty() + "activeThreadNb = " + SCsvLoaderRunnable.activeThreadNb.get());
+					Log.info("Loader : nombre de résultats (total) lus = " + totalReadEntryNbNoThreadSafe + "   temps écoulé = " + timeTookTimer.pretty() + "activeThreadNb = " + SCsvLoaderRunnable.activeThreadNb.get());
 					
 					totalReadEntryNb.addAndGet(localReadEntryNbToAddToTotalCount);
 					localReadEntryNbToAddToTotalCount = 0;
@@ -189,14 +193,16 @@ public class SCsvLoader {
 				
 			}
 			totalParsedLines.addAndGet(localReadEntryNbToAddToTotalCount);
+			totalReadEntryNb.addAndGet(localReadEntryNbToAddToTotalCount);
 			localReadEntryNbToAddToTotalCount = 0; // <- ne sera plus utilisé
+			
 			debugNumberOfEntriesWritten.addAndGet(localReadEntryNb);
 		}/* catch (FileNotFoundException e) {
 			Log.error(e);
 		}*/ catch (IOException e) {
 			Log.error(e);
 		}
-		
+		Log.error("debugCount = " + debugCount);
 		currentThreadCollectingData.startIfNeeded(); // exécuter le dernier thread si besoin
 		
 		
@@ -204,9 +210,8 @@ public class SCsvLoader {
 			runnableArray[iThread].waitTerminaison();
 		}
 		
-		List<Column> columnsList = currentTable.getColumns();
-		
-		/*for (int iColumn = 0; iColumn < columnsList.size(); iColumn++) {
+		/*List<Column> columnsList = currentTable.getColumns();
+		for (int iColumn = 0; iColumn < columnsList.size(); iColumn++) {
 			Column col = columnsList.get(iColumn);
 			col.clearAllMemoryData();
 		}*/

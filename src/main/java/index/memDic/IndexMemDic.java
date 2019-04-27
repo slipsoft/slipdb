@@ -9,11 +9,10 @@ import com.dant.utils.Timer;
 
 import db.structure.Column;
 import db.structure.Table;
-import noob.fastStructure.SCustomSort;
 
 /**
  * 
- *
+ * 
  */
 public class IndexMemDic {
 	
@@ -380,5 +379,62 @@ public class IndexMemDic {
 		
 		return originalLinePositionArray;
 	}
+	
+	/** Faire un group-by à partir des résultats passés en entrée.
+	 *  Le order 
+	 * 	@param positionsArray la liste des positions pour lesquelles faire un order by
+	 * 	@param inTable La table dont sont issues les positions stockées dans positionsArray
+	 *  @return 
+	 */
+	public static void orderByColumnsNoCopy(int[] positionsArray, Table inTable) {
+		if (positionsArray == null) return;
+		if (positionsArray.length == 0) return;
+		/*
+		if (positionsArray == null) return positionsArray;
+		if (positionsArray.length == 0) return positionsArray;*/
+		
+		
+		MemUsage.printMemUsage();
+		Timer t1, t2, t3, t4;
+		
+		t1 = new Timer("IndexMemDic.sortAll - tout :");
+		t2 = new Timer("IndexMemDic.sortAll - création objets :");
+
+		MemUsage.printMemUsage();
+		IndexMemDicTemporaryItem[] tempSortArray = new IndexMemDicTemporaryItem[positionsArray.length];
+		for (int i = 0; i < positionsArray.length; i++) {
+			tempSortArray[i] = new IndexMemDicTemporaryItem(i);
+		}
+		MemUsage.printMemUsage();
+		if (enableVerboseSort) t2.log();
+		
+		t3 = new Timer("IndexMemDic.sortAll - sort :");
+		MemUsage.printMemUsage();
+		//Arrays.sort(tempSortArray);
+		//SCustomSort.sort(tempSortArray);
+		Arrays.parallelSort(tempSortArray); // <- faible gain, environ 30% plus rapide, mais prend beaucoup plus de mémoire
+		if (enableVerboseSort) t3.log();
+		MemUsage.printMemUsage();
+		
+
+		t4 = new Timer("IndexMemDic.sortAll - réagencement positions :");
+		for (int i = 0; i < positionsArray.length; i++) {
+			positionsArray[i] = tempSortArray[i].originalLinePosition;
+			//String displayValues = table.getLineAsReadableString(sortedPositions[i]);
+			//Log.info(displayValues);
+		}
+		MemUsage.printMemUsage();
+		if (enableVerboseSort) t4.log();
+		for (int i = 0; i < positionsArray.length; i++) {
+			tempSortArray[i] = null;
+		}
+		MemUsage.printMemUsage();
+		tempSortArray = null;
+		if (enableVerboseSort) t1.log();
+		
+	}
+	
+	
+	
 	
 }

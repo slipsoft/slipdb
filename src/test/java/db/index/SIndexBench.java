@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +29,7 @@ public class SIndexBench {
 	//private int limitResultNb = 20_000;
 	Table table;
 	
-	private int parsingTimeLimitSec = 8;
+	private int parsingTimeLimitSec = -1;
 	private Timer limitParsingTimeTimer;
 	
 	
@@ -122,6 +123,61 @@ public class SIndexBench {
 		
 	}
 	
+		// ----------- Avec IndexMemDic, générique ----------- 
+	private IndexMemDic createIndexAndMakeQuery(int[] indexedColumns, ByteBuffer searchQuery) {
+		
+		IndexMemDic localIndexMemDic = new IndexMemDic(table, indexedColumns);
+		localIndexMemDic.sortAllv1();
+		
+		String indexedColumnsStr = "";
+		for (int iCol = 0; iCol < indexedColumns.length; iCol++) {
+			indexedColumnsStr += Integer.toString(indexedColumns[iCol]);
+			if (iCol != indexedColumns.length - 1) {
+				indexedColumnsStr += " ";
+			}
+		}
+		
+		// Il doit y avoir 54 résultats
+		Timer timerQuery = new Timer("IndexMemDic[" + indexedColumnsStr + "] QUERY ONLY");
+		int[] resultsPositionsArray = localIndexMemDic.findMatchingLinePositions(searchQuery);
+		timerQuery.log();
+		
+		Log.info("resultsPositionsArray.length = " + resultsPositionsArray.length);
+		
+		return localIndexMemDic;
+	}
+	
+	private String doBenchmarkIndexMemDic(int[] indexedColumns, ByteBuffer query) {
+		// ----------- Avec IndexMemDic ----------- 
+		
+		String indexedColumnsStr = "";
+		for (int iCol = 0; iCol < indexedColumns.length; iCol++) {
+			indexedColumnsStr += Integer.toString(indexedColumns[iCol]);
+			if (iCol != indexedColumns.length - 1) {
+				indexedColumnsStr += " ";
+			}
+		}
+		
+		System.gc();
+		long memInit, memFinal;
+		memInit = MemUsage.getMemUsage();
+		Timer timer = new Timer("IndexMemDic[" + indexedColumnsStr + "] TOUT ");
+		
+		IndexMemDic indexDic = createIndexAndMakeQuery(indexedColumns, query);
+		System.gc();
+		
+		memFinal = MemUsage.getMemUsage();
+		String memUsedStr = MemUsage.formatMemUsage(memFinal - memInit);
+		String result ="IndexMemDic[" + indexedColumnsStr + "] MEM " + memUsedStr + "  en  " + timer.pretty();
+		
+		
+		if (indexDic.totalLength == 78) // garder la réf
+			Log.info("Hey !");
+		
+		return result;
+		
+	}
+	
 	@Test
 	public void mainTest() throws Exception {
 		
@@ -183,10 +239,51 @@ public class SIndexBench {
 			Log.info("Houyy !");
 		}
 		
-		Log.info("");
-		Log.error(info1);
+		
+		ArrayList<String> infoMessagesList = new ArrayList<String>();
+		
+		// Bench de divers index
+		/*
+		infoMessagesList.add(doBenchmarkIndexMemDic(new int[] {}));
+		
+		
+		ByteBuffer searchQuery;
+		searchQuery = ByteBuffer.allocate(100); searchQuery.rewind();
+		searchQuery.put((byte)1);
+		searchQuery.putFloat(4);
+		
+		
+		System.gc();
+		memInit = MemUsage.getMemUsage();
+		tim2 = new Timer("Temps pris testIndexMemDic");
+		
+		testIndexMemDic();
+		System.gc();
+		
+		memFinal = MemUsage.getMemUsage();
+		memUsedStr2 = MemUsage.formatMemUsage(memFinal - memInit);
+		info2 = "MEM MEM MEM Mémoire utilisée IndexMemDic : " + memUsedStr2 + "  en  " + tim2.pretty();
+		
 		Log.error(info2);
-		Log.error(info3);
+
+		if (theIndexMemDic.totalLength == 78) // garder la réf
+			Log.info("Hey !");
+		*/
+		
+		
+		
+		
+		
+		
+		
+		Log.info("");
+		Log.warning(info1);
+		Log.warning(info2);
+		Log.warning(info3);
+		
+		for (int iMsg = 0; iMsg < infoMessagesList.size(); iMsg++) {
+			Log.warning(infoMessagesList.get(iMsg));
+		}
 		
 		
 		
@@ -305,8 +402,8 @@ public class SIndexBench {
 		int mounthFinalCount = 1;
 		for (int iCsv = 1; iCsv <= mounthFinalCount; iCsv++) {
 			String colNumber = String.format("%02d" , iCsv);
-			String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
-			//String csvPath = "F:/csv/yellow_tripdata_2015-" + colNumber + ".csv"; // E:/L3 DANT disque E
+			//String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
+			String csvPath = "F:/csv/yellow_tripdata_2015-" + colNumber + ".csv"; // E:/L3 DANT disque E
 			//String csvPath = "F:/csv/SMALL_1_000_000_yellow_tripdata_2015-04.csv";
 			Log.info("Parsing de csvName = " + csvPath);
 			parseThisCsv(table, csvLoader, csvPath);
@@ -315,6 +412,7 @@ public class SIndexBench {
 		//System.gc();
 		//MemUsage.printMemUsage("Mem usage  fin - ");
 		parseTimer.log();
+		
 		
 		
 	}
