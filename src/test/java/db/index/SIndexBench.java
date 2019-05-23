@@ -166,8 +166,10 @@ public class SIndexBench {
 		int mounthFinalCount = 1;
 		for (int iCsv = 1; iCsv <= mounthFinalCount; iCsv++) {
 			String colNumber = String.format("%02d" , iCsv);
-			//String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
-			String csvPath = "F:/csv/yellow_tripdata_2015-" + colNumber + ".csv"; // E:/L3 DANT disque E
+			String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
+			//String csvPath = "F:/csv/yellow_tripdata_2015-" + colNumber + ".csv"; // E:/L3 DANT disque E
+			//String csvPath = "C:/Users/admin/Desktop/L3 DANT Jussieu/Web_Olivier/yellow_tripdata_2015-" + colNumber + ".csv"; // E:/L3 DANT disque E
+			
 			//String csvPath = "F:/csv/SMALL_1_000_000_yellow_tripdata_2015-04.csv";
 			Log.info("Parsing de csvName = " + csvPath);
 			parseThisCsv(table, csvLoader, csvPath);
@@ -232,10 +234,25 @@ public class SIndexBench {
 		ByteBuffer searchQuery = getBufferedQuery();
 		rightSizedQuery = new byte[searchQuery.position()];
 		System.arraycopy(searchQuery.array(), 0, rightSizedQuery, 0, searchQuery.position());
-		Timer timerQuery = new Timer("Temps pris testIndexHash QUERY ONLY");
-		int[] resultsPositionsArray = indHash.get(rightSizedQuery);
+		int[] resultsPositionsArray;
+		Timer timerQuery;
+		
+		timerQuery = new Timer("Temps pris testIndexHash QUERY ONLY");
+		resultsPositionsArray = indHash.get(rightSizedQuery);
 		timer.log();
 		timerQuery.log();
+		
+		double sumTotal = 0;
+		int iteNumber = 40;
+		for (int i = 1; i <= iteNumber; i++) {
+			timerQuery = new Timer("Temps pris testIndexHash QUERY ONLY");
+			resultsPositionsArray = indHash.get(rightSizedQuery);
+			timerQuery.log();
+			sumTotal += timerQuery.getns();
+		}
+		double medValue = sumTotal / (iteNumber * 1_000_000) ;
+		Log.warning("Temps moyen utilisé (ms) : " + medValue + "ms");
+		
 		
 		Log.info("resultsPositionsArray.length = " + resultsPositionsArray.length);
 		
@@ -276,6 +293,12 @@ public class SIndexBench {
 		int[] resultsPositionsArray = ind3.findMatchingLinePositions(searchQuery); // les positions des lignes de résultat, réelles
 		timerQuery.log();
 		timer.log();
+		
+		for (int i = 1; i < 40; i++) {
+			timerQuery = new Timer("Temps pris testIndexMemDic QUERY ONLY");
+			resultsPositionsArray = ind3.findMatchingLinePositions(searchQuery); // les positions des lignes de résultat, réelles
+			timerQuery.log();
+		}
 		
 		Log.info("resultsPositionsArray.length = " + resultsPositionsArray.length);
 		

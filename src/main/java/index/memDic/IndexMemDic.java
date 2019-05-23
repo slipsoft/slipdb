@@ -46,6 +46,9 @@ public class IndexMemDic {
 		sortedPositions[sortedByValueIndex] = lineOriginalPosition;
 	}*/
 	
+	/** Trie les lignes en fonction des valeurs indexées
+	 *  Java gère magnifiquement bien le tri, même pour 100 millions d'éléments ! (c'est assez incroyable ^^)
+	 */
 	public void sortAllv1() {
 		
 		MemUsage.printMemUsage();
