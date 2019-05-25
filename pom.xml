@@ -136,6 +136,19 @@
 				<artifactId>coveralls-maven-plugin</artifactId>
 				<version>4.3.0</version>
 			</plugin>
+			<plugin>
+				<groupId>com.diffplug.spotless</groupId>
+				<artifactId>spotless-maven-plugin</artifactId>
+				<version>1.23.0</version>
+				<configuration>
+					<java>
+					<eclipse>
+						<file>${basedir}/formatter.xml</file>
+						<version>4.7.1</version>
+					</eclipse>
+					</java>
+				</configuration>
+			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
