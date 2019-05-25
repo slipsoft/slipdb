@@ -1,7 +1,7 @@
 package zArchive.sj.recherches;
 
 
-/***
+/**
  *  Filtre de requête sur table
  *
  */

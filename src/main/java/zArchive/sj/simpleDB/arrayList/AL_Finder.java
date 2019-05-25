@@ -8,7 +8,7 @@ import java.util.ArrayList;
  */
 public class AL_Finder {
 	
-	/**
+	/*
 	 * Critères de recherche :
 	 * Nom Table + Comparaison + Valeur
 	 * 

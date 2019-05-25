@@ -139,8 +139,7 @@ public class Loader {
 	private static Object writeInMemoryLock = new Object();
 	
 	/**
-	 * 
-	/** Ecriture d'une entrée (ligne, donnée complète) sur un DataOutputStream (nécessaire pour avoir le fonction .size())
+	 * Ecriture d'une entrée (ligne, donnée complète) sur un DataOutputStream (nécessaire pour avoir le fonction .size())
 	 * @param entryString
 	 * @param writeJob
 	 * @throws IncorrectEntryException

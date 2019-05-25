@@ -24,7 +24,7 @@ import db.structure.Column;
 import db.structure.Table;
 import zArchive.sj.simpleDB.treeIndexing.SIndexingTreeType;
 
-/**
+/*
  * Point très IMPORTANT :
  * Cette structure n'a pas besoin que la collection retournée par un TreeMap soit classée,
  * contrairement à IndexTreeDic !
@@ -44,7 +44,7 @@ import zArchive.sj.simpleDB.treeIndexing.SIndexingTreeType;
  *	
  */
 
-/** 
+/*
  * IndexTreeV3 est devenu -> IndexTreeCeption
  * IndexTreeV4 n'existe pas, j'ai repris en partie le code de la V3 pour faire l'IndexTreeDic.
  * 
@@ -327,13 +327,13 @@ public class IndexTreeCeption {
 	
 	// IntegerArrayList correpond à la liste des binIndex ayant la même valeur pour cet IndexingTree (donc pour la colonne indexée)
 	
-	/** Trouver le tableau d'index correspondant à une valeur
-	 *  @param associatedValue
-	 *  @return
-	 
-	public IntegerArrayList findBinIndexArrayInMemoryFromValue(Object associatedValue) {
-		return inMemoryObjectTreeMap.get(associatedValue); // fait une comparaison d'objet, et non une comparaison de référence : if (associatedValue.equals(valeurDansArbre)) [...]
-	}*/
+	// /** Trouver le tableau d'index correspondant à une valeur
+	//  *  @param associatedValue
+	//  *  @return
+	//  */
+	// public IntegerArrayList findBinIndexArrayInMemoryFromValue(Object associatedValue) {
+	// 	return inMemoryObjectTreeMap.get(associatedValue); // fait une comparaison d'objet, et non une comparaison de référence : if (associatedValue.equals(valeurDansArbre)) [...]
+	// }
 	
 	
 	/** Only gets the matching binIndexes from memory, not from stored data on disk
@@ -546,7 +546,7 @@ public class IndexTreeCeption {
 		debugDiskNumberOfExactValues = 0;
 		
 		// Lecture du dernier float écrit dans le disque, i.e. de la position de la table de routage de l'arbre principal
-		/**
+		/*
 			Je vais à la bonne position, puis je lis la table de routage de l'arbre pour trouver tous les arbres qui correspondent
 			jusqu'aux valeurs finales.
 			1) Je lis la table de l'arbre root, je vais aux arbres dont les valeurs sont compatibles

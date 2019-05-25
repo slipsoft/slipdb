@@ -20,7 +20,7 @@ import db.structure.Table;
 public class AL_CSVParser {
 	
 	
-	/** Pour le test de l'indexation, ici, faire l'indexation
+	/* Pour le test de l'indexation, ici, faire l'indexation
 	 *  des colonnes qui doivent être indexées via SIndexingTree
 	 */
 	

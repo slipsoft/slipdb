@@ -1,7 +1,7 @@
 /**
  * 
  */
-/**
+/*
  * J'écris cette partie de Français, parce que si je dois traduire en plus, c'est galère xD
  * 
  * Indexer des colonnes via un IndexTree (TreeMap),
@@ -21,7 +21,7 @@
  */
 
 
-/**
+/*
 	2019 - 03 - 22
 	
 	L'IndexTreeDic est fonctionnel, et il est possible de charger autant de donnée qu'on veut.
@@ -106,11 +106,11 @@
 
 
 
-/**
+/*
 	-------- Recherches pour la V4 de TreeIndex --------
 */
 
-/**
+/*
 	Reste à faire :
 	
 	-> Un index doit être composé de plusieurs sous-index mis sur le disque
@@ -125,12 +125,12 @@
 
 
 
-/**
+/*
 	-------- Recherches pour la V3 de IndexTree --------
 */
 //IMPORTANT : les binIndex doivent être des long et non plus des int, comme les fichiers vont être énormes.
 //IntegerArrayList : mettre un TreeMap des valeurs fines, plus optimisé qu'un ArrayList, en plus, c'est facile de faire un merge de collections lors d'une recherche
-/*****
+/*
 Sauvegarde d'un indexTreeV3 sur le disque (et mise en lecture seule, donc) :
 	-> Il faut avoir une organisation très structurée, savoir très rapidement où retrouver les arbres contenant la donnée fine.
 	1) Ecriture de tous les arbres contenant la donnée fine, sur le disque
@@ -156,7 +156,7 @@ Recherche d'une valeur, depuis le disque :
 
 
 
-/** Plus ancien :
+/* Plus ancien :
 Il serait possible de faire cet arbre d'une manière statique, mais cela nécessiterait une énorme allocation mémoire ?
 -> ArrayList des premières valeurs
 Idée : diviser la valeur par 1000, trouver la liste qui correspond (au max, 10 vérif à faire)
@@ -176,7 +176,7 @@ Plusieurs types d'arbres possibles :
 		regarde si 
 */
 
-/**
+/*
  *  --- V1 ---
  * Infos complémentaires :
  * 

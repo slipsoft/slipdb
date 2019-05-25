@@ -1,6 +1,6 @@
 package zArchive.sj.recherches;
 
-/**
+/*
 	(But selon Sylvain)
 	Moteur d'index distribué – but pour le 2019 – 03 – 29 :
 	

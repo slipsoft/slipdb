@@ -348,7 +348,7 @@ public class TableDataHandler implements Serializable {
 		return inDataFile.writeDataLine(dataAsByteArray);
 	}*/
 	
-	/**
+	/*
 		Pour écrire une donnée sur le disque :
 		-> Faire findOrCreateWriteFile(...) pour trouver un fichier dans lequel écrire
 		-> Ecrire dans le fichier

@@ -1,7 +1,7 @@
 /**
  * 
  */
-/**
+/*
  * 
  * Index full mémoire (comme demandé par Olivier)
  * utilisant les types primitifs (int, double, byte...) pour le stockage de la donnée,

@@ -269,7 +269,7 @@ class IndexTreeMessyTest {
 			// Attendre que toute la donnée soit parsée
 			table.multiThreadParsingJoinAllThreads();
 			
-			/**
+			/*
 			 * Ne supporte pour l'instant pas recherches + indexing en même temps. (Problèmes de concurrence)
 			 * -> BIEN penser à faire tableHandler.multiThreadParsingJoinAllThreads();
 			 */
@@ -277,8 +277,8 @@ class IndexTreeMessyTest {
 			
 			//for (int i = 0; i < 6; i++)
 			//tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-			/*tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);*/
+			// tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			// tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-07.csv", true);
 			//tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-08.csv", true);
@@ -287,24 +287,23 @@ class IndexTreeMessyTest {
 			//Log.info("Nombre de résultats/entrées parsés FINAL : " + Loader.debugNumberOfEntriesWritten.get());
 			
 			
-			/**/
-			/*tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-			tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);*/
+			// tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			// tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			// tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			// tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			
-			//tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv", true);
-			/*tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv", true);
-			tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv", true);
-			tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv", true);*/
+			// tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv", true);
+			// tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv", true);
+			// tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv", true);
+			// tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv", true);
 			
 			
-			/*tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-07.csv", true);
-			tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-08.csv", true);
-			tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-09.csv", true);
-			tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-10.csv", true);
-			tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-11.csv", true);
-			tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-12.csv", true);*/
+			// tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-07.csv", true);
+			// tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-08.csv", true);
+			// tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-09.csv", true);
+			// tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-10.csv", true);
+			// tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-11.csv", true);
+			// tableHandler.parseCsvData("E:/L3 DANT disque E/yellow_tripdata_2015-12.csv", true);
 			//tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			//tableHandler.parseCsvData("../SMALL_1_000_000_yellow_tripdata_2015-04.csv", true);
 			// tableHandler.parseCsvData("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv"); Fichiers identiques, donc 2 fois plus de résultats !
@@ -355,7 +354,7 @@ class IndexTreeMessyTest {
 	@Test
 	void testIndexTreeDic() throws Exception {
 		//if (true) return;
-		/**
+		/*
 		 * Note : c'est super le bordel ici, je vais ranger ça ^^'
 		 */
 		//SIndexingTreeFloat indexingFoat = new SIndexingTreeFloat();
@@ -591,7 +590,7 @@ class IndexTreeMessyTest {
 	//@Test
 	void testIndexTreeCeption() throws IOException {
 		//if (true) return;
-		/**
+		/*
 		 * Note : c'est super le bordel ici, je vais ranger ça ^^'
 		 */
 		//SIndexingTreeFloat indexingFoat = new SIndexingTreeFloat();

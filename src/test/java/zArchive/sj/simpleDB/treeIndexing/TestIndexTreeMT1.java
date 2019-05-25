@@ -29,7 +29,7 @@ import db.structure.Column;
 import db.structure.Table;
 import index.indexTree.IndexTreeCeption;
 
-/***
+/**
  * Premier test de multi-thread simple
  *
  */
@@ -119,7 +119,7 @@ public class TestIndexTreeMT1 {
 			runnableList.add(runnableLoad);
 		}
 		
-		/**
+		/*
 		 * Bilan : le parsing demande beaucoup plus de calculs que de disque.
 		 * -> Voir quelles sont les fonctions qui prennent le plus de temps à loader
 		 * -> Possible de loader le même fichier, en partant à des index différents (mais pas une bonne idée, car je ne sais pas d'où partir, de peur de couper une ligne)
@@ -138,7 +138,7 @@ public class TestIndexTreeMT1 {
 		
 		parseTimer.log();
 		
-		/**
+		/*
 		 * En première idée, pour loader :
 		 * 1) Sauvegarder chaque colonne sur disque, parsée ou non : éviter, autant que possible, de loader les dates par exemple
 		 * */
@@ -171,7 +171,7 @@ public class TestIndexTreeMT1 {
 	//@Test
 	void testIndexingTreeInt() throws IOException {
 		if (true) return;
-		/**
+		/*
 		 * Note : c'est super le bordel ici, je vais ranger ça ^^'
 		 */
 		IndexTreeCeption indexingObject = new IndexTreeCeption();

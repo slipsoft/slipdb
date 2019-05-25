@@ -110,7 +110,7 @@ public class SimpleTCPDemoServRunnable implements Runnable {
 	private void handleClientMessage(NetBuffer message) {
 		if (message != null) return;
 		
-		/**
+		/*
 		 *  Structure du message :
 		 *  int commande type
 		 *  

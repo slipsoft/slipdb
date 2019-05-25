@@ -35,14 +35,14 @@ import db.structure.Table;
 import org.apache.commons.lang3.ArrayUtils;
 import sj.network.tcpAndBuffers.NetBuffer;
 
-/**
+/*
  * Exploite une extraordinaire propritété des TreeMap (arbre rouge-noir) :
  * Les résultats sont classés par ordre croissants.
  * Il est donc possible de faire des recherches rapides par dichotomie,
  * et se baser sur une implémentation simple via un TreeMap.
  */
 
-/***
+/*
  *
  * ~ Code de Sylvain, idée (dichotomie) de Nicolas ~
  *
@@ -74,7 +74,7 @@ import sj.network.tcpAndBuffers.NetBuffer;
 public class IndexTreeDic extends Index implements Serializable {
 	private static final long serialVersionUID = 7766967903992652785L;
 	
-	/**
+	/*
 	 * Il y a donc une seule TreeMap pour ce type d'index (contrairement à IndexTreeCeption)
 	 *
 	 *
@@ -816,7 +816,7 @@ public class IndexTreeDic extends Index implements Serializable {
 		//Object associatedValue = readObjectValueFromDisk(randFile, storedValuesClassType); // (débug) valeur associée
 
 		// Je regarde si cette entrée est valide :
-		/**
+		/*
 			Cas non valide :
 			le min est après la valeur maximale
 			le max est avant la valeur minimale
@@ -959,7 +959,7 @@ public class IndexTreeDic extends Index implements Serializable {
 		final AtomicInteger totalResultCount = new AtomicInteger(0); // <- lent, mais pour peu de résultats, ça passera !
 
 		// Lecture du dernier float écrit dans le disque, i.e. de la position de la table de routage de l'arbre principal
-		/**
+		/*
 			Optimiser : faire le moins de seek/skip possibles
 		 */
 
@@ -992,7 +992,7 @@ public class IndexTreeDic extends Index implements Serializable {
 				// Lecture de la table de routage
 
 				// Pas besoin de récursvité pour l'arbre avec dichotomie
-				/** 1) Je cherche le binIndex de la valeur minimale, puis de la valeur maximale
+				/* 1) Je cherche le binIndex de la valeur minimale, puis de la valeur maximale
 				 *  2) Je vais à tous les index, je mets les valeurs en mémoire.
 				 */
 				long minBinIndex = -1;

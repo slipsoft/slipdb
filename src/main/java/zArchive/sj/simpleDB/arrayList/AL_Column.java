@@ -93,20 +93,18 @@ public class AL_Column {
 	}
 	
 	
-	/*
-	HashMap<Integer, StoredDataType> rowMap = new HashMap<Integer, StoredDataType>(); // contenu de la colonne
+	// HashMap<Integer, StoredDataType> rowMap = new HashMap<Integer, StoredDataType>(); // contenu de la colonne
 	
-	/**
-	 * Trouver l'index de la ligne correspondant à la donnée
-	 * @param data
-	 * @return
-	 * /
-	public int findKey(StoredDataType data) {
-		rowMap.con
-		data.equals(obj)
-		return -1;
-	}
-	*/
+	// /**
+	//  * Trouver l'index de la ligne correspondant à la donnée
+	//  * @param data
+	//  * @return
+	//  * /
+	// public int findKey(StoredDataType data) {
+	// 	rowMap.con
+	// 	data.equals(obj)
+	// 	return -1;
+	// }
 	
 	
 }

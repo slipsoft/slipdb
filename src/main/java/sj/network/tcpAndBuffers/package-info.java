@@ -1,7 +1,7 @@
 /**
  * 
  */
-/**
+/*
  * Gestion TCP asynchrone.
  * TOUTES les fonctions proposées à l'utilisateur de TCPClient/TCPServer sont asynchrones à l'exception d'une seule :
  * Une seule exception : le constructeur de TCPServer qui tente d'ouvrir le port du serveur. (L'acceptation de nouveaux clients via TCPServer.accept est asynchrone)

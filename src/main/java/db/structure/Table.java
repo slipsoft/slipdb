@@ -58,7 +58,7 @@ public class Table implements Serializable {
 	/* @CurrentlyUseless */ protected List<Index> indexesList = new ArrayList<>();   // liste des index générés pour cette table
 	// -> Dans TableHandler.indexTreeList pour l'instant
 	
-	/**
+	/*
 	 * Plus tard : Evolution, pour permettre le multi-thread, sauvegarder et indexer plus vite, avoir plusieurs fichiers par colonne, sauvegarde des données en entrée par colonne.
 	 * Pour l'instant, je laisse comme ça (Sylvain), et je fais l'index par dichotomie
 	 */

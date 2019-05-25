@@ -5,7 +5,7 @@ package zArchive.sj.simpleDB.arrayList;
  *
  */
 public class AL_FinderArgument {
-	/**
+	/*
 	 * Critères de recherche :
 	 * Nom Table + Comparaison + Valeur
 	 * 
