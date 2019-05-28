@@ -2,11 +2,13 @@ package index.memDic;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.List;
 
 import com.dant.utils.Log;
 import com.dant.utils.MemUsage;
 import com.dant.utils.Timer;
 
+import db.data.types.StringType;
 import db.structure.Column;
 import db.structure.Table;
 
@@ -341,10 +343,142 @@ public class IndexMemDic {
 	}
 	
 	
+	
+	/** Pour alléger l'écriture
+	 *  @param warnIfWrongArgumentType
+	 *  @param value
+	 *  @param neededClass
+	 *  @return
+	 */
+	private boolean findMatchingLinePositions_checkValueType(boolean warnIfWrongArgumentType, Object value, @SuppressWarnings("rawtypes") Class neededClass) {
+		if (warnIfWrongArgumentType == false) return true; // aucune vérif à faire
+		if (value.getClass() != neededClass) { // mauvaise classe : cast refusé
+			Log.error("Mauvais type de valeur entré : value.getClass()=[" + value.getClass() + "]  !=  [" + neededClass + "]=neededClass");
+			return false;
+		}
+		return true; // bonne classe, pas de cast à effectuer, c'est OK !
+	}
+	
+	/** Recherche à partir d'une liste d'objets
+	 * @param searchQuery
+	 * @return  null en cas d'erreur, un int[] contenant les position des lignes coïncidant
+	 */
+	public int[] findMatchingLinePositions(List<Object> queryList, boolean warnIfWrongArgumentType) {
+		// Si possible, cast des objets en ByteBuffer pour effectuer la requête
+		
+		if (queryList == null) {
+			Log.error("searchQuery == null");
+			return null; // aucune requête adressée
+		}
+		if (queryList.size() != indexOnThisColArray.length) {
+			Log.error("Mauvaise taille de searchQuery : " + queryList.size() + " != " + indexOnThisColArray.length + "  (indexOnThisColArray.length)");
+			return null;
+		}
+		
 
+		// 1) Cast des objets
+		ByteBuffer queryBuffer = ByteBuffer.allocate(200);
+		
+		for (int iColumnValue = 0; iColumnValue < queryList.size(); iColumnValue++) { // 
+			Object value = queryList.get(iColumnValue);
+			Column column = indexOnThisColArray[iColumnValue];
+			
+			// manière super bourrine de faire : 
+			
+			switch (column.dataTypeEnum) {
+			case BYTE : // je dois caster en byte la valeur entrée
+				if (value instanceof Number) {
+					// Vérification du type d'objet
+					if (findMatchingLinePositions_checkValueType(warnIfWrongArgumentType, value, Byte.class) == false) return null;
+					// Cast de l'objet
+					queryBuffer.put(((Number) value).byteValue());
+				} else {
+					Log.error("L'objet n'est pas un nombre. Cast en BYTE impossible, iColumnValue = " + iColumnValue);
+					return null;
+				}
+				break;
+			
+			case INTEGER :
+				if (value instanceof Number) {
+					// Vérification du type d'objet
+					if (findMatchingLinePositions_checkValueType(warnIfWrongArgumentType, value, Integer.class) == false) return null;
+					// Cast de l'objet
+					queryBuffer.putInt(((Number) value).intValue());
+				} else {
+					Log.error("L'objet n'est pas un nombre. Cast en INTEGER impossible, iColumnValue = " + iColumnValue);
+					return null;
+				}
+				break;
+			case LONG :
+				if (value instanceof Number) {
+					// Vérification du type d'objet
+					if (findMatchingLinePositions_checkValueType(warnIfWrongArgumentType, value, Long.class) == false) return null;
+					// Cast de l'objet
+					queryBuffer.putLong(((Number) value).longValue());
+				} else {
+					Log.error("L'objet n'est pas un nombre. Cast en LONG impossible, iColumnValue = " + iColumnValue);
+					return null;
+				}
+				break;
+			case DATE :
+				if (value instanceof Number) {
+					// Vérification du type d'objet
+					if (findMatchingLinePositions_checkValueType(warnIfWrongArgumentType, value, Integer.class) == false) return null;
+					// Cast de l'objet
+					queryBuffer.putInt(((Number) value).intValue());
+				} else {
+					Log.error("L'objet n'est pas un nombre. Cast en INTEGER (DATE) impossible, iColumnValue = " + iColumnValue);
+					return null;
+				}
+				break;
+			case FLOAT :
+				if (value instanceof Number) {
+					// Vérification du type d'objet
+					if (findMatchingLinePositions_checkValueType(warnIfWrongArgumentType, value, Float.class) == false) return null;
+					// Cast de l'objet
+					queryBuffer.putFloat(((Number) value).floatValue());
+				} else {
+					Log.error("L'objet n'est pas un nombre. Cast en FLOAT impossible, iColumnValue = " + iColumnValue);
+					return null;
+				}
+				break;
+			case DOUBLE :
+				if (value instanceof Number) {
+					// Vérification du type d'objet
+					if (findMatchingLinePositions_checkValueType(warnIfWrongArgumentType, value, Double.class) == false) return null;
+					// Cast de l'objet
+					queryBuffer.putDouble(((Number) value).doubleValue());
+				} else {
+					Log.error("L'objet n'est pas un nombre. Cast en DOUBLE impossible, iColumnValue = " + iColumnValue);
+					return null;
+				}
+				break;
+			case STRING :
+				if (value.getClass() == String.class) {
+					// -> il est nécessaire d'avoir un String de la bonne taille
+					byte[] stringAsAjustedBytes = StringType.stringToAjustedByteArray((String)value, column.dataSizeInBytes);
+					queryBuffer.put(stringAsAjustedBytes);
+				} else {
+					Log.error("L'objet n'est pas un String. iColumnValue = " + iColumnValue);
+					return null;
+				}
+				break;
+			case UNKNOWN:
+				Log.error("La colonne a un type INCONNU. iColumnValue = " + iColumnValue);
+				return null;
+			}
+		}
+		
+		
+		// Ici, queryBuffer a été créé à partir de queryList
+		return findMatchingLinePositions(queryBuffer);
+		
+	}
 	
-	
-	
+	/** 
+	 *  @param searchQuery
+	 *  @return
+	 */
 	public int[] findMatchingLinePositions(ByteBuffer searchQuery) {
 		searchQuery.rewind();
 		int[] intervalBounds;

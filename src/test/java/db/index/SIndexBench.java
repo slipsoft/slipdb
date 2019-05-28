@@ -289,10 +289,16 @@ public class SIndexBench {
 		
 		// Il doit y avoir 54 résultats
 		ByteBuffer searchQuery = getBufferedQuery();
+		/*ArrayList<Object> queryAsList = new ArrayList<Object>();
+		queryAsList.add(new Byte((byte) 1)); // (queryAsList, false);
+		queryAsList.add(new Double(4));*/
+		
+		
 		Timer timerQuery = new Timer("Temps pris testIndexMemDic QUERY ONLY");
 		int[] resultsPositionsArray = ind3.findMatchingLinePositions(searchQuery); // les positions des lignes de résultat, réelles
 		timerQuery.log();
 		timer.log();
+		
 		
 		for (int i = 1; i < 40; i++) {
 			timerQuery = new Timer("Temps pris testIndexMemDic QUERY ONLY");
