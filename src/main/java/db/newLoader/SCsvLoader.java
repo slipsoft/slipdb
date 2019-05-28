@@ -1,4 +1,4 @@
-package noob.fastStructure;
+package db.newLoader;
 
 import java.io.BufferedReader;
 import java.io.IOException;

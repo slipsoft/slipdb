@@ -1,4 +1,4 @@
-package noob.fastStructure;
+package db.newLoader;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,13 +8,15 @@ import com.dant.utils.Log;
 
 import db.structure.Column;
 
-/** 
- * Structure super pas optimisée,
- * permier benchmark via les HashMap de Java
- * 
- * 
- *
+/** Pour faire un benchmark
+ *  
+ *  Structure pas vraiment optimisée mais fonctionnelle : une seule HashMap
+ *  permier benchmark via les HashMap de Java
+ *  
+ *  Ne pas utiliser ce type d'index en production.
+ *  
  */
+@Deprecated // Uniquement pour les tests, cette classe !
 public class SIndexHashJava {
 	// Une ou plusieurs colonnes indexées ici
 	public final Column[] indexedColumns; 

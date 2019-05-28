@@ -17,9 +17,9 @@ import db.data.types.DateType;
 import db.data.types.DoubleType;
 import db.data.types.FloatType;
 import db.data.types.StringType;
+import db.newLoader.SCsvLoader;
 import db.structure.StructureException;
 import db.structure.Table;
-import noob.fastStructure.SCsvLoader;
 
 public class SLoaderTests {
 	

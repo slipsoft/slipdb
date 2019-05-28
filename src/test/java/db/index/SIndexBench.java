@@ -18,11 +18,11 @@ import db.data.types.DateType;
 import db.data.types.DoubleType;
 import db.data.types.FloatType;
 import db.data.types.StringType;
+import db.newLoader.SCsvLoader;
+import db.newLoader.SIndexHashJava;
 import db.structure.Column;
 import db.structure.Table;
 import index.memDic.IndexMemDic;
-import noob.fastStructure.SCsvLoader;
-import noob.fastStructure.SIndexHashJava;
 
 public class SIndexBench {
 	

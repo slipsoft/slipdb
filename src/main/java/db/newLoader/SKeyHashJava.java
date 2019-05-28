@@ -1,16 +1,25 @@
-package noob.fastStructure;
+package db.newLoader;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-// Structure super pas optimisée
-/*
+
+/** Pour faire un benchmark
+ *  
+ *  Structure pas vraiment optimisée mais fonctionnelle : une seule HashMap
+ *  permier benchmark via les HashMap de Java
+ *  
+ *  Ne pas utiliser ce type d'index en production.
+ *  
+ */
+/**
  * Soit, un array d'objets et j'en fais le hash, à chaque fois -> c'est vraiment pas opti d'avoir des objets en plus
  * Soit un ByteBuffer avec des types primitifs, ça limite (un peu...) le nombre d'objets en mémoire
  * 
  * */
+@Deprecated
 public class SKeyHashJava {
 	
 	public final byte[] values; // Plus générique et optmisé que des objets (c'est un seul objet)

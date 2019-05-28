@@ -340,6 +340,11 @@ public class IndexMemDic {
 		return delta;
 	}
 	
+	
+
+	
+	
+	
 	public int[] findMatchingLinePositions(ByteBuffer searchQuery) {
 		searchQuery.rewind();
 		int[] intervalBounds;
@@ -419,7 +424,6 @@ public class IndexMemDic {
 		if (enableVerboseSort) t3.log();
 		MemUsage.printMemUsage();
 		
-
 		t4 = new Timer("IndexMemDic.sortAll - réagencement positions :");
 		for (int i = 0; i < positionsArray.length; i++) {
 			positionsArray[i] = tempSortArray[i].originalLinePosition;

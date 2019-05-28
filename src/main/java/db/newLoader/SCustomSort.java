@@ -1,4 +1,9 @@
-package noob.fastStructure;
+package db.newLoader;
+
+/**
+ *  Pas utile, en fait, ce quicksort se fait DEMONTER (x'D) par le sort de Java :')
+ *  
+ */
 
 public class SCustomSort {
 	
