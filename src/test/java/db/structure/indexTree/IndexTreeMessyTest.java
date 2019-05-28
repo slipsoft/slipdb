@@ -69,7 +69,8 @@ class IndexTreeMessyTest {
 		}*/
 	}
 	
-	@BeforeAll
+	//@BeforeAll
+	@Deprecated // IndexTreeDic n'est plus utilisé, remplacé par IndexMemDic
 	static void setUpBeforeAllDe() throws Exception {
 		Log.info("setUpBeforeAll");
 		Log.start("indexingTreeTest", 3);
@@ -356,7 +357,8 @@ class IndexTreeMessyTest {
 		
 	}*/
 	
-	@Test
+	//@Test
+	@Deprecated // IndexTreeDic n'est plus utilisé, remplacé par IndexMemDic
 	void testIndexTreeDic() throws Exception {
 		//if (true) return;
 		/**
@@ -593,6 +595,7 @@ class IndexTreeMessyTest {
 	}
 	
 	//@Test
+	@Deprecated // IndexTreeCeption n'est plus utilisé, remplacé par IndexTreeDic puis IndexMemDic
 	void testIndexTreeCeption() throws IOException {
 		//if (true) return;
 		/**
@@ -727,7 +730,8 @@ class IndexTreeMessyTest {
 		
 	}
 
-	@Test
+	//@Test
+	@Deprecated // IndexTreeDic n'est plus utilisé, remplacé par IndexMemDic
 	void executeView() {
 		if (enableCsvRelatedTests == false) return;
 		Column column1 = table.getColumns().get(1);
@@ -775,7 +779,8 @@ class IndexTreeMessyTest {
 		}
 	}
 	
-	@AfterAll
+	//@AfterAll
+	@Deprecated // IndexTreeDic n'est plus utilisé, remplacé par IndexMemDic
 	static void tearDown() {
 		
 	}

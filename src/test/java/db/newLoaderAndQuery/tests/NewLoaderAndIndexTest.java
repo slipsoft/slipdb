@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import org.junit.jupiter.api.Test;
 
 import com.dant.utils.Log;
-import com.dant.utils.MemUsage;
 import com.dant.utils.Timer;
 
 import db.data.load.CsvParser;
@@ -130,12 +129,16 @@ public class NewLoaderAndIndexTest {
 		
 		Timer parseTimer = new Timer("TEMPS TOTAL PRIS PAR TOUS LES PARSINGS");
 		
-		System.gc();
-		MemUsage.printMemUsage("Mem usage  début - ");
 		SCsvLoader csvLoader = new SCsvLoader(table, new CsvParser());
 		
 		limitParsingTimeTimer = new Timer("");
+
+		String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
+		Log.info("Parsing de csvName = " + csvPath);
+		parseThisCsv(table, csvLoader, csvPath);
 		
+		
+		/* Manière plus complète de faire, pour charger plusieurs CSV :
 		int mounthFinalCount = 1;
 		for (int iCsv = 1; iCsv <= mounthFinalCount; iCsv++) {
 			String colNumber = String.format("%02d" , iCsv);
@@ -146,7 +149,7 @@ public class NewLoaderAndIndexTest {
 			//String csvPath = "F:/csv/SMALL_1_000_000_yellow_tripdata_2015-04.csv";
 			Log.info("Parsing de csvName = " + csvPath);
 			parseThisCsv(table, csvLoader, csvPath);
-		}
+		}*/
 		
 		//System.gc();
 		//MemUsage.printMemUsage("Mem usage  fin - ");
