@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
@@ -26,10 +27,6 @@ import index.memDic.IndexMemDic;
  *  
  */
 public class NewLoaderAndIndexTest {
-
-	
-	
-	
 	
 	
 	/** IMPORTANT - Info imortante :
@@ -46,17 +43,51 @@ public class NewLoaderAndIndexTest {
 		loadFirst();
 		
 		// Création de l'index sur les colonnes (d'index) 3 et 4 de la table "table".
-		IndexMemDic ind3 = new IndexMemDic(table, new int[]{3, 4}); // passenger_count et trip_distance
+		IndexMemDic indexDic = new IndexMemDic(table, new int[]{3, 4}); // passenger_count et trip_distance
 		// Etape nécessaire à la réalisation de la dichotomie : classement des lignes indexées par ordre croissant (en fonction des valeurs indexées)
-		ind3.sortAllv1();
+		indexDic.sortAllv1();
 		
 		// Faire une requête sur l'index
-		ByteBuffer searchQuery = getBufferedQuery();
-		int[] resultsPositionsArray = ind3.findMatchingLinePositions(searchQuery); // les positions des lignes de résultat, réelles
+		// Trois manières possibles :
 		
-		Log.info("resultsPositionsArray.length = " + resultsPositionsArray.length);
+		// A) Soit via un ByteBuffer :
+		ByteBuffer searchQuery = ByteBuffer.allocate(100);
+		searchQuery.rewind();
+		searchQuery.put((byte)1);
+		searchQuery.putFloat(4);
 		
+		// B) Soit via une liste simple d'objets, le cast sera réalisé
+		ArrayList<Object> searchQueryAsList_doCast = new ArrayList<Object>();
+		searchQueryAsList_doCast.add(new Double(1));
+		searchQueryAsList_doCast.add(new Double(4));
 		
+		// C) Soit via une liste simple d'objets, directement dans le bon type
+		ArrayList<Object> searchQueryAsList_noCast = new ArrayList<Object>();
+		searchQueryAsList_noCast.add(new Byte((byte) 1));
+		searchQueryAsList_noCast.add(new Float(4));
+		
+		int[] resultsPositionsArrayA = indexDic.findMatchingLinePositions(searchQuery); // les positions des lignes de résultat, réelles
+		Log.info("Recherche A OK ! Nb résultats selon A : " + resultsPositionsArrayA.length);
+		
+		int[] resultsPositionsArrayB = indexDic.findMatchingLinePositions(searchQueryAsList_doCast, false); // les positions des lignes de résultat, réelles
+		Log.info("Recherche B OK ! Nb résultats selon B : " + resultsPositionsArrayB.length);
+		
+		int[] resultsPositionsArrayC = indexDic.findMatchingLinePositions(searchQueryAsList_noCast, true); // les positions des lignes de résultat, réelles
+		Log.info("Recherche C OK ! Nb résultats selon C : " + resultsPositionsArrayC.length);
+		
+		boolean errorOccured = false;
+		Log.info("resultsPositionsArray.length = " + resultsPositionsArrayA.length);
+		if (resultsPositionsArrayA.length != resultsPositionsArrayB.length) errorOccured = true;
+		if (resultsPositionsArrayA.length != resultsPositionsArrayC.length) errorOccured = true;
+		
+		if (errorOccured) {
+			Exception error = new Exception("Résultats différents en fonction de la manière dont la recherche est faite !"
+					+ "resultsPositionsArrayA.length = " + resultsPositionsArrayA.length
+					+ "resultsPositionsArrayB.length = " + resultsPositionsArrayB.length
+					+ "resultsPositionsArrayC.length = " + resultsPositionsArrayC.length);
+			Log.error(error);
+			throw error;
+		}
 		
 	}
 	

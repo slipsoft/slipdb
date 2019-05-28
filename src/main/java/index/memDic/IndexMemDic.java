@@ -26,11 +26,15 @@ public class IndexMemDic {
 	public static Column[] indexOnThisColArray;
 
 	public static boolean enableVerboseDichotomy = false;
-	public static boolean enableVerboseSort = true;
+	public static boolean enableVerboseSort = false;
 	
 	public static final boolean useSafeSlowComparaisonsNotDichotomy = false;
 	public static final boolean enableDoubleDichotomyVerif = false;
 	
+	/** Création de l'index par dichotomie
+	 *  @param argTable
+	 *  @param argColIndexArray
+	 */
 	public IndexMemDic(Table argTable, int[] argColIndexArray) { // int argTotalLength,
 		colIndexArray = argColIndexArray;
 		table = argTable;
@@ -43,37 +47,53 @@ public class IndexMemDic {
 		}
 	}
 	
+	/** Création de l'index par dichotomie, en le rendant directement fonctionnel si (shortThisIndex == true) (classement des valeurs indexées)
+	 *  @param argTable
+	 *  @param argColIndexArray
+	 *  @param shortThisIndex
+	 */
+	public IndexMemDic(Table argTable, int[] argColIndexArray, boolean shortThisIndex) { // int argTotalLength,
+		this(argTable, argColIndexArray);
+		if (shortThisIndex)
+			sortAllv1();
+	}
 	/*
 	public void setPosition(int sortedByValueIndex, int lineOriginalPosition) {
 		sortedPositions[sortedByValueIndex] = lineOriginalPosition;
 	}*/
 	
+	public void sortAllv1() {
+		sortAllv1(false);
+	}
+	
 	/** Trie les lignes en fonction des valeurs indexées
 	 *  Java gère magnifiquement bien le tri, même pour 100 millions d'éléments ! (c'est assez incroyable ^^)
 	 */
-	public void sortAllv1() {
+	public void sortAllv1(boolean beSuperVerbose) {
 		
-		MemUsage.printMemUsage();
+		beSuperVerbose = (beSuperVerbose && enableVerboseSort);
+		
+		if (beSuperVerbose) MemUsage.printMemUsage();
 		Timer t1, t2, t3, t4;
 		
 		t1 = new Timer("IndexMemDic.sortAll - tout :");
 		t2 = new Timer("IndexMemDic.sortAll - création objets :");
 
-		MemUsage.printMemUsage();
+		if (beSuperVerbose) MemUsage.printMemUsage();
 		IndexMemDicTemporaryItem[] tempSortArray = new IndexMemDicTemporaryItem[totalLength];
 		for (int i = 0; i < totalLength; i++) {
 			tempSortArray[i] = new IndexMemDicTemporaryItem(i);
 		}
-		MemUsage.printMemUsage();
+		if (beSuperVerbose) MemUsage.printMemUsage();
 		if (enableVerboseSort) t2.log();
 		
 		t3 = new Timer("IndexMemDic.sortAll - sort :");
-		MemUsage.printMemUsage();
+		if (beSuperVerbose) MemUsage.printMemUsage();
 		//Arrays.sort(tempSortArray);
 		//SCustomSort.sort(tempSortArray);
 		Arrays.parallelSort(tempSortArray); // <- faible gain, environ 30% plus rapide, mais prend beaucoup plus de mémoire
 		if (enableVerboseSort) t3.log();
-		MemUsage.printMemUsage();
+		if (beSuperVerbose) MemUsage.printMemUsage();
 		
 
 		t4 = new Timer("IndexMemDic.sortAll - réagencement positions :");
@@ -82,12 +102,12 @@ public class IndexMemDic {
 			//String displayValues = table.getLineAsReadableString(sortedPositions[i]);
 			//Log.info(displayValues);
 		}
-		MemUsage.printMemUsage();
+		if (beSuperVerbose) MemUsage.printMemUsage();
 		if (enableVerboseSort) t4.log();
 		for (int i = 0; i < totalLength; i++) {
 			tempSortArray[i] = null;
 		}
-		MemUsage.printMemUsage();
+		if (beSuperVerbose) MemUsage.printMemUsage();
 		tempSortArray = null;
 		if (enableVerboseSort) t1.log();
 		
