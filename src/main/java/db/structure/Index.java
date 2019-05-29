@@ -27,7 +27,7 @@ public abstract class Index implements Operable {
 	 * est possible, pour que ça fonctionne, il faudrait donc remplacer Integer par
 	 * ArrayList<Integer>
 	 */
-	protected Map<Key, ArrayList<Integer>> indexedValuesMap;
+	// KAKA -> protected Map<Key, ArrayList<Integer>> indexedValuesMap;
 	protected Column indexedColumn; // colonne indexée dans cet Index
 	protected Table table;
 

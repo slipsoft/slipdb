@@ -3,8 +3,9 @@ package zArchive.sj.simpleDB.arrayList;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import db.indexHash.KeyHash;
 import db.structure.Key;
-import db.structure.KeyHash;
+import db.structure.KeyTree;
 
 /**
  * Code issu de https://beginnersbook.com/2014/07/how-to-get-the-sub-map-from-treemap-example-java/
@@ -27,14 +28,14 @@ class TreeMapDemo {
 	            new TreeMap<String, String>();
 
 	    Integer[] objArray = new Integer[] {41, 20};
-	    Key key1 = new KeyHash(objArray);
+	    KeyTree key1 = new KeyTree(objArray);
 	    objArray = new Integer[] {88, 12};
-	    Key key2 = new KeyHash(objArray);
+	    KeyTree key2 = new KeyTree(objArray);
 	    objArray = new Integer[] {841, 2220};
-	    Key key3 = new KeyHash(objArray);
+	    KeyTree key3 = new KeyTree(objArray);
 
-	    TreeMap<Key, String> treemap2 = 
-	            new TreeMap<Key, String>();
+	    TreeMap<KeyTree, String> treemap2 = 
+	            new TreeMap<KeyTree, String>();
 
 	    treemap2.put(key1, "Value 1");
 	    System.out.println("TreeMap Contains : " + treemap);

@@ -37,6 +37,15 @@ public class Utils implements Serializable {
 			return null; //new Date();
 		}
 	}
+
+	public int intDateFromString(String dateAsString) {
+		try {
+			Date tempDate = dateFormat.parse(dateAsString);
+			return (int) (tempDate.getTime() / 1_000);
+		} catch (ParseException e) {
+			return 0; //new Date();
+		}
+	}
 	
 	// Les fonctions static utilisant ne instance donnée (DateFormat) ne sont pas thread-safe.
 	// Cette fonction NE DOIT PAS être static

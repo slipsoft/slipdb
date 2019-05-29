@@ -21,6 +21,7 @@ import db.data.load.CsvParser;
 import db.data.load.Loader;
 import db.data.load.Parser;
 import db.data.types.DataType;
+import db.data.types.DataTypeEnum;
 import db.disk.dataHandler.DiskDataPosition;
 import db.disk.dataHandler.TableDataHandler;
 import db.search.Predicate;
@@ -248,6 +249,14 @@ public class Table implements Serializable {
 			newParsingThread.start();
 		}
 	}
+	
+	public void monoThreadParsing(String csvPath, boolean doRuntimeIndexing) {
+		try (InputStream is = new FileInputStream(csvPath)) {
+			this.loadData(new CsvParser(), is, doRuntimeIndexing);
+		} catch (Exception e) {
+			Log.error(e);
+		}
+	}
 
 	public void multiThreadParsingWaitForAllThreads() {
 		multiThreadParsingJoinAllThreads();
@@ -282,9 +291,9 @@ public class Table implements Serializable {
 		for (Index index : indexesList) {
 			try {
 				index.flushOnDisk();
-				Log.error("TableHandler.flushAllIndexOnDisk : flush de l'arbre !" + index);
+				Log.info("Table.flushAllIndexOnDisk : flush de l'arbre !" + index);
 			} catch (IOException e) {
-				Log.error("TableHandler.flushAllIndexOnDisk : l'arbre n'a pas pu être écrit sur le disque, IOException.");
+				Log.error("Table.flushAllIndexOnDisk : l'arbre n'a pas pu être écrit sur le disque, IOException.");
 				Log.error(e);
 				e.printStackTrace();
 			}
@@ -381,5 +390,48 @@ public class Table implements Serializable {
 	public void clearDataDirectory() throws IOException {
 		this.dataHandler.clearDataDirectory();
 	}
+	
+	
+	
+	
+	
+	public String getLineAsReadableString(int linePosition) {
+		String result = "";
+		Column col;
+		for (int iCol = 0; iCol < columnsList.size(); iCol++) {
+			col = columnsList.get(iCol);
+			String readableColumnValue = col.getDataAsReadableString(linePosition);
+			if (iCol != columnsList.size() - 1) {
+				result += readableColumnValue + ", ";
+			} else {
+				result += readableColumnValue;
+			}
+		}
+		return result;
+	}
+	
+	/** 
+	 * @return Le nombre total de lignes dans cette table (la même pour toutes les colonnes)
+	 */
+	public int getTotalLinesCount() {
+		if (columnsList.size() == 0) return 0;
+		Column col = columnsList.get(0);
+		return col.getTotalLinesNumber();
+	}
+	
+	/*public Column debugTheStringColumn;
+	
+	public void debugInitTheStringColumn() {
+		Column fuDebug = null;
+		
+		for (int i = 0; i < columnsList.size(); i++) {
+			if (columnsList.get(i).dataTypeEnum == DataTypeEnum.STRING) {
+				fuDebug = columnsList.get(i);
+				break;
+			}
+		}
+		debugTheStringColumn = fuDebug;
+	}*/
+	
 
 }

@@ -2,9 +2,11 @@ package db.data.types;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -13,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.dant.utils.Log;
+import com.dant.utils.MemUsage;
 import com.dant.utils.Timer;
 import com.dant.utils.Utils;
 
@@ -124,8 +127,11 @@ class DataTypeTest {
 	}
 	
 	
-	@Test
+	//@Test
 	void testWriteToBuffer() {
+		
+		Random rand = new Random();
+		
 		
 		int maxCountOperation = 1_000_000;
 		String maxCountOperationStr = "1_000_000";
@@ -152,14 +158,26 @@ class DataTypeTest {
 		for (int count = 0; count < maxCountOperation; count++) {
 			bBuff.rewind();
 			bBuff.put(Byte.parseByte("78"));
+			//Byte.parseByte("78");
 		}
 		localTimer.log();
+		//System.gc();
 
 		localTimer = new Timer("Parsing de IntegerType ");
 		for (int count = 0; count < maxCountOperation; count++) {
 			bBuff.rewind();
 			integerType.parseAndWriteToBuffer("454689586", bBuff);
 		}
+		//System.gc();
+		localTimer.log();
+
+		localTimer = new Timer("Parsing de IntegerType -> plus rapide ??? ");
+		for (int count = 0; count < maxCountOperation; count++) {
+			bBuff.rewind();
+			bBuff.putInt(Integer.parseInt("454689586"));
+			/*integerType.parseAndWriteToBuffer("454689586", bBuff);*/
+		}
+		//System.gc();
 		localTimer.log();
 
 		localTimer = new Timer("Parsing de LongType ");
@@ -187,6 +205,18 @@ class DataTypeTest {
 		for (int count = 0; count < maxCountOperation; count++) {
 			bBuff.rewind();
 			dateType.parseAndWriteToBuffer("2015-04-27 15:45:38", bBuff);
+		}
+		localTimer.log();
+		
+		
+		localTimer = new Timer("String <-> array");
+		String myString = "This is a test !";
+		byte[] bArr;
+		for (int count = 0; count < maxCountOperation; count++) {
+			bArr = myString.getBytes();
+			myString = new String(bArr);
+			//bBuff.rewind();
+			//dateType.parseAndWriteToBuffer("2015-04-27 15:45:38", bBuff);
 		}
 		localTimer.log();
 		
@@ -221,8 +251,153 @@ class DataTypeTest {
 		
 		
 	}
+	
+	private int[] intArray = new int[100000];
+	
+	private int getAtArrayPos(int posIndex) {
+		return intArray[posIndex];
+	}
 
-	@Test
+	//@Test
+	public void testAccessSpeed() {
+		for (int i = 0; i < intArray.length; i++) {
+			intArray[i] = i;
+		}
+		
+		int iteNb = 1_000_000_000;
+		int res = 0;
+		Timer t1 = new Timer("Test accès direct");
+		for (int i = 0; i < iteNb; i++) {
+			res += intArray[18875];
+		}
+		t1.log();
+		Log.info("res = " + res);
+		
+		res = 0;
+		t1 = new Timer("Test accès par fonction");
+		for (int i = 0; i < iteNb; i++) {
+			res += getAtArrayPos(18875);
+		}
+		t1.log();
+		Log.info("res = " + res);
+	}
+
+	//@Test
+	public void testAccessSpeedByteBuffer() {
+		ByteBuffer bBuff = ByteBuffer.allocate(60);
+		int val = 875465274;
+		bBuff.putInt(76532);
+		bBuff.putInt(86854);
+		bBuff.putInt(val);
+		bBuff.putInt(3545);
+		bBuff.rewind();
+		
+		int iteNb = 1_000_000_000;
+		int res = 0;
+		Timer t1 = new Timer("Test accès direct");
+		for (int i = 0; i < iteNb; i++) {
+			res += val;
+		}
+		t1.log();
+		Log.info("res = " + res);
+		
+		res = 0;
+		t1 = new Timer("Test accès par fonction");
+		for (int i = 0; i < iteNb; i++) {
+			res += bBuff.getInt(1); // super super rapide
+			res += bBuff.getInt(2);
+			res += bBuff.getInt(3);
+			res += bBuff.getInt(4);
+			res += bBuff.getInt(5);
+		}
+		t1.log();
+		Log.info("res = " + res);
+	}
+	
+	//@Test
+	public void testB() {
+		Log.info("Salut, test !");
+		int allocationSize = 1_000_000_000;
+		Timer t;
+		System.gc();
+		MemUsage.printMemUsage();
+		t = new Timer("Allocation array simple");
+		byte[] bibi = new byte[allocationSize];
+		t.log();
+		System.gc();
+		MemUsage.printMemUsage();
+		Log.info("Ouais, salut !");
+		
+		t = new Timer("Allocation ByteBuffer");
+		ByteBuffer bibiBubu = ByteBuffer.allocate(allocationSize);
+		t.log();
+		System.gc();
+		MemUsage.printMemUsage();
+		Log.info("Ouais, salut !");
+		
+		
+	}
+
+	//@Test
+	public void testMemDoubleParsing() {
+		
+		Random rand = new Random();
+		
+		int maxCountOperation = 10_000_000;
+		String maxCountOperationStr = "10_000_000";
+		Timer localTimer;
+		ByteBuffer bBuff = ByteBuffer.allocate(20);
+		
+		Log.info("Cout en millisecondes, pour " + maxCountOperationStr + " itérations --- :");
+		
+		String parseStr;
+		localTimer = new Timer("Parsing de DoubleType ");
+		for (int count = 0; count < maxCountOperation; count++) {
+			bBuff.rewind();
+			parseStr = Double.toString(rand.nextDouble());
+			doubleType.parseAndWriteToBuffer(parseStr, bBuff); // "454689586.2132152"
+		}
+		localTimer.log();
+	}
+
+	//@Test
+	public void testMemArrayAllocation() {
+		
+		System.gc();
+		MemUsage.printMemUsage();
+		
+		int entrySize = 10;
+		int arraySize = 1_000_000;
+		//Arrays.sort(a);(a, c);
+		int totalArraySize = arraySize * entrySize;
+		Integer[] a1int = new Integer[arraySize * entrySize];
+		for (int iLine = 0; iLine < totalArraySize; iLine++) {
+			a1int[iLine] = iLine;
+		}
+		
+		
+		
+		/*byte[][] a2int = new byte[arraySize][entrySize];
+		
+		for (int iLine = 0; iLine < arraySize; iLine++) {
+			
+			//a2int[iLine] = new int[entrySize + (iLine % 8)];
+			
+			for (int iEntry = 0; iEntry < entrySize; iEntry++) {
+				a2int[iLine][iEntry] = (byte)iEntry;
+			}
+			
+		}*/
+		
+		Log.info("Working ??");
+		System.gc();
+		MemUsage.printMemUsage();
+		
+		Log.info("" + (a1int.length));
+		
+	}
+
+	//@Test
 	void testReadTrueValue() {
 		ByteBuffer bBuff = ByteBuffer.allocate(20);
 		Object expected;
@@ -269,7 +444,7 @@ class DataTypeTest {
 		assertEquals(expected, actual);
 	}
 
-	@Test
+	//@Test
 	void testReadIndexValue() {
 		ByteBuffer bBuff = ByteBuffer.allocate(20);
 		Object expected;

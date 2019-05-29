@@ -11,7 +11,7 @@ public abstract class Parser {
 	 * @param input - the input as a buffered reader
 	 * @return entryString or *null* if there is no more entries
 	 */
-	abstract protected String processReader(BufferedReader input) throws IOException;
+	abstract public String processReader(BufferedReader input) throws IOException;
 
 	/**
 	 * Converts a string entry (such as a CSV line) to a byte array of raw data.
@@ -19,5 +19,5 @@ public abstract class Parser {
 	 * @param entryString
 	 * @return the data stored by the line as string array
 	 */
-	abstract protected String[] processEntry(String entryString);
+	abstract public String[] processEntry(String entryString);
 }

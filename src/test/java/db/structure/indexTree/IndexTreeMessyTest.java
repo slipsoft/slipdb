@@ -69,7 +69,8 @@ class IndexTreeMessyTest {
 		}*/
 	}
 	
-	@BeforeAll
+	//@BeforeAll
+	@Deprecated // IndexTreeDic n'est plus utilisé, remplacé par IndexMemDic
 	static void setUpBeforeAllDe() throws Exception {
 		Log.info("setUpBeforeAll");
 		Log.start("indexingTreeTest", 3);
@@ -257,10 +258,14 @@ class IndexTreeMessyTest {
 			//for (int i = 0; i < 20; i++)
 			
 			//table.multiThreadParsingAddAndStartCsv("E:/L3 DANT disque E/csv/yellow_tripdata_2015-07.csv", true);
+			
+			for (int i = 0; i < 4; i++)
+				table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			
+			/*table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
 			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
-			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);
+			table.multiThreadParsingAddAndStartCsv("testdata/SMALL_100_000_yellow_tripdata_2015-04.csv", true);*/
 
 			/*table.multiThreadParsingAddAndStartCsv("E:/L3 DANT disque E/csv/yellow_tripdata_2015-07.csv", true);
 			table.multiThreadParsingAddAndStartCsv("E:/L3 DANT disque E/csv/yellow_tripdata_2015-08.csv", true);
@@ -352,7 +357,8 @@ class IndexTreeMessyTest {
 		
 	}*/
 	
-	@Test
+	//@Test
+	@Deprecated // IndexTreeDic n'est plus utilisé, remplacé par IndexMemDic
 	void testIndexTreeDic() throws Exception {
 		//if (true) return;
 		/**
@@ -589,6 +595,7 @@ class IndexTreeMessyTest {
 	}
 	
 	//@Test
+	@Deprecated // IndexTreeCeption n'est plus utilisé, remplacé par IndexTreeDic puis IndexMemDic
 	void testIndexTreeCeption() throws IOException {
 		//if (true) return;
 		/**
@@ -723,7 +730,8 @@ class IndexTreeMessyTest {
 		
 	}
 
-	@Test
+	//@Test
+	@Deprecated // IndexTreeDic n'est plus utilisé, remplacé par IndexMemDic
 	void executeView() {
 		if (enableCsvRelatedTests == false) return;
 		Column column1 = table.getColumns().get(1);
@@ -771,7 +779,8 @@ class IndexTreeMessyTest {
 		}
 	}
 	
-	@AfterAll
+	//@AfterAll
+	@Deprecated // IndexTreeDic n'est plus utilisé, remplacé par IndexMemDic
 	static void tearDown() {
 		
 	}

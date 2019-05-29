@@ -18,7 +18,7 @@ import java.io.IOException;
 
 public class CsvParser extends Parser {
 
-	protected final static String csvSeparator = ","; // the CSV separator used to delimit fields
+	public final static String csvSeparator = ","; // the CSV separator used to delimit fields
 
 	/** Lecture du CSV depuis un InputStream (peu importe la provenance)
 	 *  Exécution mono-thread, en l'état, faire du multi-thread serait super super compliqué
@@ -26,12 +26,12 @@ public class CsvParser extends Parser {
 	 *  Chaque colonne aura son propre fichier binaire.
 	 */
 	@Override
-	protected String processReader(BufferedReader input) throws IOException {
+	public String processReader(BufferedReader input) throws IOException {
 		return input.readLine();
 	}
 
 	@Override
-	protected String[] processEntry(String entryString) {
+	public String[] processEntry(String entryString) {
 		// 1) Split the current line, get an array of String
 		return entryString.split(csvSeparator); // csvSeparator declared in the unit
 	}
