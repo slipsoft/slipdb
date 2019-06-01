@@ -20,23 +20,25 @@ import db.data.types.StringType;
 import db.newLoader.SCsvLoader;
 import db.structure.Table;
 import index.memDic.IndexMemDic;
+//import index.memDic.IndexMemDicCh;
 
 /** 
- *  Montre comment utiliser l'index par dichotomie et le nouveau CsvLoader
+ *  Tests pour le stockage des positions dans un index.
+ *  Stockage par blocs/chunks.
  *  
  */
-public class NewLoaderAndIndexTest {
-	
+
+public class IndexMemDicStorageTests {
 	
 	/** IMPORTANT - Info imortante :
 	 *  Ce moteur d'index tire parti des performances de la machine sur laquelle il est :
 	 *  Le programme peut très bien exploiter totalement un SDD et plusieurs coeurs de processeur.
 	 *  Les performances s'adaptent donc au matériel (parsing d'un même fichier en multi-thread par exemple)
+	 * @throws Exception 
 	 */
 	
-	@Test
-	public void mainTest() throws Exception {
-		
+	//@Test
+	public void mainTestFirst() throws Exception {
 		// Parsing et mise en mémoire vive des CSV à charger
 		// Pas de seuvagerde sur disque, pour l'instant
 		loadFirst();
@@ -44,7 +46,44 @@ public class NewLoaderAndIndexTest {
 		// Création de l'index sur les colonnes (d'index) 3 et 4 de la table "table".
 		IndexMemDic indexDic = new IndexMemDic(table, new int[]{3, 4}); // passenger_count et trip_distance
 		// Etape nécessaire à la réalisation de la dichotomie : classement des lignes indexées par ordre croissant (en fonction des valeurs indexées)
+		Timer tim = new Timer("Temps pris pour classer la 1ère fois");
 		indexDic.sortAllv1();
+		tim.log();
+		tim = new Timer("Temps pris pour classer la 2ème fois");
+		indexDic.sortAllv1();
+		tim.log();
+		
+		/*if (indexDic.testSortedPositionsChunks() == false)
+			throw new Exception("Erreur lors du test indexMemDic.testSortedPositionsChunks()");
+		
+		indexDic.benchmarkSortedPositionsChunks();*/
+		
+	}
+	
+	private void doSpeedBenchmark() {
+		
+		
+		
+	}
+	
+	@Test
+	public void mainTest() throws Exception {
+		
+		// Parsing et mise en mémoire vive des CSV à charger
+		// Pas de sauvagerde sur disque, pour l'instant
+		loadFirst();
+		
+		// Création de l'index sur les colonnes (d'index) 3 et 4 de la table "table".
+		IndexMemDic indexDic = new IndexMemDic(table, new int[]{3, 4}); // passenger_count et trip_distance
+		// Etape nécessaire à la réalisation de la dichotomie : classement des lignes indexées par ordre croissant (en fonction des valeurs indexées)
+		Timer tim = new Timer("Temps pris pour classer la 1ère fois");
+		indexDic.sortAllv1();
+		
+		
+		tim.log();
+		tim = new Timer("Temps pris pour classer la 2ème fois");
+		indexDic.sortAllv1();
+		tim.log();
 		
 		// Faire une requête sur l'index
 		// Trois manières possibles :
@@ -87,33 +126,6 @@ public class NewLoaderAndIndexTest {
 			Log.error(error);
 			throw error;
 		}
-		
-		indexDic.enableFlagCheck(true); // vérifier si les résultats existent bien, à chaque retour
-		// Supprimer des lignes pour tester
-		for (int i = 0; i < table.getLastLoadedLineIndexLength(); i++) {
-			if (i % 3 == 0)
-				table.setLineFlag(i, false);
-		}
-		
-		int[] resultsPositionsArrayFlag = indexDic.findMatchingLinePositions(searchQuery); // les positions des lignes de résultat, réelles
-		Log.info("Recherche FLAG OK ! Nb résultats avec FLAG : " + resultsPositionsArrayFlag.length + "  index len = " + indexDic.totalLength);
-		
-		indexDic.refreshIndexWithColumnsData(true);
-		
-		// index restructuré, il n'est alors pas nécesaire de vérifier queles résultats retournés sont flagés "supprimés".
-		indexDic.enableFlagCheck(false);
-		
-		int[] resultsPositionsArrayStruct = indexDic.findMatchingLinePositions(searchQuery); // les positions des lignes de résultat, réelles
-		Log.info("Recherche STRUCT OK ! Nb résultats avec restructuration : " + resultsPositionsArrayStruct.length + "  index len = " + indexDic.totalLength);
-		
-		if (resultsPositionsArrayFlag.length != resultsPositionsArrayStruct.length) {
-			Exception error = new Exception("Résultats différents après restructuration de l'index :"
-					+ "resultsPositionsArrayFlag.length = " + resultsPositionsArrayFlag.length
-					+ "resultsPositionsArrayStruct.length = " + resultsPositionsArrayStruct.length);
-			Log.error(error);
-			throw error;
-		}
-		
 		
 	}
 	
@@ -160,38 +172,15 @@ public class NewLoaderAndIndexTest {
 		
 		limitParsingTimeTimer = new Timer("");
 		
-		/* Paring de l'irdi de Sylvain, pour des tests plus complets
-		doSylvainParsing(csvLoader);*/
+		/* Paring de l'irdi de Sylvain, pour des tests plus complets*/
+		//doSylvainParsing(csvLoader);
 		
 		/* Parsing générique, de gitHub*/
 		String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
 		Log.info("Parsing de csvName = " + csvPath);
 		parseThisCsv(table, csvLoader, csvPath);
 		
-		
-		/* Manière plus complète de faire, pour charger plusieurs CSV :
-		int mounthFinalCount = 1;
-		for (int iCsv = 1; iCsv <= mounthFinalCount; iCsv++) {
-			String colNumber = String.format("%02d" , iCsv);
-			//String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
-			String csvPath = "F:/csv/yellow_tripdata_2015-" + colNumber + ".csv"; // E:/L3 DANT disque E
-			//String csvPath = "C:/Users/admin/Desktop/L3 DANT Jussieu/Web_Olivier/yellow_tripdata_2015-" + colNumber + ".csv"; // E:/L3 DANT disque E
-			
-			//String csvPath = "F:/csv/SMALL_1_000_000_yellow_tripdata_2015-04.csv";
-			Log.info("Parsing de csvName = " + csvPath);
-			parseThisCsv(table, csvLoader, csvPath);
-		}*/
-		
-		//System.gc();
-		//MemUsage.printMemUsage("Mem usage  fin - ");
 		parseTimer.log();
-
-		boolean checkLinesNumber = table.testCheckLinesNumber();
-		if (checkLinesNumber)
-			Log.info("Bon nombre total de lignes ! nombre = " + table.getTotalNumberOfLines());
-		
-		
-		
 		
 		
 	}
@@ -243,8 +232,6 @@ public class NewLoaderAndIndexTest {
 		
 	}
 	
-	
-	
-	
-	
 }
+
+
