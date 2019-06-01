@@ -301,7 +301,7 @@ public class SCsvLoaderRunnable implements Runnable {
 			//if (false)
 			synchronized(loaderWriteInMemoryLock) {
 				
-				
+				currentTable.addLineFlag();
 				
 				lineAsByteBuffer.rewind();
 				for (int columnIndex = 0; columnIndex < fieldsNumberInLine; columnIndex++) {

@@ -44,6 +44,8 @@ public class Table implements Serializable {
 	private final String baseTablePath;
 	private int lineDataSize;
 	
+	private int lastLoadedLineIndex = 0;
+	
 	
 	//protected final String dataFilesOnDiskBasePath; devenu baseTablePath
 	protected final TableDataHandler dataHandler;
@@ -58,6 +60,11 @@ public class Table implements Serializable {
 	private List<Column> columnsList = new ArrayList<>(); // liste des colonnes de la table
 	/* @CurrentlyUseless */ protected List<Index> indexesList = new ArrayList<>();   // liste des index générés pour cette table
 	// -> Dans TableHandler.indexTreeList pour l'instant
+	
+	protected int realNumberOfLines = 0; // sans compter les lignes flaguées comme étant supprimées
+	protected ArrayList<TableFlagChunk> a2FlagChunk = new ArrayList<TableFlagChunk>();
+	
+	
 	
 	/**
 	 * Plus tard : Evolution, pour permettre le multi-thread, sauvegarder et indexer plus vite, avoir plusieurs fichiers par colonne, sauvegarde des données en entrée par colonne.
@@ -433,5 +440,85 @@ public class Table implements Serializable {
 		debugTheStringColumn = fuDebug;
 	}*/
 	
+	public void addLineFlag() {
+		int flagChunkLen = a2FlagChunk.size();
+		TableFlagChunk fChunk;
+		if (flagChunkLen == 0) {
+			fChunk = new TableFlagChunk();
+			a2FlagChunk.add(fChunk);
+		} else {
+			fChunk = a2FlagChunk.get(flagChunkLen - 1);
+		}
+		boolean createNewChunk = fChunk.addLine();
+		if (createNewChunk) {
+			a2FlagChunk.add(new TableFlagChunk());
+		}
+		realNumberOfLines++;
+		lastLoadedLineIndex++;
+	}
 
+	/** Sans vérification de la validité de la position passée en paramètre.
+	 *  @param linePosition position de la ligne (globale).
+	 *  @param isPresent est présent ou non.
+	 */
+	public void setLineFlag(int linePosition, boolean isPresent) {
+		int chunkPosition = (int) Math.floor((double)linePosition / (double)TableFlagChunk.chunkAllocationSize);
+		TableFlagChunk chunk = a2FlagChunk.get(linePosition);
+		int localLinePosition = linePosition - chunkPosition * TableFlagChunk.chunkAllocationSize;
+		boolean oldFlag = chunk.getItemFlag(localLinePosition);
+		if (isPresent == false && oldFlag == true) {
+			realNumberOfLines--; // supprimer
+		}
+		else if (isPresent == true && oldFlag == false) {
+			realNumberOfLines++; // re-charger
+		}
+		chunk.setItem(localLinePosition, isPresent);
+		// aucun impact sur lastLoadedLineIndex.
+	}
+	
+	
+	/** Sans vérification de la validité de la position passée en paramètre.
+	 *  @param linePosition
+	 *  @return true si la ligne est présente, false si elle est supprimée.
+	 */
+	public boolean getLineFlag(int linePosition) {
+		int chunkPosition = linePosition / TableFlagChunk.chunkAllocationSize;
+		TableFlagChunk chunk = a2FlagChunk.get(linePosition);
+		int localLinePosition = linePosition - chunkPosition * TableFlagChunk.chunkAllocationSize;
+		return chunk.getItemFlag(localLinePosition);
+	}
+	
+	/** 
+	 *  @return le nombre total de lignes non supprimées, et non le nombre de lignes en mémoire : </br>
+	 *  Nombre de lignes flagués comme présentes seulement, sans les lignes chargées mais supprimées.
+	 */
+	public int getTotalNumberOfLines() {
+		return realNumberOfLines;
+	}
+
+	/** 
+	 *  @return le nombre total de lignes en mémoire, quel que soit leur flag (supprimées ou présentes).
+	 */
+	public int getLastLoadedLineIndex() {
+		return lastLoadedLineIndex;
+	}
+	
+	
+	public boolean testCheckLinesNumber() throws Exception {
+		int colMaxNb = 0;
+		for (int ic = 0; ic < columnsList.size(); ic++) {
+			Column col = columnsList.get(ic);
+			int lineNb = col.getTotalLinesNumber();
+			if (lineNb > colMaxNb) {
+				colMaxNb = lineNb;
+			}
+		}
+		if (colMaxNb != realNumberOfLines) {
+			Exception except = new Exception("Nombre de lignes incohérent entre les flags et les colonnes : colMaxNb("+colMaxNb+") != realNumberOfLines("+realNumberOfLines+")");
+			Log.error(except);
+			throw except;
+		}
+		return true;
+	}
+	
 }
