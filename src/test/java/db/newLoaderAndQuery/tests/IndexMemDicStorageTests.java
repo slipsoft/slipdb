@@ -20,6 +20,7 @@ import db.data.types.StringType;
 import db.newLoader.SCsvLoader;
 import db.structure.Table;
 import index.memDic.IndexMemDic;
+import index.memDic.IndexMemDicCh;
 
 /** 
  *  Tests pour le stockage des positions dans un index.
@@ -43,7 +44,7 @@ public class IndexMemDicStorageTests {
 		loadFirst();
 		
 		// Création de l'index sur les colonnes (d'index) 3 et 4 de la table "table".
-		IndexMemDic indexDic = new IndexMemDic(table, new int[]{3, 4}); // passenger_count et trip_distance
+		IndexMemDicCh indexDic = new IndexMemDicCh(table, new int[]{3, 4}); // passenger_count et trip_distance
 		// Etape nécessaire à la réalisation de la dichotomie : classement des lignes indexées par ordre croissant (en fonction des valeurs indexées)
 		indexDic.sortAllv1();
 		

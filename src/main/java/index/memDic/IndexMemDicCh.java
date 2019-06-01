@@ -12,29 +12,44 @@ import db.data.types.StringType;
 import db.structure.Column;
 import db.structure.Table;
 
-/**
- * 
- * 
+/** 
+ *  La même chose qu'indexmemDic, mais avec un stockage des positions via des chunks.
+ *  IndexMemDicCh remplacera IndexMemDic et sera renommé "IndexMemDic".
+ *  
+ *  Je garde IndexMemDic pour faire des tests de performances et voir à quel point le nouveau système
+ *  plombe les performances.
+ *  
  */
-public class IndexMemDic extends IndexMemDicAncester {
-	
+
+
+public class IndexMemDicCh extends IndexMemDicAncester {
 	
 	
 	public final int totalLength;
 	private int[] sortedPositions;
 	private int sortedPositionsRealLength;
-	
+	/** 2019-05-29 : WIP - ajout et suppression de lignes dans un index.
+	 *  Modifier une ligne : la supprimer et en ajouter une nouvelle, si la modification touche une des colonnes indexées.
+	 *  
+	 *  sortedPositions doit être découpé en plusieurs blocks 
+	 *  
+	 *  Manière super bourrine de faire : supprimer une ligne à une position, tout bouger et tout redimensionner.
+	 *  Manière plus fine : découper en pleins de bouts (blocs de 10 000 à 100 000 lignes)
+	 *  
+	 */
+	private IndexMemDicStorage sortedPositionsStorage;
 	
 	/** Création de l'index par dichotomie
 	 *  @param argTable
 	 *  @param argColIndexArray
 	 */
-	public IndexMemDic(Table argTable, int[] argColIndexArray) { // int argTotalLength,
+	public IndexMemDicCh(Table argTable, int[] argColIndexArray) { // int argTotalLength,
 		colIndexArray = argColIndexArray;
 		table = argTable;
 		totalLength = table.getTotalLinesCount();
 		sortedPositionsRealLength = totalLength;
 		sortedPositions = new int[sortedPositionsRealLength];
+		sortedPositionsStorage = new IndexMemDicStorage(totalLength);
 		
 		indexOnThisColArray = new Column[colIndexArray.length];
 		for (int i = 0; i < colIndexArray.length; i++) {
@@ -48,7 +63,7 @@ public class IndexMemDic extends IndexMemDicAncester {
 	 *  @param argColIndexArray
 	 *  @param shortThisIndex
 	 */
-	public IndexMemDic(Table argTable, int[] argColIndexArray, boolean shortThisIndex) { // int argTotalLength,
+	public IndexMemDicCh(Table argTable, int[] argColIndexArray, boolean shortThisIndex) { // int argTotalLength,
 		this(argTable, argColIndexArray);
 		if (shortThisIndex)
 			sortAllv1();
@@ -104,6 +119,33 @@ public class IndexMemDic extends IndexMemDicAncester {
 		if (enableVerboseSort) t3.log();
 		if (beSuperVerbose) MemUsage.printMemUsage();
 		
+		Timer t4_0 = new Timer("IndexMemDic.sortAll - réagencement positions avec blocs :");
+		for (int i = 0; i < totalLength; i++) {
+			int chunkPos = (i / IndexMemDicStorage.baseBlockSize);  //sortedPositions.a1Chunks
+			IndexMemDicStorageChunk chunk = sortedPositionsStorage.a1Chunks[chunkPos];
+			int posInChunk = i - chunkPos * IndexMemDicStorage.baseBlockSize;
+			chunk.sortedPositions[posInChunk] = tempSortArray[i].originalLinePosition;
+			//String displayValues = table.getLineAsReadableString(sortedPositions[i]);
+			//Log.info(displayValues);
+		}
+		t4_0.log();
+		
+
+		Timer t4_1 = new Timer("IndexMemDic.sortAll - réagencement positions avec blocs simplifié :");
+		int nbChunks = sortedPositionsStorage.a1Chunks.length;
+		int globalPos = 0;
+		for (int iChunks = 0; iChunks < nbChunks; iChunks++) {
+			IndexMemDicStorageChunk chunk = sortedPositionsStorage.a1Chunks[iChunks];
+			int chunkLength = chunk.sortedPositions.length;
+			for (int posInChunk = 0; posInChunk < chunkLength; posInChunk++) {
+				chunk.sortedPositions[posInChunk] = tempSortArray[globalPos].originalLinePosition;
+				globalPos++;
+			}
+		}
+		t4_1.log();
+		
+		sortedPositionsStorage.refreshChunkList();
+		
 		/*Timer t4_2 = new Timer("IndexMemDic.sortAll - deteteAtPosition 0 :");
 		for (int i = 0; i < 20; i++)
 			deleteAtPosition(0);
@@ -128,6 +170,75 @@ public class IndexMemDic extends IndexMemDicAncester {
 		if (enableVerboseSort) t1.log();
 		
 	}
+
+	/** 
+	 *  
+	 *  @return
+	 */
+	public boolean testSortedPositionsChunks() {
+		boolean errored = false;
+		for (int iTest = 0; iTest < totalLength; iTest++) {
+			int checkValue = sortedPositions[iTest];
+			int blockValueHard = sortedPositionsStorage.findValueAtPosition(iTest, false);
+			int blockValueDic = sortedPositionsStorage.findValueAtPosition(iTest, true);
+			boolean fail = false;
+			if (checkValue != blockValueHard) {
+				Log.error("At " + iTest + " checkValue(" + checkValue + ") != blockValueHard(" + blockValueHard + ")");
+				errored = true;
+				fail = true;
+			}
+			if (checkValue != blockValueDic) {
+				Log.error("At " + iTest + " checkValue(" + checkValue + ") != blockValueDic(" + blockValueDic + ")");
+				errored = true;
+				fail = true;
+			}
+			/*if (fail == false) {
+				Log.info("At " + iTest + "  ok !");
+			}*/
+			
+		}
+		return errored == false;
+	}
+	
+	
+	/** 
+	 *  
+	 *  
+	 *  
+	 *  
+	 */
+	
+	
+	/** 
+	 *  TODO
+	 *  
+	 *  
+	 *  
+	 */
+	public void benchmarkSortedPositionsChunks() {
+		int checkValue;
+
+		Timer tArrayAccess = new Timer("Temps d'accès array simple");
+
+		for (int iTest = 0; iTest < totalLength; iTest++) {
+			checkValue = sortedPositions[iTest];
+		}
+		tArrayAccess.log();
+		
+		Timer tChunkHard = new Timer("Temps d'accès chunk bourrin");
+		for (int iTest = 0; iTest < totalLength; iTest++) {
+			checkValue = sortedPositionsStorage.findValueAtPosition(iTest, false);
+		}
+		tChunkHard.log();
+
+		Timer tChunkDic = new Timer("Temps d'accès chunk dichotomie");
+		for (int iTest = 0; iTest < totalLength; iTest++) {
+			checkValue = sortedPositionsStorage.findValueAtPosition(iTest, true);
+		}
+		tChunkDic.log();
+	}
+	
+	
 	
 	//findMatchingIndex
 	
@@ -556,6 +667,54 @@ public class IndexMemDic extends IndexMemDicAncester {
 		
 		return originalLinePositionArray;
 	}
+	
+	/** 
+	 *  @param searchQuery
+	 *  @return
+	 */
+	public int[] findMatchingLinePositionsWithChunks(ByteBuffer searchQuery) {
+		searchQuery.rewind();
+		int[] intervalBounds;
+		if (enableDoubleDichotomyVerif) {
+			Timer t1 = new Timer("Temps pris 2 dichotomies (bornes)");
+			intervalBounds = findMatchingIntervalBounds(searchQuery);
+			t1.log();
+			Timer t2 = new Timer("Temps pris 1 dichotomie + grow");
+			int[] intervalBoundsVerif = findMatchingIntervalBoundsOldWay(searchQuery);
+			t2.log();
+			
+			if (Arrays.equals(intervalBounds, intervalBoundsVerif) == false) {
+				String debugInfo = "";
+				for (int i = 0; i < intervalBounds.length; i++) {
+					debugInfo += intervalBounds[i] + " ";
+				}
+				
+				debugInfo += " vs  ";
+				for (int i = 0; i < intervalBoundsVerif.length; i++) {
+					debugInfo += intervalBoundsVerif[i] + " ";
+				}
+				
+				Log.error("Mauvaises valeurs d'intervalles pour la dichotomie : " + debugInfo);
+			}
+		} else {
+			intervalBounds = findMatchingIntervalBounds(searchQuery);
+		}
+		
+		int startIndex = intervalBounds[0];
+		int stopIndex = intervalBounds[1];
+		if (startIndex == -1 || (stopIndex - startIndex <= 0))
+			return new int[0];
+		
+		int intervalLength = stopIndex - startIndex + 1;
+		int[] originalLinePositionArray = new int[intervalLength];
+		
+		for (int iRes = 0; iRes < intervalLength; iRes++) {
+			originalLinePositionArray[iRes] = sortedPositions[iRes + startIndex];
+		}
+		
+		return originalLinePositionArray;
+	}
+	
 	
 	
 	/** Faire un group-by à partir des résultats passés en entrée.
