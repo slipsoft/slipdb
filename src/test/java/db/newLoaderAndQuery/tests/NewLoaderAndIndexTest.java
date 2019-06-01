@@ -132,7 +132,11 @@ public class NewLoaderAndIndexTest {
 		SCsvLoader csvLoader = new SCsvLoader(table, new CsvParser());
 		
 		limitParsingTimeTimer = new Timer("");
-
+		
+		/* Paring de l'irdi de Sylvain, pour des tests plus complets*/
+		//doSylvainParsing(csvLoader);
+		
+		/* Parsing générique, de gitHub*/
 		String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
 		Log.info("Parsing de csvName = " + csvPath);
 		parseThisCsv(table, csvLoader, csvPath);
@@ -185,6 +189,25 @@ public class NewLoaderAndIndexTest {
 		searchQuery.put((byte)1);
 		searchQuery.putFloat(4);
 		return searchQuery;
+	}
+	
+	private void doSylvainParsing(SCsvLoader csvLoader) throws IOException {
+		// Manière plus complète de faire, pour charger plusieurs CSV :
+		int mounthFinalCount = 1;
+		parsingTimeLimitSec = 10;
+		for (int iCsv = 1; iCsv <= mounthFinalCount; iCsv++) {
+			String colNumber = String.format("%02d" , iCsv);
+			//String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
+			String csvPath = "F:/csv/yellow_tripdata_2015-" + colNumber + ".csv"; // E:/L3 DANT disque E
+			//String csvPath = "C:/Users/admin/Desktop/L3 DANT Jussieu/Web_Olivier/yellow_tripdata_2015-" + colNumber + ".csv"; // E:/L3 DANT disque E
+			
+			//String csvPath = "F:/csv/SMALL_1_000_000_yellow_tripdata_2015-04.csv";
+			Log.info("Parsing de csvName = " + csvPath);
+			parseThisCsv(table, csvLoader, csvPath);
+		}
+		
+		
+		
 	}
 	
 	

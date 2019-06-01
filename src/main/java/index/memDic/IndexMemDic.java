@@ -18,8 +18,23 @@ import db.structure.Table;
  */
 public class IndexMemDic {
 	
+	
+	
 	public final int totalLength;
 	private int[] sortedPositions;
+	private int sortedPositionsRealLength;
+	/** 2019-05-29 : WIP - ajout et suppression de lignes dans un index.
+	 *  Modifier une ligne : la supprimer et en ajouter une nouvelle, si la modification touche une des colonnes indexées.
+	 *  
+	 *  sortedPositions doit être découpé en plusieurs blocks 
+	 *  
+	 *  Manière super bourrine de faire : supprimer une ligne à une position, tout bouger et tout redimensionner.
+	 *  Manière plus fine : découper en pleins de bouts (blocs de 10 000 à 100 000 lignes)
+	 *  
+	 */
+	private IndexMemDicStorage sortedPositionsStorage;
+	
+	
 	// Pensé pour être mono-thread, pour l'instant
 	public static Table table;
 	public static int[] colIndexArray; // dans l'ordre
@@ -39,7 +54,10 @@ public class IndexMemDic {
 		colIndexArray = argColIndexArray;
 		table = argTable;
 		totalLength = table.getTotalLinesCount();
-		sortedPositions = new int[totalLength];
+		sortedPositionsRealLength = totalLength;
+		sortedPositions = new int[sortedPositionsRealLength];
+		sortedPositionsStorage = new IndexMemDicStorage(totalLength);
+		
 		indexOnThisColArray = new Column[colIndexArray.length];
 		for (int i = 0; i < colIndexArray.length; i++) {
 			indexOnThisColArray[i] = table.getColumns().get(colIndexArray[i]);
@@ -64,6 +82,19 @@ public class IndexMemDic {
 	
 	public void sortAllv1() {
 		sortAllv1(false);
+	}
+	
+	/** TODO
+	 * 	Faire un benchmark de cette solution et de la solution avec l'index découpé par chunks
+	 *  @param deletePos
+	 */
+	public void deleteAtPosition(int deletePos) {
+		if (deletePos < 0) return;
+		if (deletePos >= sortedPositionsRealLength) return;
+		for (int rmPos = deletePos; rmPos <= sortedPositionsRealLength - 2; rmPos++) {
+			sortedPositions[rmPos] = sortedPositions[rmPos + 1];
+		}
+		sortedPositionsRealLength--;
 	}
 	
 	/** Trie les lignes en fonction des valeurs indexées
@@ -95,15 +126,47 @@ public class IndexMemDic {
 		if (enableVerboseSort) t3.log();
 		if (beSuperVerbose) MemUsage.printMemUsage();
 		
+		Timer t4_0 = new Timer("IndexMemDic.sortAll - réagencement positions avec blocs :");
+		for (int i = 0; i < totalLength; i++) {
+			int chunkPos = (i / IndexMemDicStorage.baseBlockSize);  //sortedPositions.a1Chunks
+			IndexMemDicStorageChunk chunk = sortedPositionsStorage.a1Chunks[chunkPos];
+			int posInChunk = i - chunkPos * IndexMemDicStorage.baseBlockSize;
+			chunk.sortedPositions[posInChunk] = tempSortArray[i].originalLinePosition;
+			//String displayValues = table.getLineAsReadableString(sortedPositions[i]);
+			//Log.info(displayValues);
+		}
+		t4_0.log();
+		
+
+		Timer t4_1 = new Timer("IndexMemDic.sortAll - réagencement positions avec blocs simplifié :");
+		int nbChunks = sortedPositionsStorage.a1Chunks.length;
+		int globalPos = 0;
+		for (int iChunks = 0; iChunks < nbChunks; iChunks++) {
+			IndexMemDicStorageChunk chunk = sortedPositionsStorage.a1Chunks[iChunks];
+			int chunkLength = chunk.sortedPositions.length;
+			for (int posInChunk = 0; posInChunk < chunkLength; posInChunk++) {
+				chunk.sortedPositions[posInChunk] = tempSortArray[globalPos].originalLinePosition;
+				globalPos++;
+			}
+		}
+		t4_1.log();
+
+		Timer t4_2 = new Timer("IndexMemDic.sortAll - deteteAtPosition 0 :");
+		for (int i = 0; i < 20; i++)
+			deleteAtPosition(0);
+		t4_2.log();
+		
 
 		t4 = new Timer("IndexMemDic.sortAll - réagencement positions :");
 		for (int i = 0; i < totalLength; i++) {
+			
 			sortedPositions[i] = tempSortArray[i].originalLinePosition;
 			//String displayValues = table.getLineAsReadableString(sortedPositions[i]);
 			//Log.info(displayValues);
 		}
 		if (beSuperVerbose) MemUsage.printMemUsage();
-		if (enableVerboseSort) t4.log();
+		//if (enableVerboseSort) 
+		t4.log();
 		for (int i = 0; i < totalLength; i++) {
 			tempSortArray[i] = null;
 		}
@@ -132,18 +195,18 @@ public class IndexMemDic {
 	private int[] findMatchingIntervalBoundsOldWay(ByteBuffer searchQuery) { //findClosestLinePosition
 		
 		int dicStartIndex = 0;
-		int dicStopIndex = sortedPositions.length - 1;
+		int dicStopIndex = sortedPositionsRealLength - 1;
 		int intervalLength = dicStopIndex - dicStartIndex + 1;
 		int dicCurrentIndex = (dicStopIndex - dicStartIndex) / 2;
 		
 		/*
-		for (int i = 0; i < sortedPositions.length; i++) {
+		for (int i = 0; i < sortedPositionsRealLength; i++) {
 			String line = table.getLineAsReadableString(sortedPositions[i]);
 			Log.info(line);
 		}*/
 		
 		if (useSafeSlowComparaisonsNotDichotomy) {
-			for (int i = 0; i < sortedPositions.length; i++) {
+			for (int i = 0; i < sortedPositionsRealLength; i++) {
 				int delta = compareLineValuesAndQuery(sortedPositions[i], searchQuery);
 				if (delta == 0) {
 					dicCurrentIndex = i;//sortedPositions[i];
@@ -185,9 +248,9 @@ public class IndexMemDic {
 					break;
 				}
 				
-				if (dicStopIndex >= sortedPositions.length) Log.error("dicStopIndex trop grand");
+				if (dicStopIndex >= sortedPositionsRealLength) Log.error("dicStopIndex trop grand");
 				if (dicStopIndex < 0) Log.error("dicStopIndex trop petit");
-				if (dicStartIndex >= sortedPositions.length) Log.error("dicStartIndex trop grand");
+				if (dicStartIndex >= sortedPositionsRealLength) Log.error("dicStartIndex trop grand");
 				if (dicStartIndex < 0) Log.error("dicStartIndex trop petit");
 				//Log.info("dic bornes OK currentIndex = " + dicCurrentIndex + " dicStartIndex=" + dicStartIndex + " dicStopIndex=" + dicStopIndex + " ");
 				
@@ -215,7 +278,7 @@ public class IndexMemDic {
 		}
 		
 		// Tant que je ne suis pas à l'index maximal et que la valeur suivante est égale à la valeur recherchée
-		while ( (exactValueStartIndexDic <= sortedPositions.length - 2) && (compareLineValuesAndQuery(sortedPositions[exactValueStopIndexDic + 1], searchQuery) == 0) ) {
+		while ( (exactValueStartIndexDic <= sortedPositionsRealLength - 2) && (compareLineValuesAndQuery(sortedPositions[exactValueStopIndexDic + 1], searchQuery) == 0) ) {
 			exactValueStopIndexDic++;
 		}
 		growTime.log();
@@ -238,7 +301,7 @@ public class IndexMemDic {
 	private int findMatchingIndex(ByteBuffer searchQuery, boolean findLeftValue) { // <- findLeftValue <-  ou  -> findRightValue ->  toujours en valeur exacte (inclusive)
 		
 		int dicStartIndex = 0;
-		int dicStopIndex = sortedPositions.length - 1;
+		int dicStopIndex = sortedPositionsRealLength - 1;
 		int intervalLength = dicStopIndex - dicStartIndex + 1;
 		int dicCurrentIndex = dicStartIndex + intervalLength / 2;
 		
@@ -298,7 +361,7 @@ public class IndexMemDic {
 					// Trouver la valeur de droite
 					// Je ne m'arrête que lorsque la valeur de droite est soit différente (plus grande) soit l'index maximal
 					
-					if (dicCurrentIndex == (sortedPositions.length - 1)) break;
+					if (dicCurrentIndex == (sortedPositionsRealLength - 1)) break;
 					int rightRealLinePosition = sortedPositions[dicCurrentIndex + 1];
 					int rightDelta = compareLineValuesAndQuery(rightRealLinePosition, searchQuery);
 					
@@ -312,9 +375,9 @@ public class IndexMemDic {
 				//break;
 			}
 			
-			if (dicStopIndex >= sortedPositions.length) Log.error("dicStopIndex trop grand");
+			if (dicStopIndex >= sortedPositionsRealLength) Log.error("dicStopIndex trop grand");
 			if (dicStopIndex < 0) Log.error("dicStopIndex trop petit");
-			if (dicStartIndex >= sortedPositions.length) Log.error("dicStartIndex trop grand");
+			if (dicStartIndex >= sortedPositionsRealLength) Log.error("dicStartIndex trop grand");
 			if (dicStartIndex < 0) Log.error("dicStartIndex trop petit");
 			//Log.info("dic bornes OK currentIndex = " + dicCurrentIndex + " dicStartIndex=" + dicStartIndex + " dicStopIndex=" + dicStopIndex + " ");
 			
