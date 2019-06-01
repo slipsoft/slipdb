@@ -44,6 +44,7 @@ public class IndexMemDic extends IndexMemDicAncester {
 		}
 	}
 	
+	
 	/** Création de l'index par dichotomie, en le rendant directement fonctionnel si (shortThisIndex == true) (classement des valeurs indexées)
 	 *  @param argTable
 	 *  @param argColIndexArray
@@ -54,10 +55,28 @@ public class IndexMemDic extends IndexMemDicAncester {
 		if (shortThisIndex)
 			sortAllv1();
 	}
-	/*
-	public void setPosition(int sortedByValueIndex, int lineOriginalPosition) {
-		sortedPositions[sortedByValueIndex] = lineOriginalPosition;
-	}*/
+	
+	/** Vérifie si une colonne est indexée par cet index
+	 *  @param colIndex
+	 *  @return
+	 */
+	public boolean hasColumnIndex(int colIndex) {
+		for (int iCol : colIndexArray) {
+			if (iCol == colIndex) return true;
+		}
+		return false;
+	}
+	
+	/** Suppression d'une colonne de la table : répercussion sur les index
+	 *  @param colIndex
+	 *  @return
+	 */
+	public void columnWasDeletedFromTable(int colIndex) {
+		for (int i = 0; i < colIndexArray.length; i++) {
+			if (colIndexArray[i] > colIndex)
+				colIndexArray[i]--;
+		}
+	}
 	
 	/** Mise à jour de l'index avec les données des colonnes,
 	 *  nécessaire lors de l'ajout de nouvelles lignes.
@@ -151,6 +170,11 @@ public class IndexMemDic extends IndexMemDicAncester {
 		
 		
 	}
+	
+	/*
+	public void setPosition(int sortedByValueIndex, int lineOriginalPosition) {
+		sortedPositions[sortedByValueIndex] = lineOriginalPosition;
+	}*/
 	
 	public void enableFlagCheck(boolean enable) {
 		hasToCheckResultsFlags = enable;
