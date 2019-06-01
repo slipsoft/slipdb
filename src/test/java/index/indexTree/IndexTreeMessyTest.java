@@ -1,4 +1,4 @@
-package db.structure.indexTree;
+package index.indexTree;
 
 import java.io.IOException;
 import java.util.*;
@@ -56,7 +56,7 @@ class IndexTreeMessyTest {
 	
 	private static String serializeFromPath = "data_save/serialStructureEverything.bin";
 	
-	//@BeforeAll
+	@BeforeAll
 	static void setUpBeforeAll() throws Exception {
 		SerialStructure.loadStructureFrom(serializeFromPath);
 		table = Database.getInstance().getAllTables().get(0);
@@ -69,7 +69,7 @@ class IndexTreeMessyTest {
 		}*/
 	}
 	
-	//@BeforeAll
+	@BeforeAll
 	@Deprecated // IndexTreeDic n'est plus utilisé, remplacé par IndexMemDic
 	static void setUpBeforeAllDe() throws Exception {
 		Log.info("setUpBeforeAll");
@@ -357,7 +357,7 @@ class IndexTreeMessyTest {
 		
 	}*/
 	
-	//@Test
+	@Test
 	@Deprecated // IndexTreeDic n'est plus utilisé, remplacé par IndexMemDic
 	void testIndexTreeDic() throws Exception {
 		//if (true) return;
@@ -730,8 +730,8 @@ class IndexTreeMessyTest {
 		
 	}
 
-	//@Test
-	@Deprecated // IndexTreeDic n'est plus utilisé, remplacé par IndexMemDic
+	@Test
+	// à appliquer au nouvel index car IndexTreeDic n'est plus utilisé, remplacé par IndexMemDic
 	void executeView() {
 		if (enableCsvRelatedTests == false) return;
 		Column column1 = table.getColumns().get(1);
@@ -763,23 +763,29 @@ class IndexTreeMessyTest {
 			ResultSet result;
 			result = view1.execute();
 			assertEquals(140, result.size());
+			Log.info("executed view1");
 			result = view2.execute();
 			assertEquals(700, result.size());
+			Log.info("executed view2");
 			result = view3.execute();
 			assertEquals(700, result.size());
+			Log.info("executed view3");
 			result = view4.execute();
 			assertEquals(0, result.size());
+			Log.info("executed view4");
 			result = view5.execute();
 			assertEquals(24, result.size());
+			Log.info("executed view5");
 			result = view6.execute();
 			assertEquals(816, result.size());
+			Log.info("executed view6");
 		} catch (SearchException e) {
 			Log.error(e);
 			throw new AssertionError(e);
 		}
 	}
 	
-	//@AfterAll
+	@AfterAll
 	@Deprecated // IndexTreeDic n'est plus utilisé, remplacé par IndexMemDic
 	static void tearDown() {
 		
