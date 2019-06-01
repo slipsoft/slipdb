@@ -32,6 +32,7 @@ import db.structure.Column;
 import db.structure.Database;
 import db.structure.Index;
 import db.structure.Table;
+import index.IndexException;
 import org.apache.commons.lang3.ArrayUtils;
 import sj.network.tcpAndBuffers.NetBuffer;
 

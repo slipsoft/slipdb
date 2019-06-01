@@ -19,7 +19,7 @@ import db.data.types.DateType;
 import db.disk.dataHandler.DiskDataPosition;
 import db.structure.Column;
 import db.structure.Table;
-import index.indexTree.IndexException;
+import index.IndexException;
 
 public class Loader {
 	private Table currentTable;

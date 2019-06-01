@@ -343,7 +343,7 @@ public class IndexMemDic {
 	
 	/** 
 	 *  @param linePosition
-	 *  @param seachQuery
+	 *  @param searchQuery
 	 *  @return
 	 */
 	public int compareLineValuesAndQuery(int linePosition, ByteBuffer searchQuery) {
@@ -380,7 +380,6 @@ public class IndexMemDic {
 	}
 	
 	/** Recherche à partir d'une liste d'objets
-	 * @param searchQuery
 	 * @return  null en cas d'erreur, un int[] contenant les position des lignes coïncidant
 	 */
 	public int[] findMatchingLinePositions(List<Object> queryList, boolean warnIfWrongArgumentType) {
