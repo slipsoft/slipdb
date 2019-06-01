@@ -37,7 +37,7 @@ public class IndexMemDicStorageTests {
 	 * @throws Exception 
 	 */
 	
-	@Test
+	//@Test
 	public void mainTestFirst() throws Exception {
 		// Parsing et mise en mémoire vive des CSV à charger
 		// Pas de seuvagerde sur disque, pour l'instant
@@ -46,8 +46,12 @@ public class IndexMemDicStorageTests {
 		// Création de l'index sur les colonnes (d'index) 3 et 4 de la table "table".
 		IndexMemDicCh indexDic = new IndexMemDicCh(table, new int[]{3, 4}); // passenger_count et trip_distance
 		// Etape nécessaire à la réalisation de la dichotomie : classement des lignes indexées par ordre croissant (en fonction des valeurs indexées)
+		Timer tim = new Timer("Temps pris pour classer la 1ère fois");
 		indexDic.sortAllv1();
-		
+		tim.log();
+		tim = new Timer("Temps pris pour classer la 2ème fois");
+		indexDic.sortAllv1();
+		tim.log();
 		
 		if (indexDic.testSortedPositionsChunks() == false)
 			throw new Exception("Erreur lors du test indexMemDic.testSortedPositionsChunks()");
@@ -60,20 +64,24 @@ public class IndexMemDicStorageTests {
 		
 		
 		
-		
 	}
 	
-	//@Test
+	@Test
 	public void mainTest() throws Exception {
 		
 		// Parsing et mise en mémoire vive des CSV à charger
-		// Pas de seuvagerde sur disque, pour l'instant
+		// Pas de sauvagerde sur disque, pour l'instant
 		loadFirst();
 		
 		// Création de l'index sur les colonnes (d'index) 3 et 4 de la table "table".
-		IndexMemDic indexDic = new IndexMemDic(table, new int[]{3, 4}); // passenger_count et trip_distance
+		IndexMemDicCh indexDic = new IndexMemDicCh(table, new int[]{3, 4}); // passenger_count et trip_distance
 		// Etape nécessaire à la réalisation de la dichotomie : classement des lignes indexées par ordre croissant (en fonction des valeurs indexées)
+		Timer tim = new Timer("Temps pris pour classer la 1ère fois");
 		indexDic.sortAllv1();
+		tim.log();
+		tim = new Timer("Temps pris pour classer la 2ème fois");
+		indexDic.sortAllv1();
+		tim.log();
 		
 		// Faire une requête sur l'index
 		// Trois manières possibles :
@@ -163,12 +171,12 @@ public class IndexMemDicStorageTests {
 		limitParsingTimeTimer = new Timer("");
 		
 		/* Paring de l'irdi de Sylvain, pour des tests plus complets*/
-		//doSylvainParsing(csvLoader);
+		doSylvainParsing(csvLoader);
 		
-		/* Parsing générique, de gitHub*/
+		/* Parsing générique, de gitHub
 		String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
 		Log.info("Parsing de csvName = " + csvPath);
-		parseThisCsv(table, csvLoader, csvPath);
+		parseThisCsv(table, csvLoader, csvPath);*/
 		
 		parseTimer.log();
 		
@@ -206,7 +214,7 @@ public class IndexMemDicStorageTests {
 	private void doSylvainParsing(SCsvLoader csvLoader) throws IOException {
 		// Manière plus complète de faire, pour charger plusieurs CSV :
 		int mounthFinalCount = 1;
-		parsingTimeLimitSec = 10;
+		parsingTimeLimitSec = 20;
 		for (int iCsv = 1; iCsv <= mounthFinalCount; iCsv++) {
 			String colNumber = String.format("%02d" , iCsv);
 			//String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";

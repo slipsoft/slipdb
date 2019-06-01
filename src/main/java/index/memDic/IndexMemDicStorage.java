@@ -26,7 +26,6 @@ public class IndexMemDicStorage {
 	public int totalNumberOfPositions; // nombre total de positions stockées (et donc classées)
 	
 	
-	
 	public IndexMemDicStorage(int totalLength) {
 		totalNumberOfPositions = totalLength;
 		int chunkNb = (int) Math.ceil(((double)totalNumberOfPositions / (double)baseBlockSize)); // arrondi au supérieur
