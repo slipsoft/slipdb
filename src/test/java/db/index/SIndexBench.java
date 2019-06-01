@@ -299,7 +299,7 @@ public class SIndexBench {
 		timerQuery.log();
 		timer.log();
 		
-		
+		ind3.enableFlagCheck(false);
 		for (int i = 1; i < 40; i++) {
 			timerQuery = new Timer("Temps pris testIndexMemDic QUERY ONLY");
 			resultsPositionsArray = ind3.findMatchingLinePositions(searchQuery); // les positions des lignes de résultat, réelles

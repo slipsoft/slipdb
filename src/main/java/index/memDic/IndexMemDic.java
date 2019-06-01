@@ -23,6 +23,7 @@ public class IndexMemDic extends IndexMemDicAncester {
 	public int totalLength;
 	private int[] sortedPositions;
 	private int sortedPositionsRealLength;
+	private boolean hasToCheckResultsFlags = false;
 	
 	
 	/** Création de l'index par dichotomie
@@ -138,8 +139,7 @@ public class IndexMemDic extends IndexMemDicAncester {
 			//Log.info(displayValues);
 		}
 		if (beSuperVerbose) MemUsage.printMemUsage();
-		//if (enableVerboseSort) 
-		t4.log();
+		if (enableVerboseSort) t4.log();
 		for (int i = 0; i < totalLength; i++) {
 			tempSortArray[i] = null;
 		}
@@ -147,9 +147,13 @@ public class IndexMemDic extends IndexMemDicAncester {
 		tempSortArray = null;
 		if (enableVerboseSort) t1.log();
 		
+		//hasToCheckResultsFlags = false;
 		
 		
-		
+	}
+	
+	public void enableFlagCheck(boolean enable) {
+		hasToCheckResultsFlags = enable;
 	}
 	
 	public void sortAllv1() {
@@ -646,24 +650,33 @@ public class IndexMemDic extends IndexMemDicAncester {
 			return new int[0];
 		
 		int intervalLength = stopIndex - startIndex + 1;
-		int[] originalLinePositionArray = new int[intervalLength];
 		
-		int realResultCount = 0;
-		for (int iRes = 0; iRes < intervalLength; iRes++) {
-			int linePositionInTable = sortedPositions[iRes + startIndex];
-			boolean stillPresent = table.getLineFlag(linePositionInTable);
-			if (stillPresent) {
-				originalLinePositionArray[realResultCount] = linePositionInTable;
-				realResultCount++;
+		if (hasToCheckResultsFlags) {
+			int[] originalLinePositionArray = new int[intervalLength];
+			int realResultCount = 0;
+			for (int iRes = 0; iRes < intervalLength; iRes++) {
+				int linePositionInTable = sortedPositions[iRes + startIndex];
+				boolean stillPresent = table.getLineFlag(linePositionInTable);
+				if (stillPresent) {
+					originalLinePositionArray[realResultCount] = linePositionInTable;
+					realResultCount++;
+				}
 			}
+			
+			int[] originalLinePositionArray_realSize = new int[realResultCount];
+			for (int iRes = 0; iRes < realResultCount; iRes++) {
+				originalLinePositionArray_realSize[iRes] = sortedPositions[iRes + startIndex];
+			}
+			
+			return originalLinePositionArray_realSize;
+		} else {
+			
+			int[] originalLinePositionArray_realSize = new int[intervalLength];
+			for (int iRes = 0; iRes < intervalLength; iRes++) {
+				originalLinePositionArray_realSize[iRes] = sortedPositions[iRes + startIndex];
+			}
+			return originalLinePositionArray_realSize;
 		}
-		
-		int[] originalLinePositionArray_realSize = new int[realResultCount];
-		for (int iRes = 0; iRes < realResultCount; iRes++) {
-			originalLinePositionArray_realSize[iRes] = sortedPositions[iRes + startIndex];
-		}
-		
-		return originalLinePositionArray_realSize;
 	}
 	
 	

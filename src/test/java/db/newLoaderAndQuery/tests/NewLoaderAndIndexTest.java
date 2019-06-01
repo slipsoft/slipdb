@@ -88,6 +88,7 @@ public class NewLoaderAndIndexTest {
 			throw error;
 		}
 		
+		indexDic.enableFlagCheck(true); // vérifier si les résultats existent bien, à chaque retour
 		// Supprimer des lignes pour tester
 		for (int i = 0; i < table.getLastLoadedLineIndexLength(); i++) {
 			if (i % 3 == 0)
@@ -98,6 +99,9 @@ public class NewLoaderAndIndexTest {
 		Log.info("Recherche FLAG OK ! Nb résultats avec FLAG : " + resultsPositionsArrayFlag.length + "  index len = " + indexDic.totalLength);
 		
 		indexDic.refreshIndexWithColumnsData(true);
+		
+		// index restructuré, il n'est alors pas nécesaire de vérifier queles résultats retournés sont flagés "supprimés".
+		indexDic.enableFlagCheck(false);
 		
 		int[] resultsPositionsArrayStruct = indexDic.findMatchingLinePositions(searchQuery); // les positions des lignes de résultat, réelles
 		Log.info("Recherche STRUCT OK ! Nb résultats avec restructuration : " + resultsPositionsArrayStruct.length + "  index len = " + indexDic.totalLength);
