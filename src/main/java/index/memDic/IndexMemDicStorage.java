@@ -146,6 +146,16 @@ public class IndexMemDicStorage {
 	 */
 	
 	
+	/** Cas simple : supprimer une seule ligne
+	 *  @param globalDeletePosition
+	 */
+	public void deleteAtPositionSingle(int globalDeletePosition) {
+		// 1) Il faut trouver le bloc dans lequel est cette position
+		
+		
+		
+	}
+	
 	public void setChunkLineValue() {
 		
 	}

@@ -47,8 +47,19 @@ public class IndexMemDicStorageTests {
 		// Etape nécessaire à la réalisation de la dichotomie : classement des lignes indexées par ordre croissant (en fonction des valeurs indexées)
 		indexDic.sortAllv1();
 		
+		
 		if (indexDic.testSortedPositionsChunks() == false)
 			throw new Exception("Erreur lors du test indexMemDic.testSortedPositionsChunks()");
+		
+		indexDic.benchmarkSortedPositionsChunks();
+		
+	}
+	
+	private void doSpeedBenchmark() {
+		
+		
+		
+		
 	}
 	
 	//@Test
@@ -158,24 +169,7 @@ public class IndexMemDicStorageTests {
 		Log.info("Parsing de csvName = " + csvPath);
 		parseThisCsv(table, csvLoader, csvPath);
 		
-		
-		/* Manière plus complète de faire, pour charger plusieurs CSV :
-		int mounthFinalCount = 1;
-		for (int iCsv = 1; iCsv <= mounthFinalCount; iCsv++) {
-			String colNumber = String.format("%02d" , iCsv);
-			String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
-			//String csvPath = "F:/csv/yellow_tripdata_2015-" + colNumber + ".csv"; // E:/L3 DANT disque E
-			//String csvPath = "C:/Users/admin/Desktop/L3 DANT Jussieu/Web_Olivier/yellow_tripdata_2015-" + colNumber + ".csv"; // E:/L3 DANT disque E
-			
-			//String csvPath = "F:/csv/SMALL_1_000_000_yellow_tripdata_2015-04.csv";
-			Log.info("Parsing de csvName = " + csvPath);
-			parseThisCsv(table, csvLoader, csvPath);
-		}*/
-		
-		//System.gc();
-		//MemUsage.printMemUsage("Mem usage  fin - ");
 		parseTimer.log();
-		
 		
 		
 	}

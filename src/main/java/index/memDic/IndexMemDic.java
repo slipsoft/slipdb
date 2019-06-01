@@ -177,7 +177,7 @@ public class IndexMemDic {
 		if (enableVerboseSort) t1.log();
 		
 	}
-	
+
 	/** 
 	 *  
 	 *  @return
@@ -206,6 +206,37 @@ public class IndexMemDic {
 		}
 		return errored == false;
 	}
+
+	/** 
+	 *  TODO
+	 *  
+	 *  
+	 *  
+	 */
+	public void benchmarkSortedPositionsChunks() {
+		int checkValue;
+
+		Timer tArrayAccess = new Timer("Temps d'accès array simple");
+
+		for (int iTest = 0; iTest < totalLength; iTest++) {
+			checkValue = sortedPositions[iTest];
+		}
+		tArrayAccess.log();
+		
+		Timer tChunkHard = new Timer("Temps d'accès chunk bourrin");
+		for (int iTest = 0; iTest < totalLength; iTest++) {
+			checkValue = sortedPositionsStorage.findValueAtPosition(iTest, false);
+		}
+		tChunkHard.log();
+
+		Timer tChunkDic = new Timer("Temps d'accès chunk dichotomie");
+		for (int iTest = 0; iTest < totalLength; iTest++) {
+			checkValue = sortedPositionsStorage.findValueAtPosition(iTest, true);
+		}
+		tChunkDic.log();
+	}
+	
+	
 	
 	//findMatchingIndex
 	
