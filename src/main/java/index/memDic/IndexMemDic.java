@@ -150,11 +150,13 @@ public class IndexMemDic {
 			}
 		}
 		t4_1.log();
-
-		Timer t4_2 = new Timer("IndexMemDic.sortAll - deteteAtPosition 0 :");
+		
+		sortedPositionsStorage.refreshChunkList();
+		
+		/*Timer t4_2 = new Timer("IndexMemDic.sortAll - deteteAtPosition 0 :");
 		for (int i = 0; i < 20; i++)
 			deleteAtPosition(0);
-		t4_2.log();
+		t4_2.log();*/
 		
 
 		t4 = new Timer("IndexMemDic.sortAll - réagencement positions :");
@@ -176,9 +178,37 @@ public class IndexMemDic {
 		
 	}
 	
+	/** 
+	 *  
+	 *  @return
+	 */
+	public boolean testSortedPositionsChunks() {
+		boolean errored = false;
+		for (int iTest = 0; iTest < totalLength; iTest++) {
+			int checkValue = sortedPositions[iTest];
+			int blockValueHard = sortedPositionsStorage.findValueAtPosition(iTest, false);
+			int blockValueDic = sortedPositionsStorage.findValueAtPosition(iTest, true);
+			boolean fail = false;
+			if (checkValue != blockValueHard) {
+				Log.error("At " + iTest + " checkValue(" + checkValue + ") != blockValueHard(" + blockValueHard + ")");
+				errored = true;
+				fail = true;
+			}
+			if (checkValue != blockValueDic) {
+				Log.error("At " + iTest + " checkValue(" + checkValue + ") != blockValueDic(" + blockValueDic + ")");
+				errored = true;
+				fail = true;
+			}
+			/*if (fail == false) {
+				Log.info("At " + iTest + "  ok !");
+			}*/
+			
+		}
+		return errored == false;
+	}
+	
 	//findMatchingIndex
 	
-
 	private int[] findMatchingIntervalBounds(ByteBuffer searchQuery) { //findClosestLinePosition
 		int startIndex = findMatchingIndex(searchQuery, true);
 		if (startIndex == -1) return new int[] {-1, -1};
@@ -604,6 +634,55 @@ public class IndexMemDic {
 		
 		return originalLinePositionArray;
 	}
+	
+	/** 
+	 *  @param searchQuery
+	 *  @return
+	 */
+	public int[] findMatchingLinePositionsWithChunks(ByteBuffer searchQuery) {
+		searchQuery.rewind();
+		int[] intervalBounds;
+		if (enableDoubleDichotomyVerif) {
+			Timer t1 = new Timer("Temps pris 2 dichotomies (bornes)");
+			intervalBounds = findMatchingIntervalBounds(searchQuery);
+			t1.log();
+			Timer t2 = new Timer("Temps pris 1 dichotomie + grow");
+			int[] intervalBoundsVerif = findMatchingIntervalBoundsOldWay(searchQuery);
+			t2.log();
+			
+			if (Arrays.equals(intervalBounds, intervalBoundsVerif) == false) {
+				String debugInfo = "";
+				for (int i = 0; i < intervalBounds.length; i++) {
+					debugInfo += intervalBounds[i] + " ";
+				}
+				
+				debugInfo += " vs  ";
+				for (int i = 0; i < intervalBoundsVerif.length; i++) {
+					debugInfo += intervalBoundsVerif[i] + " ";
+				}
+				
+				Log.error("Mauvaises valeurs d'intervalles pour la dichotomie : " + debugInfo);
+			}
+		} else {
+			intervalBounds = findMatchingIntervalBounds(searchQuery);
+		}
+		
+		int startIndex = intervalBounds[0];
+		int stopIndex = intervalBounds[1];
+		if (startIndex == -1 || (stopIndex - startIndex <= 0))
+			return new int[0];
+		
+		int intervalLength = stopIndex - startIndex + 1;
+		int[] originalLinePositionArray = new int[intervalLength];
+		
+		for (int iRes = 0; iRes < intervalLength; iRes++) {
+			originalLinePositionArray[iRes] = sortedPositions[iRes + startIndex];
+		}
+		
+		return originalLinePositionArray;
+	}
+	
+	
 	
 	/** Faire un group-by à partir des résultats passés en entrée.
 	 *  Le order 

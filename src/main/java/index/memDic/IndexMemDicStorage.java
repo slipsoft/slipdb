@@ -23,11 +23,13 @@ public class IndexMemDicStorage {
 	 */
 	
 	public IndexMemDicStorageChunk[] a1Chunks;
+	public int totalNumberOfPositions; // nombre total de positions stockées (et donc classées)
 	
 	
 	
 	public IndexMemDicStorage(int totalLength) {
-		int chunkNb = (int) Math.ceil(((double)totalLength / (double)baseBlockSize)); // arrondi au supérieur
+		totalNumberOfPositions = totalLength;
+		int chunkNb = (int) Math.ceil(((double)totalNumberOfPositions / (double)baseBlockSize)); // arrondi au supérieur
 		
 		a1Chunks = new IndexMemDicStorageChunk[chunkNb];
 		
@@ -37,7 +39,7 @@ public class IndexMemDicStorage {
 				a1Chunks[iChunk] = new IndexMemDicStorageChunk(baseBlockSize, iChunk * baseBlockSize);
 			}
 			// Création du dernier chunk, de taille variable
-			int lastChunkLength = totalLength - (chunkNb - 1) * baseBlockSize;
+			int lastChunkLength = totalNumberOfPositions - (chunkNb - 1) * baseBlockSize;
 			a1Chunks[chunkNb - 1] = new IndexMemDicStorageChunk(lastChunkLength, (chunkNb - 1) * baseBlockSize);
 		} else {
 			// pas de données indexées, pas de chunk à créer
@@ -84,6 +86,50 @@ public class IndexMemDicStorage {
 			}
 		} else {
 			// recherche par dichotomie
+			int startChunkPosition = 0;
+			int stopChunkPosition = a1Chunks.length - 1;
+			
+			int currentChunkPosition;// = a1Chunks.length / 2;
+			
+			while (stopChunkPosition - startChunkPosition >= 1) {
+				int chunkInvervalLength = stopChunkPosition - startChunkPosition;
+				// Je me place au centre de l'intervalle
+				currentChunkPosition = startChunkPosition + chunkInvervalLength / 2;
+				// Je regarde où je dois aller (ok, droite, gauche)
+				IndexMemDicStorageChunk chunk = a1Chunks[currentChunkPosition];
+				if (chunk.hasGlobalPosition(globalPositionInIndex)) {
+					startChunkPosition = currentChunkPosition;
+					stopChunkPosition = currentChunkPosition;
+					return (chunk.getValueAtGlobalPosition(globalPositionInIndex));
+				}
+				// Si le chunk n'a pas la position, je regarde si la position est à droite ou à gauche
+				if (chunk.startPosition < globalPositionInIndex) {
+					// Si la position de départ du chunk est plus petite et qu'il ne contient pas la position,
+					// je drois aller à droite
+					startChunkPosition = currentChunkPosition + 1;
+					continue;
+				} else { // (else non nécessaire, mais ajouté pour plus de clareté)
+					// Si la position de départ du chunk est plus grande et qu'il ne contient pas la position,
+					// je drois aller à gauche
+					stopChunkPosition = currentChunkPosition - 1;
+					continue;
+				}
+			}
+			if (stopChunkPosition - startChunkPosition >= 1) {
+				Log.error("Bornes de fin de dichotomie invalides : " + (stopChunkPosition - startChunkPosition));
+				return -1;
+			}
+			
+			IndexMemDicStorageChunk chunk = a1Chunks[startChunkPosition];
+			if (chunk.hasGlobalPosition(globalPositionInIndex) == false) {
+				Log.error("Un seul chunk restant, mais la position n'y est pas."
+						+ "globalPositionInIndex("+globalPositionInIndex+") et intervalChunk=[" + chunk.startPosition + ",  " + chunk.getLastPosition() + "]");
+				return -1;
+				
+			} else {
+				return (chunk.getValueAtGlobalPosition(globalPositionInIndex));
+				//Log.info("Trouvay !");
+			}
 			
 			
 		}
