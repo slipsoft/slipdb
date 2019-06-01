@@ -44,6 +44,8 @@ public class Table implements Serializable {
 	private final String baseTablePath;
 	private int lineDataSize;
 	
+	private int lastLoadedLineIndex = 0;
+	
 	
 	//protected final String dataFilesOnDiskBasePath; devenu baseTablePath
 	protected final TableDataHandler dataHandler;
@@ -452,6 +454,7 @@ public class Table implements Serializable {
 			a2FlagChunk.add(new TableFlagChunk());
 		}
 		realNumberOfLines++;
+		lastLoadedLineIndex++;
 	}
 
 	/** Sans vérification de la validité de la position passée en paramètre.
@@ -470,6 +473,7 @@ public class Table implements Serializable {
 			realNumberOfLines++; // re-charger
 		}
 		chunk.setItem(localLinePosition, isPresent);
+		// aucun impact sur lastLoadedLineIndex.
 	}
 	
 	
@@ -491,6 +495,14 @@ public class Table implements Serializable {
 	public int getTotalNumberOfLines() {
 		return realNumberOfLines;
 	}
+
+	/** 
+	 *  @return le nombre total de lignes en mémoire, quel que soit leur flag (supprimées ou présentes).
+	 */
+	public int getLastLoadedLineIndex() {
+		return lastLoadedLineIndex;
+	}
+	
 	
 	public boolean testCheckLinesNumber() throws Exception {
 		int colMaxNb = 0;
