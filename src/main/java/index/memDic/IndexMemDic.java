@@ -58,6 +58,22 @@ public class IndexMemDic extends IndexMemDicAncester {
 		sortedPositions[sortedByValueIndex] = lineOriginalPosition;
 	}*/
 	
+	/** Mise à jour de l'index avec les données des colonnes,
+	 *  nécessaire lors de l'ajout de nouvelles lignes.
+	 *  
+	 *  Ça pourrait être beaucoup plus optimisé avec un système de chunks, mais je n'ai malheureusement plus assez de temps.
+	*/
+	public void refreshIndexWithColumnsData() {
+		
+		
+		IndexMemDicTemporaryItem[] tempSortArray = new IndexMemDicTemporaryItem[totalLength];
+		for (int i = 0; i < totalLength; i++) {
+			tempSortArray[i] = new IndexMemDicTemporaryItem(i);
+		}
+		
+		
+	}
+	
 	public void sortAllv1() {
 		sortAllv1(false);
 	}
@@ -109,7 +125,7 @@ public class IndexMemDic extends IndexMemDicAncester {
 			deleteAtPosition(0);
 		t4_2.log();*/
 		
-
+		
 		t4 = new Timer("IndexMemDic.sortAll - réagencement positions :");
 		for (int i = 0; i < totalLength; i++) {
 			

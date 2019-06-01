@@ -20,7 +20,7 @@ import db.data.types.StringType;
 import db.newLoader.SCsvLoader;
 import db.structure.Table;
 import index.memDic.IndexMemDic;
-import index.memDic.IndexMemDicCh;
+//import index.memDic.IndexMemDicCh;
 
 /** 
  *  Tests pour le stockage des positions dans un index.
@@ -44,7 +44,7 @@ public class IndexMemDicStorageTests {
 		loadFirst();
 		
 		// Création de l'index sur les colonnes (d'index) 3 et 4 de la table "table".
-		IndexMemDicCh indexDic = new IndexMemDicCh(table, new int[]{3, 4}); // passenger_count et trip_distance
+		IndexMemDic indexDic = new IndexMemDic(table, new int[]{3, 4}); // passenger_count et trip_distance
 		// Etape nécessaire à la réalisation de la dichotomie : classement des lignes indexées par ordre croissant (en fonction des valeurs indexées)
 		Timer tim = new Timer("Temps pris pour classer la 1ère fois");
 		indexDic.sortAllv1();
@@ -53,10 +53,10 @@ public class IndexMemDicStorageTests {
 		indexDic.sortAllv1();
 		tim.log();
 		
-		if (indexDic.testSortedPositionsChunks() == false)
+		/*if (indexDic.testSortedPositionsChunks() == false)
 			throw new Exception("Erreur lors du test indexMemDic.testSortedPositionsChunks()");
 		
-		indexDic.benchmarkSortedPositionsChunks();
+		indexDic.benchmarkSortedPositionsChunks();*/
 		
 	}
 	
@@ -74,10 +74,12 @@ public class IndexMemDicStorageTests {
 		loadFirst();
 		
 		// Création de l'index sur les colonnes (d'index) 3 et 4 de la table "table".
-		IndexMemDicCh indexDic = new IndexMemDicCh(table, new int[]{3, 4}); // passenger_count et trip_distance
+		IndexMemDic indexDic = new IndexMemDic(table, new int[]{3, 4}); // passenger_count et trip_distance
 		// Etape nécessaire à la réalisation de la dichotomie : classement des lignes indexées par ordre croissant (en fonction des valeurs indexées)
 		Timer tim = new Timer("Temps pris pour classer la 1ère fois");
 		indexDic.sortAllv1();
+		
+		
 		tim.log();
 		tim = new Timer("Temps pris pour classer la 2ème fois");
 		indexDic.sortAllv1();

@@ -24,7 +24,7 @@ import db.structure.Table;
  */
 
 
-public class IndexMemDicCh extends IndexMemDicAncester {
+public class IndexMemDicChObs extends IndexMemDicAncester {
 	
 	
 	public final int totalLength;
@@ -45,7 +45,7 @@ public class IndexMemDicCh extends IndexMemDicAncester {
 	 *  @param argTable
 	 *  @param argColIndexArray
 	 */
-	public IndexMemDicCh(Table argTable, int[] argColIndexArray) { // int argTotalLength,
+	public IndexMemDicChObs(Table argTable, int[] argColIndexArray) { // int argTotalLength,
 		colIndexArray = argColIndexArray;
 		table = argTable;
 		totalLength = table.getTotalLinesCount();
@@ -65,7 +65,7 @@ public class IndexMemDicCh extends IndexMemDicAncester {
 	 *  @param argColIndexArray
 	 *  @param shortThisIndex
 	 */
-	public IndexMemDicCh(Table argTable, int[] argColIndexArray, boolean shortThisIndex) { // int argTotalLength,
+	public IndexMemDicChObs(Table argTable, int[] argColIndexArray, boolean shortThisIndex) { // int argTotalLength,
 		this(argTable, argColIndexArray);
 		if (shortThisIndex)
 			sortAllv1();
