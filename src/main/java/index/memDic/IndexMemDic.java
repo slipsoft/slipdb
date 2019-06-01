@@ -20,7 +20,7 @@ public class IndexMemDic extends IndexMemDicAncester {
 	
 	
 	
-	public final int totalLength;
+	public int totalLength;
 	private int[] sortedPositions;
 	private int sortedPositionsRealLength;
 	
@@ -63,13 +63,91 @@ public class IndexMemDic extends IndexMemDicAncester {
 	 *  
 	 *  Ça pourrait être beaucoup plus optimisé avec un système de chunks, mais je n'ai malheureusement plus assez de temps.
 	*/
-	public void refreshIndexWithColumnsData() {
+	public void refreshIndexWithColumnsData(boolean beSuperVerbose) {
 		
+		beSuperVerbose = (beSuperVerbose && enableVerboseSort);
 		
-		IndexMemDicTemporaryItem[] tempSortArray = new IndexMemDicTemporaryItem[totalLength];
-		for (int i = 0; i < totalLength; i++) {
-			tempSortArray[i] = new IndexMemDicTemporaryItem(i);
+		if (beSuperVerbose) MemUsage.printMemUsage();
+		Timer t1, t2, t3, t4;
+		
+		t1 = new Timer("IndexMemDic.sortAll - tout :");
+		t2 = new Timer("IndexMemDic.sortAll - création objets :");
+		
+		if (beSuperVerbose) MemUsage.printMemUsage();
+		
+		int numberOfStillPersentLines = table.getTotalNumberOfLines();
+		int lastLoadedLineIndexLength = table.getLastLoadedLineIndexLength();
+		
+		// Déjà, j'ajoute les lignes que j'ai en mémoire, si elles sont toujours présentes
+		int oldTotalLength = totalLength;
+		totalLength = numberOfStillPersentLines;
+		// Ici, je suppose que la seule différence avec l'état précédent est
+		// que des lignes ont été ajoutées et des lignes ont été flag.
+		// Pas de restructuration profonde de la base et des données, donc.
+		// Il y a donc toujours totalLength >= oldTotalLength.
+		
+		IndexMemDicTemporaryItem[] tempSortArray = new IndexMemDicTemporaryItem[numberOfStillPersentLines];
+		int indexInTempSortArray = 0;
+		
+		// Pour chaque ligne déjà dans l'index, je regarde si elle existe toujours
+		for (int iLine = 0; iLine < oldTotalLength; iLine++) {
+			int linePositionInTable = sortedPositions[iLine];
+			boolean stillPresent = table.getLineFlag(linePositionInTable);
+			if (stillPresent) {
+				tempSortArray[indexInTempSortArray] = new IndexMemDicTemporaryItem(linePositionInTable);
+				indexInTempSortArray++;
+			}
 		}
+		// Ajout des nouvelles lignes
+		for (int iLine = oldTotalLength; iLine < lastLoadedLineIndexLength; iLine++) {
+			
+			boolean stillPresent = table.getLineFlag(iLine);
+			if (stillPresent) {
+				tempSortArray[indexInTempSortArray] = new IndexMemDicTemporaryItem(iLine);
+				indexInTempSortArray++;
+			}
+			
+		}
+		
+		if (indexInTempSortArray != numberOfStillPersentLines) {
+			Log.error("Erreur lors de la restructuration de l'index : indexInTempSortArray("+indexInTempSortArray+") != numberOfStillPersentLines("+numberOfStillPersentLines+")");
+		}
+		
+		if (beSuperVerbose) MemUsage.printMemUsage();
+		if (enableVerboseSort) t2.log();
+		
+		t3 = new Timer("IndexMemDic.refreshIndexWithColumnsData - sort :");
+		if (beSuperVerbose) MemUsage.printMemUsage();
+		//Arrays.sort(tempSortArray);
+		//SCustomSort.sort(tempSortArray);
+		Arrays.parallelSort(tempSortArray); // <- faible gain, environ 30% plus rapide, mais prend beaucoup plus de mémoire
+		if (enableVerboseSort) t3.log();
+		if (beSuperVerbose) MemUsage.printMemUsage();
+		
+		/*Timer t4_2 = new Timer("IndexMemDic.sortAll - deteteAtPosition 0 :");
+		for (int i = 0; i < 20; i++)
+			deleteAtPosition(0);
+		t4_2.log();*/
+		
+		
+		t4 = new Timer("IndexMemDic.refreshIndexWithColumnsData - réagencement positions :");
+		for (int i = 0; i < totalLength; i++) {
+			
+			sortedPositions[i] = tempSortArray[i].originalLinePosition;
+			//String displayValues = table.getLineAsReadableString(sortedPositions[i]);
+			//Log.info(displayValues);
+		}
+		if (beSuperVerbose) MemUsage.printMemUsage();
+		//if (enableVerboseSort) 
+		t4.log();
+		for (int i = 0; i < totalLength; i++) {
+			tempSortArray[i] = null;
+		}
+		if (beSuperVerbose) MemUsage.printMemUsage();
+		tempSortArray = null;
+		if (enableVerboseSort) t1.log();
+		
+		
 		
 		
 	}
@@ -95,6 +173,10 @@ public class IndexMemDic extends IndexMemDicAncester {
 	 *  Java gère magnifiquement bien le tri, même pour 100 millions d'éléments ! (c'est assez incroyable ^^)
 	 */
 	public void sortAllv1(boolean beSuperVerbose) {
+		totalLength = 0;
+		refreshIndexWithColumnsData(beSuperVerbose);
+		
+		/*
 		
 		beSuperVerbose = (beSuperVerbose && enableVerboseSort);
 		
@@ -123,7 +205,7 @@ public class IndexMemDic extends IndexMemDicAncester {
 		/*Timer t4_2 = new Timer("IndexMemDic.sortAll - deteteAtPosition 0 :");
 		for (int i = 0; i < 20; i++)
 			deleteAtPosition(0);
-		t4_2.log();*/
+		t4_2.log();* /
 		
 		
 		t4 = new Timer("IndexMemDic.sortAll - réagencement positions :");
@@ -142,7 +224,7 @@ public class IndexMemDic extends IndexMemDicAncester {
 		if (beSuperVerbose) MemUsage.printMemUsage();
 		tempSortArray = null;
 		if (enableVerboseSort) t1.log();
-		
+		*/
 	}
 	
 	//findMatchingIndex
@@ -566,11 +648,22 @@ public class IndexMemDic extends IndexMemDicAncester {
 		int intervalLength = stopIndex - startIndex + 1;
 		int[] originalLinePositionArray = new int[intervalLength];
 		
+		int realResultCount = 0;
 		for (int iRes = 0; iRes < intervalLength; iRes++) {
-			originalLinePositionArray[iRes] = sortedPositions[iRes + startIndex];
+			int linePositionInTable = sortedPositions[iRes + startIndex];
+			boolean stillPresent = table.getLineFlag(linePositionInTable);
+			if (stillPresent) {
+				originalLinePositionArray[realResultCount] = linePositionInTable;
+				realResultCount++;
+			}
 		}
 		
-		return originalLinePositionArray;
+		int[] originalLinePositionArray_realSize = new int[realResultCount];
+		for (int iRes = 0; iRes < realResultCount; iRes++) {
+			originalLinePositionArray_realSize[iRes] = sortedPositions[iRes + startIndex];
+		}
+		
+		return originalLinePositionArray_realSize;
 	}
 	
 	

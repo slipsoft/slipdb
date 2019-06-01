@@ -88,6 +88,29 @@ public class NewLoaderAndIndexTest {
 			throw error;
 		}
 		
+		// Supprimer des lignes pour tester
+		for (int i = 0; i < table.getLastLoadedLineIndexLength(); i++) {
+			if (i % 3 == 0)
+				table.setLineFlag(i, false);
+		}
+		
+		int[] resultsPositionsArrayFlag = indexDic.findMatchingLinePositions(searchQuery); // les positions des lignes de résultat, réelles
+		Log.info("Recherche FLAG OK ! Nb résultats avec FLAG : " + resultsPositionsArrayFlag.length + "  index len = " + indexDic.totalLength);
+		
+		indexDic.refreshIndexWithColumnsData(true);
+		
+		int[] resultsPositionsArrayStruct = indexDic.findMatchingLinePositions(searchQuery); // les positions des lignes de résultat, réelles
+		Log.info("Recherche STRUCT OK ! Nb résultats avec restructuration : " + resultsPositionsArrayStruct.length + "  index len = " + indexDic.totalLength);
+		
+		if (resultsPositionsArrayFlag.length != resultsPositionsArrayStruct.length) {
+			Exception error = new Exception("Résultats différents après restructuration de l'index :"
+					+ "resultsPositionsArrayFlag.length = " + resultsPositionsArrayFlag.length
+					+ "resultsPositionsArrayStruct.length = " + resultsPositionsArrayStruct.length);
+			Log.error(error);
+			throw error;
+		}
+		
+		
 	}
 	
 	
@@ -133,8 +156,8 @@ public class NewLoaderAndIndexTest {
 		
 		limitParsingTimeTimer = new Timer("");
 		
-		/* Paring de l'irdi de Sylvain, pour des tests plus complets*/
-		//doSylvainParsing(csvLoader);
+		/* Paring de l'irdi de Sylvain, pour des tests plus complets
+		doSylvainParsing(csvLoader);*/
 		
 		/* Parsing générique, de gitHub*/
 		String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
@@ -162,6 +185,8 @@ public class NewLoaderAndIndexTest {
 		boolean checkLinesNumber = table.testCheckLinesNumber();
 		if (checkLinesNumber)
 			Log.info("Bon nombre total de lignes ! nombre = " + table.getTotalNumberOfLines());
+		
+		
 		
 		
 		
@@ -198,7 +223,7 @@ public class NewLoaderAndIndexTest {
 	private void doSylvainParsing(SCsvLoader csvLoader) throws IOException {
 		// Manière plus complète de faire, pour charger plusieurs CSV :
 		int mounthFinalCount = 1;
-		parsingTimeLimitSec = 10;
+		parsingTimeLimitSec = 20;
 		for (int iCsv = 1; iCsv <= mounthFinalCount; iCsv++) {
 			String colNumber = String.format("%02d" , iCsv);
 			//String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";

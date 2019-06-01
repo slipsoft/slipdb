@@ -18,4 +18,5 @@ public class IndexMemDicAncester {
 	
 	public static final boolean useSafeSlowComparaisonsNotDichotomy = false;
 	public static final boolean enableDoubleDichotomyVerif = false;
+	
 }

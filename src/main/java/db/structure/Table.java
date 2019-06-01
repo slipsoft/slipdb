@@ -44,7 +44,7 @@ public class Table implements Serializable {
 	private final String baseTablePath;
 	private int lineDataSize;
 	
-	private int lastLoadedLineIndex = 0;
+	private int lastLoadedLineIndexLength = 0;
 	
 	
 	//protected final String dataFilesOnDiskBasePath; devenu baseTablePath
@@ -454,7 +454,7 @@ public class Table implements Serializable {
 			a2FlagChunk.add(new TableFlagChunk());
 		}
 		realNumberOfLines++;
-		lastLoadedLineIndex++;
+		lastLoadedLineIndexLength++;
 	}
 
 	/** Sans vérification de la validité de la position passée en paramètre.
@@ -463,7 +463,7 @@ public class Table implements Serializable {
 	 */
 	public void setLineFlag(int linePosition, boolean isPresent) {
 		int chunkPosition = (int) Math.floor((double)linePosition / (double)TableFlagChunk.chunkAllocationSize);
-		TableFlagChunk chunk = a2FlagChunk.get(linePosition);
+		TableFlagChunk chunk = a2FlagChunk.get(chunkPosition);
 		int localLinePosition = linePosition - chunkPosition * TableFlagChunk.chunkAllocationSize;
 		boolean oldFlag = chunk.getItemFlag(localLinePosition);
 		if (isPresent == false && oldFlag == true) {
@@ -483,9 +483,12 @@ public class Table implements Serializable {
 	 */
 	public boolean getLineFlag(int linePosition) {
 		int chunkPosition = linePosition / TableFlagChunk.chunkAllocationSize;
-		TableFlagChunk chunk = a2FlagChunk.get(linePosition);
+		//Log.info("getLineFlag - linePosition = " + linePosition);
+		TableFlagChunk chunk = a2FlagChunk.get(chunkPosition);
 		int localLinePosition = linePosition - chunkPosition * TableFlagChunk.chunkAllocationSize;
-		return chunk.getItemFlag(localLinePosition);
+		boolean itemFlag = chunk.getItemFlag(localLinePosition);
+		//Log.info("itemFlag = " + itemFlag);
+		return itemFlag;
 	}
 	
 	/** 
@@ -499,8 +502,8 @@ public class Table implements Serializable {
 	/** 
 	 *  @return le nombre total de lignes en mémoire, quel que soit leur flag (supprimées ou présentes).
 	 */
-	public int getLastLoadedLineIndex() {
-		return lastLoadedLineIndex;
+	public int getLastLoadedLineIndexLength() {
+		return lastLoadedLineIndexLength;
 	}
 	
 	

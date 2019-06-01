@@ -173,12 +173,12 @@ public class IndexMemDicStorageTests {
 		limitParsingTimeTimer = new Timer("");
 		
 		/* Paring de l'irdi de Sylvain, pour des tests plus complets*/
-		doSylvainParsing(csvLoader);
+		//doSylvainParsing(csvLoader);
 		
-		/* Parsing générique, de gitHub
+		/* Parsing générique, de gitHub*/
 		String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
 		Log.info("Parsing de csvName = " + csvPath);
-		parseThisCsv(table, csvLoader, csvPath);*/
+		parseThisCsv(table, csvLoader, csvPath);
 		
 		parseTimer.log();
 		
@@ -233,3 +233,5 @@ public class IndexMemDicStorageTests {
 	}
 	
 }
+
+
