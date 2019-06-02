@@ -136,6 +136,9 @@ public class IndexMemDic extends IndexMemDicAncester {
 		if (beSuperVerbose) MemUsage.printMemUsage();
 		if (enableVerboseSort) t2.log();
 		
+		// ABSOLUMENT nécessaire pour le sort : avoir staticIndexOnThisColArray en static. 
+		IndexMemDicAncester.staticIndexOnThisColArray = indexOnThisColArray;
+		
 		t3 = new Timer("IndexMemDic.refreshIndexWithColumnsData - sort :");
 		if (beSuperVerbose) MemUsage.printMemUsage();
 		//Arrays.sort(tempSortArray);
