@@ -241,8 +241,16 @@
         }
       }
     },
-    "Group" : {
-      "type" : "object"
+    "GroupEntity" : {
+      "type" : "object",
+      "properties" : {
+        "fields" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        }
+      }
     },
     "HttpResponse" : {
       "type" : "object",
@@ -273,8 +281,17 @@
         }
       }
     },
-    "Sort" : {
-      "type" : "object"
+    "SortEntity" : {
+      "type" : "object",
+      "properties" : {
+        "direction" : {
+          "type" : "string",
+          "enum" : [ "ASC", "DESC" ]
+        },
+        "field" : {
+          "type" : "string"
+        }
+      }
     },
     "TableEntity" : {
       "type" : "object",
@@ -314,11 +331,11 @@
         "sortList" : {
           "type" : "array",
           "items" : {
-            "$ref" : "#/definitions/Sort"
+            "$ref" : "#/definitions/SortEntity"
           }
         },
         "groupBy" : {
-          "$ref" : "#/definitions/Group"
+          "$ref" : "#/definitions/GroupEntity"
         }
       }
     }
