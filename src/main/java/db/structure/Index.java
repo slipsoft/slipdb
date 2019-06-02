@@ -75,7 +75,9 @@ public abstract class Index implements Operable {
 	}
 
 	public abstract boolean isOperatorCompatible(Operator op);
+	@Deprecated //remplace DiskDataPosition by the new int position
 	public abstract Collection<DiskDataPosition> getPositionsFromPredicate(Predicate predicate) throws IndexException;
+	@Deprecated //remplace DiskDataPosition by the new int position
 	public abstract void addValue(Object value, DiskDataPosition position) throws IOException;
 	public abstract void flushOnDisk() throws IOException;
 }

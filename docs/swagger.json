@@ -256,8 +256,12 @@
         "columnsToIndex" : {
           "type" : "array",
           "items" : {
-            "$ref" : "#/definitions/ColumnEntity"
+            "type" : "string"
           }
+        },
+        "type" : {
+          "type" : "string",
+          "enum" : [ "dichotomy", "tree", "hash" ]
         }
       }
     },

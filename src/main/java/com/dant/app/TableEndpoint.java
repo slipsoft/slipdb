@@ -8,7 +8,10 @@ import com.dant.entity.*;
 import com.dant.utils.Log;
 import db.data.load.CsvParser;
 import db.search.SearchException;
+import db.structure.Database;
+import db.structure.Index;
 import db.structure.Table;
+import index.indexTree.IndexException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
 
@@ -49,11 +52,13 @@ public class TableEndpoint {
     @Path("{tableName}/index")
     public HttpResponse addIndex(
             @PathParam("tableName") String tableName,
-            @ApiParam(value = "content", required = true) IndexEntity index) {
-        Log.debug(index);
-        if (index == null) {
-            throw new BadRequestException("body cannot be null");
+            @ApiParam(value = "content", required = true) IndexEntity indexEntity) throws IndexException {
+        if (indexEntity == null) {
+            throw new BadRequestException("content cannot be null");
         }
-        return new HttpResponse("Oh yeah baby", null);
+        Table table = Controller.getTableByName(tableName);
+        Index index = indexEntity.convertToIndex(table);
+        table.addIndex(index);
+        return new HttpResponse("ok", "Oh yeah baby, l'index a bien été ajouté");
     }
 }

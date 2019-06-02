@@ -10,6 +10,7 @@ import db.structure.Database;
 import db.structure.Table;
 
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -81,7 +82,7 @@ public class Controller {
             throw new BadRequestException("table name is invalid: " + tableName);
         }
         Optional<Table> tableOptional = Database.getInstance().getAllTables().stream().filter(t -> t.getName().equals(tableName)).findFirst();
-        return tableOptional.orElseThrow(() -> new BadRequestException("table not found: " + tableName));
+        return tableOptional.orElseThrow(() -> new NotFoundException("table not found: " + tableName));
     }
 
     public static HttpResponse doSearch(ViewEntity viewEntity) throws SearchException {
