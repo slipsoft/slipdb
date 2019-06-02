@@ -28,6 +28,11 @@ public class IndexMemDicAncester extends Index {
 	public static final boolean enableDoubleDichotomyVerif = false;
 
 	@Override
+	public Column[] getIndexedColumns() {
+		return indexOnThisColArray;
+	}
+
+	@Override
 	public boolean isOperatorCompatible(Operator op) {
 		//TODO
 		return false;

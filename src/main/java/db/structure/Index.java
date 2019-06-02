@@ -56,8 +56,8 @@ public abstract class Index implements Operable {
 	/**
 	 * @return la liste des colonnes indexées dans cet Index
 	 */
-	public Column getIndexedColumn() {
-		return indexedColumn;
+	public Column[] getIndexedColumns() {
+		return new Column[] {indexedColumn};
 	}
 	
 	public boolean canBeUsedWithPredicate(Predicate predicate) {

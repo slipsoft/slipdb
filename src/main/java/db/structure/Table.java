@@ -151,7 +151,9 @@ public class Table implements Serializable {
 
 	public void addIndex(Index index) {
 		this.indexesList.add(index);
-		index.getIndexedColumn().addIndex(index);
+		for (Column column :index.getIndexedColumns()) {
+			column.addIndex(index);
+		}
 	}
 
 	private void computeLineDataSize() {
