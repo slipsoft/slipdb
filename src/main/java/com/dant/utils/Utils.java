@@ -95,6 +95,7 @@ public class Utils implements Serializable {
 		return true;
 	}
 
+	@Deprecated
 	public static Response generateResponse (int statusCode, String message, String type, Object entity) {
 		return Response.status(statusCode).entity(new HttpResponse(message, entity)).type(type).build();
 	}

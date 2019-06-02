@@ -1,6 +1,5 @@
 package com.dant.entity;
 
-import com.dant.exception.BadRequestException;
 import com.dant.utils.Log;
 import com.dant.utils.Utils;
 import com.google.gson.Gson;
@@ -12,6 +11,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import db.structure.Table;
+
+import javax.ws.rs.BadRequestException;
 
 public class TableEntity extends Entity implements Serializable {
     public ArrayList<ColumnEntity> allColumns;
@@ -33,15 +34,15 @@ public class TableEntity extends Entity implements Serializable {
         return gson.toJson(this);
     }
 
-    public void validate(ArrayList<ResponseError> errors) {
+    public void validate() {
         if (this.name == null || this.name.length() == 0) {
-            errors.add(new ResponseError(Location.createTable, Type.missingData, "Table name property is missing"));
-            if (!com.dant.utils.Utils.validateRegex(Database.getInstance().config.tableNamePattern, this.name)) {
-                errors.add(new ResponseError(Location.createTable, Type.invalidData, "Table name property is invalid: " + this.name));
-            }
+            throw new BadRequestException( "Table name property is missing");
+        }
+        if (!com.dant.utils.Utils.validateRegex(Database.getInstance().config.tableNamePattern, this.name)) {
+            throw new BadRequestException( "Table name property is invalid: " + this.name);
         }
         if (this.allColumns == null || this.allColumns.size() == 0) {
-            errors.add(new ResponseError(Location.createTable, Type.missingData, "column list is missing"));
+            throw new BadRequestException( "column list is missing");
         } else {
             ArrayList<Entity> columnCheckForDuplicate = allColumns.stream().collect(Collectors.toCollection(ArrayList::new));
             boolean columnListHasDuplicates = allColumns.stream().filter(c -> Utils.isNameDuplicate(columnCheckForDuplicate, c.name)).collect(Collectors.toCollection(ArrayList::new)).size() <= 1;
@@ -49,13 +50,14 @@ public class TableEntity extends Entity implements Serializable {
             if (!columnListHasDuplicates){
                 this.allColumns.stream().forEach(c -> {
                     try {
-                        c.validate(errors);
+                        c.validate();
                     } catch (Exception exp) {
                         Log.error(exp);
+                        throw new RuntimeException(exp);
                     }
                 });
             } else {
-                errors.add(new ResponseError(Location.createTable, Type.missingData, "duplicates in column names"));
+                throw new BadRequestException( "duplicates in column names");
             }
         }
     }

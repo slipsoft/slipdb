@@ -6,6 +6,7 @@ import db.data.types.DataType;
 import db.structure.Column;
 import db.structure.Database;
 
+import javax.ws.rs.BadRequestException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,22 +29,22 @@ public class ColumnEntity extends Entity implements Serializable {
         return gson.toJson(this);
     }
 
-    public void validate(ArrayList<ResponseError> errors) throws NoSuchFieldException, ClassNotFoundException, IllegalAccessException {
+    public void validate() throws NoSuchFieldException, ClassNotFoundException, IllegalAccessException {
         if (this.name == null || this.name.length() == 0) {
-            errors.add(new ResponseError(Location.createTable, Type.missingData, "Column name is missing"));
+            throw new BadRequestException( "Column name is missing");
         } else {
             if (!validateRegex(Database.getInstance().config.columnNamePattern, this.name)) {
-                errors.add(new ResponseError(Location.createTable, Type.invalidData, "Column name is invalid: " + this.name));
+                throw new BadRequestException( "Column name is invalid: " + this.name);
             }
         }
         if (this.type == null) {
-            errors.add(new ResponseError(Location.createTable, Type.missingData, "Column Type is missing"));
+            throw new BadRequestException( "Column Type is missing");
         } else {
             HashMap<String, String> DataTypes = Database.getInstance().config.DataTypes;
             String DataTypesClassPathPrefix = Database.getInstance().config.DataTypesClassPathPrefix;
 
             if (DataTypes.get(this.type) == null) {
-                errors.add(new ResponseError(Location.createTable, Type.invalidData, "Column type is invalid"));
+                throw new BadRequestException( "Column type is invalid");
             } else {
                 String dataTypeClassName = DataTypesClassPathPrefix+DataTypes.get(this.type);
                 Class dataTypeClass = Class.forName(dataTypeClassName);
@@ -51,18 +52,18 @@ public class ColumnEntity extends Entity implements Serializable {
 
                 if(sizeIsRequired) {
                     if (this.size == 0) {
-                        errors.add(new ResponseError(Location.createTable, Type.invalidData, "size is missing"));
+                        throw new BadRequestException( "size is missing");
                     } else if (this.size < 0) {
-                        errors.add(new ResponseError(Location.createTable, Type.invalidData, "size is invalid"));
+                        throw new BadRequestException( "size is invalid");
                     } else  {
                         int maxSizeInBytes = dataTypeClass.getField("maxSizeInBytes").getInt(null);
 
                         if(this.size > maxSizeInBytes) {
-                            errors.add(new ResponseError(Location.createTable, Type.invalidData, "field size is too high, max size for " + this.type + " is: " + maxSizeInBytes ));
+                            throw new BadRequestException( "field size is too high, max size for " + this.type + " is: " + maxSizeInBytes );
                         }
                     }
                 } else if (!sizeIsRequired && this.size != 0) {
-                    errors.add(new ResponseError(Location.createTable, Type.invalidData, "field size is not needed for " + this.type));
+                    throw new BadRequestException( "field size is not needed for " + this.type);
                 }
             }
         }

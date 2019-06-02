@@ -1,6 +1,6 @@
 package com.dant.entity;
 
-
+@Deprecated
 public enum Location {
     createTable("createTable"),
     updateTable("updateTable"),

@@ -3,11 +3,10 @@ package com.dant.entity;
 import db.search.*;
 import db.structure.Column;
 import db.structure.Table;
-import java.util.ArrayList;
+
+import javax.ws.rs.BadRequestException;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.logging.Filter;
-import java.util.stream.Collectors;
 
 public class FilterTermEntity {
     public JoinMethod joinMethod;
@@ -16,12 +15,12 @@ public class FilterTermEntity {
     public Operator operator;
     public Object value;
 
-    public void validate (Table table, ArrayList<ResponseError> allErrors) {
+    public void validate (Table table) {
 
         boolean isValid = false;
         if (this.joinMethod != null && (this.terms != null && this.terms.length > 0)) {
             isValid = true;
-            Arrays.stream(terms).forEach(t -> t.validate(table, allErrors));
+            Arrays.stream(terms).forEach(t -> t.validate(table));
         }
 
         if (this.column != null && this.operator != null && this.value != null) {
@@ -31,22 +30,22 @@ public class FilterTermEntity {
                 if (realColumn.get().getDataType().isOperatorCompatible(operator)){
                     if (value != null) {
                         if (!realColumn.get().getDataType().inputCanBeParsed((String)value)) {
-                            allErrors.add(new ResponseError(Location.search, Type.invalidData, "value can't be parsed in selected column : " + column + " " + value));
+                            throw new BadRequestException("value can't be parsed in selected column : " + column + " " + value);
                         }
                     } else {
-                        allErrors.add(new ResponseError(Location.search, Type.missingData, "value is missing"));
+                        throw new BadRequestException("value is missing");
                     }
                 } else {
-                    allErrors.add(new ResponseError(Location.search, Type.invalidData, "operator is not compatible with this data Type" + operator));
+                    throw new BadRequestException("operator is not compatible with this data Type" + operator);
                 }
             } else {
-                allErrors.add(new ResponseError(Location.search, Type.invalidData, "column does not exist : " + column));
+                throw new BadRequestException("column does not exist : " + column);
             }
         }
 
 
         if (!isValid) {
-            allErrors.add(new ResponseError(Location.search, Type.invalidData, "filterTerm is neither an array of filterTerms nor a predicate "));
+            throw new BadRequestException("filterTerm is neither an array of filterTerms nor a predicate ");
         }
     }
 

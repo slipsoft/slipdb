@@ -1,14 +1,15 @@
 package com.dant.app;
 
 import com.dant.entity.*;
-import com.dant.exception.BadRequestException;
 import com.dant.utils.Log;
 import db.search.ResultSet;
+import db.search.SearchException;
 import db.search.View;
 import db.serial.SerialStructure;
 import db.structure.Database;
 import db.structure.Table;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,13 +18,12 @@ import java.util.stream.Collectors;
 
 public class Controller {
 
-    public static ArrayList<ResponseError> addTables(ArrayList<TableEntity> allTableEntities, boolean addImmediately) throws BadRequestException {
+    public static void addTables(ArrayList<TableEntity> allTableEntities, boolean addImmediately) {
 
-        ArrayList<ResponseError> errors = new ArrayList<>();
         ArrayList<String> names = new ArrayList<>();
 
         if (allTableEntities.size() == 0) {
-            errors.add(new ResponseError(Location.createTable, Type.invalidData, "table array is empty"));
+            throw new BadRequestException( "table array is empty");
         }
 
         if (!addImmediately) {
@@ -34,20 +34,16 @@ public class Controller {
                     continue;
 
                 if (names.stream().anyMatch(n -> table.name.equals(n))) {
-                    errors.add(new ResponseError(Location.createTable, Type.invalidData, "table name is duplicate"));
+                    throw new BadRequestException( "table name is duplicate");
                 }
 
                 if (Database.getInstance().getAllTables().stream().anyMatch(n -> table.name.equals(n.getName()))) {
-                    errors.add(new ResponseError(Location.createTable, Type.invalidData, "table name is duplicate"));
+                    throw new BadRequestException( "table name is duplicate");
                 }
                 names.add(table.name);
             }
 
-            allTableEntities.stream().forEach(t -> t.validate(errors));
-
-            if(errors.size() > 0) {
-                return errors;
-            }
+            allTableEntities.stream().forEach(t -> t.validate());
         }
 
         ArrayList<Table> tablesToAdd = allTableEntities.stream().map(t -> {
@@ -61,35 +57,25 @@ public class Controller {
         tablesToAdd.stream().forEach(t -> Database.getInstance().getAllTables().add(t));
         
 		SerialStructure.saveStructure();
-        return null;
     }
 
-    public static Response getTable(String tableName) {
+    public static HttpResponse getTable(String tableName) {
         Optional<Table> tableOptional = getTableByName(tableName);
-        if (tableOptional.isPresent()) {
-            return com.dant.utils.Utils.generateResponse(200, "ok", "application/json", tableOptional.get().convertToEntity());
-        } else {
-            ResponseError error = new ResponseError(Location.getTable, Type.invalidData, "Table was not found");
-            return com.dant.utils.Utils.generateResponse(400, "error", "application/json", error);
-        }
-
+        Table table = tableOptional.orElseThrow(() -> new BadRequestException("Table was not found"));
+        return new HttpResponse("ok", table.convertToEntity());
     }
 
-    public static Response deleteTable(String tableName) {
-        Optional tableOptional = getTableByName(tableName);
-        if (tableOptional.isPresent()) {
-            Database.getInstance().getAllTables().remove(tableOptional.get());
-            return com.dant.utils.Utils.generateResponse(200, "ok", "application/json", "table successfully removed");
-        } else {
-            ResponseError error = new ResponseError(Location.deleteTable, Type.invalidData, "Table was not found");
-            return com.dant.utils.Utils.generateResponse(400, "error", "application/json", error);
-        }
+    public static HttpResponse deleteTable(String tableName) {
+        Optional<Table> tableOptional = getTableByName(tableName);
+        Table table = tableOptional.orElseThrow(() -> new BadRequestException("Table was not found"));
+        Database.getInstance().getAllTables().remove(table);
+        return new HttpResponse( "ok", "table successfully removed");
     }
 
 
-    public static Response getTables() {
+    public static HttpResponse getTables() {
         ArrayList<TableEntity> allTableEntities = Database.getInstance().getAllTables().stream().map(Table::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
-        return com.dant.utils.Utils.generateResponse(200, "ok", "application/json", allTableEntities);
+        return new HttpResponse( "ok",  allTableEntities);
     }
 
     public static Optional<Table> getTableByName(String tableName) {
@@ -99,19 +85,11 @@ public class Controller {
         return Optional.empty();
     }
 
-    public static Response doSearch(ViewEntity viewEntity) {
-        try {
-            ArrayList<ResponseError> allErrors = new ArrayList<>();
-            viewEntity.validate(allErrors);
-            if (allErrors.size() > 0)
-                return com.dant.utils.Utils.generateResponse(400, "error", "application/json", allErrors);
-            View viewToExecute = viewEntity.convertToView();
-            ResultSet resultSet = viewToExecute.execute();
-            return com.dant.utils.Utils.generateResponse(200, "ok", "application/json", resultSet);
-        } catch (Exception exp) {
-            Log.error(exp);
-            return com.dant.utils.Utils.generateResponse(500, "error", "application/json", "error when doing search");
-        }
+    public static HttpResponse doSearch(ViewEntity viewEntity) throws SearchException {
+        viewEntity.validate();
+        View viewToExecute = viewEntity.convertToView();
+        ResultSet resultSet = viewToExecute.execute();
+        return new HttpResponse( "ok", resultSet);
 
     }
 
