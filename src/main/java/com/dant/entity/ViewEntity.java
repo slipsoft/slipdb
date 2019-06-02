@@ -32,8 +32,7 @@ public class ViewEntity {
             throw new BadRequestException("table name is invalid");
         }
 
-        Optional<Table> tableOptional = Controller.getTableByName(this.tableName);
-        Table table = tableOptional.orElseThrow(() -> new BadRequestException("no table with this name"));
+        Table table = Controller.getTableByName(tableName);
 
         if (filterTerm != null) {
             filterTerm.validate(table);
@@ -57,7 +56,7 @@ public class ViewEntity {
     }
 
     public View convertToView() {
-        Table table = Controller.getTableByName(tableName).get();
+        Table table = Controller.getTableByName(tableName);
         FilterTerm concreteFilterTerm = filterTerm.convertToFilterTerm(table);
 
         return new View(table, concreteFilterTerm, this.fieldList, this.sortList, this.groupBy);

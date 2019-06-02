@@ -60,14 +60,12 @@ public class Controller {
     }
 
     public static HttpResponse getTable(String tableName) {
-        Optional<Table> tableOptional = getTableByName(tableName);
-        Table table = tableOptional.orElseThrow(() -> new BadRequestException("Table was not found"));
+        Table table = Controller.getTableByName(tableName);
         return new HttpResponse("ok", table.convertToEntity());
     }
 
     public static HttpResponse deleteTable(String tableName) {
-        Optional<Table> tableOptional = getTableByName(tableName);
-        Table table = tableOptional.orElseThrow(() -> new BadRequestException("Table was not found"));
+        Table table = Controller.getTableByName(tableName);
         Database.getInstance().getAllTables().remove(table);
         return new HttpResponse( "ok", "table successfully removed");
     }
@@ -78,11 +76,12 @@ public class Controller {
         return new HttpResponse( "ok",  allTableEntities);
     }
 
-    public static Optional<Table> getTableByName(String tableName) {
-        if (com.dant.utils.Utils.validateRegex(Database.getInstance().config.tableNamePattern, tableName)) {
-            return Database.getInstance().getAllTables().stream().filter(t -> t.getName().equals(tableName)).findFirst();
+    public static Table getTableByName(String tableName) {
+        if (!com.dant.utils.Utils.validateRegex(Database.getInstance().config.tableNamePattern, tableName)) {
+            throw new BadRequestException("table name is invalid: " + tableName);
         }
-        return Optional.empty();
+        Optional<Table> tableOptional = Database.getInstance().getAllTables().stream().filter(t -> t.getName().equals(tableName)).findFirst();
+        return tableOptional.orElseThrow(() -> new BadRequestException("table not found: " + tableName));
     }
 
     public static HttpResponse doSearch(ViewEntity viewEntity) throws SearchException {

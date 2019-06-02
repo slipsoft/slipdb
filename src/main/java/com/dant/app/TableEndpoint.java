@@ -27,10 +27,8 @@ public class TableEndpoint {
     @Path("/{tableName}/load/csv")
     @Consumes("text/csv")
     public HttpResponse loadCSV(@PathParam("tableName") String tableName, String body) throws UnsupportedEncodingException {
-        Optional<Table> tableOptional = Controller.getTableByName(tableName);
-        Table table = tableOptional.orElseThrow(() -> new BadRequestException("table name is invalid"));
         InputStream is = new ByteArrayInputStream(body.getBytes("UTF-8"));
-        table.loadData(new CsvParser(), is, true);
+        Controller.getTableByName(tableName).loadData(new CsvParser(), is, true);
         return new HttpResponse("ok", "ok");
 
     }
