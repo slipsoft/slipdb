@@ -25,7 +25,7 @@ public class DBEndpoint {
         // si la requète vient d'un endpoint, pas besoin de valider
         boolean addImmediatly = InternalToken.equals(Database.getInstance().config.SuperSecretPassphrase);
         Controller.addTables(allTables, addImmediatly);
-        return new HttpResponse("ok", "table successfully inserted");
+        return new HttpResponse("table successfully inserted");
     }
 
     @GET

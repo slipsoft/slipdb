@@ -15,6 +15,6 @@ public class JsonSyntaxExceptionMapper implements ExceptionMapper<JsonSyntaxExce
 
     @Override
     public Response toResponse(JsonSyntaxException e) {
-        return Response.status(400).entity(new HttpResponse("Error: bad request", e.getMessage())).type("application/json").build();
+        return Response.status(400).entity(new HttpResponse(false, "Bad Request Error: " + e.getMessage())).type("application/json").build();
     }
 }

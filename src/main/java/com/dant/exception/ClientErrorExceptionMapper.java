@@ -16,6 +16,6 @@ public class ClientErrorExceptionMapper implements ExceptionMapper<ClientErrorEx
 
     @Override
     public Response toResponse(ClientErrorException e) {
-        return Response.status(400).entity(new HttpResponse("Bad Request Error", e.getMessage())).type("application/json").build();
+        return Response.status(400).entity(new HttpResponse(false, "Bad Request Error: " + e.getMessage())).type("application/json").build();
     }
 }

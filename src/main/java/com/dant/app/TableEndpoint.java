@@ -27,12 +27,14 @@ import java.util.Optional;
 public class TableEndpoint {
 
     @POST
-    @Path("/{tableName}/load/csv")
+    @Path("/{tableName}/load")
     @Consumes("text/csv")
-    public HttpResponse loadCSV(@PathParam("tableName") String tableName, String body) throws UnsupportedEncodingException {
+    public HttpResponse loadCSV(
+            @PathParam("tableName") String tableName,
+            @ApiParam(value = "content", required = true) String body) throws UnsupportedEncodingException {
         InputStream is = new ByteArrayInputStream(body.getBytes("UTF-8"));
         Controller.getTableByName(tableName).loadData(new CsvParser(), is, true);
-        return new HttpResponse("ok", "ok");
+        return new HttpResponse("ok");
 
     }
 
@@ -59,6 +61,6 @@ public class TableEndpoint {
         Table table = Controller.getTableByName(tableName);
         Index index = indexEntity.convertToIndex(table);
         table.addIndex(index);
-        return new HttpResponse("ok", "Oh yeah baby, l'index a bien été ajouté");
+        return new HttpResponse("Oh yeah baby, l'index a bien été ajouté");
     }
 }
