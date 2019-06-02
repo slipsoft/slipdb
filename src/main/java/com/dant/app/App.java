@@ -1,8 +1,6 @@
 package com.dant.app;
 
-import com.dant.exception.BadRequestExceptionMapper;
-import com.dant.exception.JsonSyntaxExceptionMapper;
-import com.dant.exception.RuntimeExceptionMapper;
+import com.dant.exception.*;
 import com.dant.filter.GsonProvider;
 
 import db.serial.SerialStructure;
@@ -33,8 +31,9 @@ public class App extends Application {
 		Set<Class<?>> sets = new HashSet<>(1);
 		sets.add(GsonProvider.class);
 		sets.add(RuntimeExceptionMapper.class);
-		sets.add(BadRequestExceptionMapper.class);
 		sets.add(JsonSyntaxExceptionMapper.class);
+		sets.add(SearchExceptionMapper.class);
+		sets.add(ClientErrorExceptionMapper.class);
 		return sets;
 	}
 

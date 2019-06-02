@@ -6,7 +6,7 @@ import db.search.*;
 import db.structure.Database;
 import db.structure.Table;
 
-import java.util.ArrayList;
+import javax.ws.rs.BadRequestException;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,47 +27,36 @@ public class ViewEntity {
         return this;
     }
 
-    public void validate(ArrayList<ResponseError> allErrors) {
+    public void validate() {
         if (!com.dant.utils.Utils.validateRegex(Database.getInstance().config.tableNamePattern, this.tableName)) {
-            allErrors.add(new ResponseError(Location.search, Type.invalidData, "table name is invalid"));
-            return;
+            throw new BadRequestException("table name is invalid");
         }
 
-        Optional<Table> tableOptional = Controller.getTableByName(this.tableName);
-        if (!tableOptional.isPresent()) {
-            allErrors.add(new ResponseError(Location.search, Type.invalidData, "no table with this name"));
-            return;
-        }
-        Table table = tableOptional.get();
+        Table table = Controller.getTableByName(tableName);
 
         if (filterTerm != null) {
-            filterTerm.validate(table, allErrors);
+            filterTerm.validate(table);
         } else {
-            allErrors.add(new ResponseError(Location.search, Type.missingData, "filterTerm is missing"));
-
+            throw new BadRequestException("filterTerm is missing");
         }
 
         if (fieldList != null) {
-            fieldList.stream().forEach(f -> f.validate(table, allErrors));
+            fieldList.stream().forEach(f -> f.validate(table));
         } else {
-            allErrors.add(new ResponseError(Location.search, Type.missingData, "fieldList is missing"));
+            throw new BadRequestException("fieldList is missing");
         }
         if (sortList != null) {
-            sortList.stream().forEach(s-> s.validate(table, allErrors));
-        } else {
-            allErrors.add(new ResponseError(Location.search, Type.missingData, "sort list is missing"));
+            sortList.stream().forEach(s-> s.validate(table));
         }
 
         if (groupBy != null) {
-            groupBy.validate(table, allErrors);
-        } else {
-            allErrors.add(new ResponseError(Location.search, Type.missingData, "groupBy is missing"));
+            groupBy.validate(table);
         }
 
     }
 
     public View convertToView() {
-        Table table = Controller.getTableByName(tableName).get();
+        Table table = Controller.getTableByName(tableName);
         FilterTerm concreteFilterTerm = filterTerm.convertToFilterTerm(table);
 
         return new View(table, concreteFilterTerm, this.fieldList, this.sortList, this.groupBy);

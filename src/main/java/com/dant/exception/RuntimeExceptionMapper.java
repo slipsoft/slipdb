@@ -14,6 +14,6 @@ public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException>
 
 	@Override
 	public Response toResponse(RuntimeException e) {
-		return Response.status(500).entity(new HttpResponse("Unknown Server Error", e.getMessage())).type("application/json").build();
+		return Response.status(500).entity(new HttpResponse("Unknown Runtime Error", e.getMessage())).type("application/json").build();
 	}
 }

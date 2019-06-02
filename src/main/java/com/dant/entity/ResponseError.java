@@ -2,6 +2,7 @@ package com.dant.entity;
 
 import com.google.gson.Gson;
 
+@Deprecated
 public class ResponseError {
 
     public Location location;

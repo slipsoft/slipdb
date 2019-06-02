@@ -1,11 +1,8 @@
 package db.search;
 
-import com.dant.entity.Location;
-import com.dant.entity.ResponseError;
-import com.dant.entity.Type;
 import db.structure.Table;
 
-import java.util.ArrayList;
+import javax.ws.rs.BadRequestException;
 
 public class Sort {
 	protected Direction direction;
@@ -25,10 +22,10 @@ public class Sort {
 		}
 	}
 
-	public void validate(Table table, ArrayList<ResponseError> allErrors) {
+	public void validate(Table table) {
 		if (this.direction == null) {
-			allErrors.add(new ResponseError(Location.search, Type.invalidData, "Direction is invalid in sort"));
+			throw new BadRequestException("Direction is invalid in sort");
 		}
-		field.validate(table, allErrors);
+		field.validate(table);
 	}
 }
