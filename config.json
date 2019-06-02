@@ -1,7 +1,7 @@
 {
   "tableNamePattern": "^[a-zA-Z0-9_-]{3,25}$",
   "columnNamePattern": "^[a-zA-Z0-9_-]{3,25}$",
-  "DataTypesClassPathPrefix": "db.data.",
+  "DataTypesClassPathPrefix": "db.data.types.",
   "DataTypes": {
     "Byte": "ByteType",
     "Date": "DateType",
