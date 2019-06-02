@@ -131,7 +131,7 @@
         }
       }
     },
-    "/table/{tableName}/load/csv" : {
+    "/table/{tableName}/load" : {
       "post" : {
         "tags" : [ "table" ],
         "operationId" : "loadCSV",
@@ -247,8 +247,8 @@
     "HttpResponse" : {
       "type" : "object",
       "properties" : {
-        "message" : {
-          "type" : "string"
+        "success" : {
+          "type" : "boolean"
         },
         "response" : {
           "type" : "object"

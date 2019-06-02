@@ -32,6 +32,9 @@ public class TableEndpoint {
     public HttpResponse loadCSV(
             @PathParam("tableName") String tableName,
             @ApiParam(value = "content", required = true) String body) throws UnsupportedEncodingException {
+        if (body == null) {
+            throw new BadRequestException("content cannot be null");
+        }
         InputStream is = new ByteArrayInputStream(body.getBytes("UTF-8"));
         Controller.getTableByName(tableName).loadData(new CsvParser(), is, true);
         return new HttpResponse("ok");
@@ -43,6 +46,9 @@ public class TableEndpoint {
     public HttpResponse search(
             @PathParam("tableName") String tableName,
             @ApiParam(value = "content", required = true) ViewEntity view) throws SearchException {
+        if (view == null) {
+            throw new BadRequestException("content cannot be null");
+        }
         view.setTableName(tableName);
         return Controller.doSearch(view);
     }
