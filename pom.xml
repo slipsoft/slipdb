@@ -24,6 +24,13 @@
 			<artifactId>resteasy-servlet-initializer</artifactId>
 			<version>${resteasy.version}</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/io.swagger/swagger-annotations -->
+		<dependency>
+			<groupId>io.swagger</groupId>
+			<artifactId>swagger-annotations</artifactId>
+			<version>1.5.0</version>
+		</dependency>
+
 		<!-- Json lib -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
@@ -87,7 +94,7 @@
 			<plugin>
 				<groupId>com.github.kongchen</groupId>
 				<artifactId>swagger-maven-plugin</artifactId>
-				<version>3.1.6</version>
+				<version>3.1.7</version>
 				<configuration>
 					<apiSources>
 						<apiSource>
@@ -95,6 +102,7 @@
 							<locations>
 								<location>com.dant.app</location>
 							</locations>
+							<host>localhost:8080</host>
 							<info>
 								<title>slipdb</title>
 								<version>1.0.0-beta</version>

@@ -5,16 +5,21 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.dant.entity.*;
+import com.dant.exception.BadRequestException;
 import com.dant.utils.Log;
 import db.data.load.CsvParser;
 import db.structure.Table;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiParam;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Optional;
 
+@Api("table")
 @Path("/table")
-
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 public class TableEndpoint {
 
     @POST
@@ -40,9 +45,10 @@ public class TableEndpoint {
 
     @POST
     @Path("{tableName}/search")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response search(@PathParam("tableName") String tableName, ViewEntity view) {
+    public Response search(
+            @PathParam("tableName") String tableName,
+            @ApiParam(value = "content", required = true) ViewEntity view) {
+        view.setTableName(tableName);
         try {
             return Controller.doSearch(view);
 
@@ -50,5 +56,19 @@ public class TableEndpoint {
             Log.error(exp);
             return com.dant.utils.Utils.generateResponse(500, "non", "non", "non");
         }
+    }
+
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{tableName}/index")
+    public HttpResponse addIndex(
+            @PathParam("tableName") String tableName,
+            @ApiParam(value = "content", required = true) IndexEntity index) {
+        Log.debug(index);
+        if (index == null) {
+            throw new BadRequestException("body cannot be null");
+        }
+        return new HttpResponse("Oh yeah baby", null);
     }
 }

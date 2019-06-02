@@ -22,6 +22,11 @@ public class ViewEntity {
         return gson.toJson(this);
     }
 
+    public ViewEntity setTableName(String tableName) {
+        this.tableName = tableName;
+        return this;
+    }
+
     public void validate(ArrayList<ResponseError> allErrors) {
         if (!com.dant.utils.Utils.validateRegex(Database.getInstance().config.tableNamePattern, this.tableName)) {
             allErrors.add(new ResponseError(Location.search, Type.invalidData, "table name is invalid"));

@@ -4,9 +4,16 @@
     "version" : "1.0.0-beta",
     "title" : "slipdb"
   },
+  "host" : "localhost:8080",
+  "tags" : [ {
+    "name" : "db"
+  }, {
+    "name" : "table"
+  } ],
   "paths" : {
     "/db/tables" : {
       "get" : {
+        "tags" : [ "db" ],
         "operationId" : "getTables",
         "consumes" : [ "application/json" ],
         "produces" : [ "application/json" ],
@@ -17,10 +24,22 @@
         }
       },
       "put" : {
+        "tags" : [ "db" ],
         "operationId" : "createTables",
         "consumes" : [ "application/json" ],
         "produces" : [ "application/json" ],
         "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "content",
+          "required" : true,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/definitions/TableEntity"
+            }
+          }
+        }, {
           "name" : "InternalToken",
           "in" : "header",
           "required" : false,
@@ -36,6 +55,7 @@
     },
     "/db/tables/{tableName}" : {
       "get" : {
+        "tags" : [ "db" ],
         "operationId" : "getTable",
         "consumes" : [ "application/json" ],
         "produces" : [ "application/json" ],
@@ -52,6 +72,7 @@
         }
       },
       "delete" : {
+        "tags" : [ "db" ],
         "operationId" : "deleteTable",
         "consumes" : [ "application/json" ],
         "produces" : [ "application/json" ],
@@ -68,10 +89,42 @@
         }
       }
     },
+    "/table/{tableName}/index" : {
+      "put" : {
+        "tags" : [ "table" ],
+        "operationId" : "addIndex",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "tableName",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "description" : "content",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/IndexEntity"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/HttpResponse"
+            }
+          }
+        }
+      }
+    },
     "/table/{tableName}/load/csv" : {
       "post" : {
+        "tags" : [ "table" ],
         "operationId" : "loadCSV",
         "consumes" : [ "text/csv" ],
+        "produces" : [ "application/json" ],
         "parameters" : [ {
           "name" : "tableName",
           "in" : "path",
@@ -87,6 +140,7 @@
     },
     "/table/{tableName}/search" : {
       "post" : {
+        "tags" : [ "table" ],
         "operationId" : "search",
         "consumes" : [ "application/json" ],
         "produces" : [ "application/json" ],
@@ -95,11 +149,146 @@
           "in" : "path",
           "required" : true,
           "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "description" : "content",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/ViewEntity"
+          }
         } ],
         "responses" : {
           "default" : {
             "description" : "successful operation"
           }
+        }
+      }
+    }
+  },
+  "definitions" : {
+    "ColumnEntity" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string"
+        },
+        "type" : {
+          "type" : "string"
+        },
+        "size" : {
+          "type" : "integer",
+          "format" : "int32"
+        }
+      }
+    },
+    "Field" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string"
+        }
+      }
+    },
+    "FilterTermEntity" : {
+      "type" : "object",
+      "properties" : {
+        "joinMethod" : {
+          "type" : "string",
+          "enum" : [ "and", "or" ]
+        },
+        "terms" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/FilterTermEntity"
+          }
+        },
+        "column" : {
+          "type" : "string"
+        },
+        "operator" : {
+          "type" : "string",
+          "enum" : [ "equals", "greater", "less", "greaterOrEquals", "lessOrEquals", "in", "between" ]
+        },
+        "value" : {
+          "type" : "object"
+        }
+      }
+    },
+    "Group" : {
+      "type" : "object"
+    },
+    "HttpResponse" : {
+      "type" : "object",
+      "properties" : {
+        "message" : {
+          "type" : "string"
+        },
+        "response" : {
+          "type" : "object"
+        }
+      }
+    },
+    "IndexEntity" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string"
+        },
+        "columnsToIndex" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/ColumnEntity"
+          }
+        }
+      }
+    },
+    "Sort" : {
+      "type" : "object"
+    },
+    "TableEntity" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string"
+        },
+        "allColumns" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/ColumnEntity"
+          }
+        },
+        "allIndexes" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/IndexEntity"
+          }
+        }
+      }
+    },
+    "ViewEntity" : {
+      "type" : "object",
+      "properties" : {
+        "tableName" : {
+          "type" : "string"
+        },
+        "filterTerm" : {
+          "$ref" : "#/definitions/FilterTermEntity"
+        },
+        "fieldList" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Field"
+          }
+        },
+        "sortList" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Sort"
+          }
+        },
+        "groupBy" : {
+          "$ref" : "#/definitions/Group"
         }
       }
     }
