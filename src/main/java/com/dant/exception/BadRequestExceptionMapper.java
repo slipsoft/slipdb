@@ -1,5 +1,7 @@
 package com.dant.exception;
 
+import com.dant.entity.HttpResponse;
+
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
@@ -12,6 +14,6 @@ public class BadRequestExceptionMapper implements ExceptionMapper<BadRequestExce
 
     @Override
     public Response toResponse(BadRequestException e) {
-        return Response.status(400).entity(e.getMessage()).type("plain/text").build();
+        return Response.status(400).entity(new HttpResponse("Error: bad request", e.getMessage())).type("application/json").build();
     }
 }
