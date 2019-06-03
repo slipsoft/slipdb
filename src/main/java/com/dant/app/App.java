@@ -23,7 +23,7 @@ public class App extends Application {
 	public Set<Object> getSingletons() {
 		initialize();
 		try {
-			Log.start("slipdb", 0);
+			Log.start("slipdb", Database.getInstance().config.logLevel);
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
 		}
@@ -46,7 +46,6 @@ public class App extends Application {
 
 	public static void initialize() {
 		// -> déséraliser la DB ici
-		Database.getInstance().getConfigFromFile();
 		
 		SerialStructure.loadStructure();
 		// -> Je ne serialise que la liste des tables

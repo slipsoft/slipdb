@@ -48,6 +48,7 @@ public class Table implements Serializable {
 	
 	
 	//protected final String dataFilesOnDiskBasePath; devenu baseTablePath
+	@Deprecated
 	protected final TableDataHandler dataHandler;
 	
 	protected final String name; // table name
@@ -124,6 +125,7 @@ public class Table implements Serializable {
 		return indexesList;
 	}
 
+	@Deprecated
 	public TableDataHandler getDataHandler() {
 		return dataHandler;
 	}
@@ -361,6 +363,7 @@ public class Table implements Serializable {
 		return lineValues;
 	}
 
+	@Deprecated
 	public ResultSet getFullResultsFromBinIndexes(Collection<DiskDataPosition> resultsCollection) { // table connue ! , Table fromTable) {
 		return getFullResultsFromBinIndexes(resultsCollection, true, -1);
 	}
@@ -371,6 +374,7 @@ public class Table implements Serializable {
 	 * @param waitTimeLimitMs - time limit
 	 * @return a full resultset
 	 */
+	@Deprecated
 	public ResultSet getFullResultsFromBinIndexes(Collection<DiskDataPosition> resultsCollection, boolean waitForAllResults, int waitTimeLimitMs) { // table connue ! , Table fromTable) {
 		return getFullResultsFromBinIndexes(resultsCollection, waitForAllResults, waitTimeLimitMs, null);
 	}
@@ -382,6 +386,7 @@ public class Table implements Serializable {
 	 * @param onlyGetThoseColumnsIndex null si renvoyer tout les champs
 	 * @return a full resultset
 	 */
+	@Deprecated
 	public ResultSet getFullResultsFromBinIndexes(Collection<DiskDataPosition> resultsCollection, boolean waitForAllResults, int waitTimeLimitMs, ArrayList<Integer> onlyGetThoseColumnsIndex) { // table connue ! , Table fromTable) {
 		return getDataHandler().getValuesOfLinesListById(resultsCollection, waitForAllResults, waitTimeLimitMs, onlyGetThoseColumnsIndex);
 	}

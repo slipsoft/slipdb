@@ -14,6 +14,7 @@ import com.dant.utils.Timer;
 
 import db.data.load.Parser;
 import db.structure.Column;
+import db.structure.Database;
 import db.structure.Table;
 
 /**
@@ -22,8 +23,8 @@ import db.structure.Table;
  *
  */
 public class SCsvLoader {
-	
-	private final int threadCount = 6;//+8;
+
+	private final static int threadCount = Database.getInstance().config.loaderNbThread;
 	private SCsvLoaderRunnable[] runnableArray;// = new SLoaderThread[threadCount];
 	
 	public static AtomicInteger totalParsedLines = new AtomicInteger(0); // Mis à jour des threads
