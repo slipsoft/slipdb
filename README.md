@@ -30,7 +30,10 @@ how to deploy the project on a live system.
     ```
     mvn jetty:run
     ```
-You can now connect to the API at http://localhost/api/test
+You can now connect to the API at http://localhost:8080/.
+A working `get` request could be [`/db/tables`](http://localhost:8080/db/tables).
+
+You can also find the API documentation of your running instance at http://localhost:8080/docs/
 
 ## Running the tests
 
@@ -48,7 +51,7 @@ _not deployable yet..._
 
 ### API
 
-The API documentation can be found [here](https://slipsoft.github.io/slipdb/).
+The API documentation [can be found online](https://slipsoft.github.io/slipdb/). Or if you want to consult you local instance documentation you can access http://localhost:8080/docs/ while the server is running.
 
 ## Built With
 
