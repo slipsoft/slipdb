@@ -1,31 +1,14 @@
 package db.search;
 
-import db.structure.Table;
-
-import javax.ws.rs.BadRequestException;
+import db.structure.Column;
 
 public class Sort {
-	protected Direction direction;
-	protected Field field;
-	
-	public enum Direction {
-		ASC("ASC"),
-		DESC("DESC");
+	protected DirectionEnum direction;
+	// should be a class different from Column as it could also be an field created in the view...
+	protected Column fields;
 
-		private final String fieldDescription;
-
-		public String getfieldDescription() {
-			return fieldDescription;
-		}
-		Direction(String value) {
-			fieldDescription = value;
-		}
-	}
-
-	public void validate(Table table) {
-		if (this.direction == null) {
-			throw new BadRequestException("Direction is invalid in sort");
-		}
-		field.validate(table);
+	public Sort(DirectionEnum direction, Column fields) {
+		this.direction = direction;
+		this.fields = fields;
 	}
 }

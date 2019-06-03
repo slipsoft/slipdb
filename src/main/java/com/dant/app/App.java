@@ -3,12 +3,14 @@ package com.dant.app;
 import com.dant.exception.*;
 import com.dant.filter.GsonProvider;
 
+import com.dant.utils.Log;
 import db.serial.SerialStructure;
 import db.structure.Database;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,6 +22,11 @@ public class App extends Application {
 	@Override
 	public Set<Object> getSingletons() {
 		initialize();
+		try {
+			Log.start("slipdb", 0);
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
+		}
 		Set<Object> sets = new HashSet<>(1);
 		sets.add(new DBEndpoint());
 		sets.add(new TableEndpoint());

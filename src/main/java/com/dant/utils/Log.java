@@ -77,14 +77,14 @@ public class Log {
 	}
 	
 	protected static void logInfoMessage(String msg, String prefix, int depth) {
-		if (noHeader)
-			msg = msg + getCaller(depth);
-		else
-			msg = prefixString("INFO/" + prefix) + msg + getCaller(depth);
 		if (Log.level >= 1) {
+			if (noHeader)
+				msg = msg + getCaller(depth);
+			else
+				msg = prefixString("INFO/" + prefix) + msg + getCaller(depth);
 			System.out.println(msg);
+			append(msg);
 		}
-		append(msg);
 	}
 
 	/**
@@ -151,9 +151,11 @@ public class Log {
 	}
 
 	protected static void logWarningMessage(String msg, String prefix, int depth) {
-		msg = prefixString("WARNING/" + prefix) + msg + getCaller(depth);
-		System.err.println(msg);
-		append(msg);
+		if (level >= 1) {
+			msg = prefixString("WARNING/" + prefix) + msg + getCaller(depth);
+			System.err.println(msg);
+			append(msg);
+		}
 	}
 	
 	/**

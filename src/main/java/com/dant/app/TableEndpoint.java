@@ -8,7 +8,10 @@ import com.dant.entity.*;
 import com.dant.utils.Log;
 import db.data.load.CsvParser;
 import db.search.SearchException;
+import db.structure.Database;
+import db.structure.Index;
 import db.structure.Table;
+import index.indexTree.IndexException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
 
@@ -24,12 +27,17 @@ import java.util.Optional;
 public class TableEndpoint {
 
     @POST
-    @Path("/{tableName}/load/csv")
+    @Path("/{tableName}/load")
     @Consumes("text/csv")
-    public HttpResponse loadCSV(@PathParam("tableName") String tableName, String body) throws UnsupportedEncodingException {
+    public HttpResponse loadCSV(
+            @PathParam("tableName") String tableName,
+            @ApiParam(value = "content", required = true) String body) throws UnsupportedEncodingException {
+        if (body == null) {
+            throw new BadRequestException("content cannot be null");
+        }
         InputStream is = new ByteArrayInputStream(body.getBytes("UTF-8"));
         Controller.getTableByName(tableName).loadData(new CsvParser(), is, true);
-        return new HttpResponse("ok", "ok");
+        return new HttpResponse("ok");
 
     }
 
@@ -38,6 +46,9 @@ public class TableEndpoint {
     public HttpResponse search(
             @PathParam("tableName") String tableName,
             @ApiParam(value = "content", required = true) ViewEntity view) throws SearchException {
+        if (view == null) {
+            throw new BadRequestException("content cannot be null");
+        }
         view.setTableName(tableName);
         return Controller.doSearch(view);
     }
@@ -49,11 +60,13 @@ public class TableEndpoint {
     @Path("{tableName}/index")
     public HttpResponse addIndex(
             @PathParam("tableName") String tableName,
-            @ApiParam(value = "content", required = true) IndexEntity index) {
-        Log.debug(index);
-        if (index == null) {
-            throw new BadRequestException("body cannot be null");
+            @ApiParam(value = "content", required = true) IndexEntity indexEntity) throws IndexException {
+        if (indexEntity == null) {
+            throw new BadRequestException("content cannot be null");
         }
-        return new HttpResponse("Oh yeah baby", null);
+        Table table = Controller.getTableByName(tableName);
+        Index index = indexEntity.convertToIndex(table);
+        table.addIndex(index);
+        return new HttpResponse("Oh yeah baby, l'index a bien été ajouté");
     }
 }

@@ -10,6 +10,7 @@ import db.structure.Database;
 import db.structure.Table;
 
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -61,19 +62,19 @@ public class Controller {
 
     public static HttpResponse getTable(String tableName) {
         Table table = Controller.getTableByName(tableName);
-        return new HttpResponse("ok", table.convertToEntity());
+        return new HttpResponse(table.convertToEntity());
     }
 
     public static HttpResponse deleteTable(String tableName) {
         Table table = Controller.getTableByName(tableName);
         Database.getInstance().getAllTables().remove(table);
-        return new HttpResponse( "ok", "table successfully removed");
+        return new HttpResponse("table successfully removed");
     }
 
 
     public static HttpResponse getTables() {
         ArrayList<TableEntity> allTableEntities = Database.getInstance().getAllTables().stream().map(Table::convertToEntity).collect(Collectors.toCollection(ArrayList::new));
-        return new HttpResponse( "ok",  allTableEntities);
+        return new HttpResponse(allTableEntities);
     }
 
     public static Table getTableByName(String tableName) {
@@ -81,14 +82,13 @@ public class Controller {
             throw new BadRequestException("table name is invalid: " + tableName);
         }
         Optional<Table> tableOptional = Database.getInstance().getAllTables().stream().filter(t -> t.getName().equals(tableName)).findFirst();
-        return tableOptional.orElseThrow(() -> new BadRequestException("table not found: " + tableName));
+        return tableOptional.orElseThrow(() -> new NotFoundException("table not found: " + tableName));
     }
 
     public static HttpResponse doSearch(ViewEntity viewEntity) throws SearchException {
-        viewEntity.validate();
         View viewToExecute = viewEntity.convertToView();
         ResultSet resultSet = viewToExecute.execute();
-        return new HttpResponse( "ok", resultSet);
+        return new HttpResponse(resultSet);
 
     }
 

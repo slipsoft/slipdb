@@ -131,7 +131,7 @@
         }
       }
     },
-    "/table/{tableName}/load/csv" : {
+    "/table/{tableName}/load" : {
       "post" : {
         "tags" : [ "table" ],
         "operationId" : "loadCSV",
@@ -142,6 +142,14 @@
           "in" : "path",
           "required" : true,
           "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "description" : "content",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
         } ],
         "responses" : {
           "200" : {
@@ -192,7 +200,8 @@
           "type" : "string"
         },
         "type" : {
-          "type" : "string"
+          "type" : "string",
+          "enum" : [ "Byte", "Date", "Double", "Float", "Integer", "Long", "String" ]
         },
         "size" : {
           "type" : "integer",
@@ -233,14 +242,22 @@
         }
       }
     },
-    "Group" : {
-      "type" : "object"
+    "GroupEntity" : {
+      "type" : "object",
+      "properties" : {
+        "fields" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        }
+      }
     },
     "HttpResponse" : {
       "type" : "object",
       "properties" : {
-        "message" : {
-          "type" : "string"
+        "success" : {
+          "type" : "boolean"
         },
         "response" : {
           "type" : "object"
@@ -256,13 +273,26 @@
         "columnsToIndex" : {
           "type" : "array",
           "items" : {
-            "$ref" : "#/definitions/ColumnEntity"
+            "type" : "string"
           }
+        },
+        "type" : {
+          "type" : "string",
+          "enum" : [ "dichotomy", "tree", "hash" ]
         }
       }
     },
-    "Sort" : {
-      "type" : "object"
+    "SortEntity" : {
+      "type" : "object",
+      "properties" : {
+        "direction" : {
+          "type" : "string",
+          "enum" : [ "ASC", "DESC" ]
+        },
+        "field" : {
+          "type" : "string"
+        }
+      }
     },
     "TableEntity" : {
       "type" : "object",
@@ -302,11 +332,11 @@
         "sortList" : {
           "type" : "array",
           "items" : {
-            "$ref" : "#/definitions/Sort"
+            "$ref" : "#/definitions/SortEntity"
           }
         },
         "groupBy" : {
-          "$ref" : "#/definitions/Group"
+          "$ref" : "#/definitions/GroupEntity"
         }
       }
     }

@@ -95,11 +95,6 @@ public class Utils implements Serializable {
 		return true;
 	}
 
-	@Deprecated
-	public static Response generateResponse (int statusCode, String message, String type, Object entity) {
-		return Response.status(statusCode).entity(new HttpResponse(message, entity)).type(type).build();
-	}
-
 	public static boolean isNameDuplicate(ArrayList<Entity> entities, String toCheck) {
 		ArrayList<Entity> duplicates = entities.stream().filter(e -> e.name.equals(toCheck)).collect(Collectors.toCollection(ArrayList::new));
 		return duplicates.size() <= 1;

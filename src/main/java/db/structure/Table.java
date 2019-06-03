@@ -151,7 +151,9 @@ public class Table implements Serializable {
 
 	public void addIndex(Index index) {
 		this.indexesList.add(index);
-		index.getIndexedColumn().addIndex(index);
+		for (Column column :index.getIndexedColumns()) {
+			column.addIndex(index);
+		}
 	}
 
 	private void computeLineDataSize() {
@@ -219,6 +221,18 @@ public class Table implements Serializable {
 			}
 		}
 		return -1;
+	}
+
+	public int[] columnNumbers(String[] colNames) {
+		int[] colNumbers = new int[colNames.length];
+		for (int i = 0; i < colNames.length; i++) {
+			int num = findColumnNumber(colNames[i]);
+			if (num == -1) {
+				throw new RuntimeException("Column not found: " + colNames[i]);
+			}
+			colNumbers[i] = num;
+		}
+		return colNumbers;
 	}
 
 	/**

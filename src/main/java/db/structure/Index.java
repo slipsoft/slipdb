@@ -56,8 +56,8 @@ public abstract class Index implements Operable {
 	/**
 	 * @return la liste des colonnes indexées dans cet Index
 	 */
-	public Column getIndexedColumn() {
-		return indexedColumn;
+	public Column[] getIndexedColumns() {
+		return new Column[] {indexedColumn};
 	}
 	
 	public boolean canBeUsedWithPredicate(Predicate predicate) {
@@ -75,7 +75,9 @@ public abstract class Index implements Operable {
 	}
 
 	public abstract boolean isOperatorCompatible(Operator op);
+	@Deprecated //remplace DiskDataPosition by the new int position
 	public abstract Collection<DiskDataPosition> getPositionsFromPredicate(Predicate predicate) throws IndexException;
+	@Deprecated //remplace DiskDataPosition by the new int position
 	public abstract void addValue(Object value, DiskDataPosition position) throws IOException;
 	public abstract void flushOnDisk() throws IOException;
 }
