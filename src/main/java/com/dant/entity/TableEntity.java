@@ -51,7 +51,7 @@ public class TableEntity extends Entity implements Serializable {
                 this.allColumns.stream().forEach(c -> {
                     try {
                         c.validate();
-                    } catch (Exception exp) {
+                    } catch (ReflectiveOperationException exp) {
                         Log.error(exp);
                         throw new RuntimeException(exp);
                     }

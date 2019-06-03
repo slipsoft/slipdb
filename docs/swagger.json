@@ -200,7 +200,8 @@
           "type" : "string"
         },
         "type" : {
-          "type" : "string"
+          "type" : "string",
+          "enum" : [ "Byte", "Date", "Double", "Float", "Integer", "Long", "String" ]
         },
         "size" : {
           "type" : "integer",

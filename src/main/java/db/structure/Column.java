@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.dant.entity.ColumnEntity;
+import com.dant.entity.TypeEnum;
 import com.dant.utils.EasyFile;
 import com.dant.utils.Log;
 import com.dant.utils.Utils;
@@ -237,10 +238,7 @@ public class Column implements Serializable {
 
 	public ColumnEntity convertToEntity() {
 		int typeClassSize = this.dataType.getSize();
-		String typeClassName = this.dataType.getClass().getName();
-		String DataTypesClassPathPrefix = Database.getInstance().config.DataTypesClassPathPrefix;
-
-		String type = Database.getInstance().config.DataTypes.entrySet().stream().filter(e -> (DataTypesClassPathPrefix + e.getValue()).equals(typeClassName)).map(Map.Entry::getKey).findFirst().get();
+		TypeEnum type = TypeEnum.valueOf(this.dataType.getClass());
 		return new ColumnEntity(this.name, type, typeClassSize);
 	}
 	

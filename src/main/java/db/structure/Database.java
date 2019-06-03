@@ -17,8 +17,8 @@ public final class Database {
     public Config config;
     public ArrayList<Node> allNodes;
     
-    protected AtomicInteger nextTableID = new AtomicInteger(1);
-	protected AtomicInteger nextIndexTreeDicUniqueId = new AtomicInteger(1);
+    private AtomicInteger nextTableID = new AtomicInteger(1);
+	private AtomicInteger nextIndexTreeDicUniqueId = new AtomicInteger(1);
     
     private Database() {
         allTables = new ArrayList<>();
@@ -39,7 +39,7 @@ public final class Database {
     }
     
     private static class Init {
-        public static final Database INSTANCE = new Database();
+        static final Database INSTANCE = new Database();
     }
     
     public ArrayList<Table> getAllTables() {
@@ -47,8 +47,8 @@ public final class Database {
     }
     
     /** Ecrire les données : SEULEMENT LES TABLES
-     *  @param objectOutputStream
-     *  @throws IOException
+     *  @param objectOutputStream output
+     *  @throws IOException in case of IO failure
      */
     public void writeSerialData(ObjectOutputStream objectOutputStream) throws IOException {
     	objectOutputStream.writeObject(nextTableID);
@@ -60,8 +60,8 @@ public final class Database {
     }
     
     /** Lire les données : SEULEMENT LES TABLES
-     *  @param objectOutputStream
-     *  @throws IOException
+     *  @param objectInputStream input
+     *  @throws IOException in case of IO failure
      */
     @SuppressWarnings("unchecked")
 	public void readSerialData(ObjectInputStream objectInputStream) throws ClassNotFoundException, IOException {

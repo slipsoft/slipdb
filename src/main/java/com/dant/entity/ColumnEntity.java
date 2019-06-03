@@ -14,10 +14,10 @@ import java.util.HashMap;
 import static com.dant.utils.Utils.*;
 
 public class ColumnEntity extends Entity implements Serializable {
-    public String type;
+    public TypeEnum type;
     public int size;
 
-    public ColumnEntity(String name, String type, int size) {
+    public ColumnEntity(String name, TypeEnum type, int size) {
         this.name = name;
         this.type = type;
         this.size = size;
@@ -29,7 +29,7 @@ public class ColumnEntity extends Entity implements Serializable {
         return gson.toJson(this);
     }
 
-    public void validate() throws NoSuchFieldException, ClassNotFoundException, IllegalAccessException {
+    public void validate() throws NoSuchFieldException, IllegalAccessException {
         if (this.name == null || this.name.length() == 0) {
             throw new BadRequestException( "Column name is missing");
         } else {
@@ -38,32 +38,21 @@ public class ColumnEntity extends Entity implements Serializable {
             }
         }
         if (this.type == null) {
-            throw new BadRequestException( "Column Type is missing");
-        } else {
-            HashMap<String, String> DataTypes = Database.getInstance().config.DataTypes;
-            String DataTypesClassPathPrefix = Database.getInstance().config.DataTypesClassPathPrefix;
+            throw new BadRequestException("Column Type is missing for column: " + this.name);
+        }
+        Class dataTypeClass = this.type.convertToClass();
+        boolean sizeIsRequired = dataTypeClass.getField("sizeIsRequired").getBoolean(null);
 
-            if (DataTypes.get(this.type) == null) {
-                throw new BadRequestException( "Column type is invalid");
-            } else {
-                String dataTypeClassName = DataTypesClassPathPrefix+DataTypes.get(this.type);
-                Class dataTypeClass = Class.forName(dataTypeClassName);
-                boolean sizeIsRequired = dataTypeClass.getField("sizeIsRequired").getBoolean(null);
+        if(sizeIsRequired) {
+            if (this.size == 0) {
+                throw new BadRequestException( "size is missing for column: " + this.name);
+            } else if (this.size < 0) {
+                throw new BadRequestException( "size is invalid for column: " + this.name);
+            } else  {
+                int maxSizeInBytes = dataTypeClass.getField("maxSizeInBytes").getInt(null);
 
-                if(sizeIsRequired) {
-                    if (this.size == 0) {
-                        throw new BadRequestException( "size is missing");
-                    } else if (this.size < 0) {
-                        throw new BadRequestException( "size is invalid");
-                    } else  {
-                        int maxSizeInBytes = dataTypeClass.getField("maxSizeInBytes").getInt(null);
-
-                        if(this.size > maxSizeInBytes) {
-                            throw new BadRequestException( "field size is too high, max size for " + this.type + " is: " + maxSizeInBytes );
-                        }
-                    }
-                } else if (!sizeIsRequired && this.size != 0) {
-                    throw new BadRequestException( "field size is not needed for " + this.type);
+                if(this.size > maxSizeInBytes) {
+                    throw new BadRequestException( "field size is too high, max size for " + this.type + " is: " + maxSizeInBytes );
                 }
             }
         }
@@ -71,9 +60,7 @@ public class ColumnEntity extends Entity implements Serializable {
 
     public Column convertToColumn() {
         try {
-            String DataTypesClassPathPrefix = Database.getInstance().config.DataTypesClassPathPrefix;
-            String className = Database.getInstance().config.DataTypes.get(type);
-            Class dataTypeClass = Class.forName(DataTypesClassPathPrefix+className);
+            Class dataTypeClass = this.type.convertToClass();
             DataType dataType;
             if (dataTypeClass.getField("sizeIsRequired").getBoolean(null)) {
                 dataType = (DataType)dataTypeClass.getDeclaredConstructor(int.class).newInstance(this.size);
@@ -81,7 +68,7 @@ public class ColumnEntity extends Entity implements Serializable {
                 dataType = (DataType)dataTypeClass.getDeclaredConstructor().newInstance();
             }
             return new Column(this.name, dataType);
-        } catch (Exception exp) {
+        } catch (ReflectiveOperationException exp) {
             Log.error(exp);
             throw new RuntimeException("unable to create table");
         }
