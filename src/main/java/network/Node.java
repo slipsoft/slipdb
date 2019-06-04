@@ -28,7 +28,7 @@ public class Node {
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .build();
         HttpRequest checkRequest = HttpRequest.newBuilder()
-                .uri(URI.create(address + ":" + port + "/check"))
+                .uri(URI.create(address + ":" + port + "/db/check"))
                 .headers("Content-Type", "application/json", "InternalToken", Database.getInstance().config.SuperSecretPassphrase)
                 .GET()
                 .build();

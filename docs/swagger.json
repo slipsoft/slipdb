@@ -42,6 +42,13 @@
         "operationId" : "checkNode",
         "consumes" : [ "application/json" ],
         "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "InternalToken",
+          "in" : "header",
+          "required" : false,
+          "type" : "string",
+          "default" : "null"
+        } ],
         "responses" : {
           "200" : {
             "description" : "successful operation",
