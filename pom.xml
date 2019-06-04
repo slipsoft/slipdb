@@ -1,7 +1,7 @@
 <project
-	xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+		xmlns="http://maven.apache.org/POM/4.0.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.dant</groupId>
 	<artifactId>dant</artifactId>
@@ -11,6 +11,7 @@
 	<properties>
 		<resteasy.version>3.1.0.Final</resteasy.version>
 		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
+		<jaxb-substitute.api.version>1.0.4.Final</jaxb-substitute.api.version>
 	</properties>
 	<dependencies>
 		<!-- JAX-RS lib -->
@@ -62,6 +63,11 @@
 			<version>5.3.1</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.3.1</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>dant</finalName>
@@ -70,6 +76,11 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>3.0.0-M3</version>
+				<configuration>
+					<forkCount>0</forkCount> <!-- changed this to 0 -->
+					<reuseForks>false</reuseForks>
+					<printSummary>true</printSummary>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
