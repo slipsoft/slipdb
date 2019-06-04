@@ -58,7 +58,12 @@ public class Controller {
         tablesToAdd.stream().forEach(t -> Database.getInstance().getAllTables().add(t));
         
 		SerialStructure.saveStructure();
+
+		if (!addImmediately) {
+
+        }
     }
+
 
     public static HttpResponse getTable(String tableName) {
         Table table = Controller.getTableByName(tableName);

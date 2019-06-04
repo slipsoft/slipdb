@@ -9,7 +9,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import db.network.Node;
+import network.Node;
 
 public final class Database {
 	
