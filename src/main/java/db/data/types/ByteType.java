@@ -43,7 +43,12 @@ public class ByteType extends DataType {
 	@Override
 	public boolean isOperatorCompatible(Operator op) {
 		return ArrayUtils.contains(new Operator[] {
-			Operator.equals
+			Operator.equals,
+			Operator.greater,
+			Operator.less,
+			Operator.greaterOrEquals,
+			Operator.lessOrEquals,
+			Operator.between,
 		}, op);
 	}
 

@@ -22,7 +22,7 @@ public class IndexHash extends Index {
 	protected HashMap<KeyHash, ArrayList<Integer>> indexedValuesMap;
 	
 	public IndexHash(Table table, Column column) {
-		super(table, column);
+		super(table, new Column[] {column});
 		this.indexedValuesMap = new HashMap<>();
 	}
 	
@@ -43,16 +43,23 @@ public class IndexHash extends Index {
 	}
 
 	@Override
+	public void indexEntry(Object[] entry, int id) throws IndexException {
+
+	}
+
+	@Override
 	public boolean isOperatorCompatible(Operator op) {
 		if(!ArrayUtils.contains(new Operator[] {
 				Operator.equals
 			}, op)) {
 			return false;
 		}
-		if (!indexedColumn.getDataType().isOperatorCompatible(op)) {
-			return false;
-		}
 		return true;
 	}
-	
+
+	@Override
+	public int[] getIdsFromPredicate(Predicate predicate) throws IndexException {
+		return new int[0];
+	}
+
 }

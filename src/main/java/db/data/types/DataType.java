@@ -14,10 +14,7 @@ public abstract class DataType implements Operable, Serializable {
 	private static final long serialVersionUID = 4426175636422784230L;
 
 	public static boolean sizeIsRequired; // nécessaire au bon fonctionnement de l'API, si set à true => public static int maxSizeInBytes = [max]; obligatoire
-	
-	
-	
-	protected int sizeInBytes;
+	int sizeInBytes;
 	
 	//c'est en fait inutile (merci Nicolas ;) ) : protected final Utils currentUtilsInstance; // doit être initialisé
 	//protected Object currentValue;
@@ -30,7 +27,12 @@ public abstract class DataType implements Operable, Serializable {
 	
 	public DataType() {
 	}
-	
+
+	@Override
+	public String toString() {
+		return super.getClass().getName();
+	}
+
 	@SuppressWarnings("rawtypes")
 	public abstract Class getAssociatedClassType();
 	

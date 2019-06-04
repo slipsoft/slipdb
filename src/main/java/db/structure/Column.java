@@ -241,8 +241,12 @@ public class Column implements Serializable {
 		TypeEnum type = TypeEnum.valueOf(this.dataType.getClass());
 		return new ColumnEntity(this.name, type, typeClassSize);
 	}
-	
-	
+
+	@Override
+	public String toString() {
+		return this.name + ":" + this.dataType;
+	}
+
 	private ColumnDataChunk dataMemoryGetWriteChunk() {
 		if (a2DataChunk.size() == 0) {
 			ColumnDataChunk newDataChunk = new ColumnDataChunk(dataType, chunkDataTypeAllocationSize);

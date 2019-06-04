@@ -250,6 +250,7 @@ public class Table implements Serializable {
 	 * @param doRuntimeIndexing
 	 * @throws Exception
 	 */
+	@Deprecated
 	public void loadData(Parser parser, InputStream csvStream, boolean doRuntimeIndexing) {
 		//if (csvParser == null)
 		// Thread-safe
@@ -328,9 +329,23 @@ public class Table implements Serializable {
 	 * @param position - the Disk position of this entry
 	 * @throws IndexException - if one of the indexes couldn't index this entry
 	 */
+	@Deprecated
 	public void indexEntry(Object[] entry, DiskDataPosition position) throws IndexException {
 		for (Index index: indexesList) {
 			index.indexEntry(entry, position);
+		}
+	}
+
+	/**
+	 * Add an entry in every index of the table
+	 * @param entry - an array of object representing an entry
+	 * @param id - the id (position) of this entry
+	 * @throws IndexException - if one of the indexes couldn't index this entry
+	 */
+	@Deprecated
+	public void indexEntry(Object[] entry, int id) throws IndexException {
+		for (Index index: indexesList) {
+			index.indexEntry(entry, id);
 		}
 	}
 

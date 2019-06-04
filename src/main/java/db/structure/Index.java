@@ -1,5 +1,6 @@
 package db.structure;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.io.IOException;
 
@@ -9,6 +10,7 @@ import db.search.Operator;
 import db.search.Operable;
 import db.search.Predicate;
 import index.IndexException;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * Classe Index, permettant d'indexer une ou plusieurs colonnes Exemple :
@@ -26,7 +28,7 @@ public abstract class Index implements Operable {
 	 * ArrayList<Integer>
 	 */
 	// KAKA -> protected Map<Key, ArrayList<Integer>> indexedValuesMap;
-	protected Column indexedColumn; // colonne indexée dans cet Index
+	protected Column[] indexedColumns; // colonne indexée dans cet Index
 	protected Table table;
 
 	/**
@@ -34,11 +36,11 @@ public abstract class Index implements Operable {
 	 * used by the TreeMap indexing class.
 	 *
 	 * @param table - table of the index
-	 * @param indexedColumn - column to index
+	 * @param indexedColumns - columns to index
 	 */
-	public Index(Table table, Column indexedColumn) {
+	public Index(Table table, Column[] indexedColumns) {
 		this.table = table;
-		this.indexedColumn = indexedColumn;
+		this.indexedColumns = indexedColumns;
 	}
 
 	/**
@@ -55,27 +57,33 @@ public abstract class Index implements Operable {
 	 * @return la liste des colonnes indexées dans cet Index
 	 */
 	public Column[] getIndexedColumns() {
-		return new Column[] {indexedColumn};
+		return indexedColumns;
 	}
 	
 	public boolean canBeUsedWithPredicate(Predicate predicate) {
-		boolean containsColumn = indexedColumn.equals(predicate.getColumn());
+		boolean containsColumn = ArrayUtils.contains(indexedColumns, predicate.getColumn());
 		boolean isOperatorCompatible = this.isOperatorCompatible(predicate.getOperator());
 		return containsColumn && isOperatorCompatible;
 	}
 
+	@Deprecated
 	public void indexEntry(Object[] entry, DiskDataPosition position) throws IndexException{
 		try {
-			this.addValue(entry[this.indexedColumn.getNumber()], position);
+			this.addValue(entry[this.indexedColumns[0].getNumber()], position);
 		} catch (IOException e) {
 			throw new IndexException(e);
 		}
 	}
 
+	public abstract void indexEntry(Object[] entry, int id) throws IndexException;
 	public abstract boolean isOperatorCompatible(Operator op);
+	public abstract int[] getIdsFromPredicate(Predicate predicate) throws IndexException;
+
+	// Deprecated interface
 	@Deprecated //remplace DiskDataPosition by the new int position
 	public abstract Collection<DiskDataPosition> getPositionsFromPredicate(Predicate predicate) throws IndexException;
 	@Deprecated //remplace DiskDataPosition by the new int position
 	public abstract void addValue(Object value, DiskDataPosition position) throws IOException;
+	@Deprecated
 	public abstract void flushOnDisk() throws IOException;
 }

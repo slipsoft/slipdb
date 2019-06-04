@@ -210,7 +210,7 @@ public class IndexTreeDic extends Index implements Serializable {
 	 * Nouveau constructeur qui prend direct une column
 	 */
 	public IndexTreeDic(Table table, Column indexedColumn) throws IndexException{
-		super(table, indexedColumn);
+		super(table, new Column[] {indexedColumn});
 		loadSerialAndCreateCommon();
 		DataType columnDataType = indexedColumn.getDataType();
 		storedValuesClassType = columnDataType.getAssociatedClassType();
@@ -266,7 +266,8 @@ public class IndexTreeDic extends Index implements Serializable {
 
 
 		associatedTableColumnIndex = columnIndex;
-		indexedColumn = columnsList.get(associatedTableColumnIndex);
+		Column indexedColumn = columnsList.get(associatedTableColumnIndex);
+		indexedColumns = new Column[] {indexedColumn};
 		DataType columnDataType = indexedColumn.getDataType();
 
 		storedValuesClassType = columnDataType.getAssociatedClassType();
@@ -435,8 +436,8 @@ public class IndexTreeDic extends Index implements Serializable {
 	
 	//private Object indexingValueLockOnlyForAddAndDiskAndMemory = new Object(); // pas d'interblocage possible car les fonctions ne s'utilisent pas l'une l'autre
 	/** Ajouter une valeur et un binIndex associé
-	 *  @param associatedValue valeur indexée, ATTENTION : doit être du type du IndexTree utilisé (Integer, Float, Byte, Double, ...)
-	 *  @param binIndex position (dans le fichier binaire global) de la donnée stockée dans la table
+	 *  @param argAssociatedValue valeur indexée, ATTENTION : doit être du type du IndexTree utilisé (Integer, Float, Byte, Double, ...)
+	 *  @param dataPosition position (dans le fichier binaire global) de la donnée stockée dans la table
 	 * @throws IOException problème d'I/O
 	 */
 	public void addValue(Object argAssociatedValue, DiskDataPosition dataPosition) throws IOException { synchronized (indexingValueLock) {
@@ -469,8 +470,8 @@ public class IndexTreeDic extends Index implements Serializable {
 
 	/** Only gets the matching binIndexes from memory, not from stored data on disk
 	 *
-	 * @param minValue
-	 * @param maxValue
+	 * @param minValueExact
+	 * @param maxValueExact
 	 * @param isInclusive
 	 * @return la collection contenant tous les binIndex correspondants
 	 * @throws Exception
@@ -883,8 +884,7 @@ public class IndexTreeDic extends Index implements Serializable {
 	}
 
 	/** Pour faire un Equals (demandé par Nicolas)
-	 *  @param equalsExactValue
-	 *  @param justEvaluateResultNumber
+	 *  @param predicate
 	 *  @return
 	 *  @throws Exception
 	 */
@@ -936,8 +936,8 @@ public class IndexTreeDic extends Index implements Serializable {
 
 	/** Gets the matching results from disk !
 	 *
-	 *  @param minValue
-	 *  @param maxValue
+	 *  @param argMinValueExact
+	 *  @param argMaxValueExact
 	 *  @param isInclusive
 	 *  @return la collection contenant tous les binIndex correspondants
 	 * @throws Exception
@@ -1274,6 +1274,13 @@ public class IndexTreeDic extends Index implements Serializable {
 		return associatedTableColumnIndex;
 	}
 
+	// added only to make it temporarily compatible with Index
+	@Deprecated
+	@Override
+	public void indexEntry(Object[] entry, int id) throws IndexException {
+		//TODO (ou pas...)
+	}
+
 	@Override
 	public boolean isOperatorCompatible(Operator op) {
 		return ArrayUtils.contains(new Operator[] {
@@ -1285,6 +1292,14 @@ public class IndexTreeDic extends Index implements Serializable {
 				Operator.in,
 				Operator.between
 		}, op);
+	}
+
+	// added only to make it temporarily compatible with Index
+	@Deprecated
+	@Override
+	public int[] getIdsFromPredicate(Predicate predicate) throws IndexException {
+		// TODO (ou pas...)
+		return new int[0];
 	}
 
 	// compareValues : nom pas clair !

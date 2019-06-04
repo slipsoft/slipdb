@@ -52,6 +52,9 @@ public class Predicate implements FilterTerm {
 
 	@Override
 	public Set<DiskDataPosition> execute() throws SearchException {
+		if (!column.getDataType().isOperatorCompatible(operator)) {
+			throw new SearchException("the operator: " + operator + " is not compatible with the column: " + column);
+		}
 		try {
 			return new HashSet<>(getIndex().getPositionsFromPredicate(this));
 		} catch (StructureException e) {

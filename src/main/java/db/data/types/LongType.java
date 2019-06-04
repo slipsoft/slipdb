@@ -49,6 +49,7 @@ public class LongType extends DataType {
 			Operator.less,
 			Operator.greaterOrEquals,
 			Operator.lessOrEquals,
+			Operator.between,
 		}, op);
 	}
 

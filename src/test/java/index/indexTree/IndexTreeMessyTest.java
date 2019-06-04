@@ -21,14 +21,11 @@ import db.data.types.ByteType;
 import db.data.types.DateType;
 import db.data.types.DoubleType;
 import db.data.types.FloatType;
-import db.data.types.IntegerArrayList;
 import db.data.types.DataPositionList;
 import db.data.types.StringType;
 import db.structure.Column;
 import db.structure.Database;
 import db.structure.Table;
-import index.indexTree.IndexTreeCeption;
-import index.indexTree.IndexTreeDic;
 
 import static org.junit.jupiter.api.Assertions.*;
 

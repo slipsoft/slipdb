@@ -22,7 +22,7 @@ import db.data.types.ByteType;
 import db.data.types.DateType;
 import db.data.types.DoubleType;
 import db.data.types.FloatType;
-import db.data.types.IntegerArrayList;
+import index.indexTree.IntegerArrayList;
 import db.data.types.StringType;
 import db.data.load.CsvParser;
 import db.structure.Column;
