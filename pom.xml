@@ -80,6 +80,7 @@
 					<forkCount>0</forkCount> <!-- changed this to 0 -->
 					<reuseForks>false</reuseForks>
 					<printSummary>true</printSummary>
+					<printSummary>true</printSummary>
 				</configuration>
 			</plugin>
 			<plugin>
