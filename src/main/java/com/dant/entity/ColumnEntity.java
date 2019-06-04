@@ -70,7 +70,7 @@ public class ColumnEntity extends Entity implements Serializable {
             return new Column(this.name, dataType);
         } catch (ReflectiveOperationException exp) {
             Log.error(exp);
-            throw new RuntimeException("unable to create table");
+            throw new RuntimeException("unable to create column");
         }
     }
 }

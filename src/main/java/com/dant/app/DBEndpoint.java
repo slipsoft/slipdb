@@ -6,6 +6,7 @@ import com.google.gson.JsonSyntaxException;
 import db.structure.Database;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
+import network.Network;
 import network.Node;
 
 import javax.ws.rs.*;
@@ -13,12 +14,9 @@ import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.Response;
 
 
 @Api("db")
@@ -35,36 +33,30 @@ public class DBEndpoint {
         }
         return new HttpResponse("ok");
     }
-
-    // Sans doute un moyen de la condenser qcio
     @PUT
     @Path("/addNode")
     public void addNodes(@ApiParam(value = "nodeData", required = true) List<Node> allNodes, final @Suspended AsyncResponse responseToClient) {
-        try {
-            List<CompletableFuture<java.net.http.HttpResponse<String>>> completableFutures = allNodes.stream().map(Node::checkNode).collect(Collectors.toList());
-            // met toutes mes completableFutures dans une liste
+        List<CompletableFuture<java.net.http.HttpResponse<String>>> completableFutures = allNodes.stream().map(Node::checkNode).collect(Collectors.toList());
+        // met toutes mes completableFutures dans une liste
 
-            CompletableFuture<Void> allFutures = CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[completableFutures.size()]));
-            // appelle la fonction allOff pour retourner 1 seul objet Future
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[completableFutures.size()]));
+        // appelle la fonction allOff pour retourner 1 seul objet Future
 
-            CompletableFuture<List<java.net.http.HttpResponse<String>>> allCompletableFutures = allFutures.thenApply(future -> {
-                return completableFutures.stream()
-                        .map(completableFuture -> completableFuture.join())
-                        .collect(Collectors.toList());
-            });
-            // on met tous les resultats dans une liste qu'on passe à un nouveau Future
+        CompletableFuture<List<java.net.http.HttpResponse<String>>> allCompletableFutures = allFutures.thenApply(future ->
+                completableFutures.stream()
+                    .map(completableFuture -> completableFuture.join())
+                    .collect(Collectors.toList())
+        );
+        // on met tous les resultats dans une liste qu'on passe à un nouveau Future
 
-            allCompletableFutures.thenAccept(responses -> {
-                responses.stream().forEach(response -> {
-                    if (response.statusCode() != 200) {
-                        throw new JsonSyntaxException("node could not be validated");
-                    }
-                    responseToClient.resume("ok");
-                });
-            });
-        } catch (Exception exp) {
-            responseToClient.resume(exp);
-        }
+        allCompletableFutures.thenAccept(responses ->
+            responses.stream().forEach(response -> {
+                if (response.statusCode() != 200) {
+                    responseToClient.resume(new JsonSyntaxException("one or more nodes could not be validated" + response.request().uri()));
+                }
+                responseToClient.resume("ok");
+            })
+        );
     }
 
     @PUT
@@ -92,7 +84,20 @@ public class DBEndpoint {
 
     @DELETE
     @Path("/tables/{tableName}")
-    public HttpResponse deleteTable(@PathParam("tableName") String tableName) {
-        return Controller.deleteTable(tableName);
+    public void deleteTable(@PathParam("tableName") String tableName, final @Suspended AsyncResponse responseToClient) {
+        try {
+            Controller.deleteTable(tableName);
+            Network.broadcast("/tables" + tableName, "DELETE").thenAccept(responses ->
+                    responses.stream().forEach(response -> {
+                        if (response.statusCode() != 200) {
+                            responseToClient.resume(new JsonSyntaxException("the table on node" + response.request().uri() + "could not be deleted"));
+                        }
+                        responseToClient.resume("ok");
+                    })
+            );
+        } catch (Exception exp) {
+            //en mode réons eaunc, l'exception handling est différent
+            responseToClient.resume(exp);
+        }
     }
 }
