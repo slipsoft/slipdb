@@ -140,7 +140,7 @@
 						<exclude>*Archive/**/*</exclude>
 					</excludes>
 				</configuration>
-				<version>0.7.6.201602180812</version>
+				<version>0.8.4</version>
 				<executions>
 					<execution>
 						<id>prepare-agent</id>
