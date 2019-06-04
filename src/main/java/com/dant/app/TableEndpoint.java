@@ -2,23 +2,19 @@ package com.dant.app;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import com.dant.entity.*;
-import com.dant.utils.Log;
 import db.data.load.CsvParser;
 import db.search.SearchException;
-import db.structure.Database;
 import db.structure.Index;
 import db.structure.Table;
-import index.indexTree.IndexException;
+import index.IndexException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Optional;
 
 @Api("table")
 @Path("/table")

@@ -32,6 +32,7 @@ import index.indexTree.IndexTreeDic;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Deprecated
 class IndexTreeMessyTest {
 	
 	// Voir constante dans IndexTreeDic : static public int maxResultCountPerIndexInstance = 10;

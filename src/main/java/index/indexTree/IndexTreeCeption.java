@@ -91,7 +91,7 @@ import zArchive.sj.simpleDB.treeIndexing.SIndexingTreeType;
  */
 
 
-
+@Deprecated
 public class IndexTreeCeption {
 	protected SIndexingTreeType treeType; // servira pour l'utilisation de méthodes génériques, pour utiliser le bon type d'arbre et faire les bons cast
 	

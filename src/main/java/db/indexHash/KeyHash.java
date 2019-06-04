@@ -2,6 +2,7 @@ package db.indexHash;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+@Deprecated
 public class KeyHash { //  extends Key 
 	
 	private Object[] valuesArray;

@@ -15,12 +15,14 @@ import db.structure.KeyTree;
  */
 
 @SuppressWarnings("unused")
+@Deprecated
 class TreeMapDemo {
 	
 	public static void main(String[] args) {
 		mainTreeMapDemo();
 	}
-	
+
+	@Deprecated
 	public static void mainTreeMapDemo() {
 	 
 	    // Create a TreeMap

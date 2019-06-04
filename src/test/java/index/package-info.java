@@ -6,4 +6,4 @@
  * 
  *
  */
-package db.index;
+package index;

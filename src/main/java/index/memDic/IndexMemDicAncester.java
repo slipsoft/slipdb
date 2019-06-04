@@ -6,7 +6,7 @@ import db.search.Predicate;
 import db.structure.Column;
 import db.structure.Index;
 import db.structure.Table;
-import index.indexTree.IndexException;
+import index.IndexException;
 
 import java.io.IOException;
 import java.util.Collection;

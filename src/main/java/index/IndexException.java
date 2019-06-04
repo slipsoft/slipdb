@@ -1,4 +1,4 @@
-package index.indexTree;
+package index;
 
 import db.structure.StructureException;
 

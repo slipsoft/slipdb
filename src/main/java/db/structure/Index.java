@@ -1,8 +1,6 @@
 package db.structure;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 import java.io.IOException;
 
 import db.disk.dataHandler.DiskDataPosition;
@@ -10,7 +8,7 @@ import db.search.Operator;
 
 import db.search.Operable;
 import db.search.Predicate;
-import index.indexTree.IndexException;
+import index.IndexException;
 
 /**
  * Classe Index, permettant d'indexer une ou plusieurs colonnes Exemple :

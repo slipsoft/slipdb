@@ -20,7 +20,7 @@ import db.search.ResultSet;
 import db.structure.Column;
 import db.structure.StructureException;
 import db.structure.Table;
-import index.indexTree.IndexException;
+import index.IndexException;
 import index.indexTree.IndexTreeDic;
 
 @Deprecated

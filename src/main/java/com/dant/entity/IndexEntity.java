@@ -1,18 +1,15 @@
 package com.dant.entity;
 
 import com.google.gson.Gson;
-import db.structure.Column;
 import db.structure.Index;
 import db.structure.Table;
-import index.indexTree.IndexException;
+import index.IndexException;
 import index.indexTree.IndexTreeDic;
 import index.memDic.IndexMemDic;
 import org.jboss.resteasy.spi.NotImplementedYetException;
 
 import javax.ws.rs.BadRequestException;
 import java.io.Serializable;
-import java.util.List;
-import java.util.Optional;
 
 public class IndexEntity extends Entity implements Serializable {
     public String[] columnsToIndex;

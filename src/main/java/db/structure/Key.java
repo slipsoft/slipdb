@@ -9,7 +9,8 @@ package db.structure;
 public abstract class Key {
 	
 	protected Object value; // liste des valeurs contenues dans cette clef
-	
+
+	@Deprecated
 	public Key(Object value) { // possible de créer une clef via un KeyMaker, pas super optimisé mais pratique !
 		this.value = value;
 	}

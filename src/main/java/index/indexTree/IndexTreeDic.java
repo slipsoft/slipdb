@@ -32,6 +32,7 @@ import db.structure.Column;
 import db.structure.Database;
 import db.structure.Index;
 import db.structure.Table;
+import index.IndexException;
 import org.apache.commons.lang3.ArrayUtils;
 import sj.network.tcpAndBuffers.NetBuffer;
 
@@ -70,7 +71,7 @@ import sj.network.tcpAndBuffers.NetBuffer;
  *       ne pas faire de seek supplémentaire, améliore grandement les performances et ne prend pas beaucoup plus d'espace disque.
  *
  */
-
+@Deprecated
 public class IndexTreeDic extends Index implements Serializable {
 	private static final long serialVersionUID = 7766967903992652785L;
 	

@@ -1,5 +1,6 @@
 package db.structure;
 
+@Deprecated
 public class KeyTree extends Key implements Comparable<KeyTree> {
 
 	public KeyTree(Object[] aValuesList) {

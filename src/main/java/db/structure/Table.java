@@ -21,12 +21,11 @@ import db.data.load.CsvParser;
 import db.data.load.Loader;
 import db.data.load.Parser;
 import db.data.types.DataType;
-import db.data.types.DataTypeEnum;
 import db.disk.dataHandler.DiskDataPosition;
 import db.disk.dataHandler.TableDataHandler;
 import db.search.Predicate;
 import db.search.ResultSet;
-import index.indexTree.IndexException;
+import index.IndexException;
 
 /**
  * A simple SQL-like table, consisting of

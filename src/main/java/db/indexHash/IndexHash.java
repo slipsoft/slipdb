@@ -10,12 +10,12 @@ import db.search.Predicate;
 import db.structure.Column;
 import db.structure.Index;
 import db.structure.Table;
-import index.indexTree.IndexException;
+import index.IndexException;
 
 import org.apache.commons.lang3.ArrayUtils;
 
 import db.search.Operator;
-
+@Deprecated
 public class IndexHash extends Index {
 	
 	// Hash map associant une clef à une liste de positions (index des lignes parsées des csv)
