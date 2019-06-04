@@ -11,6 +11,47 @@
     "name" : "table"
   } ],
   "paths" : {
+    "/db/addNode" : {
+      "put" : {
+        "tags" : [ "db" ],
+        "operationId" : "addNodes",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "nodeData",
+          "required" : true,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/definitions/Node"
+            }
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/db/check" : {
+      "get" : {
+        "tags" : [ "db" ],
+        "operationId" : "checkNode",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/HttpResponse"
+            }
+          }
+        }
+      }
+    },
     "/db/tables" : {
       "get" : {
         "tags" : [ "db" ],
@@ -279,6 +320,21 @@
         "type" : {
           "type" : "string",
           "enum" : [ "dichotomy", "tree", "hash" ]
+        }
+      }
+    },
+    "Node" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string"
+        },
+        "address" : {
+          "type" : "string"
+        },
+        "port" : {
+          "type" : "integer",
+          "format" : "int32"
         }
       }
     },
