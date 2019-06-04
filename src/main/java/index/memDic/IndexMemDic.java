@@ -1,6 +1,7 @@
 package index.memDic;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -9,8 +10,10 @@ import com.dant.utils.MemUsage;
 import com.dant.utils.Timer;
 
 import db.data.types.StringType;
+import db.search.Predicate;
 import db.structure.Column;
 import db.structure.Table;
+import index.IndexException;
 
 /**
  * 
@@ -484,7 +487,7 @@ public class IndexMemDic extends IndexMemDicAncester {
 	
 	/** 
 	 *  @param linePosition
-	 *  @param seachQuery
+	 *  @param searchQuery
 	 *  @return
 	 */
 	public int compareLineValuesAndQuery(int linePosition, ByteBuffer searchQuery) {
@@ -521,7 +524,8 @@ public class IndexMemDic extends IndexMemDicAncester {
 	}
 	
 	/** Recherche à partir d'une liste d'objets
-	 * @param searchQuery
+	 * @param queryList la liste d'objets
+	 * @param warnIfWrongArgumentType
 	 * @return  null en cas d'erreur, un int[] contenant les position des lignes coïncidant
 	 */
 	public int[] findMatchingLinePositions(List<Object> queryList, boolean warnIfWrongArgumentType) {
@@ -756,8 +760,15 @@ public class IndexMemDic extends IndexMemDicAncester {
 		if (enableVerboseSort) t1.log();
 		
 	}
-	
-	
-	
-	
+
+	@Override
+	public int[] getIdsFromPredicate(Predicate predicate) throws IndexException {
+		List<Object> values = new ArrayList<Object>(Arrays.asList(predicate.getValue()));
+		switch (predicate.getOperator()) {
+			case equals:
+				return this.findMatchingLinePositions(values, false);
+			default:
+				throw new IndexException("invalid operator");
+		}
+	}
 }

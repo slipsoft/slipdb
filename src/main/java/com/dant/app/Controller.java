@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Controller {
@@ -87,7 +88,7 @@ public class Controller {
 
     public static HttpResponse doSearch(ViewEntity viewEntity) throws SearchException {
         View viewToExecute = viewEntity.convertToView();
-        ResultSet resultSet = viewToExecute.execute();
+        Set<Object> resultSet = viewToExecute.execute();
         return new HttpResponse(resultSet);
 
     }
