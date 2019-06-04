@@ -27,8 +27,8 @@ public class DBEndpoint {
 
     @GET
     @Path("/check")
-    public HttpResponse checkNode(String superSecretPassPhrase) {
-        if (Database.getInstance().config.SuperSecretPassphrase != superSecretPassPhrase) {
+    public HttpResponse checkNode(@DefaultValue("null") @HeaderParam("InternalToken") String InternalToken) {
+        if (Database.getInstance().config.SuperSecretPassphrase != InternalToken) {
             throw new JsonSyntaxException("passPhraseDoesNotMatch");
         }
         return new HttpResponse("ok");
@@ -51,9 +51,10 @@ public class DBEndpoint {
 
         allCompletableFutures.thenAccept(responses ->
             responses.stream().forEach(response -> {
-                if (response.statusCode() != 200) {
-                    responseToClient.resume(new JsonSyntaxException("one or more nodes could not be validated" + response.request().uri()));
+                if (response.statusCode() != 200) {System.out.println(response.statusCode());
+                    responseToClient.resume(new JsonSyntaxException("one or more nodes could not be validated " + response.request().uri() + "error code " + response.statusCode()));
                 }
+                Database.getInstance().allNodes.addAll(allNodes); //TODO check for duplicates
                 responseToClient.resume("ok");
             })
         );

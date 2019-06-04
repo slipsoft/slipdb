@@ -2,6 +2,7 @@ package network;
 
 import db.structure.Database;
 
+import javax.xml.crypto.Data;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -28,10 +29,9 @@ public class Node {
                 .build();
         HttpRequest checkRequest = HttpRequest.newBuilder()
                 .uri(URI.create(address + ":" + port + "/check"))
-                .header("Content-Type", "application/json")
+                .headers("Content-Type", "application/json", "InternalToken", Database.getInstance().config.SuperSecretPassphrase)
                 .GET()
                 .build();
-
         return client.sendAsync(checkRequest, HttpResponse.BodyHandlers.ofString());
 
     }

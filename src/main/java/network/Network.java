@@ -1,9 +1,7 @@
 package network;
 
-import com.google.gson.JsonSyntaxException;
 import db.structure.Database;
 
-import java.io.Serializable;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
