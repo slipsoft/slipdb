@@ -48,13 +48,10 @@ public class IndexHash extends Index {
 	}
 
 	@Override
-	public boolean isOperatorCompatible(Operator op) {
-		if(!ArrayUtils.contains(new Operator[] {
-				Operator.equals
-			}, op)) {
-			return false;
-		}
-		return true;
+	protected Operator[] compatibleOperators() {
+		return new Operator[] {
+			Operator.equals,
+		};
 	}
 
 	@Override

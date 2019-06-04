@@ -54,20 +54,20 @@ The API documentation [can be found online](https://slipsoft.github.io/slipdb/).
 
 While [the server is running](#run-the-server), here are some queries you can run to test the API:
 
-1.  [`PUT /db/tables`](http://localhost:8080/docs/#/db/createTables) with this body:
+1.  [`PUT /db/tables`](http://localhost:8080/docs/#/db/createTables) with the following body:
     ```json
     [
         {
             "name": "taxi2newYork",
             "allColumns": [
-                {"name": "VendorID", "type": "Byte"},
+                {"name": "vendor_id", "type": "Byte"},
                 {"name": "tpep_pickup_datetime", "type": "Date"},
                 {"name": "tpep_dropoff_datetime", "type": "Date"},
                 {"name": "passenger_count", "type": "Byte"},
                 {"name": "trip_distance", "type": "Float"},
                 {"name": "pickup_longitude", "type": "Double"},
                 {"name": "pickup_latitude", "type": "Double"},
-                {"name": "RateCodeID", "type": "Byte"},
+                {"name": "rate_code_id", "type": "Byte"},
                 {"name": "store_and_fwd_flag", "type": "String", "size": "1"},
                 {"name": "dropoff_longitude", "type": "Double"},
                 {"name": "dropoff_latitude", "type": "Double"},
@@ -84,9 +84,20 @@ While [the server is running](#run-the-server), here are some queries you can ru
     ]
     ```
 
-2.  [`GET /db/tables`](http://localhost:8080/db/tables) should return the table we just created.
+2.  [`GET /db/tables`](http://localhost:8080/docs/#/db/getTables) should return the table we just created.
 
 3.  [`POST /table/{tableName}/load`](http://localhost:8080/docs/#/table/loadCSV) with `taxi2newYork` as tableName and the content of [`testdata/SMALL_100_000_yellow_tripdata_2015-04.csv`](testdata/SMALL_100_000_yellow_tripdata_2015-04.csv) as the body.
+
+4.  [`PUT /table/{tableName}/index`](http://localhost:8080/docs/#/table/addIndex) with `taxi2newYork` as tableName and the following body:
+    ```json
+    {
+        "name": "index_vendor_id",
+        "columnsToIndex": [
+            "vendor_id"
+        ],
+        "type": "dichotomy"
+    }
+    ```
 
 ## Built With
 

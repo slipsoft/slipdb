@@ -19,6 +19,7 @@ import com.dant.utils.Log;
 
 import db.data.load.CsvParser;
 import db.data.load.Loader;
+import db.data.load.ParallelLoader;
 import db.data.load.Parser;
 import db.data.types.DataType;
 import db.disk.dataHandler.DiskDataPosition;
@@ -26,6 +27,8 @@ import db.disk.dataHandler.TableDataHandler;
 import db.search.Predicate;
 import db.search.ResultSet;
 import index.IndexException;
+
+import javax.ws.rs.NotFoundException;
 
 /**
  * A simple SQL-like table, consisting of
@@ -229,7 +232,7 @@ public class Table implements Serializable {
 		for (int i = 0; i < colNames.length; i++) {
 			int num = findColumnNumber(colNames[i]);
 			if (num == -1) {
-				throw new RuntimeException("Column not found: " + colNames[i]);
+				throw new NotFoundException("Column not found: " + colNames[i]);
 			}
 			colNumbers[i] = num;
 		}
@@ -259,6 +262,18 @@ public class Table implements Serializable {
 
 	}
 
+	/**
+	 * Load data in the table.
+	 * Thread-safe: the table is read-only.
+	 * @param inputStream - stream that contains the data to parse.
+	 */
+	public void loadData(Parser parser, InputStream inputStream) {
+		ParallelLoader loader = new ParallelLoader(this, parser);
+		loader.parse(inputStream, true);
+
+	}
+
+	@Deprecated
 	public void multiThreadParsingAddAndStartCsv(String csvPath, boolean doRuntimeIndexing) {
 		synchronized(multiThreadParsingListLock) {
 			Thread newParsingThread = new Thread(() -> {

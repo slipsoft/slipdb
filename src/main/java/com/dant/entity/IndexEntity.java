@@ -22,13 +22,9 @@ public class IndexEntity extends Entity implements Serializable {
             case dichotomy:
                 return new IndexMemDic(table, columnNumbers);
             case tree:
-                if (columnNumbers.length > 1) {
-                    throw new BadRequestException("tree indexes are currently only single columns indexes");
-                }
-                return new IndexTreeDic(table, columnNumbers[0]);
             case hash:
             default:
-                throw new NotImplementedYetException("this index type is not implemented yet... :(");
+                throw new BadRequestException("this index type is not implemented yet :( : " + type);
         }
     }
 

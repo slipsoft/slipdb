@@ -7,6 +7,7 @@ import db.structure.Column;
 import db.structure.Index;
 import db.structure.Table;
 import index.IndexException;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -39,9 +40,10 @@ public class IndexMemDicAncester extends Index {
 	}
 
 	@Override
-	public boolean isOperatorCompatible(Operator op) {
-		//TODO
-		return false;
+	protected Operator[] compatibleOperators() {
+		return new Operator[] {
+				Operator.equals,
+		};
 	}
 
 	@Override

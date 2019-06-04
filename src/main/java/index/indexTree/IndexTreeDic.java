@@ -1282,16 +1282,16 @@ public class IndexTreeDic extends Index implements Serializable {
 	}
 
 	@Override
-	public boolean isOperatorCompatible(Operator op) {
-		return ArrayUtils.contains(new Operator[] {
-				Operator.equals,
-				Operator.greater,
-				Operator.less,
-				Operator.greaterOrEquals,
-				Operator.lessOrEquals,
-				Operator.in,
-				Operator.between
-		}, op);
+	protected Operator[] compatibleOperators() {
+		return new Operator[] {
+			Operator.equals,
+			Operator.greater,
+			Operator.less,
+			Operator.greaterOrEquals,
+			Operator.lessOrEquals,
+			Operator.in,
+			Operator.between,
+		};
 	}
 
 	// added only to make it temporarily compatible with Index

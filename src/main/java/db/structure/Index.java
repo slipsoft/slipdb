@@ -61,9 +61,18 @@ public abstract class Index implements Operable {
 	}
 	
 	public boolean canBeUsedWithPredicate(Predicate predicate) {
-		boolean containsColumn = ArrayUtils.contains(indexedColumns, predicate.getColumn());
+		boolean containsColumn = ArrayUtils.contains(getIndexedColumns(), predicate.getColumn());
 		boolean isOperatorCompatible = this.isOperatorCompatible(predicate.getOperator());
 		return containsColumn && isOperatorCompatible;
+	}
+
+	/**
+	 * Check if an operator is compatible with this index.
+	 * @param op the operator to check
+	 * @return true if the operator is compatible
+	 */
+	public boolean isOperatorCompatible(Operator op) {
+		return ArrayUtils.contains(this.compatibleOperators(), op);
 	}
 
 	@Deprecated
@@ -76,7 +85,12 @@ public abstract class Index implements Operable {
 	}
 
 	public abstract void indexEntry(Object[] entry, int id) throws IndexException;
-	public abstract boolean isOperatorCompatible(Operator op);
+
+	/**
+	 * Function to implement. Return the list of Operators compatible with the index.
+	 * @return list of compatible Operators
+	 */
+	protected abstract Operator[] compatibleOperators();
 	public abstract int[] getIdsFromPredicate(Predicate predicate) throws IndexException;
 
 	// Deprecated interface
