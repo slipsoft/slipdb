@@ -2,23 +2,19 @@ package com.dant.app;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import com.dant.entity.*;
-import com.dant.utils.Log;
 import db.data.load.CsvParser;
 import db.search.SearchException;
-import db.structure.Database;
 import db.structure.Index;
 import db.structure.Table;
-import index.indexTree.IndexException;
+import index.IndexException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Optional;
 
 @Api("table")
 @Path("/table")
@@ -36,7 +32,7 @@ public class TableEndpoint {
             throw new BadRequestException("content cannot be null");
         }
         InputStream is = new ByteArrayInputStream(body.getBytes("UTF-8"));
-        Controller.getTableByName(tableName).loadData(new CsvParser(), is, true);
+        Controller.getTableByName(tableName).loadData(new CsvParser(), is);
         return new HttpResponse("ok");
 
     }

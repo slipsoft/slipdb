@@ -48,6 +48,7 @@ public class FloatType extends DataType {
 			Operator.less,
 			Operator.greaterOrEquals,
 			Operator.lessOrEquals,
+			Operator.between,
 		}, op);
 	}
 

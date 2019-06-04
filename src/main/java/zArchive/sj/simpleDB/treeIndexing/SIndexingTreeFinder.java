@@ -3,7 +3,7 @@ package zArchive.sj.simpleDB.treeIndexing;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import db.data.types.IntegerArrayList;
+import index.indexTree.IntegerArrayList;
 
 /** Retourner les valeurs correspondant aux filtres passés en argument
  * 

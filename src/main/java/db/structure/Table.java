@@ -19,14 +19,16 @@ import com.dant.utils.Log;
 
 import db.data.load.CsvParser;
 import db.data.load.Loader;
+import db.data.load.ParallelLoader;
 import db.data.load.Parser;
 import db.data.types.DataType;
-import db.data.types.DataTypeEnum;
 import db.disk.dataHandler.DiskDataPosition;
 import db.disk.dataHandler.TableDataHandler;
 import db.search.Predicate;
 import db.search.ResultSet;
-import index.indexTree.IndexException;
+import index.IndexException;
+
+import javax.ws.rs.NotFoundException;
 
 /**
  * A simple SQL-like table, consisting of
@@ -48,6 +50,7 @@ public class Table implements Serializable {
 	
 	
 	//protected final String dataFilesOnDiskBasePath; devenu baseTablePath
+	@Deprecated
 	protected final TableDataHandler dataHandler;
 	
 	protected final String name; // table name
@@ -124,6 +127,7 @@ public class Table implements Serializable {
 		return indexesList;
 	}
 
+	@Deprecated
 	public TableDataHandler getDataHandler() {
 		return dataHandler;
 	}
@@ -228,7 +232,7 @@ public class Table implements Serializable {
 		for (int i = 0; i < colNames.length; i++) {
 			int num = findColumnNumber(colNames[i]);
 			if (num == -1) {
-				throw new RuntimeException("Column not found: " + colNames[i]);
+				throw new NotFoundException("Column not found: " + colNames[i]);
 			}
 			colNumbers[i] = num;
 		}
@@ -249,6 +253,7 @@ public class Table implements Serializable {
 	 * @param doRuntimeIndexing
 	 * @throws Exception
 	 */
+	@Deprecated
 	public void loadData(Parser parser, InputStream csvStream, boolean doRuntimeIndexing) {
 		//if (csvParser == null)
 		// Thread-safe
@@ -257,6 +262,18 @@ public class Table implements Serializable {
 
 	}
 
+	/**
+	 * Load data in the table.
+	 * Thread-safe: the table is read-only.
+	 * @param inputStream - stream that contains the data to parse.
+	 */
+	public void loadData(Parser parser, InputStream inputStream) {
+		ParallelLoader loader = new ParallelLoader(this, parser);
+		loader.parse(inputStream, true);
+
+	}
+
+	@Deprecated
 	public void multiThreadParsingAddAndStartCsv(String csvPath, boolean doRuntimeIndexing) {
 		synchronized(multiThreadParsingListLock) {
 			Thread newParsingThread = new Thread(() -> {
@@ -327,9 +344,23 @@ public class Table implements Serializable {
 	 * @param position - the Disk position of this entry
 	 * @throws IndexException - if one of the indexes couldn't index this entry
 	 */
+	@Deprecated
 	public void indexEntry(Object[] entry, DiskDataPosition position) throws IndexException {
 		for (Index index: indexesList) {
 			index.indexEntry(entry, position);
+		}
+	}
+
+	/**
+	 * Add an entry in every index of the table
+	 * @param entry - an array of object representing an entry
+	 * @param id - the id (position) of this entry
+	 * @throws IndexException - if one of the indexes couldn't index this entry
+	 */
+	@Deprecated
+	public void indexEntry(Object[] entry, int id) throws IndexException {
+		for (Index index: indexesList) {
+			index.indexEntry(entry, id);
 		}
 	}
 
@@ -361,6 +392,7 @@ public class Table implements Serializable {
 		return lineValues;
 	}
 
+	@Deprecated
 	public ResultSet getFullResultsFromBinIndexes(Collection<DiskDataPosition> resultsCollection) { // table connue ! , Table fromTable) {
 		return getFullResultsFromBinIndexes(resultsCollection, true, -1);
 	}
@@ -371,6 +403,7 @@ public class Table implements Serializable {
 	 * @param waitTimeLimitMs - time limit
 	 * @return a full resultset
 	 */
+	@Deprecated
 	public ResultSet getFullResultsFromBinIndexes(Collection<DiskDataPosition> resultsCollection, boolean waitForAllResults, int waitTimeLimitMs) { // table connue ! , Table fromTable) {
 		return getFullResultsFromBinIndexes(resultsCollection, waitForAllResults, waitTimeLimitMs, null);
 	}
@@ -382,6 +415,7 @@ public class Table implements Serializable {
 	 * @param onlyGetThoseColumnsIndex null si renvoyer tout les champs
 	 * @return a full resultset
 	 */
+	@Deprecated
 	public ResultSet getFullResultsFromBinIndexes(Collection<DiskDataPosition> resultsCollection, boolean waitForAllResults, int waitTimeLimitMs, ArrayList<Integer> onlyGetThoseColumnsIndex) { // table connue ! , Table fromTable) {
 		return getDataHandler().getValuesOfLinesListById(resultsCollection, waitForAllResults, waitTimeLimitMs, onlyGetThoseColumnsIndex);
 	}

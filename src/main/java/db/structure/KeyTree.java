@@ -1,7 +1,9 @@
 package db.structure;
 
+@Deprecated
 public class KeyTree extends Key implements Comparable<KeyTree> {
 
+	@Deprecated
 	public KeyTree(Object[] aValuesList) {
 		super(aValuesList);
 		// TODO Auto-generated constructor stub

@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import db.data.types.IntegerType;
 import db.data.types.StringType;
-import db.indexHash.IndexHash;
+import index.indexHash.IndexHash;
 
 class TableTest {
 	private Table table;

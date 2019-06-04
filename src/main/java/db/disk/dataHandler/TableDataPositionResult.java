@@ -1,5 +1,6 @@
 package db.disk.dataHandler;
 
+@Deprecated
 public class TableDataPositionResult {
 	
 	public final DiskDataPosition dataPosition;

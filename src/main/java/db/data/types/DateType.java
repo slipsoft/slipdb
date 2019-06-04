@@ -89,6 +89,7 @@ public class DateType extends DataType implements Serializable {
 			Operator.less,
 			Operator.greaterOrEquals,
 			Operator.lessOrEquals,
+			Operator.between,
 		}, op);
 	}
 

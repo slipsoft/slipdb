@@ -1,4 +1,5 @@
 ### Slipdb ###
+config.json
 *.bin
 *.sbin
 *.idc_bin

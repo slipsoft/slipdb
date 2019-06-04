@@ -19,17 +19,14 @@ how to deploy the project on a live system.
 
 ### Installing
 
-1.  Install dependencies
+#### Install dependencies
 
-    ```
     mvn install
-    ```
 
-2.  Run the server
+#### Run the server
 
-    ```
     mvn jetty:run
-    ```
+
 You can now connect to the API at http://localhost:8080/.
 A working `get` request could be [`/db/tables`](http://localhost:8080/db/tables).
 
@@ -52,6 +49,55 @@ _not deployable yet..._
 ### API
 
 The API documentation [can be found online](https://slipsoft.github.io/slipdb/). Or if you want to consult you local instance documentation you can access http://localhost:8080/docs/ while the server is running.
+
+## Manual testing of the API
+
+While [the server is running](#run-the-server), here are some queries you can run to test the API:
+
+1.  [`PUT /db/tables`](http://localhost:8080/docs/#/db/createTables) with the following body:
+    ```json
+    [
+        {
+            "name": "taxi2newYork",
+            "allColumns": [
+                {"name": "vendor_id", "type": "Byte"},
+                {"name": "tpep_pickup_datetime", "type": "Date"},
+                {"name": "tpep_dropoff_datetime", "type": "Date"},
+                {"name": "passenger_count", "type": "Byte"},
+                {"name": "trip_distance", "type": "Float"},
+                {"name": "pickup_longitude", "type": "Double"},
+                {"name": "pickup_latitude", "type": "Double"},
+                {"name": "rate_code_id", "type": "Byte"},
+                {"name": "store_and_fwd_flag", "type": "String", "size": "1"},
+                {"name": "dropoff_longitude", "type": "Double"},
+                {"name": "dropoff_latitude", "type": "Double"},
+                {"name": "payment_type", "type": "Byte"},
+                {"name": "fare_amount", "type": "Float"},
+                {"name": "extra", "type": "Float"},
+                {"name": "mta_tax", "type": "Float"},
+                {"name": "tip_amount", "type": "Float"},
+                {"name": "tolls_amount", "type": "Float"},
+                {"name": "improvment_surcharge", "type": "Float"},
+                {"name": "total_amount", "type": "Float"}
+            ]
+        }
+    ]
+    ```
+
+2.  [`GET /db/tables`](http://localhost:8080/docs/#/db/getTables) should return the table we just created.
+
+3.  [`POST /table/{tableName}/load`](http://localhost:8080/docs/#/table/loadCSV) with `taxi2newYork` as tableName and the content of [`testdata/SMALL_100_000_yellow_tripdata_2015-04.csv`](testdata/SMALL_100_000_yellow_tripdata_2015-04.csv) as the body.
+
+4.  [`PUT /table/{tableName}/index`](http://localhost:8080/docs/#/table/addIndex) with `taxi2newYork` as tableName and the following body:
+    ```json
+    {
+        "name": "index_vendor_id",
+        "columnsToIndex": [
+            "vendor_id"
+        ],
+        "type": "dichotomy"
+    }
+    ```
 
 ## Built With
 

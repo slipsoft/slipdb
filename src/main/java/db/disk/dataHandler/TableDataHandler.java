@@ -27,6 +27,7 @@ import db.structure.Table;
  *  Thread-safe pour les parties qui le nécessitent,
  *  mais globalement non-thread-safe : doit être utilisé par le thread qui gère la table myTable.
  */
+@Deprecated
 public class TableDataHandler implements Serializable {
 	private static final long serialVersionUID = 5501412889994005013L;
 	

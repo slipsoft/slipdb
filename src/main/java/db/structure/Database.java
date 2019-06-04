@@ -12,19 +12,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 import db.network.Node;
 
 public final class Database {
-	
+
     private ArrayList<Table> allTables;
     public Config config;
     public ArrayList<Node> allNodes;
-    
+
     private AtomicInteger nextTableID = new AtomicInteger(1);
 	private AtomicInteger nextIndexTreeDicUniqueId = new AtomicInteger(1);
-    
+
     private Database() {
         allTables = new ArrayList<>();
     }
-    
-    public void getConfigFromFile() {
+
+    public Database getConfigFromFile() {
         try {
             FileReader configReader = new FileReader("config.json");
             Gson gson = new Gson();
@@ -32,20 +32,21 @@ public final class Database {
         } catch (Exception exp) {
             Log.error(exp);
         }
+        return this;
     }
-    
+
     public static Database getInstance() {
         return Init.INSTANCE;
     }
-    
+
     private static class Init {
-        static final Database INSTANCE = new Database();
+        static final Database INSTANCE = new Database().getConfigFromFile();
     }
-    
+
     public ArrayList<Table> getAllTables() {
         return allTables;
     }
-    
+
     /** Ecrire les données : SEULEMENT LES TABLES
      *  @param objectOutputStream output
      *  @throws IOException in case of IO failure
@@ -58,7 +59,7 @@ public final class Database {
 		}
 		objectOutputStream.writeObject(allTables);
     }
-    
+
     /** Lire les données : SEULEMENT LES TABLES
      *  @param objectInputStream input
      *  @throws IOException in case of IO failure
@@ -69,7 +70,7 @@ public final class Database {
     	nextIndexTreeDicUniqueId = (AtomicInteger) objectInputStream.readObject();
     	allTables                = (ArrayList<Table>) objectInputStream.readObject();
     }
-    
+
     /*public void readAdditionalSerialData(ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException {
     	nextTableID = (AtomicInteger) objectInputStream.readObject();
     }*/
@@ -80,7 +81,7 @@ public final class Database {
     public int getAndIncrementNextIndexTreeDicID() {
     	return nextIndexTreeDicUniqueId.getAndIncrement();
     }
-    
+
 }
 
 

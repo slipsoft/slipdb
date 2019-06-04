@@ -1,6 +1,0 @@
-{
-  "tableNamePattern": "^[a-zA-Z0-9_-]{3,25}$",
-  "columnNamePattern": "^[a-zA-Z0-9_-]{3,25}$",
-  "NTPHostName": "fr.pool.ntp.org",
-  "SuperSecretPassphrase": "laTarentule"
-}

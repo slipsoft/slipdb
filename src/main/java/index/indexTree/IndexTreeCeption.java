@@ -18,7 +18,6 @@ import java.util.Map.Entry;
 import com.dant.utils.EasyFile;
 
 import db.data.types.DataType;
-import db.data.types.IntegerArrayList;
 import db.search.Operator;
 import db.structure.Column;
 import db.structure.Table;
@@ -91,7 +90,7 @@ import zArchive.sj.simpleDB.treeIndexing.SIndexingTreeType;
  */
 
 
-
+@Deprecated
 public class IndexTreeCeption {
 	protected SIndexingTreeType treeType; // servira pour l'utilisation de méthodes génériques, pour utiliser le bon type d'arbre et faire les bons cast
 	

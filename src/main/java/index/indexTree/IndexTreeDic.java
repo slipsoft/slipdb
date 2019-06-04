@@ -32,8 +32,9 @@ import db.structure.Column;
 import db.structure.Database;
 import db.structure.Index;
 import db.structure.Table;
+import index.IndexException;
 import org.apache.commons.lang3.ArrayUtils;
-import sj.network.tcpAndBuffers.NetBuffer;
+import zArchive.sj.tcpAndBuffers.NetBuffer;
 
 /**
  * Exploite une extraordinaire propritété des TreeMap (arbre rouge-noir) :
@@ -70,7 +71,7 @@ import sj.network.tcpAndBuffers.NetBuffer;
  *       ne pas faire de seek supplémentaire, améliore grandement les performances et ne prend pas beaucoup plus d'espace disque.
  *
  */
-
+@Deprecated
 public class IndexTreeDic extends Index implements Serializable {
 	private static final long serialVersionUID = 7766967903992652785L;
 	
@@ -209,7 +210,7 @@ public class IndexTreeDic extends Index implements Serializable {
 	 * Nouveau constructeur qui prend direct une column
 	 */
 	public IndexTreeDic(Table table, Column indexedColumn) throws IndexException{
-		super(table, indexedColumn);
+		super(table, new Column[] {indexedColumn});
 		loadSerialAndCreateCommon();
 		DataType columnDataType = indexedColumn.getDataType();
 		storedValuesClassType = columnDataType.getAssociatedClassType();
@@ -265,7 +266,8 @@ public class IndexTreeDic extends Index implements Serializable {
 
 
 		associatedTableColumnIndex = columnIndex;
-		indexedColumn = columnsList.get(associatedTableColumnIndex);
+		Column indexedColumn = columnsList.get(associatedTableColumnIndex);
+		indexedColumns = new Column[] {indexedColumn};
 		DataType columnDataType = indexedColumn.getDataType();
 
 		storedValuesClassType = columnDataType.getAssociatedClassType();
@@ -434,8 +436,8 @@ public class IndexTreeDic extends Index implements Serializable {
 	
 	//private Object indexingValueLockOnlyForAddAndDiskAndMemory = new Object(); // pas d'interblocage possible car les fonctions ne s'utilisent pas l'une l'autre
 	/** Ajouter une valeur et un binIndex associé
-	 *  @param associatedValue valeur indexée, ATTENTION : doit être du type du IndexTree utilisé (Integer, Float, Byte, Double, ...)
-	 *  @param binIndex position (dans le fichier binaire global) de la donnée stockée dans la table
+	 *  @param argAssociatedValue valeur indexée, ATTENTION : doit être du type du IndexTree utilisé (Integer, Float, Byte, Double, ...)
+	 *  @param dataPosition position (dans le fichier binaire global) de la donnée stockée dans la table
 	 * @throws IOException problème d'I/O
 	 */
 	public void addValue(Object argAssociatedValue, DiskDataPosition dataPosition) throws IOException { synchronized (indexingValueLock) {
@@ -468,8 +470,8 @@ public class IndexTreeDic extends Index implements Serializable {
 
 	/** Only gets the matching binIndexes from memory, not from stored data on disk
 	 *
-	 * @param minValue
-	 * @param maxValue
+	 * @param minValueExact
+	 * @param maxValueExact
 	 * @param isInclusive
 	 * @return la collection contenant tous les binIndex correspondants
 	 * @throws Exception
@@ -882,8 +884,7 @@ public class IndexTreeDic extends Index implements Serializable {
 	}
 
 	/** Pour faire un Equals (demandé par Nicolas)
-	 *  @param equalsExactValue
-	 *  @param justEvaluateResultNumber
+	 *  @param predicate
 	 *  @return
 	 *  @throws Exception
 	 */
@@ -935,8 +936,8 @@ public class IndexTreeDic extends Index implements Serializable {
 
 	/** Gets the matching results from disk !
 	 *
-	 *  @param minValue
-	 *  @param maxValue
+	 *  @param argMinValueExact
+	 *  @param argMaxValueExact
 	 *  @param isInclusive
 	 *  @return la collection contenant tous les binIndex correspondants
 	 * @throws Exception
@@ -1273,17 +1274,32 @@ public class IndexTreeDic extends Index implements Serializable {
 		return associatedTableColumnIndex;
 	}
 
+	// added only to make it temporarily compatible with Index
+	@Deprecated
 	@Override
-	public boolean isOperatorCompatible(Operator op) {
-		return ArrayUtils.contains(new Operator[] {
-				Operator.equals,
-				Operator.greater,
-				Operator.less,
-				Operator.greaterOrEquals,
-				Operator.lessOrEquals,
-				Operator.in,
-				Operator.between
-		}, op);
+	public void indexEntry(Object[] entry, int id) throws IndexException {
+		//TODO (ou pas...)
+	}
+
+	@Override
+	protected Operator[] compatibleOperators() {
+		return new Operator[] {
+			Operator.equals,
+			Operator.greater,
+			Operator.less,
+			Operator.greaterOrEquals,
+			Operator.lessOrEquals,
+			Operator.in,
+			Operator.between,
+		};
+	}
+
+	// added only to make it temporarily compatible with Index
+	@Deprecated
+	@Override
+	public int[] getIdsFromPredicate(Predicate predicate) throws IndexException {
+		// TODO (ou pas...)
+		return new int[0];
 	}
 
 	// compareValues : nom pas clair !

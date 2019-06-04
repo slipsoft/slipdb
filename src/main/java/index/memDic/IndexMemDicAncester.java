@@ -6,13 +6,15 @@ import db.search.Predicate;
 import db.structure.Column;
 import db.structure.Index;
 import db.structure.Table;
-import index.indexTree.IndexException;
+import index.IndexException;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.IOException;
 import java.util.Collection;
 
 /**
  *  Pour avoir un objet commun pour le stockage des variables statiques entre IndexMemDic et IndexMemDicCh.
+ *  Probablement à passer en abstract @SylvainLune ??
  *
  */
 public class IndexMemDicAncester extends Index {
@@ -39,11 +41,25 @@ public class IndexMemDicAncester extends Index {
 	}
 
 	@Override
-	public boolean isOperatorCompatible(Operator op) {
+	public void indexEntry(Object[] entry, int id) throws IndexException {
 		//TODO
-		return false;
 	}
 
+	@Override
+	protected Operator[] compatibleOperators() {
+		return new Operator[] {
+				Operator.equals,
+		};
+	}
+
+	@Override
+	public int[] getIdsFromPredicate(Predicate predicate) throws IndexException {
+		//TODO
+		return new int[0];
+	}
+
+
+	// Deprecated interface
 	@Override
 	public Collection<DiskDataPosition> getPositionsFromPredicate(Predicate predicate) throws IndexException {
 		return null;
