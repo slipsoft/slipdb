@@ -17,6 +17,7 @@ import com.dant.utils.Log;
  *  et de faire des writeDataLine(..). Ne pas oublier de closeJob (ou close) quand l'écriture du thread est terminée.
  *
  */
+@Deprecated
 public class TableDataHandlerWriteJob implements Closeable { // AutoClosable nécessaire pour des blocs try simples
 	
 	protected final TableDataHandler dataHandler;

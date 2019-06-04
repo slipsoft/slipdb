@@ -3,8 +3,6 @@ package zArchive.sj.simpleDB.arrayList;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import db.indexHash.KeyHash;
-import db.structure.Key;
 import db.structure.KeyTree;
 
 /**
@@ -17,7 +15,7 @@ import db.structure.KeyTree;
 @SuppressWarnings("unused")
 @Deprecated
 class TreeMapDemo {
-	
+
 	public static void main(String[] args) {
 		mainTreeMapDemo();
 	}

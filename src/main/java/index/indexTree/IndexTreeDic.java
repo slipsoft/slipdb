@@ -34,7 +34,7 @@ import db.structure.Index;
 import db.structure.Table;
 import index.IndexException;
 import org.apache.commons.lang3.ArrayUtils;
-import sj.network.tcpAndBuffers.NetBuffer;
+import zArchive.sj.tcpAndBuffers.NetBuffer;
 
 /**
  * Exploite une extraordinaire propritété des TreeMap (arbre rouge-noir) :

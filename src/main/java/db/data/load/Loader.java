@@ -37,7 +37,8 @@ public class Loader {
 	DateType localDateTypeThreadSafe;
 	ByteBuffer localEntryBuffer;
 	Object[] localEntriesArray;
-	
+
+	@Deprecated //Sniff :(
 	public Loader(Table schema, Parser parser, boolean doRuntimeIndexing) { // 
 		//this.schema = schema; // <- C'est Nicolas qui a voulu appeler ça comme ça, pas moi :p
 		currentTable = schema;
@@ -54,7 +55,8 @@ public class Loader {
 	public void setRuntimeIndexing(Object argIndexingEntryList) {
 		// ciao bye
 	}
-	
+
+	@Deprecated
 	public final void parse(InputStream input, boolean appendAtTheEndOfSave) {
 		parse(input, -1, appendAtTheEndOfSave);
 	}
@@ -70,6 +72,7 @@ public class Loader {
 	 * @param input
 	 * @param limit
 	 */
+	@Deprecated
 	public final void parse(InputStream input, int limit, boolean appendAtTheEndOfSave) {
 		//Log.info("PARSE : memusage init = ");
 		//System.gc();
@@ -145,6 +148,7 @@ public class Loader {
 	 * @throws IncorrectEntryException
 	 * @throws IOException 
 	 */
+	@Deprecated
 	protected final void parseAndWriteEntry(String entryString, TableDataHandlerWriteJob writeJob) throws IncorrectEntryException, IOException {
 		
 		String[] valuesAsStringArray = parser.processEntry(entryString);

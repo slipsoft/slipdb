@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
+import db.data.load.ParallelLoader;
 import org.junit.jupiter.api.Test;
 
 import com.dant.utils.Log;
@@ -18,8 +19,6 @@ import db.data.types.DateType;
 import db.data.types.DoubleType;
 import db.data.types.FloatType;
 import db.data.types.StringType;
-import db.newLoader.SCsvLoader;
-import db.newLoader.SIndexHashJava;
 import db.structure.Column;
 import db.structure.Table;
 import index.memDic.IndexMemDic;
@@ -159,7 +158,7 @@ public class SIndexBench {
 		
 		System.gc();
 		MemUsage.printMemUsage("Mem usage  début - ");
-		SCsvLoader csvLoader = new SCsvLoader(table, new CsvParser());
+		ParallelLoader csvLoader = new ParallelLoader(table, new CsvParser());
 		
 		limitParsingTimeTimer = new Timer("");
 		
@@ -190,7 +189,7 @@ public class SIndexBench {
 	 *  @param csvPath  chemin vers le CSV à parser (relatif ou absolu)
 	 *  @throws IOException  erreur retournée si l'accès au CSV est impossible
 	 */
-	private void parseThisCsv(Table table, SCsvLoader csvLoader, String csvPath) throws IOException {
+	private void parseThisCsv(Table table, ParallelLoader csvLoader, String csvPath) throws IOException {
 		InputStream csvStream = new FileInputStream(csvPath);
 		csvLoader.parse(csvStream, true, limitParsingTimeTimer, parsingTimeLimitSec);
 		csvStream.close();

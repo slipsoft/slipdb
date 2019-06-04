@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import com.dant.utils.Log;
 import db.data.types.StringType;
-import db.indexHash.IndexHash;
+import index.indexHash.IndexHash;
 import db.structure.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;

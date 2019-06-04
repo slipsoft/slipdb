@@ -2,8 +2,6 @@ package db.structure;
 
 import java.util.ArrayList;
 
-import db.indexHash.KeyHash;
-
 /**
  *  KeyMaker, pour ne pas avoir à créer un tableau lors de la création des clefs, pas super optilisé mais pratique (parfois)
  */
@@ -19,7 +17,8 @@ public class KeyHashMaker {
 	public void addValue(Object newValue) {
 		valuesList.add(newValue);
 	}
-	
+
+	@Deprecated
 	public Key makeKey() {
 		Object[] objectArray = valuesList.toArray();
 		return null;

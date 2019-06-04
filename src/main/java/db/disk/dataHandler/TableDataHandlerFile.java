@@ -17,6 +17,7 @@ import com.dant.utils.Log;
 import db.structure.Column;
 import db.structure.Table;
 
+@Deprecated
 public class TableDataHandlerFile implements Serializable {
 	
 	// Champs mis en public pour gagner du temps

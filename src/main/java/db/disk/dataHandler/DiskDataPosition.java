@@ -10,6 +10,7 @@ import java.io.Serializable;
  *  Position exacte d'une donnée (ligne) écrite sur le disque
  *
  */
+@Deprecated
 public class DiskDataPosition implements Comparable<DiskDataPosition>, Serializable {
 	
 	private static final long serialVersionUID = 8763520237301457678L;
