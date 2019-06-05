@@ -9,13 +9,13 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import db.network.Node;
+import network.Node;
 
 public final class Database {
 
     private ArrayList<Table> allTables;
     public Config config;
-    public ArrayList<Node> allNodes;
+    public ArrayList<Node> allNodes = new ArrayList<Node>();
 
     private AtomicInteger nextTableID = new AtomicInteger(1);
 	private AtomicInteger nextIndexTreeDicUniqueId = new AtomicInteger(1);
