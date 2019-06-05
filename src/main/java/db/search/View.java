@@ -59,7 +59,7 @@ public class View {
 			for (Integer id : ids) {
 				List<Object> line = new ArrayList<>();
 				for (Column column : columns) {
-					line.add(column.getDataAsReadableString(id));
+					line.add(column.getData(id));
 				}
 				resultSet.add(line);
 			}
