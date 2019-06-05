@@ -17,6 +17,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.Response;
 
 
 @Api("db")
@@ -36,6 +37,7 @@ public class DBEndpoint {
     @PUT
     @Path("/addNode")
     public void addNodes(@ApiParam(value = "nodeData", required = true) List<Node> allNodes, final @Suspended AsyncResponse responseToClient) {
+        //TODO check for duplicates && remove the "http://" part
         List<CompletableFuture<java.net.http.HttpResponse<String>>> completableFutures = allNodes.stream().map(Node::checkNode).collect(Collectors.toList());
         // met toutes mes completableFutures dans une liste
 
@@ -49,15 +51,18 @@ public class DBEndpoint {
         );
         // on met tous les resultats dans une liste qu'on passe à un nouveau Future
 
-        allCompletableFutures.thenAccept(responses ->
+        allCompletableFutures.thenAccept(responses -> {
             responses.stream().forEach(response -> {
+                System.out.println(response.statusCode());
+                System.out.println(response.body());
                 if (response.statusCode() != 200) {
                     responseToClient.resume(new JsonSyntaxException("one or more nodes could not be validated " + response.request().uri() + "error code " + response.statusCode()) + " " + response.body());
                 }
-                Database.getInstance().allNodes.addAll(allNodes); //TODO check for duplicates
-                responseToClient.resume("ok");
-            })
-        );
+                responseToClient.resume(new HttpResponse("ok"));
+                Database.getInstance().allNodes.addAll(allNodes);
+                System.out.println("icicicicicicic222");
+            });
+        });
     }
 
     @PUT
