@@ -27,6 +27,7 @@ public class IndexMemDic extends IndexMemDicAncester {
 	private int[] sortedPositions;
 	private int sortedPositionsRealLength;
 	private boolean hasToCheckResultsFlags = false;
+	private boolean notBeenSortedYet = true;
 	
 	
 	/** Création de l'index par dichotomie
@@ -39,6 +40,7 @@ public class IndexMemDic extends IndexMemDicAncester {
 		totalLength = table.getTotalLinesCount();
 		sortedPositionsRealLength = totalLength;
 		sortedPositions = new int[sortedPositionsRealLength];
+		notBeenSortedYet = true;
 		
 		indexOnThisColArray = new Column[colIndexArray.length];
 		for (int i = 0; i < colIndexArray.length; i++) {
@@ -101,6 +103,8 @@ public class IndexMemDic extends IndexMemDicAncester {
 		int numberOfStillPersentLines = table.getTotalNumberOfLines();
 		int lastLoadedLineIndexLength = table.getLastLoadedLineIndexLength();
 		
+		if (notBeenSortedYet) totalLength = 0;
+		notBeenSortedYet = false;
 		// Déjà, j'ajoute les lignes que j'ai en mémoire, si elles sont toujours présentes
 		int oldTotalLength = totalLength;
 		totalLength = numberOfStillPersentLines;
@@ -204,7 +208,7 @@ public class IndexMemDic extends IndexMemDicAncester {
 	 *  Java gère magnifiquement bien le tri, même pour 100 millions d'éléments ! (c'est assez incroyable ^^)
 	 */
 	public void sortAllv1(boolean beSuperVerbose) {
-		totalLength = 0;
+		if (notBeenSortedYet) totalLength = 0;
 		refreshIndexWithColumnsData(beSuperVerbose);
 		
 		/*
@@ -264,6 +268,7 @@ public class IndexMemDic extends IndexMemDicAncester {
 		int startIndex = findMatchingIndex(searchQuery, true);
 		if (startIndex == -1) return new int[] {-1, -1};
 		int stopIndex = findMatchingIndex(searchQuery, false);
+		if (stopIndex == -1) return new int[] {-1, -1};
 		return new int[] {startIndex, stopIndex};
 	}
 	
@@ -380,6 +385,9 @@ public class IndexMemDic extends IndexMemDicAncester {
 	 *  @return  -1 si aucun élèment ne correspondait
 	 */
 	private int findMatchingIndex(ByteBuffer searchQuery, boolean findLeftValue) { // <- findLeftValue <-  ou  -> findRightValue ->  toujours en valeur exacte (inclusive)
+
+		if (sortedPositions == null) return -1;
+		if (sortedPositions.length == 0) return -1;
 		
 		int dicStartIndex = 0;
 		int dicStopIndex = sortedPositionsRealLength - 1;
@@ -456,10 +464,22 @@ public class IndexMemDic extends IndexMemDicAncester {
 				//break;
 			}
 			
-			if (dicStopIndex >= sortedPositionsRealLength) Log.error("dicStopIndex trop grand");
-			if (dicStopIndex < 0) Log.error("dicStopIndex trop petit");
-			if (dicStartIndex >= sortedPositionsRealLength) Log.error("dicStartIndex trop grand");
-			if (dicStartIndex < 0) Log.error("dicStartIndex trop petit");
+			if (dicStopIndex >= sortedPositionsRealLength) {
+				Log.error("dicStopIndex trop grand");
+				return -1;
+			}
+			if (dicStopIndex < 0) {
+				Log.error("dicStopIndex trop petit");
+				return -1;
+			}
+			if (dicStartIndex >= sortedPositionsRealLength) {
+				Log.error("dicStartIndex trop grand");
+				return -1;
+			}
+			if (dicStartIndex < 0) {
+				Log.error("dicStartIndex trop petit");
+				return -1;
+			}
 			//Log.info("dic bornes OK currentIndex = " + dicCurrentIndex + " dicStartIndex=" + dicStartIndex + " dicStopIndex=" + dicStopIndex + " ");
 			
 			intervalLength = dicStopIndex - dicStartIndex + 1;

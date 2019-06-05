@@ -44,7 +44,9 @@ public class NewLoaderAndIndexTest {
 		// Création de l'index sur les colonnes (d'index) 3 et 4 de la table "table".
 		IndexMemDic indexDic = new IndexMemDic(table, new int[]{3, 4}); // passenger_count et trip_distance
 		// Etape nécessaire à la réalisation de la dichotomie : classement des lignes indexées par ordre croissant (en fonction des valeurs indexées)
-		indexDic.sortAllv1();
+		//indexDic.sortAllv1();
+		
+		indexDic.refreshIndexWithColumnsData(false);
 		
 		// Faire une requête sur l'index
 		// Trois manières possibles :
