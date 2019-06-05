@@ -5,5 +5,5 @@ import db.disk.dataHandler.DiskDataPosition;
 import java.util.Set;
 
 public interface FilterTerm {
-    Set<DiskDataPosition> execute() throws SearchException;
+    Set<Integer> execute() throws SearchException;
 }

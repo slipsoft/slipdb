@@ -15,8 +15,8 @@ public class FilterGroup implements FilterTerm {
 	}
 
 	@Override
-	public Set<DiskDataPosition> execute() throws SearchException {
-		Set<DiskDataPosition> positions = null;
+	public Set<Integer> execute() throws SearchException {
+		Set<Integer> positions = null;
 		for (FilterTerm filterTerm : terms) {
 			if (positions == null) {
 				positions = filterTerm.execute();

@@ -37,7 +37,6 @@ public class TableEndpoint {
         if (body == null) {
             throw new BadRequestException("content cannot be null");
         }
-
         if (InternalToken.equals("null")) {
 
             if (Database.getInstance().allNodes.size() > 0) {

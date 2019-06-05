@@ -9,8 +9,10 @@ import com.dant.utils.MemUsage;
 import com.dant.utils.Timer;
 
 import db.data.types.StringType;
+import db.search.Predicate;
 import db.structure.Column;
 import db.structure.Table;
+import index.IndexException;
 
 /** 
  *  La même chose qu'indexmemDic, mais avec un stockage des positions via des chunks.
@@ -632,8 +634,16 @@ public class IndexMemDicChObs extends IndexMemDicAncester {
 		
 		return realLinePosition;
 	}
-	
-	
-	
-	
+
+
+	@Override
+	public int[] getIdsFromPredicate(Predicate predicate) throws IndexException {
+		//TODO
+		return new int[0];
+	}
+
+	@Override
+	public void refreshIndexWithColumnsData(boolean beSuperVerbose) {
+
+	}
 }

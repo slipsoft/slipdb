@@ -44,7 +44,9 @@ public class NewLoaderAndIndexTest {
 		// Création de l'index sur les colonnes (d'index) 3 et 4 de la table "table".
 		IndexMemDic indexDic = new IndexMemDic(table, new int[]{3, 4}); // passenger_count et trip_distance
 		// Etape nécessaire à la réalisation de la dichotomie : classement des lignes indexées par ordre croissant (en fonction des valeurs indexées)
-		indexDic.sortAllv1();
+		//indexDic.sortAllv1();
+		
+		indexDic.refreshIndexWithColumnsData(false);
 		
 		// Faire une requête sur l'index
 		// Trois manières possibles :
@@ -96,7 +98,7 @@ public class NewLoaderAndIndexTest {
 		}
 		
 		int[] resultsPositionsArrayFlag = indexDic.findMatchingLinePositions(searchQuery); // les positions des lignes de résultat, réelles
-		Log.info("Recherche FLAG OK ! Nb résultats avec FLAG : " + resultsPositionsArrayFlag.length + "  index len = " + indexDic.totalLength);
+		Log.info("Recherche FLAG OK ! Nb résultats avec FLAG : " + resultsPositionsArrayFlag.length + "  index len = " + indexDic.getTotalEffectiveLength());
 		
 		indexDic.refreshIndexWithColumnsData(true);
 		
@@ -104,7 +106,7 @@ public class NewLoaderAndIndexTest {
 		indexDic.enableFlagCheck(false);
 		
 		int[] resultsPositionsArrayStruct = indexDic.findMatchingLinePositions(searchQuery); // les positions des lignes de résultat, réelles
-		Log.info("Recherche STRUCT OK ! Nb résultats avec restructuration : " + resultsPositionsArrayStruct.length + "  index len = " + indexDic.totalLength);
+		Log.info("Recherche STRUCT OK ! Nb résultats avec restructuration : " + resultsPositionsArrayStruct.length + "  index len = " + indexDic.getTotalEffectiveLength());
 		
 		if (resultsPositionsArrayFlag.length != resultsPositionsArrayStruct.length) {
 			Exception error = new Exception("Résultats différents après restructuration de l'index :"

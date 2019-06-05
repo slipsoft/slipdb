@@ -84,6 +84,7 @@ public abstract class Index implements Operable {
 		}
 	}
 
+	@Deprecated
 	public abstract void indexEntry(Object[] entry, int id) throws IndexException;
 
 	/**
@@ -92,6 +93,7 @@ public abstract class Index implements Operable {
 	 */
 	protected abstract Operator[] compatibleOperators();
 	public abstract int[] getIdsFromPredicate(Predicate predicate) throws IndexException;
+	public abstract void refreshIndexWithColumnsData(boolean beSuperVerbose);
 
 	// Deprecated interface
 	@Deprecated //remplace DiskDataPosition by the new int position
