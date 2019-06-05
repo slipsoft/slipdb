@@ -9,4 +9,5 @@ public class Config {
     public Integer loaderNbThread;
     public String NTPHostName;
     public String SuperSecretPassphrase;
+
 }

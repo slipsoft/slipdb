@@ -300,7 +300,26 @@ public class Column implements Serializable {
 		ColumnDataChunk dataChunk = dataMemoryGetWriteChunk();
 		addAnotherChunkIfNecessary(dataChunk.writeStringData(value));
 	}*/
-	
+
+	/**
+	 * Return the value of this id in the active column
+	 * Non thread-safe du fait de la transformation des int en dates
+	 * @param indexAbsolute the line id
+	 * @return an Object containing the rightly tuper value
+	 */
+	public Object getData(int indexAbsolute) {
+		switch (dataTypeEnum) {
+			case BYTE    : return readByte(indexAbsolute);
+			case INTEGER : return readInteger(indexAbsolute);
+			case LONG    : return readLong(indexAbsolute);
+			case DATE    : return Utils.dateToStringNoThreadSafe(Utils.dateFromSecInt(readInteger(indexAbsolute)));
+			case FLOAT   : return readFloat(indexAbsolute);
+			case DOUBLE  : return readDouble(indexAbsolute);
+			case STRING  : return readString(indexAbsolute);
+			default      : return null;
+		}
+	}
+
 	/** Non thread-safe du fait de la transformation des int en dates
 	 * @param indexAbsolute
 	 * @return

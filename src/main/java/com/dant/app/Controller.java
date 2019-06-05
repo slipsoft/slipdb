@@ -11,11 +11,9 @@ import db.structure.Table;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Controller {
@@ -59,7 +57,12 @@ public class Controller {
         tablesToAdd.stream().forEach(t -> Database.getInstance().getAllTables().add(t));
         
 		SerialStructure.saveStructure();
+
+		if (!addImmediately) {
+
+        }
     }
+
 
     public static HttpResponse getTable(String tableName) {
         Table table = Controller.getTableByName(tableName);
@@ -90,7 +93,5 @@ public class Controller {
         View viewToExecute = viewEntity.convertToView();
         ResultSet resultSet = viewToExecute.execute();
         return new HttpResponse(resultSet);
-
     }
-
 }
