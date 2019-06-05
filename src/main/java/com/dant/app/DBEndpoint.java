@@ -104,7 +104,7 @@ public class DBEndpoint {
     public void deleteTable(@PathParam("tableName") String tableName, final @Suspended AsyncResponse responseToClient) {
         Controller.deleteTable(tableName);
         if (Database.getInstance().allNodes.size() > 0) {
-            Network.broadcast("/tables/" + tableName, "DELETE").thenAccept(responses ->
+            Network.broadcast("/db/tables/" + tableName, "DELETE").thenAccept(responses ->
                     responses.stream().forEach(response -> {
                         if (response.statusCode() != 200) {
                             throw new JsonSyntaxException("the table on node" + response.request().uri() + "could not be deleted");
