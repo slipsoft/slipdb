@@ -84,7 +84,7 @@ public class SIndexBench {
 		
 		Log.warning(info2);
 
-		if (theIndexMemDic.totalLength == 78) // garder la réf
+		if (theIndexMemDic.getTotalEffectiveLength() == 78) // garder la réf
 			Log.info("Hey !");
 		
 		
@@ -314,7 +314,7 @@ public class SIndexBench {
 		
 		//showResults(resultsPositionsArray); /// <- Afficher tous kes résultats
 		
-		if (ind3.totalLength == 18) {
+		if (ind3.getTotalEffectiveLength() == 18) {
 			Log.info("Inutile, mais force le GC à garder la réf en mémoire");
 		}
 		
@@ -459,7 +459,7 @@ public class SIndexBench {
 		String result ="IndexMemDic[" + indexedColumnsStr + "] MEM " + memUsedStr + "  en  " + timer.pretty();
 		
 		
-		if (indexDic.totalLength == 78) // garder la réf
+		if (indexDic.getTotalEffectiveLength() == 78) // garder la réf
 			Log.info("Hey !");
 		
 		return result;

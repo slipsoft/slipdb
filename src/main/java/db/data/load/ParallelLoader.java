@@ -94,7 +94,7 @@ public class ParallelLoader {
 		return foundReadyThread;
 	}
 
-	private int debugCount = 0;
+	//private int debugCount = 0;
 	
 	/**
 	 * Parse an input stream into an output stream according to a schema with a
@@ -200,7 +200,7 @@ public class ParallelLoader {
 		}*/ catch (IOException e) {
 			Log.error(e);
 		}
-		Log.error("debugCount = " + debugCount);
+		//Log.error("debugCount = " + debugCount);
 		currentThreadCollectingData.startIfNeeded(); // exécuter le dernier thread si besoin
 		
 		
