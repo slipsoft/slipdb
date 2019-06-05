@@ -1302,6 +1302,11 @@ public class IndexTreeDic extends Index implements Serializable {
 		return new int[0];
 	}
 
+	@Override
+	public void refreshIndexWithColumnsData(boolean beSuperVerbose) {
+
+	}
+
 	// compareValues : nom pas clair !
 	/*public int compareValues(Object value1, Object value2) {
 		if (value1 == null || value2 == null) return 0;

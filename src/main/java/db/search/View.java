@@ -4,10 +4,8 @@ import db.disk.dataHandler.DiskDataPosition;
 import db.structure.Column;
 import db.structure.Table;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class View {
 
@@ -55,9 +53,17 @@ public class View {
 	 */
 	public ResultSet execute() throws SearchException {
 		Column[] columns = getListColumns();
-		Set<DiskDataPosition> positions = this.filter.execute();
+		Set<Integer> ids = this.filter.execute();
+		ResultSet resultSet = new ResultSet();
 		try {
-		return table.getFullResultsFromBinIndexes(positions);
+			for (Integer id : ids) {
+				List<Object> line = new ArrayList<>();
+				for (Column column : columns) {
+					line.add(column.getDataAsReadableString(id));
+				}
+				resultSet.add(line);
+			}
+			return resultSet;
 		} catch (Exception e) {
 			throw new SearchException(e);
 		}
