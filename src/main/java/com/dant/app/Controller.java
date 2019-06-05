@@ -88,7 +88,7 @@ public class Controller {
 
     public static HttpResponse doSearch(ViewEntity viewEntity) throws SearchException {
         View viewToExecute = viewEntity.convertToView();
-        Set<Object> resultSet = viewToExecute.execute();
+        ResultSet resultSet = viewToExecute.execute();
         return new HttpResponse(resultSet);
 
     }

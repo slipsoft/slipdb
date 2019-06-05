@@ -51,11 +51,19 @@ public class View {
 	 * @return - a result set
 	 * @throws SearchException - in case of search failure
 	 */
-	public Set<Object> execute() throws SearchException {
+	public ResultSet execute() throws SearchException {
 		Column[] columns = getListColumns();
-		Set<Integer> positions = this.filter.execute();
+		Set<Integer> ids = this.filter.execute();
+		ResultSet resultSet = new ResultSet();
 		try {
-			return Arrays.stream(columns).map((Column col) -> col.getDataAsRawBytes(2)).collect(Collectors.toSet());
+			for (Integer id : ids) {
+				List<Object> line = new ArrayList<>();
+				for (Column column : columns) {
+					line.add(column.getDataAsReadableString(id));
+				}
+				resultSet.add(line);
+			}
+			return resultSet;
 		} catch (Exception e) {
 			throw new SearchException(e);
 		}

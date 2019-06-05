@@ -61,8 +61,10 @@ public class ViewEntity {
             group = this.groupBy.convertToGroup(table);
         }
         List<Sort> sorts = new ArrayList<>();
-        for (SortEntity sort : this.sortList) {
-            sorts.add(sort.convertToSort(table));
+        if (sortList != null) {
+            for (SortEntity sort : this.sortList) {
+                sorts.add(sort.convertToSort(table));
+            }
         }
         return new View(table, concreteFilterTerm, this.fieldList, sorts, group);
     }

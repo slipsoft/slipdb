@@ -23,6 +23,10 @@ how to deploy the project on a live system.
 
     mvn install
 
+#### Copy & edit the config file
+
+    cp config.dist.json config.json
+
 #### Run the server
 
     mvn jetty:run

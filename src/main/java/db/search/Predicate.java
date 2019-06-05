@@ -57,7 +57,9 @@ public class Predicate implements FilterTerm {
 			throw new SearchException("the operator: " + operator + " is not compatible with the column: " + column);
 		}
 		try {
-			return new HashSet<Integer>(Arrays.asList(ArrayUtils.toObject(getIndex().getIdsFromPredicate(this))));
+			int[] ids = getIndex().getIdsFromPredicate(this);
+			Integer[] idObjects = ArrayUtils.toObject(ids);
+			return new HashSet<Integer>(Arrays.asList(idObjects));
 		} catch (StructureException e) {
 			throw new SearchException(e);
 		}

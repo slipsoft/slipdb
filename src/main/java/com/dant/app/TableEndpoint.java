@@ -32,9 +32,10 @@ public class TableEndpoint {
             throw new BadRequestException("content cannot be null");
         }
         InputStream is = new ByteArrayInputStream(body.getBytes("UTF-8"));
-        Controller.getTableByName(tableName).loadData(new CsvParser(), is);
+        Table table = Controller.getTableByName(tableName);
+        table.loadData(new CsvParser(), is);
+        table.refreshAllIndexes(false);
         return new HttpResponse("ok");
-
     }
 
     @POST

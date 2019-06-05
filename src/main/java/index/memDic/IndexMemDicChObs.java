@@ -641,4 +641,9 @@ public class IndexMemDicChObs extends IndexMemDicAncester {
 		//TODO
 		return new int[0];
 	}
+
+	@Override
+	public void refreshIndexWithColumnsData(boolean beSuperVerbose) {
+
+	}
 }

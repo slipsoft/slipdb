@@ -32,7 +32,7 @@ public class FilterTermEntity {
                 realValue = realColumn.getDataType().getAssociatedClassType().cast(value);
             } catch (ClassCastException e) {
                 //throw new BadRequestException("value can't be parsed in selected column : " + column + " " + value);
-                Log.warning("value can't be parsed in selected column : " + column + " " + value);
+                //Log.warning("value can't be parsed in selected column : " + column + " " + value);
             }
             return new Predicate(table, table.getColumnByName(this.column).get(), this.operator, this.value);
         }
