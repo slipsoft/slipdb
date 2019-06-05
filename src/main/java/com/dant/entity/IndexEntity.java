@@ -20,7 +20,9 @@ public class IndexEntity extends Entity implements Serializable {
         int[] columnNumbers = table.columnNumbers(columnsToIndex);
         switch (type) {
             case dichotomy:
-                return new IndexMemDic(table, columnNumbers);
+                IndexMemDic index = new IndexMemDic(table, columnNumbers);
+                index.refreshIndexWithColumnsData(false);
+                return index;
             case tree:
             case hash:
             default:

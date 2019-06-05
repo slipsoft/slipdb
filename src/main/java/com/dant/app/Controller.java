@@ -8,16 +8,12 @@ import db.search.View;
 import db.serial.SerialStructure;
 import db.structure.Database;
 import db.structure.Table;
-import network.Node;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class Controller {

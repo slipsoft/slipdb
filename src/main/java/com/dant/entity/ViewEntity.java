@@ -37,9 +37,7 @@ public class ViewEntity {
 
         Table table = Controller.getTableByName(tableName);
 
-        if (filterTerm != null) {
-            filterTerm.validate(table);
-        } else {
+        if (filterTerm == null) {
             throw new BadRequestException("filterTerm is missing");
         }
 
@@ -63,8 +61,10 @@ public class ViewEntity {
             group = this.groupBy.convertToGroup(table);
         }
         List<Sort> sorts = new ArrayList<>();
-        for (SortEntity sort : this.sortList) {
-            sorts.add(sort.convertToSort(table));
+        if (sortList != null) {
+            for (SortEntity sort : this.sortList) {
+                sorts.add(sort.convertToSort(table));
+            }
         }
         return new View(table, concreteFilterTerm, this.fieldList, sorts, group);
     }

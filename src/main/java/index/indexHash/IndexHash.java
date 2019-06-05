@@ -59,4 +59,9 @@ public class IndexHash extends Index {
 		return new int[0];
 	}
 
+	@Override
+	public void refreshIndexWithColumnsData(boolean beSuperVerbose) {
+
+	}
+
 }

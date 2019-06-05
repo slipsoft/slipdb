@@ -160,6 +160,12 @@ public class Table implements Serializable {
 		}
 	}
 
+	public void refreshAllIndexes(boolean beSuperVerbose) {
+		for (Index index : indexesList) {
+			index.refreshIndexWithColumnsData(beSuperVerbose);
+		}
+	}
+
 	private void computeLineDataSize() {
 		lineDataSize = columnsList
 				.stream()

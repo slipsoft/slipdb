@@ -17,7 +17,7 @@ import java.util.Collection;
  *  Probablement à passer en abstract @SylvainLune ??
  *
  */
-public class IndexMemDicAncester extends Index {
+public abstract class IndexMemDicAncester extends Index {
 	// Pensé pour être mono-thread, pour l'instant
 	
 	protected Table table;
@@ -47,17 +47,10 @@ public class IndexMemDicAncester extends Index {
 
 	@Override
 	protected Operator[] compatibleOperators() {
-		return new Operator[] {
+		return new Operator[]{
 				Operator.equals,
 		};
 	}
-
-	@Override
-	public int[] getIdsFromPredicate(Predicate predicate) throws IndexException {
-		//TODO
-		return new int[0];
-	}
-
 
 	// Deprecated interface
 	@Override
