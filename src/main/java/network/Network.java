@@ -40,6 +40,10 @@ public class Network {
         );
     }
 
+    public static CompletableFuture<List<java.net.http.HttpResponse<String>>> sendForParsing(ArrayList<String> strings) {
+        return null;
+    }
+
     public static CompletableFuture<List<java.net.http.HttpResponse<String>>> broadcast(String endpoint, String method, String body) {
         ArrayList<Node> allNodes = Database.getInstance().allNodes;
         HttpClient client = HttpClient.newBuilder()

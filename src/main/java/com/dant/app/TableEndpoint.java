@@ -2,19 +2,24 @@ package com.dant.app;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.xml.crypto.Data;
 
 import com.dant.entity.*;
 import db.data.load.CsvParser;
 import db.search.SearchException;
+import db.structure.Database;
 import db.structure.Index;
 import db.structure.Table;
 import index.IndexException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
+import network.Network;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Api("table")
 @Path("/table")
@@ -27,14 +32,50 @@ public class TableEndpoint {
     @Consumes("text/csv")
     public HttpResponse loadCSV(
             @PathParam("tableName") String tableName,
-            @ApiParam(value = "content", required = true) String body) throws UnsupportedEncodingException {
+            @ApiParam(value = "content", required = true) String body,
+            @DefaultValue("null") @HeaderParam("InternalToken") String InternalToken) throws UnsupportedEncodingException {
         if (body == null) {
             throw new BadRequestException("content cannot be null");
         }
-        InputStream is = new ByteArrayInputStream(body.getBytes("UTF-8"));
-        Controller.getTableByName(tableName).loadData(new CsvParser(), is);
-        return new HttpResponse("ok");
 
+        if (InternalToken.equals("null")) {
+
+            if (Database.getInstance().allNodes.size() > 0) {
+                String[] lines = body.split("\\r?\\n");
+                Integer nodeCount = Database.getInstance().allNodes.size() + 1;
+                ArrayList<ArrayList<String>> fileSplitBynodes = new ArrayList<>();
+                Integer currentNode = 0;
+
+                for (int i = 0; i < lines.length; i++) {
+
+                    fileSplitBynodes.get(currentNode).add(lines[i]);
+                    currentNode = (currentNode + 1) % nodeCount;
+                }
+
+                ArrayList<String> toSend = fileSplitBynodes.stream().map(strings -> {
+                    StringBuffer buffer = new StringBuffer();
+                    strings.stream().forEach(s -> buffer.append(s));
+                    return buffer.toString();
+                }).collect(Collectors.toCollection(ArrayList::new));
+                String forLocal = toSend.remove(0);
+
+                Network.sendForParsing(toSend);
+
+                InputStream is = new ByteArrayInputStream(forLocal.getBytes());
+                Controller.getTableByName(tableName).loadData(new CsvParser(), is);
+                return new HttpResponse("ok");
+            }
+            InputStream is = new ByteArrayInputStream(body.getBytes("UTF-8"));
+            Controller.getTableByName(tableName).loadData(new CsvParser(), is);
+            return new HttpResponse("ok");
+
+        } else if (InternalToken.equals(Database.getInstance().config.SuperSecretPassphrase)) {
+            InputStream is = new ByteArrayInputStream(body.getBytes("UTF-8"));
+            Controller.getTableByName(tableName).loadData(new CsvParser(), is);
+            return new HttpResponse("ok");
+        } else {
+            throw new RuntimeException("laTarentule");
+        }
     }
 
     @POST
