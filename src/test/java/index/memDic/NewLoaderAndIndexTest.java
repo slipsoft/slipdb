@@ -98,7 +98,7 @@ public class NewLoaderAndIndexTest {
 		}
 		
 		int[] resultsPositionsArrayFlag = indexDic.findMatchingLinePositions(searchQuery); // les positions des lignes de résultat, réelles
-		Log.info("Recherche FLAG OK ! Nb résultats avec FLAG : " + resultsPositionsArrayFlag.length + "  index len = " + indexDic.totalLength);
+		Log.info("Recherche FLAG OK ! Nb résultats avec FLAG : " + resultsPositionsArrayFlag.length + "  index len = " + indexDic.getTotalEffectiveLength());
 		
 		indexDic.refreshIndexWithColumnsData(true);
 		
@@ -106,7 +106,7 @@ public class NewLoaderAndIndexTest {
 		indexDic.enableFlagCheck(false);
 		
 		int[] resultsPositionsArrayStruct = indexDic.findMatchingLinePositions(searchQuery); // les positions des lignes de résultat, réelles
-		Log.info("Recherche STRUCT OK ! Nb résultats avec restructuration : " + resultsPositionsArrayStruct.length + "  index len = " + indexDic.totalLength);
+		Log.info("Recherche STRUCT OK ! Nb résultats avec restructuration : " + resultsPositionsArrayStruct.length + "  index len = " + indexDic.getTotalEffectiveLength());
 		
 		if (resultsPositionsArrayFlag.length != resultsPositionsArrayStruct.length) {
 			Exception error = new Exception("Résultats différents après restructuration de l'index :"
