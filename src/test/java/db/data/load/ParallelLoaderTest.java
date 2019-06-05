@@ -59,8 +59,8 @@ public class ParallelLoaderTest {
 		int mounthFinalCount = 2;
 		for (int iCsv = 1; iCsv <= mounthFinalCount; iCsv++) {
 			String colNumber = String.format("%02d" , iCsv);
-			//String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
-			String csvPath = "E:/csv/yellow_tripdata_2015-" + colNumber + ".csv"; // E:/L3 DANT disque E
+			String csvPath = "testdata/SMALL_100_000_yellow_tripdata_2015-04.csv";
+			//String csvPath = "E:/csv/yellow_tripdata_2015-" + colNumber + ".csv"; // E:/L3 DANT disque E
 			Log.info("Parsing de csvName = " + csvPath);
 			parseThisCsv(table, csvLoader, csvPath);
 		}

@@ -728,8 +728,9 @@ class IndexTreeMessyTest {
 		
 	}
 
-	@Test
+	//@Test NE PAS exécuter cette vus, n'est plus compatible
 	// à appliquer au nouvel index car IndexTreeDic n'est plus utilisé, remplacé par IndexMemDic
+	@Deprecated
 	void executeView() {
 		if (enableCsvRelatedTests == false) return;
 		Column column1 = table.getColumns().get(1);
