@@ -71,13 +71,13 @@ public class DBEndpoint {
         // si la requète vient d'un endpoint, pas besoin de valider
         boolean addImmediatly = InternalToken.equals(Database.getInstance().config.SuperSecretPassphrase);
         Controller.addTables(allTables, addImmediatly);
-        if (!addImmediatly &&  Database.getInstance().allNodes.size() > 0) {
+        if (!addImmediatly && Database.getInstance().allNodes.size() > 0) {
             Gson gson = new Gson();
             String body = gson.toJson(allTables);
             Network.broadcast("/db/tables", "PUT", body).thenAccept(responses -> {
                 responses.stream().forEach(response -> {
                     if (response.statusCode() != 200) {
-                        throw new JsonSyntaxException("error when broadcasting to node " + response.statusCode() + " " +response.body() + response.uri());
+                        responseToClient.resume(new JsonSyntaxException("error when broadcasting to node " + response.statusCode() + " " +response.body() + response.uri()));
                     }
                     responseToClient.resume(new HttpResponse("ok"));
                 });
@@ -104,7 +104,7 @@ public class DBEndpoint {
     public void deleteTable(@PathParam("tableName") String tableName, final @Suspended AsyncResponse responseToClient) {
         Controller.deleteTable(tableName);
         if (Database.getInstance().allNodes.size() > 0) {
-            Network.broadcast("/tables" + tableName, "DELETE").thenAccept(responses ->
+            Network.broadcast("/tables/" + tableName, "DELETE").thenAccept(responses ->
                     responses.stream().forEach(response -> {
                         if (response.statusCode() != 200) {
                             throw new JsonSyntaxException("the table on node" + response.request().uri() + "could not be deleted");

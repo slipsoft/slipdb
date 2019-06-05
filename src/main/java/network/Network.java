@@ -48,7 +48,7 @@ public class Network {
                 .build();
 
         ArrayList<HttpRequest> allRequests = allNodes.stream().map(node -> HttpRequest.newBuilder()
-                .uri(URI.create(node.address + ":" + node.port + "/" + endpoint))
+                .uri(URI.create(node.address + ":" + node.port + endpoint))
                 .headers("Content-Type", "application/json", "InternalToken", Database.getInstance().config.SuperSecretPassphrase)
                 .method(method, HttpRequest.BodyPublishers.ofString(body))
                 .build()
