@@ -181,7 +181,7 @@ public class SimpleTCPDemoCreateTable {
 		//DataPositionList result = tableHandler.findIndexedResultsOfColumn("trip_distance", 17.78f, 18f, true);
 		//DataPositionList result = table.findIndexedResultsOfColumn("trip_distance", 18f);
 		searchQueryTimer.log();
-		Set<Object> fullResulsVariables = view.execute();
+		ResultSet fullResulsVariables = view.execute();
 		
 		//tableHandler.displayOnLogResults(fullResulsVariables);
 		int numberOfResults = fullResulsVariables.size();
