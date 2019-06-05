@@ -37,7 +37,7 @@ public class IndexMemDic extends IndexMemDicAncester {
 	public IndexMemDic(Table argTable, int[] argColIndexArray) { // int argTotalLength,
 		colIndexArray = argColIndexArray;
 		table = argTable;
-		totalLength = table.getTotalLinesCount();
+		totalLength = 0; // Initialisation à 0, mise à jour dans refreshIndexWithColumnsData()   //ancienne valeur : table.getTotalLinesCount();
 		sortedPositionsRealLength = totalLength;
 		sortedPositions = new int[sortedPositionsRealLength];
 		notBeenSortedYet = true;
@@ -104,8 +104,10 @@ public class IndexMemDic extends IndexMemDicAncester {
 		int lastLoadedLineIndexLength = table.getLastLoadedLineIndexLength();
 		
 		if (notBeenSortedYet) totalLength = 0;
-		notBeenSortedYet = false;
+		notBeenSortedYet = false; // <- plus vraiment nécessaire mais je laisse quand-même ^^
 		// Déjà, j'ajoute les lignes que j'ai en mémoire, si elles sont toujours présentes
+		if (sortedPositions.length < totalLength) // correctif
+			totalLength = sortedPositions.length;
 		int oldTotalLength = totalLength;
 		totalLength = numberOfStillPersentLines;
 		// Ici, je suppose que la seule différence avec l'état précédent est
