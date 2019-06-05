@@ -5,7 +5,9 @@ import db.structure.Column;
 import db.structure.Index;
 import db.structure.StructureException;
 import db.structure.Table;
+import org.apache.commons.lang3.ArrayUtils;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -50,13 +52,12 @@ public class Predicate implements FilterTerm {
 
 	public Object getValue() { return this.value; }
 
-	@Override
-	public Set<DiskDataPosition> execute() throws SearchException {
+	public Set<Integer> execute() throws SearchException {
 		if (!column.getDataType().isOperatorCompatible(operator)) {
 			throw new SearchException("the operator: " + operator + " is not compatible with the column: " + column);
 		}
 		try {
-			return new HashSet<>(getIndex().getPositionsFromPredicate(this));
+			return new HashSet<Integer>(Arrays.asList(ArrayUtils.toObject(getIndex().getIdsFromPredicate(this))));
 		} catch (StructureException e) {
 			throw new SearchException(e);
 		}

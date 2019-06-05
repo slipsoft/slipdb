@@ -2,6 +2,7 @@ package zArchive.sj.demoSimple;
 
 
 import java.io.IOException;
+import java.util.Set;
 
 import com.dant.utils.Log;
 import com.dant.utils.Timer;
@@ -180,7 +181,7 @@ public class SimpleTCPDemoCreateTable {
 		//DataPositionList result = tableHandler.findIndexedResultsOfColumn("trip_distance", 17.78f, 18f, true);
 		//DataPositionList result = table.findIndexedResultsOfColumn("trip_distance", 18f);
 		searchQueryTimer.log();
-		ResultSet fullResulsVariables = view.execute();
+		Set<Object> fullResulsVariables = view.execute();
 		
 		//tableHandler.displayOnLogResults(fullResulsVariables);
 		int numberOfResults = fullResulsVariables.size();

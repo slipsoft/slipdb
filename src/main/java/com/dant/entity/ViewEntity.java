@@ -37,9 +37,7 @@ public class ViewEntity {
 
         Table table = Controller.getTableByName(tableName);
 
-        if (filterTerm != null) {
-            filterTerm.validate(table);
-        } else {
+        if (filterTerm == null) {
             throw new BadRequestException("filterTerm is missing");
         }
 

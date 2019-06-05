@@ -758,7 +758,7 @@ class IndexTreeMessyTest {
 		View view6 = new View(table, filter4);
 
 		try {
-			ResultSet result;
+			Set<Object> result;
 			result = view1.execute();
 			assertEquals(140, result.size());
 			Log.info("executed view1");
