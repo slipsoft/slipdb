@@ -3,6 +3,8 @@ config.json
 *.bin
 *.sbin
 *.idc_bin
+node_modules
+node
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Java template
