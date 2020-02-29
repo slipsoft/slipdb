@@ -127,7 +127,7 @@ class DataTypeTest {
 	}
 	
 	
-	//@Test
+	@Test
 	void testWriteToBuffer() {
 		
 		Random rand = new Random();
@@ -183,7 +183,9 @@ class DataTypeTest {
 		localTimer = new Timer("Parsing de LongType ");
 		for (int count = 0; count < maxCountOperation; count++) {
 			bBuff.rewind();
-			longType.parseAndWriteToBuffer("45468957895686", bBuff);
+			bBuff.putLong(Long.parseLong("45468957895686"));
+			
+			//longType.parseAndWriteToBuffer("45468957895686", bBuff);
 		}
 		localTimer.log();
 		
