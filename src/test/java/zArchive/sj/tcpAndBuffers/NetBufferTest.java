@@ -1,4 +1,7 @@
 package zArchive.sj.tcpAndBuffers;
+/**
+ * Test du coverage pour mieux comprendre "comment ça fonctionne ce truc"
+ */
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
